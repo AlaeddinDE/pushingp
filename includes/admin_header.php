@@ -9,10 +9,10 @@ $showSidebarToggle = $showSidebarToggle ?? false;
 
 $mainLinks = [
     'dashboard' => ['label' => 'Dashboard', 'href' => '/admin/index.php'],
-    'kasse'     => ['label' => 'Kasse', 'href' => '/admin/index.php#transactions'],
-    'shifts'    => ['label' => 'Schichten', 'href' => '/admin/index.php#shifts'],
+    'kasse'     => ['label' => 'Kasse', 'href' => '/admin/kasse.php'],
+    'shifts'    => ['label' => 'Schichten', 'href' => '/admin/schichten.php'],
     'members'   => ['label' => 'Mitglieder', 'href' => '/admin/users.php'],
-    'board'     => ['label' => 'Board', 'href' => '/admin/index.php#admin-board'],
+    'board'     => ['label' => 'Board', 'href' => '/admin/board.php'],
 ];
 ?>
 <header class="admin-topbar">
@@ -31,6 +31,11 @@ $mainLinks = [
         <span class="admin-brand__subtitle">Admin</span>
       </span>
     </a>
+    <button id="adminNavToggle" class="admin-burger admin-burger--nav" type="button" aria-label="Menü ein- oder ausblenden" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
     <nav class="admin-nav" aria-label="Admin Navigation">
       <?php foreach ($mainLinks as $key => $link): $active = $adminActive === $key; ?>
         <a href="<?= htmlspecialchars($link['href']) ?>"
