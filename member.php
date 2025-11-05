@@ -118,6 +118,9 @@
             <div class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
             <span class="text-sm font-medium"><?= htmlspecialchars($user) ?></span>
           </div>
+          <?php if ($isAdmin): ?>
+            <a href="admin/" class="px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 transition-colors text-sm font-medium">Admin</a>
+          <?php endif; ?>
           <a href="index.html" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">🏠 Start</a>
           <a href="logout.php" class="px-4 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-colors text-sm font-medium">Abmelden</a>
         </div>

@@ -39,7 +39,7 @@ CREATE TABLE IF NOT EXISTS members_v2 (
 CREATE TABLE IF NOT EXISTS transactions_v2 (
   id           BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
   member_id    INT UNSIGNED NOT NULL,
-  type         ENUM('Einzahlung','Auszahlung','Gutschrift','Schaden') NOT NULL,
+  type         ENUM('Einzahlung','Auszahlung','Gutschrift','Schaden','Gruppenaktion') NOT NULL,
   amount       DECIMAL(10,2) NOT NULL CHECK (amount >= 0),
   reason       VARCHAR(255) NULL,
   created_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -93,6 +93,22 @@ CREATE TABLE IF NOT EXISTS admins_v2 (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- =========================================================
+-- 4b) Admin Board (Events & Ankündigungen)
+-- =========================================================
+CREATE TABLE IF NOT EXISTS admin_board (
+  id            INT UNSIGNED NOT NULL AUTO_INCREMENT,
+  type          ENUM('event','announcement') NOT NULL,
+  title         VARCHAR(150) NOT NULL,
+  content       TEXT NULL,
+  scheduled_for DATETIME NULL,
+  created_by    VARCHAR(120) NOT NULL,
+  created_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (id),
+  KEY idx_admin_board_schedule (scheduled_for),
+  KEY idx_admin_board_type (type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- =========================================================
 -- 5) Views/Helper (v2)
 --    a) Sicht: reeller Kassenstand je Mitglied
 --       (Gutschriften werden NICHT als Zufluss gezählt)
@@ -105,7 +121,7 @@ SELECT
   ROUND(COALESCE(SUM(
     CASE
       WHEN t.type='Einzahlung' THEN  t.amount
-      WHEN t.type IN ('Auszahlung','Schaden') THEN -t.amount
+      WHEN t.type IN ('Auszahlung','Schaden','Gruppenaktion') THEN -t.amount
       ELSE 0
     END
   ),0),2) AS real_balance
@@ -122,8 +138,9 @@ SELECT
   m.name,
   ROUND(COALESCE(SUM(
     CASE
-      WHEN t.type IN ('Einzahlung','Gutschrift') THEN  t.amount
-      WHEN t.type IN ('Auszahlung','Schaden')      THEN -t.amount
+      WHEN t.type IN ('Einzahlung') THEN  t.amount
+      WHEN t.type = 'Gutschrift' THEN 0
+      WHEN t.type IN ('Auszahlung','Schaden','Gruppenaktion') THEN -t.amount
       ELSE 0
     END
   ),0),2) AS gross_flow
@@ -139,7 +156,8 @@ SELECT
   ROUND(COALESCE(SUM(
     CASE
       WHEN type='Einzahlung' THEN  amount
-      WHEN type IN ('Auszahlung','Schaden') THEN -amount
+      WHEN type='Gutschrift' THEN 0
+      WHEN type IN ('Auszahlung','Schaden','Gruppenaktion') THEN -amount
       ELSE 0
     END
   ),0),2) AS kassenstand
