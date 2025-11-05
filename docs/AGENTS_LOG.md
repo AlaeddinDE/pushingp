@@ -13,3 +13,8 @@
 - Sämtliche `api/v2`-Endpunkte für Startseite, Crew, Kasse, Schichten, Events, Status und Admin umgesetzt inkl. CSRF-Prüfung, Rollenlogik und Rate-Limiting-Hilfen in `includes/api_bootstrap.php`.
 - Umfassende Datenbankmigration `MIGRATION_20240709_system_modules.sql` ergänzt neue Tabellen (Events, Shifts, Vacations, Sickdays, Payment Requests, Feedback, Notifications) sowie Spaltenerweiterungen und Views für die Finanzlogik.
 - Logging und Admin-Funktionen erweitert (`admin_logs`, Benachrichtigungs-Queue), Payment-Flows (Requests, Status) und Verfügbarkeitsaggregation implementiert.
+
+## [2025-11-05] Admin Navigation & Seiten-Refactor
+- Dashboard, Kasse, Schichten und Board auf separate Admin-Seiten aufgeteilt (`admin/index.php`, `admin/kasse.php`, `admin/schichten.php`, `admin/board.php`).
+- Neues JavaScript-Modul `assets/js/admin.js` erstellt, das mobile Navigation, Partikel-Hintergrund sowie Dashboard-, Kassen-, Schicht- und Board-Logik zentral steuert.
+- `includes/admin_header.php` und `admin/theme.css` für mobile Navigation optimiert, Header-Dopplungen entfernt und Single-Page-Layout zugunsten einzelner Seiten ersetzt.
