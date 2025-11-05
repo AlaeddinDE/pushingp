@@ -84,5 +84,8 @@ find "$WEB_DIR" -type f -exec chmod 664 {} \;
 # --- RESTART APACHE ---
 log "🔁 Restarting Apache"
 systemctl restart apache2 && log "✅ Apache restarted"
+chmod +x /var/www/html/deploy.sh
+chmod 755 /usr/local/bin/deploy
 
 log "✅ Deploy completed successfully"
+
