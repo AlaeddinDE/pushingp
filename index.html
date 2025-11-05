@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="description" content="Pushing P — Crew, Kasse, Schichten und Live-Status. Alles in einem modernen Dashboard." />
+  <link rel="icon" href="assets/img/favicon.png" />
+  <title>Pushing P — Crew Landing</title>
+
+  <!-- Tailwind + GSAP (CDN for speed) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+  <style>
+    :root { color-scheme: dark; }
+    html,body { height:100%; }
+    body { 
+      margin:0;
+      font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
+      color:#fff;
+      background:#06060a;
+      overflow-x:hidden;
+      -webkit-font-smoothing:antialiased;
+      text-rendering:optimizeLegibility;
+    }
+
+    /* Gradient text */
+    .grad-text { 
+      background:linear-gradient(135deg, #60a5fa 0%, #a78bfa 30%, #f472b6 60%, #22d3ee 90%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      color:transparent;
+      background-size:200% 200%;
+      animation:gradientShift 8s linear infinite;
+    }
+    @keyframes gradientShift { 0%,100%{background-position:0% 50%}50%{background-position:100% 50%} }
+
+    .glass{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(8px);} 
+    .glass-strong{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);} 
+
+    /* Interactions */
+    .magnet{ transition:transform .24s cubic-bezier(.2,.9,.2,1)}.magnet:active{transform:translateY(1px)}
+    .float{ animation:float 6s ease-in-out infinite } @keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+    .pulse-glow{ animation:pulseGlow 3s infinite } @keyframes pulseGlow{0%,100%{box-shadow:0 18px 40px rgba(99,102,241,0.18)}50%{box-shadow:0 30px 80px rgba(99,102,241,0.26)}}
+
+    .stat-card{ transition:all .4s cubic-bezier(.2,.9,.2,1)} .stat-card:hover{ transform:translateY(-10px) scale(1.02); box-shadow:0 30px 90px rgba(0,0,0,0.5)}
+
+    /* Small utility */
+    .shadow-glow{ box-shadow: 0 20px 60px rgba(99,102,241,0.08) }
+
+    /* Canvas particles sits behind everything */
+    #particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
+
+    header.site-header{ position:fixed; top:0; left:0; right:0; z-index:50 }
+    .content-wrap{ position:relative; z-index:10 }
+
+    /* mobile nav */
+    .nav-toggle{ display:inline-flex; align-items:center; justify-content:center; width:44px; height:44px }
+
+    /* Make hero responsive */
+    @media (max-width:640px){ .hero-title{ font-size:48px } }
+  </style>
+</head>
+
+<body>
+
+  <!-- Particles canvas (subtil, performant) -->
+  <canvas id="particles" aria-hidden="true"></canvas>
+
+  <!-- Header -->
+  <header class="site-header glass content-wrap">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3" aria-label="Pushing P Startseite">
+        <img src="assets/img/logo.png" alt="Logo" class="h-8 w-8 object-contain" onerror="this.style.display='none'">
+        <h1 class="text-2xl font-black grad-text">PUSHING <span style="color:#3b82f6">P</span></h1>
+      </a>
+
+      <nav class="hidden md:flex gap-6 items-center" role="navigation" aria-label="Hauptnavigation">
+        <a href="#crew" class="hover:text-blue-400 transition-colors">Crew</a>
+        <a href="#modules" class="hover:text-blue-400 transition-colors">Features</a>
+        <a href="#login" class="hover:text-blue-400 transition-colors">Login</a>
+        <a href="login.php" class="magnet bg-white/10 px-3 py-1 rounded-xl hover:bg-white/20">Anmelden</a>
+      </nav>
+
+      <!-- Mobile toggle -->
+      <button id="mobileToggle" class="md:hidden nav-toggle glass-strong" aria-expanded="false" aria-controls="mobileMenu" aria-label="Menü öffnen">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path stroke="#fff" stroke-width="1.8" stroke-linecap="round" d="M3 6h18M3 12h18M3 18h18"></path></svg>
+      </button>
+    </div>
+
+    <div id="mobileMenu" class="md:hidden max-w-7xl mx-auto px-4 pb-4 hidden" role="menu">
+      <div class="flex flex-col gap-3">
+        <a href="#crew" class="block py-2">Crew</a>
+        <a href="#modules" class="block py-2">Features</a>
+        <a href="#login" class="block py-2">Login</a>
+        <a href="login.php" class="block py-2">Anmelden</a>
+      </div>
+    </div>
+  </header>
+
+  <main class="content-wrap">
+    <!-- Hero -->
+    <section class="pt-28 pb-20 text-center relative overflow-hidden">
+      <div class="max-w-4xl mx-auto px-4">
+        <h2 class="hero-title text-6xl md:text-7xl lg:text-8xl font-extrabold grad-text mb-4">PUSHING <span class="inline-block float" style="color:#3b82f6">P</span></h2>
+        <p class="text-lg text-white/80 mb-6">Eine Crew. Ein Vibe. Kasse, Schichten, Live-Status — alles an einem Ort.</p>
+
+        <div class="flex gap-4 justify-center items-center mb-8 flex-wrap">
+          <a href="#modules" class="magnet bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-2xl font-bold text-lg shadow-glow pulse-glow">Los geht's 🚀</a>
+          <a href="#crew" class="magnet glass-strong px-6 py-3 rounded-2xl font-bold text-lg">Crew ansehen 👥</a>
+        </div>
+
+        <div class="flex gap-4 justify-center text-sm text-white/60">
+          <div class="glass-strong rounded-xl px-4 py-2">Live Kassenstand: <strong id="balance">Lädt...</strong></div>
+          <div class="glass-strong rounded-xl px-4 py-2">Schichten heute: <strong id="shiftsCount">–</strong></div>
+          <div class="glass-strong rounded-xl px-4 py-2">Online jetzt: <strong id="online">Wird geladen...</strong></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Crew -->
+    <section id="crew" class="py-16 max-w-7xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h3 class="text-4xl sm:text-5xl font-extrabold mb-2 grad-text">Die Crew</h3>
+        <p class="text-white/60">Unser Team im Überblick</p>
+      </div>
+      <div id="crewList" class="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
+    </section>
+
+    <!-- Modules -->
+    <section id="modules" class="py-16 max-w-7xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <h3 class="text-4xl sm:text-5xl font-extrabold mb-2 grad-text">Features</h3>
+        <p class="text-white/60">Alles was du brauchst, an einem Ort</p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <a href="login.php" class="stat-card glass-strong rounded-2xl p-6 hover:shadow-glow block cursor-pointer">
+          <div class="text-4xl mb-2">💰</div>
+          <h4 class="text-xl font-bold mb-1">Kasse</h4>
+          <p id="balanceSmall" class="text-2xl font-black text-blue-400">Lädt...</p>
+          <p class="text-white/60 text-sm mt-2">Live Kassenstand — immer up-to-date</p>
+        </a>
+
+        <a href="login.php" class="stat-card glass-strong rounded-2xl p-6 hover:shadow-glow block cursor-pointer">
+          <div class="text-4xl mb-2">🕓</div>
+          <h4 class="text-xl font-bold mb-1">Schichten</h4>
+          <p id="shiftsCountSmall" class="text-2xl font-black text-purple-400">–</p>
+          <p class="text-white/60 text-sm mt-2">Schichten heute — schnell einsehen</p>
+        </a>
+
+        <a href="login.php" class="stat-card glass-strong rounded-2xl p-6 hover:shadow-glow block cursor-pointer">
+          <div class="text-4xl mb-2">🟢</div>
+          <h4 class="text-xl font-bold mb-1">Live Status</h4>
+          <p id="onlineSmall" class="text-2xl font-black text-emerald-400">Wird geladen...</p>
+          <p class="text-white/60 text-sm mt-2">Wer ist gerade online</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- Login (compact) -->
+    <section id="login" class="py-16 max-w-7xl mx-auto px-6">
+      <div class="text-center mb-8">
+        <h3 class="text-3xl sm:text-4xl font-extrabold mb-2 grad-text">Anmelden</h3>
+        <p class="text-white/60">Melde dich an, um auf dein Dashboard zuzugreifen</p>
+      </div>
+      <div class="max-w-md mx-auto">
+        <div class="glass-strong rounded-2xl p-6">
+          <form id="loginForm" class="space-y-4" aria-label="Login-Formular">
+            <div>
+              <label for="name" class="block text-sm text-white/70 mb-2">Name</label>
+              <input id="name" name="name" type="text" placeholder="Dein Name" class="w-full p-3 rounded-xl text-black outline-none" list="names" required autocomplete="off">
+              <datalist id="names"></datalist>
+            </div>
+            <div>
+              <label class="block text-sm text-white/70 mb-2">PIN</label>
+              <input name="pin" type="password" placeholder="PIN (4–6 Ziffern)" class="w-full p-3 rounded-xl text-black outline-none" required>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-3 rounded-xl font-bold text-lg">Einloggen 🚀</button>
+            <p id="msg" class="text-red-400 text-sm text-center min-h-[24px]"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+  // --- Utilities & enhancements ---
+  gsap.registerPlugin(ScrollTrigger);
+
+  // Mobile nav toggle
+  const mobileToggle = document.getElementById('mobileToggle');
+  const mobileMenu = document.getElementById('mobileMenu');
+  mobileToggle.addEventListener('click', () => {
+    const open = mobileMenu.classList.toggle('hidden') === false;
+    mobileToggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  });
+
+  // Smooth scroll for anchor links
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+      const href = this.getAttribute('href');
+      if (href && href.startsWith('#')) {
+        e.preventDefault();
+        const target = document.querySelector(href);
+        if (target) target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    });
+  });
+
+  // --- Data loading (reuse existing endpoints) ---
+  async function loadCrew(){
+    try{
+      const res = await fetch('api/get_members.php');
+      if(!res.ok) throw new Error('Crew load failed');
+      const members = await res.json();
+      const list = document.getElementById('crewList');
+      const datalist = document.getElementById('names');
+      list.innerHTML = '';
+      (members||[]).forEach((m,i)=>{
+        const el = document.createElement('div');
+        el.className = 'stat-card glass-strong p-6 rounded-2xl';
+        el.innerHTML = `<div class="flex items-center gap-4"><div class="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-black">${(m.name||'?')[0].toUpperCase()}</div><div class="flex-1"><h4 class="font-bold text-lg mb-1">${m.name}</h4><p class="text-white/60">${m.flag||'🌍'}</p></div></div>`;
+        list.appendChild(el);
+        gsap.from(el,{duration:0.6,y:30,opacity:0,delay:i*0.05,ease:'power3.out'});
+        const opt = document.createElement('option'); opt.value = m.name; datalist.appendChild(opt);
+      });
+      if(!members || members.length===0) list.innerHTML = '<div class="col-span-full text-center py-12 text-white/50">Keine Mitglieder gefunden</div>';
+    }catch(e){ console.error(e); document.getElementById('crewList').innerHTML = '<div class="col-span-full text-center py-12 text-red-400">Fehler beim Laden der Crew</div>' }
+  }
+
+  async function loadBalance(){ try{ const res = await fetch('api/get_balance.php'); const data = await res.json(); const total = (data||[]).reduce((s,i)=>s+parseFloat(i.balance||0),0); document.getElementById('balance').textContent = total.toFixed(2)+ ' €'; document.getElementById('balanceSmall').textContent = total.toFixed(2)+' €'; }catch(e){ document.getElementById('balance').textContent='Fehler'; document.getElementById('balanceSmall').textContent='Fehler' } }
+
+  async function loadOnline(){ try{ const res = await fetch('api/discord_status.php'); const data = await res.json(); const cnt = data.count||0; document.getElementById('online').textContent = cnt + ' online'; document.getElementById('onlineSmall').textContent = cnt + ' online'; }catch(e){ document.getElementById('online').textContent='Fehler'; document.getElementById('onlineSmall').textContent='Fehler' } }
+
+  async function loadShiftsToday(){ try{ const res = await fetch('api/get_shifts.php'); const data = await res.json(); const today = new Date().toISOString().split('T')[0]; const todayShifts = (data||[]).filter(s=>s.shift_date===today); document.getElementById('shiftsCount').textContent = todayShifts.length; document.getElementById('shiftsCountSmall').textContent = todayShifts.length; }catch(e){ document.getElementById('shiftsCount').textContent='?'; document.getElementById('shiftsCountSmall').textContent='?' } }
+
+  // Login handler (same endpoints)
+  document.getElementById('loginForm').addEventListener('submit', async e => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    try{
+      const res = await fetch('api/login.php',{method:'POST',body:formData});
+      const data = await res.json();
+      if(data.status==='ok'){ window.location.href = data.admin ? 'admin/' : 'member.php'; }
+      else document.getElementById('msg').textContent = data.error || 'Login fehlgeschlagen';
+    }catch(err){ document.getElementById('msg').textContent = 'Netzwerkfehler'; }
+  });
+
+  // GSAP entrance animations
+  gsap.utils.toArray('.stat-card, .hero-title, .glass-strong, .grad-text').forEach((el,i)=>{
+    gsap.from(el,{ scrollTrigger:{ trigger:el, start:'top 90%', toggleActions:'play none none none', once:true }, duration:0.8, y:40, opacity:0, delay:i*0.06, ease:'power3.out' });
+  });
+
+  // --- Subtle particle background ---
+  (function particleBg(){
+    const canvas = document.getElementById('particles');
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let w = canvas.width = innerWidth; let h = canvas.height = innerHeight; const DPR = Math.max(1, window.devicePixelRatio || 1);
+    canvas.width = w * DPR; canvas.height = h * DPR; canvas.style.width = w + 'px'; canvas.style.height = h + 'px'; ctx.scale(DPR, DPR);
+    const particles = [];
+    const count = Math.round((w*h)/90000); // adaptive
+    for(let i=0;i<count;i++){ particles.push({ x:Math.random()*w, y:Math.random()*h, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, r:1+Math.random()*2 }) }
+    function tick(){ ctx.clearRect(0,0,w,h); for(let p of particles){ p.x+=p.vx; p.y+=p.vy; if(p.x<0)p.x=w; if(p.x>w)p.x=0; if(p.y<0)p.y=h; if(p.y>h)p.y=0; ctx.beginPath(); ctx.fillStyle='rgba(255,255,255,0.06)'; ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill(); }
+      // connect
+      for(let i=0;i<particles.length;i++){ for(let j=i+1;j<particles.length;j++){ const a=particles[i], b=particles[j]; const dx=a.x-b.x, dy=a.y-b.y; const d=dx*dx+dy*dy; if(d<9000){ const alpha = 0.03*(1 - d/9000); ctx.strokeStyle='rgba(140,160,255,'+alpha+')'; ctx.lineWidth=1; ctx.beginPath(); ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y); ctx.stroke(); } } }
+      requestAnimationFrame(tick);
+    }
+    tick();
+    addEventListener('resize',()=>{ w=canvas.width=innerWidth; h=canvas.height=innerHeight; canvas.width = w*DPR; canvas.height = h*DPR; canvas.style.width = w+'px'; canvas.style.height = h+'px'; ctx.scale(DPR,DPR); });
+  })();
+
+  // Init data
+  loadCrew(); loadBalance(); loadOnline(); loadShiftsToday();
+  </script>
+
+</body>
+</html>

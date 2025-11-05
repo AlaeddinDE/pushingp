@@ -1,0 +1,14 @@
+body {
+  font-family: system-ui, sans-serif;
+  background: #0a0b10;
+  color: #fff;
+  padding: 2rem;
+}
+h1 { color: #60a5fa; }
+table { border-collapse: collapse; width: 100%; margin-top: 1rem; }
+td, th { border: 1px solid #333; padding: .6rem; text-align: left; }
+tr:nth-child(even) { background: #111; }
+.btn {
+  display: inline-block; margin-top: 1rem; padding: .6rem 1rem;
+  background: #6366f1; color: white; border-radius: .5rem; text-decoration: none;
+}
