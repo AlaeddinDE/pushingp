@@ -57,7 +57,7 @@ if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $date)) {
     api_send_response('error', null, 'Ungültiges Datum', 422);
 }
 
-$allowedTypes = ['early', 'late', 'night', 'day'];
+$allowedTypes = ['early', 'late', 'night', 'day', 'custom'];
 if (!in_array($type, $allowedTypes, true)) {
     api_send_response('error', null, 'Ungültiger Schichttyp', 422);
 }
@@ -69,8 +69,12 @@ $defaults = [
     'day' => ['07:00:00', '17:30:00'],
 ];
 
-$startTime = isset($data['start']) ? trim((string) $data['start']) : $defaults[$type][0];
-$endTime = isset($data['end']) ? trim((string) $data['end']) : $defaults[$type][1];
+$startTime = isset($data['start']) ? trim((string) $data['start']) : ($defaults[$type][0] ?? null);
+$endTime = isset($data['end']) ? trim((string) $data['end']) : ($defaults[$type][1] ?? null);
+
+if ($startTime === null || $endTime === null) {
+    api_send_response('error', null, 'Start- und Endzeit erforderlich', 422);
+}
 
 if (!preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $startTime) || !preg_match('/^\d{2}:\d{2}(:\d{2})?$/', $endTime)) {
     api_send_response('error', null, 'Ungültige Uhrzeit', 422);

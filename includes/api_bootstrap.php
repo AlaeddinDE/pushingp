@@ -36,19 +36,62 @@ function api_require_method(string $method): void
 
 function api_get_session_user(): ?array
 {
-    if (!isset($_SESSION['user']) || !is_array($_SESSION['user'])) {
+    if (!isset($_SESSION['user'])) {
         return null;
     }
 
-    $user = $_SESSION['user'];
-    if (!isset($user['roles'])) {
-        $user['roles'] = ['member'];
-    } elseif (is_string($user['roles'])) {
-        $roles = array_filter(array_map('trim', explode(',', $user['roles'])));
-        $user['roles'] = $roles ?: ['member'];
+    $raw = $_SESSION['user'];
+    if (!is_array($raw)) {
+        global $mysqli;
+        $name = (string) $raw;
+        $stmt = $mysqli->prepare('SELECT id, name, flag FROM members WHERE name=? LIMIT 1');
+        if ($stmt) {
+            $stmt->bind_param('s', $name);
+            if ($stmt->execute()) {
+                $stmt->bind_result($id, $dbName, $flag);
+                if ($stmt->fetch()) {
+                    $roles = !empty($_SESSION['is_admin']) ? ['member', 'admin'] : ['member'];
+                    $raw = [
+                        'id' => (int) $id,
+                        'name' => $dbName,
+                        'display_name' => $dbName,
+                        'flag' => $flag,
+                        'roles' => $roles,
+                    ];
+                    $_SESSION['user'] = $raw;
+                }
+            }
+            $stmt->close();
+        }
+        if (!is_array($raw)) {
+            return null;
+        }
     }
 
-    return $user;
+    if (!isset($raw['roles'])) {
+        $raw['roles'] = ['member'];
+    } elseif (is_string($raw['roles'])) {
+        $roles = array_filter(array_map('trim', explode(',', $raw['roles'])));
+        $raw['roles'] = $roles ?: ['member'];
+    }
+
+    if (!isset($raw['id']) && isset($raw['name'])) {
+        global $mysqli;
+        $stmt = $mysqli->prepare('SELECT id FROM members WHERE name=? LIMIT 1');
+        if ($stmt) {
+            $stmt->bind_param('s', $raw['name']);
+            if ($stmt->execute()) {
+                $stmt->bind_result($id);
+                if ($stmt->fetch()) {
+                    $raw['id'] = (int) $id;
+                    $_SESSION['user'] = $raw;
+                }
+            }
+            $stmt->close();
+        }
+    }
+
+    return $raw;
 }
 
 function api_require_login(): array
