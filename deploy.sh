@@ -46,7 +46,13 @@ log "✅ Repo cloned"
 
 # --- SYNC FILES ---
 log "🧭 Syncing files to $WEB_DIR"
-rsync -a --delete --exclude ".git" --exclude "node_modules" --exclude "deploy.sh" "$TMP_DIR"/ "$WEB_DIR"/
+rsync -a --delete \
+  --exclude ".git" \
+  --exclude "node_modules" \
+  --exclude "deploy.sh" \
+  --exclude "AGENTS.md" \
+  --exclude "deploy" \
+  "$TMP_DIR"/ "$WEB_DIR"/
 log "✅ Files synced"
 
 # --- MAIN MIGRATION ---
@@ -84,8 +90,7 @@ find "$WEB_DIR" -type f -exec chmod 664 {} \;
 # --- RESTART APACHE ---
 log "🔁 Restarting Apache"
 systemctl restart apache2 && log "✅ Apache restarted"
-chmod +x /var/www/html/deploy.sh
-chmod 755 /usr/local/bin/deploy
 
 log "✅ Deploy completed successfully"
+
 
