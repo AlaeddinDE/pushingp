@@ -10,9 +10,9 @@ try {
     
     // Wenn Admin, auch PIN zurückgeben
     if ($isAdmin) {
-        $result = $mysqli->query("SELECT name, flag, pin, start_date FROM members ORDER BY name ASC");
+        $result = $mysqli->query("SELECT id, name, flag, pin, start_date, is_locked, locked_at, locked_reason FROM members ORDER BY name ASC");
     } else {
-        $result = $mysqli->query("SELECT name, flag FROM members ORDER BY name ASC");
+        $result = $mysqli->query("SELECT id, name, flag, is_locked FROM members ORDER BY name ASC");
     }
     
     if (!$result) {
@@ -21,6 +21,10 @@ try {
     
     $members = [];
     while ($row = $result->fetch_assoc()) {
+        $row['id'] = isset($row['id']) ? (int) $row['id'] : null;
+        if (isset($row['is_locked'])) {
+            $row['is_locked'] = (int) $row['is_locked'] === 1;
+        }
         $members[] = $row;
     }
     

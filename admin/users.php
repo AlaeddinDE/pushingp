@@ -96,7 +96,8 @@ $adminSubnav = [
               <th class="py-3 px-4 font-semibold">Flag</th>
               <th class="py-3 px-4 font-semibold">PIN</th>
               <th class="py-3 px-4 font-semibold">Start</th>
-              <th class="py-3 px-4 font-semibold w-64">Aktionen</th>
+              <th class="py-3 px-4 font-semibold">Status</th>
+              <th class="py-3 px-4 font-semibold w-72">Aktionen</th>
             </tr>
           </thead>
           <tbody id="memberRows" class="text-sm"></tbody>
@@ -117,13 +118,20 @@ $adminSubnav = [
         document.getElementById('memberCount').textContent = list.length;
         
         if (list.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-white/50">Keine Mitglieder gefunden</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Keine Mitglieder gefunden</td></tr>';
           return;
         }
         
         list.forEach((m, i) => {
           const tr = document.createElement('tr');
           tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
+          const locked = Boolean(m.is_locked);
+          const statusLabel = locked ? 'Gesperrt' : 'Aktiv';
+          const statusClass = locked ? 'bg-red-600/20 text-red-200' : 'bg-emerald-500/20 text-emerald-200';
+          const lockAction = locked ? 'unlock' : 'lock';
+          const lockLabel = locked ? '🔓 Entsperren' : '🚫 Sperren';
+          const lockTitleRaw = locked && m.locked_reason ? `Grund: ${m.locked_reason}` : '';
+          const lockTitle = lockTitleRaw.replace(/"/g, '&quot;');
           tr.innerHTML = `
             <td class="py-4 px-4 font-medium">${m.name || 'N/A'}</td>
             <td class="py-4 px-4 text-lg">${m.flag || '🌍'}</td>
@@ -134,6 +142,12 @@ $adminSubnav = [
               ${m.start_date || 'N/A'}
             </td>
             <td class="py-4 px-4">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-semibold ${statusClass}" title="${lockTitle}">
+                <span class="h-2 w-2 rounded-full ${locked ? 'bg-red-400 animate-pulse' : 'bg-emerald-400'}"></span>
+                ${statusLabel}
+              </span>
+            </td>
+            <td class="py-4 px-4">
               <div class="flex gap-2 flex-wrap">
                 <button onclick="changePin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 text-xs font-medium transition-colors">
                   ${m.pin ? '✏️ PIN ändern' : '➕ PIN setzen'}
@@ -141,8 +155,8 @@ $adminSubnav = [
                 <button onclick="viewPin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-medium transition-colors">
                   👁️ PIN anzeigen
                 </button>
-                <button onclick="banUser('${m.name}')" class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-200 text-xs font-medium transition-colors">
-                  🚫 Sperren
+                <button onclick="toggleLock('${m.name}', '${lockAction}')" class="px-3 py-1.5 rounded-lg ${locked ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-red-600/20 hover:bg-red-600/30 text-red-200'} text-xs font-medium transition-colors">
+                  ${lockLabel}
                 </button>
               </div>
             </td>
@@ -155,23 +169,28 @@ $adminSubnav = [
       }
     }
 
-    async function banUser(name) {
-      if (!confirm(`${name} wirklich sperren? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+    async function toggleLock(name, action = 'lock') {
+      const locking = action !== 'unlock';
+      const confirmation = locking
+        ? `${name} wirklich sperren?`
+        : `${name} wieder freigeben?`;
+      if (!confirm(confirmation)) return;
+      const reason = locking ? prompt('Grund für die Sperre (optional):', '') || '' : '';
       try {
         const res = await fetch('/api/admin_ban_user.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ name })
+          body: new URLSearchParams({ name, action, reason })
         });
         const data = await res.json();
         if (data.status === 'ok') {
-          alert('Benutzer gesperrt ✅');
+          alert(locking ? 'Benutzer gesperrt ✅' : 'Benutzer entsperrt ✅');
           loadMembers();
         } else {
           alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
         }
       } catch (e) {
-        alert('Fehler beim Sperren');
+        alert(locking ? 'Fehler beim Sperren' : 'Fehler beim Entsperren');
       }
     }
 

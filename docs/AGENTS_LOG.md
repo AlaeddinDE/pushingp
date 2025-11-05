@@ -18,3 +18,9 @@
 - Dashboard, Kasse, Schichten und Board auf separate Admin-Seiten aufgeteilt (`admin/index.php`, `admin/kasse.php`, `admin/schichten.php`, `admin/board.php`).
 - Neues JavaScript-Modul `assets/js/admin.js` erstellt, das mobile Navigation, Partikel-Hintergrund sowie Dashboard-, Kassen-, Schicht- und Board-Logik zentral steuert.
 - `includes/admin_header.php` und `admin/theme.css` für mobile Navigation optimiert, Header-Dopplungen entfernt und Single-Page-Layout zugunsten einzelner Seiten ersetzt.
+
+## [2024-08-21] Member-Abwesenheiten & Sperrlogik
+- Schicht-Erfassung repariert und um Schichttypen erweitert (`api/set_shift.php`, `api/get_shifts.php`, `member.php`).
+- Neue Urlaub-/Krankmeldungs-Workflows inklusive UI, CSRF-gestützter v2-API-Calls und Tabellen (`member.php`, `migrations/MIGRATION_20240821_member_absences.sql`).
+- Mitgliederverwaltung erweitert: Sperrstatus, Entsperren und Status-Badges (`admin/users.php`, `api/admin_ban_user.php`, `api/get_members.php`).
+- Login/Auth modernisiert (Session-Struktur, CSRF-Token, v2-Kompatibilität) in `api/login.php`, `includes/auth.php`, `includes/api_bootstrap.php`.
