@@ -1,46 +1,97 @@
 <?php
-require_once __DIR__ . '/../../includes/db.php';
+declare(strict_types=1);
 
-function send_response(string $status, ?array $data = null, ?string $error = null, int $httpCode = 200): void {
-    header('Content-Type: application/json');
-    http_response_code($httpCode);
-    $payload = [
-        'status' => $status,
-        'error' => $error,
-    ];
-    if ($data !== null) {
-        $payload['data'] = $data;
-    }
-    echo json_encode($payload);
-    exit;
-}
+require_once __DIR__ . '/../../includes/api_bootstrap.php';
 
+api_require_method('GET');
+
+$historyDays = 30;
+
+$totalBalance = 0.0;
+$reservedBalance = 0.0;
+
+// Gesamtkassenstand (nur gebuchte Bewegungen)
 $stmt = $mysqli->prepare(
-    'SELECT member_id, name, real_balance FROM v2_member_real_balance ORDER BY name ASC'
+    "SELECT COALESCE(SUM(CASE 
+        WHEN type='Einzahlung' THEN amount 
+        WHEN type IN ('Auszahlung','Schaden','Gruppenaktion','Gruppenaktion_anteilig','Reservierung','Umbuchung') THEN -amount 
+        WHEN type IN ('Korrektur','Ausgleich') THEN amount 
+        ELSE 0 END),0)
+     FROM transactions_v2
+     WHERE status='gebucht'"
 );
-if (!$stmt) {
-    send_response('error', null, 'Datenbankfehler beim Vorbereiten der Abfrage', 500);
-}
-
-if (!$stmt->execute()) {
+if ($stmt) {
+    if ($stmt->execute() && $stmt->bind_result($sumBalance) && $stmt->fetch()) {
+        $totalBalance = (float) $sumBalance;
+    }
     $stmt->close();
-    send_response('error', null, 'Datenbankfehler beim Ausführen der Abfrage', 500);
 }
 
-if (!$stmt->bind_result($memberId, $name, $realBalance)) {
+// Reservierungen
+$stmt = $mysqli->prepare("SELECT COALESCE(SUM(amount),0) FROM reservations_v2 WHERE status='active'");
+if ($stmt) {
+    if ($stmt->execute() && $stmt->bind_result($reserved) && $stmt->fetch()) {
+        $reservedBalance = (float) $reserved;
+    }
     $stmt->close();
-    send_response('error', null, 'Datenbankfehler beim Lesen der Ergebnisse', 500);
 }
 
-$balances = [];
-while ($stmt->fetch()) {
-    $balances[] = [
-        'member_id' => (int) $memberId,
-        'name' => $name,
-        'real_balance' => (float) $realBalance,
+// Historie: aggregierte Tageswerte der letzten 30 Tage
+$history = [];
+$stmt = $mysqli->prepare(
+    "SELECT DATE(created_at) AS tx_date,
+            SUM(CASE 
+                WHEN type='Einzahlung' THEN amount 
+                WHEN type IN ('Auszahlung','Schaden','Gruppenaktion','Gruppenaktion_anteilig','Reservierung','Umbuchung') THEN -amount 
+                WHEN type IN ('Korrektur','Ausgleich') THEN amount 
+                ELSE 0 END) AS delta
+     FROM transactions_v2
+     WHERE status='gebucht' AND created_at >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+     GROUP BY tx_date
+     ORDER BY tx_date ASC"
+);
+if ($stmt) {
+    $stmt->bind_param('i', $historyDays);
+    if ($stmt->execute()) {
+        $stmt->bind_result($txDate, $delta);
+        $entries = [];
+        while ($stmt->fetch()) {
+            $entries[] = [
+                'date' => $txDate,
+                'delta' => (float) $delta,
+            ];
+        }
+        $history = [];
+        $runningTotal = $totalBalance;
+        $entriesCount = count($entries);
+        if ($entriesCount > 0) {
+            // Rekonstruiere Verlauf rückwärts
+            for ($i = $entriesCount - 1; $i >= 0; $i--) {
+                $runningTotal -= $entries[$i]['delta'];
+            }
+            $runningTotal = round($runningTotal, 2);
+            foreach ($entries as $entry) {
+                $runningTotal += $entry['delta'];
+                $history[] = [
+                    'ts' => $entry['date'],
+                    'balance' => round($runningTotal, 2),
+                ];
+            }
+        }
+    }
+    $stmt->close();
+}
+
+if (empty($history)) {
+    $history[] = [
+        'ts' => date('Y-m-d'),
+        'balance' => round($totalBalance, 2),
     ];
 }
 
-$stmt->close();
-
-send_response('success', ['members' => $balances], null, 200);
+api_send_response('success', [
+    'balance' => round($totalBalance, 2),
+    'reserved' => round($reservedBalance, 2),
+    'available' => round($totalBalance - $reservedBalance, 2),
+    'history' => $history,
+]);

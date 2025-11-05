@@ -8,3 +8,8 @@
 ## [2024-06-08] shift timeline enhancements
 - Shift-Radar um Tooltips, Tastaturfokus und Overnight-Indikatoren ergänzt, inklusive besserer Darstellung von Schichten über Mitternacht in `index.html`.
 - Datenabruf der Landingpage parallelisiert (`Promise.allSettled`), um Crew-, Shift- und Statusdaten schneller zu laden.
+
+## [2024-07-09] vollständige API-Implementierung laut Spezifikation
+- Sämtliche `api/v2`-Endpunkte für Startseite, Crew, Kasse, Schichten, Events, Status und Admin umgesetzt inkl. CSRF-Prüfung, Rollenlogik und Rate-Limiting-Hilfen in `includes/api_bootstrap.php`.
+- Umfassende Datenbankmigration `MIGRATION_20240709_system_modules.sql` ergänzt neue Tabellen (Events, Shifts, Vacations, Sickdays, Payment Requests, Feedback, Notifications) sowie Spaltenerweiterungen und Views für die Finanzlogik.
+- Logging und Admin-Funktionen erweitert (`admin_logs`, Benachrichtigungs-Queue), Payment-Flows (Requests, Status) und Verfügbarkeitsaggregation implementiert.
