@@ -6,9 +6,12 @@ try {
     $sql = "
       SELECT name,
              ROUND(SUM(
-               CASE WHEN type='Einzahlung' THEN amount
-                    WHEN type='Gutschrift' THEN amount
-                    ELSE -amount END
+               CASE
+                 WHEN type='Einzahlung' THEN amount
+                 WHEN type='Gutschrift' THEN 0
+                 WHEN type IN ('Auszahlung','Schaden','Gruppenaktion') THEN -amount
+                 ELSE 0
+               END
              ),2) AS balance
       FROM transactions
       GROUP BY name

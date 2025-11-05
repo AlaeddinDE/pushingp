@@ -1,10 +1,17 @@
 <?php
-session_start();
-if (empty($_SESSION['user']) || empty($_SESSION['is_admin'])) {
-  header('Location: ../login.php');
+require_once '../includes/auth.php';
+if (!$isAdmin) {
+  header('Location: ../member.php');
   exit;
 }
-$user = $_SESSION['user'];
+$adminActive = 'dashboard';
+$adminSubnav = [
+  ['label' => 'Kennzahlen', 'href' => '#dashboard'],
+  ['label' => 'Kasse', 'href' => '#transactions'],
+  ['label' => 'Mitglieder', 'href' => '#members'],
+  ['label' => 'Schichten', 'href' => '#shifts'],
+  ['label' => 'Board', 'href' => '#admin-board'],
+];
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -18,6 +25,7 @@ $user = $_SESSION['user'];
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="theme.css" />
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,12 +38,12 @@ $user = $_SESSION['user'];
         extend: {
           fontFamily: { display: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
           colors: {
-            brand: { 600:'#6366f1', 700:'#4f46e5', 800:'#4338ca' },
+            brand: { 500:'#f87171', 600:'#f43f5e', 700:'#be123c' },
             glass: { card: 'rgba(255,255,255,.08)', edge: 'rgba(255,255,255,.14)' }
           },
           boxShadow: {
-            glow: '0 20px 60px rgba(99,102,241,.25)',
-            glass: '0 10px 40px rgba(0,0,0,.35)'
+            glow: '0 20px 60px rgba(244,63,94,.32)',
+            glass: '0 10px 40px rgba(15,23,42,.45)'
           }
         }
       }
@@ -47,32 +55,28 @@ $user = $_SESSION['user'];
     html, body { height: 100% }
     body{
       margin:0;
-      background:
-        radial-gradient(1400px 900px at 10% 10%, rgba(99,102,241,.14), transparent 60%),
-        radial-gradient(1200px 700px at 90% 30%, rgba(236,72,153,.12), transparent 60%),
-        radial-gradient(900px 700px at 50% 85%, rgba(34,211,238,.09), transparent 50%),
-        #06060a;
+      background: var(--admin-bg);
       -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
       overflow: hidden;
     }
     .grad-text{
-      background: linear-gradient(135deg,#60a5fa 0%, #a78bfa 30%, #f472b6 60%, #22d3ee 90%);
+      background: linear-gradient(135deg,#f87171 0%, #f43f5e 35%, #be123c 70%, #fb7185 100%);
       -webkit-background-clip: text; background-clip: text; color: transparent;
       background-size: 200% 200%;
       animation: gradientShift 8s linear infinite;
     }
     @keyframes gradientShift { 0%,100%{background-position:0% 50%}50%{background-position:100% 50%} }
 
-    .glass{ background: var(--glass, rgba(255,255,255,.06)); border:1px solid rgba(255,255,255,.12); backdrop-filter: blur(16px) saturate(120%); -webkit-backdrop-filter: blur(16px) saturate(120%)}
-    .glass-strong{ background: rgba(255,255,255,.09); border:1px solid rgba(255,255,255,.16); backdrop-filter: blur(20px) saturate(140%) }
+    .glass{ background: rgba(248,113,113,0.08); border:1px solid rgba(248,113,113,0.18); backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%)}
+    .glass-strong{ background: rgba(15,23,42,0.75); border:1px solid rgba(248,113,113,0.18); backdrop-filter: blur(22px) saturate(160%) }
     .stat-card{ transition: transform .35s cubic-bezier(.2,.9,.2,1), box-shadow .35s }
-    .stat-card:hover{ transform: translateY(-6px) scale(1.015); box-shadow: 0 28px 80px rgba(99,102,241,.28) }
+    .stat-card:hover{ transform: translateY(-6px) scale(1.015); box-shadow: 0 28px 80px rgba(244,63,94,.32) }
 
     /* Layout */
     .layout { display: grid; grid-template-columns: 280px 1fr; height: 100vh; }
     @media (max-width: 1024px){ .layout { grid-template-columns: 0 1fr } #sidebar { transform: translateX(-100%) } #sidebar.open { transform: translateX(0) } }
-    .sidebar-link{ display:flex; align-items:center; gap:.7rem; padding:.7rem .9rem; border-radius: .9rem; transition: background .2s, transform .2s; }
-    .sidebar-link:hover{ background: rgba(255,255,255,.08); transform: translateX(2px) }
+    .sidebar-link{ display:flex; align-items:center; gap:.7rem; padding:.7rem .9rem; border-radius: .9rem; transition: background .2s, transform .2s; color: rgba(255,255,255,0.75); }
+    .sidebar-link:hover{ background: rgba(244,63,94,.18); transform: translateX(2px); color:#fff }
 
     /* Particles */
     #particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -90,7 +94,7 @@ $user = $_SESSION['user'];
     <!-- Sidebar -->
     <aside id="sidebar" class="glass-strong border-r border-white/10 shadow-glass px-4 py-5 sticky top-0 h-screen z-10 transition-transform duration-300">
       <div class="flex items-center gap-3 mb-6 px-2">
-        <div class="h-9 w-9 rounded-xl bg-blue-600/80 grid place-items-center shadow-md"><span class="text-xl font-black">P</span></div>
+        <div class="h-9 w-9 rounded-xl bg-rose-500/80 grid place-items-center shadow-md"><span class="text-xl font-black">P</span></div>
         <div>
           <div class="text-sm text-white/60 leading-none mb-1">Pushing P</div>
           <div class="text-lg font-extrabold grad-text leading-none">Admin</div>
@@ -102,6 +106,7 @@ $user = $_SESSION['user'];
         <a href="#transactions" class="sidebar-link"><span>💰</span><span>Kasse</span></a>
         <a href="#members" class="sidebar-link"><span>👥</span><span>Mitglieder</span></a>
         <a href="#shifts" class="sidebar-link"><span>🕓</span><span>Schichten</span></a>
+        <a href="#admin-board" class="sidebar-link"><span>📌</span><span>Board</span></a>
       </nav>
 
       <div class="mt-8 p-3 rounded-xl bg-white/5 text-sm">
@@ -111,28 +116,13 @@ $user = $_SESSION['user'];
 
       <div class="mt-6 grid gap-2">
         <a href="../index.html" class="w-full text-center rounded-xl bg-white/10 hover:bg-white/20 px-3 py-2">🏠 Start</a>
-        <a href="../logout.php" class="w-full text-center rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-300 px-3 py-2">Abmelden</a>
+        <a href="../logout.php" class="w-full text-center rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 px-3 py-2">Abmelden</a>
       </div>
     </aside>
 
     <!-- Main -->
     <main class="relative z-5 overflow-y-auto">
-      <!-- Topbar -->
-      <header class="sticky top-0 z-20">
-        <div class="glass border-b border-white/10 backdrop-blur supports-backdrop-blur:bg-white/5">
-          <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-              <button id="toggleSidebar" class="lg:hidden rounded-xl p-2 hover:bg-white/10">
-                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-              </button>
-              <h1 class="text-xl md:text-2xl font-black grad-text">PUSHING <span style="color:#3b82f6">P</span> — Admin Dashboard</h1>
-            </div>
-            <div class="hidden md:flex items-center gap-2 text-sm">
-              <span class="px-3 py-1.5 rounded-xl bg-white/10">Hallo, <?=htmlspecialchars($user)?> 👋</span>
-            </div>
-          </div>
-        </div>
-      </header>
+      <?php $showSidebarToggle = true; include '../includes/admin_header.php'; ?>
 
       <div class="max-w-7xl mx-auto px-4 py-8 space-y-10">
         <!-- KPI Cards -->
@@ -151,8 +141,8 @@ $user = $_SESSION['user'];
           <div class="stat-card glass-strong rounded-2xl p-6">
             <div class="flex items-center justify-between mb-4">
               <div class="text-3xl">👥</div>
-              <div class="h-8 w-8 rounded-lg bg-blue-500/20 grid place-items-center">
-                <svg class="w-4 h-4 text-blue-400" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
+              <div class="h-8 w-8 rounded-lg bg-rose-500/20 grid place-items-center">
+                <svg class="w-4 h-4 text-rose-300" viewBox="0 0 24 24" fill="none" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0"/></svg>
               </div>
             </div>
             <div class="text-4xl font-black number-counter mb-2" id="anzMembers">–</div>
@@ -221,6 +211,8 @@ $user = $_SESSION['user'];
             <button data-q="all" class="txchip px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-sm">Alle</button>
             <button data-q="einzahlung" class="txchip px-3 py-1.5 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 text-sm">Einzahlungen</button>
             <button data-q="auszahlung" class="txchip px-3 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-400 text-sm">Auszahlungen</button>
+            <button data-q="schaden" class="txchip px-3 py-1.5 rounded-lg bg-orange-500/20 hover:bg-orange-500/30 text-orange-300 text-sm">Schäden</button>
+            <button data-q="gruppenaktion" class="txchip px-3 py-1.5 rounded-lg bg-purple-500/20 hover:bg-purple-500/30 text-purple-300 text-sm">Gruppenaktionen</button>
             <button data-q="heute" class="txchip px-3 py-1.5 rounded-lg bg-blue-500/20 hover:bg-blue-500/30 text-blue-400 text-sm">Heute</button>
           </div>
 
@@ -308,10 +300,12 @@ $user = $_SESSION['user'];
                 </div>
                 <div>
                   <label class="block text-sm text-white/70 mb-2">Typ</label>
-                  <select name="type" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" required>
+                  <select id="transactionTypeInline" name="type" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" required>
                     <option value="Einzahlung">Einzahlung</option>
                     <option value="Auszahlung">Auszahlung</option>
                     <option value="Gutschrift">Gutschrift</option>
+                    <option value="Schaden">Schaden</option>
+                    <option value="Gruppenaktion">Gruppenaktion</option>
                   </select>
                 </div>
                 <div>
@@ -354,6 +348,54 @@ $user = $_SESSION['user'];
             </table>
           </div>
         </section>
+
+        <!-- Admin Board -->
+        <section id="admin-board" class="section glass-strong rounded-2xl p-6">
+          <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6">
+            <div>
+              <h2 class="text-2xl font-bold">Crew Board</h2>
+              <p class="text-white/60 text-sm">Events, Ankündigungen & wichtige Notizen</p>
+            </div>
+            <div class="flex gap-2">
+              <button id="reloadBoard" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20">🔄 Aktualisieren</button>
+            </div>
+          </div>
+
+          <div class="grid gap-6 lg:grid-cols-2">
+            <form id="boardForm" class="glass rounded-2xl p-6 space-y-4">
+              <div class="flex gap-3 flex-wrap">
+                <label class="flex items-center gap-2 text-sm">
+                  <input type="radio" name="type" value="event" class="accent-rose-500" checked>
+                  <span>Event</span>
+                </label>
+                <label class="flex items-center gap-2 text-sm">
+                  <input type="radio" name="type" value="announcement" class="accent-rose-500">
+                  <span>Ankündigung</span>
+                </label>
+              </div>
+              <div>
+                <label class="block text-sm text-white/70 mb-2">Titel *</label>
+                <input name="title" required maxlength="150" placeholder="Titel" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" />
+              </div>
+              <div>
+                <label class="block text-sm text-white/70 mb-2">Datum &amp; Uhrzeit (optional)</label>
+                <input type="datetime-local" name="scheduled_for" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" />
+              </div>
+              <div>
+                <label class="block text-sm text-white/70 mb-2">Beschreibung</label>
+                <textarea name="content" rows="4" placeholder="Details, Agenda oder Hinweise" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600"></textarea>
+              </div>
+              <button class="w-full rounded-xl bg-gradient-to-r from-brand-600 to-brand-700 px-4 py-3 font-semibold shadow-lg hover:shadow-glow transition-all">
+                Eintrag speichern ✨
+              </button>
+              <p id="boardFormMsg" class="text-sm text-center"></p>
+            </form>
+
+            <div class="space-y-4" id="boardList">
+              <div class="text-white/50 text-sm">Noch keine Einträge vorhanden.</div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   </div>
@@ -379,10 +421,12 @@ $user = $_SESSION['user'];
           </div>
           <div>
             <label class="block text-sm text-white/70 mb-2">Typ *</label>
-            <select name="type" class="w-full rounded-xl px-4 py-3 bg-white/10 text-white outline-none focus:ring-2 focus:ring-brand-600" required>
+            <select id="transactionTypeModal" name="type" class="w-full rounded-xl px-4 py-3 bg-white/10 text-white outline-none focus:ring-2 focus:ring-brand-600" required>
               <option value="Einzahlung">💰 Einzahlung</option>
               <option value="Auszahlung">💸 Auszahlung</option>
               <option value="Gutschrift">✨ Gutschrift</option>
+              <option value="Schaden">⚠️ Schaden</option>
+              <option value="Gruppenaktion">👥 Gruppenaktion</option>
             </select>
           </div>
           <div>
@@ -440,6 +484,7 @@ $user = $_SESSION['user'];
     let membersChart = null;
     let balanceChart = null;
     let transactions = [];
+    let boardEntries = [];
     let currentPage = 1;
     const perPage = 10;
     let txFilter = 'all';
@@ -469,22 +514,57 @@ $user = $_SESSION['user'];
       $('#transactionFilter').addEventListener('change', loadTransactions);
       $$('#transactions .txchip').forEach(btn => btn.addEventListener('click', () => { txFilter = btn.dataset.q; renderTransactions(); }));
       $('#reloadMembers').addEventListener('click', loadMembers);
-      $('#reloadShifts').addEventListener('click', loadShiftsToday);
+      $('#reloadShifts').addEventListener('click', loadShifts);
+      $('#reloadBoard').addEventListener('click', loadBoard);
       $('#btnOpenTxModal').addEventListener('click', openTransactionModal);
 
       // Forms
       $('#addMemberForm').addEventListener('submit', onAddMember);
       $('#transactionFormInline').addEventListener('submit', onAddTransactionInline);
       $('#transactionFormModal').addEventListener('submit', onAddTransactionModal);
+      $('#boardForm').addEventListener('submit', onBoardSubmit);
+
+      const typeInline = $('#transactionTypeInline');
+      const typeModal = $('#transactionTypeModal');
+      const memberInline = $('#transactionMember');
+      const modalMemberSelect = document.querySelector('#transactionModal select[name="name"]');
+      if(typeInline){ typeInline.addEventListener('change', ()=>handleTypeChange(typeInline, memberInline)); }
+      if(typeModal){ typeModal.addEventListener('change', ()=>handleTypeChange(typeModal, modalMemberSelect)); }
+      const boardList = $('#boardList');
+      if(boardList){
+        boardList.addEventListener('click', (ev)=>{
+          const btn = ev.target.closest('button[data-del-board]');
+          if(btn){ deleteBoardEntry(btn.getAttribute('data-del-board')); }
+        });
+      }
     });
 
     function debounce(fn, wait){
       let to; return (...a)=>{ clearTimeout(to); to=setTimeout(()=>fn(...a), wait) }
     }
 
+    function handleTypeChange(selectEl, memberSelect){
+      if(!selectEl || !memberSelect) return;
+      const isGroup = selectEl.value === 'Gruppenaktion';
+      if(isGroup){
+        memberSelect.disabled = true;
+        memberSelect.removeAttribute('required');
+        memberSelect.classList.add('opacity-60');
+      }else{
+        memberSelect.disabled = false;
+        memberSelect.setAttribute('required','required');
+        memberSelect.classList.remove('opacity-60');
+      }
+    }
+
+    function escapeHtml(str){
+      const map = {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"};
+      return (str || '').replace(/[&<>"']/g, c => map[c]);
+    }
+
     async function initApp(){
       try{
-        await Promise.all([loadMembers(), loadBalance(), loadShiftsToday(), loadTransactions()]);
+        await Promise.all([loadMembers(), loadBalance(), loadShifts(), loadTransactions(), loadBoard()]);
         initCharts();
         gsap.utils.toArray('.section, .stat-card, .glass-strong').forEach((el,i)=>{
           gsap.from(el,{ scrollTrigger:{trigger:el, start:'top 90%', once:true }, duration:.7, y:30, opacity:0, ease:'power3.out', delay:i*0.03 });
@@ -520,13 +600,13 @@ $user = $_SESSION['user'];
             <td class="py-3 px-2 text-lg">${m.flag || '🌍'}</td>
             <td class="py-3 px-2">
               <div class="flex gap-2 flex-wrap">
-                <button class="px-3 py-1.5 rounded-lg ${m.is_admin ? 'bg-purple-600/20 hover:bg-purple-600/30 text-purple-400' : 'bg-green-600/20 hover:bg-green-600/30 text-green-400'} text-xs font-medium transition-colors" data-act="toggle-admin" data-name="${m.name}" data-current="${m.is_admin ? '1' : '0'}">
+                <button class="px-3 py-1.5 rounded-lg ${m.is_admin ? 'bg-purple-600/20 hover:bg-purple-600/30 text-purple-200' : 'bg-rose-600/20 hover:bg-rose-600/30 text-rose-200'} text-xs font-medium transition-colors" data-act="toggle-admin" data-name="${m.name}" data-current="${m.is_admin ? '1' : '0'}">
                   ${m.is_admin ? '👑 Admin entfernen' : '⚡ Admin machen'}
                 </button>
-                <button class="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-medium transition-colors" data-act="pin" data-name="${m.name}">
+                <button class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-medium transition-colors" data-act="pin" data-name="${m.name}">
                   PIN ändern
                 </button>
-                <button class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs font-medium transition-colors" data-act="ban" data-name="${m.name}">
+                <button class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-200 text-xs font-medium transition-colors" data-act="ban" data-name="${m.name}">
                   Sperren
                 </button>
               </div>
@@ -550,6 +630,7 @@ $user = $_SESSION['user'];
           if(opt.value === current) opt.selected = true;
           select.appendChild(opt);
         });
+        handleTypeChange($('#transactionTypeInline'), select);
       }
 
       // KPI
@@ -565,7 +646,7 @@ $user = $_SESSION['user'];
       updateBalanceChart(data);
     }
 
-    async function loadShiftsToday(){
+    async function loadShifts(){
       try{
         const res = await fetch('/api/get_shifts.php');
         const data = await res.json();
@@ -601,7 +682,7 @@ $user = $_SESSION['user'];
             const id = btn.getAttribute('data-del-shift');
             const r = await fetch('/api/delete_shift.php',{method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:new URLSearchParams({id})});
             const j = await r.json();
-            if(j.status==='ok'){ loadShiftsToday(); } else { alert(j.error||'Fehler'); }
+            if(j.status==='ok'){ loadShifts(); } else { alert(j.error||'Fehler'); }
           });
         }
       }catch(e){
@@ -626,6 +707,56 @@ $user = $_SESSION['user'];
       renderTransactions();
     }
 
+    async function loadBoard(){
+      try{
+        const res = await fetch('/api/get_admin_board.php');
+        const data = await res.json();
+        boardEntries = Array.isArray(data) ? data : [];
+        renderBoard();
+      }catch(e){
+        console.error(e);
+        const list = $('#boardList');
+        if(list) list.innerHTML = '<div class="text-red-400 text-sm">Fehler beim Laden des Boards</div>';
+      }
+    }
+
+    function renderBoard(){
+      const list = $('#boardList');
+      if(!list) return;
+      if(!boardEntries.length){
+        list.innerHTML = '<div class="text-white/50 text-sm">Noch keine Einträge vorhanden.</div>';
+        return;
+      }
+      const dateFmt = new Intl.DateTimeFormat('de-DE', { dateStyle:'medium', timeStyle:'short' });
+      list.innerHTML = '';
+      boardEntries.forEach(entry => {
+        const card = document.createElement('div');
+        card.className = 'glass rounded-2xl p-5 relative overflow-hidden';
+        const badgeClass = entry.type === 'event' ? 'bg-rose-500/20 text-rose-200' : 'bg-sky-500/20 text-sky-200';
+        const badgeLabel = entry.type === 'event' ? 'Event' : 'Ankündigung';
+        const schedule = entry.scheduled_for ? dateFmt.format(new Date(entry.scheduled_for)) : null;
+        const title = escapeHtml(entry.title);
+        const content = escapeHtml(entry.content).replace(/\n/g, '<br>');
+        const author = escapeHtml(entry.created_by);
+        card.innerHTML = `
+          <div class="flex items-start justify-between gap-4">
+            <span class="px-2 py-1 rounded-lg text-xs font-semibold ${badgeClass}">${badgeLabel}</span>
+            <button data-del-board="${entry.id}" class="px-2 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/30 text-red-200 text-xs">🗑️</button>
+          </div>
+          <div class="mt-4">
+            <h3 class="text-lg font-semibold">${title}</h3>
+            ${schedule ? `<div class="text-sm text-white/60 mt-1">${schedule}</div>` : ''}
+          </div>
+          <p class="text-sm text-white/70 mt-3 whitespace-pre-line">${content || '–'}</p>
+          <div class="text-xs text-white/40 mt-4 flex justify-between">
+            <span>von ${author}</span>
+            <span>${dateFmt.format(new Date(entry.created_at))}</span>
+          </div>
+        `;
+        list.appendChild(card);
+      });
+    }
+
     function renderTransactions(){
       const tbody = $('#transactionsTable');
       if(!transactions.length){
@@ -637,8 +768,10 @@ $user = $_SESSION['user'];
       }
       // filter by chip
       let list = transactions.slice();
-      if(txFilter==='einzahlung'){ list = list.filter(t => t.type==='Einzahlung' || t.type==='Gutschrift'); }
+      if(txFilter==='einzahlung'){ list = list.filter(t => t.type==='Einzahlung'); }
       if(txFilter==='auszahlung'){ list = list.filter(t => t.type==='Auszahlung'); }
+      if(txFilter==='schaden'){ list = list.filter(t => t.type==='Schaden'); }
+      if(txFilter==='gruppenaktion'){ list = list.filter(t => t.type==='Gruppenaktion'); }
       if(txFilter==='heute'){ const today = new Date().toISOString().split('T')[0]; list = list.filter(t => (t.date||'').startsWith(today)); }
       if(txSearch){ list = list.filter(t => (t.name||'').toLowerCase().includes(txSearch) || (t.note||t.reason||'').toLowerCase().includes(txSearch)); }
 
@@ -649,16 +782,30 @@ $user = $_SESSION['user'];
       tbody.innerHTML = '';
       pageItems.forEach(t=>{
         const tr = document.createElement('tr');
-        const isPos = (t.type==='Einzahlung' || t.type==='Gutschrift');
+        const type = t.type || '';
+        const isPos = type === 'Einzahlung';
+        const isNeutral = type === 'Gutschrift';
+        const badgeClasses = {
+          'Einzahlung':'bg-emerald-500/20 text-emerald-300',
+          'Auszahlung':'bg-red-500/20 text-red-300',
+          'Gutschrift':'bg-sky-500/20 text-sky-200',
+          'Schaden':'bg-orange-500/20 text-orange-200',
+          'Gruppenaktion':'bg-purple-500/20 text-purple-200'
+        };
+        const amountClass = isPos ? 'text-emerald-400' : (isNeutral ? 'text-sky-300' : 'text-red-400');
+        const amountPrefix = isPos ? '+' : (isNeutral ? '' : '-');
+        const date = escapeHtml(t.date || 'N/A');
+        const name = escapeHtml(t.name || 'N/A');
+        const note = escapeHtml(t.note || t.reason || '–');
         tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
         tr.innerHTML = `
-          <td class="py-3 px-2 text-white/70">${t.date || 'N/A'}</td>
-          <td class="py-3 px-2 font-medium">${t.name || 'N/A'}</td>
+          <td class="py-3 px-2 text-white/70">${date}</td>
+          <td class="py-3 px-2 font-medium">${name}</td>
           <td class="py-3 px-2">
-            <span class="px-2 py-1 rounded-lg text-xs font-medium ${isPos ? 'bg-emerald-500/20 text-emerald-400' : 'bg-red-500/20 text-red-400'}">${t.type || 'N/A'}</span>
+            <span class="px-2 py-1 rounded-lg text-xs font-medium ${badgeClasses[type] || 'bg-white/10 text-white/70'}">${type || 'N/A'}</span>
           </td>
-          <td class="py-3 px-2 font-bold ${isPos ? 'text-emerald-400' : 'text-red-400'}">${isPos?'+':'-'}${Number(t.amount||0).toFixed(2)} €</td>
-          <td class="py-3 px-2 text-white/60 text-xs max-w-xs truncate" title="${t.note || t.reason || ''}">${t.note || t.reason || '–'}</td>
+          <td class="py-3 px-2 font-bold ${amountClass}">${amountPrefix}${Number(t.amount||0).toFixed(2)} €</td>
+          <td class="py-3 px-2 text-white/60 text-xs max-w-xs truncate" title="${note}">${note}</td>
           <td class="py-3 px-2 text-right">
             <button data-del-tx="${t.id}" class="px-2 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs font-medium">🗑️</button>
           </td>`;
@@ -690,6 +837,50 @@ $user = $_SESSION['user'];
     function nextPage(){
       const total = Number($('#totalTransactions').textContent||0);
       if((currentPage*perPage) < total){ currentPage++; renderTransactions(); }
+    }
+
+    async function onBoardSubmit(e){
+      e.preventDefault();
+      const form = e.target;
+      const msg = $('#boardFormMsg');
+      msg.textContent = '';
+      const submitBtn = form.querySelector('button[type="submit"]');
+      if(submitBtn) submitBtn.disabled = true;
+      try{
+        const fd = new FormData(form);
+        const res = await fetch('/api/admin_board_create.php', { method:'POST', body: fd });
+        const data = await res.json();
+        if(data.status === 'ok'){
+          msg.textContent = 'Gespeichert ✅';
+          msg.className = 'text-sm text-center text-emerald-400';
+          form.reset();
+          await loadBoard();
+        }else{
+          msg.textContent = data.error || 'Fehler beim Speichern';
+          msg.className = 'text-sm text-center text-red-400';
+        }
+      }catch(err){
+        msg.textContent = 'Netzwerkfehler';
+        msg.className = 'text-sm text-center text-red-400';
+      }finally{
+        if(submitBtn) submitBtn.disabled = false;
+      }
+    }
+
+    async function deleteBoardEntry(id){
+      if(!id) return;
+      if(!confirm('Eintrag wirklich löschen?')) return;
+      const res = await fetch('/api/admin_board_delete.php', {
+        method:'POST',
+        headers:{'Content-Type':'application/x-www-form-urlencoded'},
+        body: new URLSearchParams({ id })
+      });
+      const data = await res.json();
+      if(data.status==='ok'){
+        await loadBoard();
+      }else{
+        alert(data.error || 'Eintrag konnte nicht gelöscht werden');
+      }
     }
 
     // Member actions
@@ -751,12 +942,20 @@ $user = $_SESSION['user'];
     async function onAddTransactionInline(e){
       e.preventDefault();
       const fd = new FormData(e.target);
+      const type = fd.get('type');
       const r = await fetch('/api/add_transaction.php', { method:'POST', body: fd });
       const j = await r.json().catch(()=>({error:'Serverfehler'}));
       const msg = $('#transactionMsg');
       if(j.status==='ok'){
-        msg.textContent = 'Transaktion hinzugefügt ✅'; msg.className = 'text-emerald-400 text-sm text-center';
+        if(type === 'Gruppenaktion'){
+          const count = j.count || members.length;
+          msg.textContent = `Gruppenaktion für ${count} Mitglieder erfasst ✅`;
+        } else {
+          msg.textContent = 'Transaktion hinzugefügt ✅';
+        }
+        msg.className = 'text-emerald-400 text-sm text-center';
         e.target.reset(); await loadBalance(); await loadTransactions();
+        handleTypeChange($('#transactionTypeInline'), $('#transactionMember'));
       } else {
         msg.textContent = j.error || 'Fehler'; msg.className = 'text-red-400 text-sm text-center';
       }
@@ -776,12 +975,20 @@ $user = $_SESSION['user'];
     async function onAddTransactionModal(e){
       e.preventDefault();
       const fd = new FormData(e.target);
+      const type = fd.get('type');
       const r = await fetch('/api/add_transaction.php', { method:'POST', body: fd });
       const j = await r.json().catch(()=>({error:'Serverfehler'}));
       const msg = $('#transactionModalMsg');
       if(j.status==='ok'){
-        msg.textContent = 'Transaktion hinzugefügt ✅'; msg.className = 'text-emerald-400 text-sm text-center';
+        if(type === 'Gruppenaktion'){
+          const count = j.count || members.length;
+          msg.textContent = `Gruppenaktion für ${count} Mitglieder erfasst ✅`;
+        } else {
+          msg.textContent = 'Transaktion hinzugefügt ✅';
+        }
+        msg.className = 'text-emerald-400 text-sm text-center';
         e.target.reset(); await loadBalance(); await loadTransactions(); setTimeout(closeTransactionModal, 400);
+        handleTypeChange($('#transactionTypeModal'), document.querySelector('#transactionModal select[name="name"]'));
       } else {
         msg.textContent = j.error || 'Fehler'; msg.className = 'text-red-400 text-sm text-center';
       }
