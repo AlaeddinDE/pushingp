@@ -136,4 +136,20 @@ chmod 755 "$DEPLOY_LINK"
 log "✅ Deploy executable restored"
 
 log "✅ Deploy completed successfully"
+
+# --- Auto-check migration placement ---
+log "🧩 Verifying migration file placement"
+mkdir -p "$MIGR_DIR/auto" "$MIGR_DIR/undo"
+
+# Verschiebe versehentlich falsch abgelegte SQL-Dateien (außer Setup)
+find "$WEB_DIR" -maxdepth 1 -type f -name "*.sql" ! -name "SQL_SETUP_*" | while read misplaced; do
+  base=$(basename "$misplaced")
+  log "⚠️  Found misplaced migration: $base — moving to $MIGR_DIR/auto"
+  mv "$misplaced" "$MIGR_DIR/auto/$base"
+done
+
+chown -R www-data:www-data "$MIGR_DIR"
+log "✅ Migration folder structure enforced"
+
 exit 0
+
