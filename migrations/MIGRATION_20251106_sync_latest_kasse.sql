@@ -1,3 +1,6 @@
+-- MIGRATION 2025-11-06: sync_latest_kasse_schema
+-- Konsolidiert die aktuelle Datenbankstruktur aus Kasse.sql als Migration.
+
 -- phpMyAdmin SQL Dump
 -- version 5.2.1deb3
 -- https://www.phpmyadmin.net/

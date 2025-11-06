@@ -142,7 +142,7 @@ log "🧩 Verifying migration file placement"
 mkdir -p "$MIGR_DIR/auto" "$MIGR_DIR/undo"
 
 # Verschiebe versehentlich falsch abgelegte SQL-Dateien (außer Setup)
-find "$WEB_DIR" -maxdepth 1 -type f -name "*.sql" ! -name "SQL_SETUP_*" | while read misplaced; do
+find "$WEB_DIR" -maxdepth 1 -type f -name "*.sql" ! -name "SQL_SETUP_*" ! -name "Kasse.sql" | while read misplaced; do
   base=$(basename "$misplaced")
   log "⚠️  Found misplaced migration: $base — moving to $MIGR_DIR/auto"
   mv "$misplaced" "$MIGR_DIR/auto/$base"
