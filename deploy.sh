@@ -43,7 +43,7 @@ git clone --depth=1 "$REPO_URL" "$TMP_DIR" >/dev/null 2>&1 || {
 }
 log "✅ Repo cloned"
 
-# --- Sync files ---
+# --- Sync files (skip deploy + config files + applied migrations) ---
 log "🧭 Syncing files to $WEB_DIR"
 rsync -a --delete \
   --exclude ".git" \
@@ -51,6 +51,7 @@ rsync -a --delete \
   --exclude "deploy.sh" \
   --exclude "AGENTS.md" \
   --exclude "deploy" \
+  --exclude "migrations" \
   --exclude ".applied_migrations" \
   "$TMP_DIR"/ "$WEB_DIR"/
 log "✅ Files synced"
@@ -69,9 +70,10 @@ fi
 # --- Extra migrations ---
 log "🧱 Checking extra migrations in $MIGR_DIR"
 mkdir -p "$MIGR_DIR"
-
+touch "$APPLIED_FILE"
 NEW_MIGR=0
-while IFS= read -r sql; do
+
+for sql in $(find "$MIGR_DIR" -maxdepth 1 -type f -name "*.sql" | sort); do
   base=$(basename "$sql")
   if ! grep -qx "$base" "$APPLIED_FILE"; then
     log "➡️  Applying migration: $base"
@@ -86,12 +88,10 @@ while IFS= read -r sql; do
   else
     log "⏩ Already applied: $base"
   fi
-done < <(find "$MIGR_DIR" -maxdepth 1 -type f -name "*.sql" | sort)
+done
 
 if [ "$NEW_MIGR" -eq 0 ]; then
   log "ℹ️  No new migrations to apply"
-else
-  log "✅ Applied $NEW_MIGR new migrations"
 fi
 
 # --- Permissions ---
