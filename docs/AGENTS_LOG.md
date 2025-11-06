@@ -24,3 +24,8 @@
 - Neue Urlaub-/Krankmeldungs-Workflows inklusive UI, CSRF-gestützter v2-API-Calls und Tabellen (`member.php`, `migrations/MIGRATION_20240821_member_absences.sql`).
 - Mitgliederverwaltung erweitert: Sperrstatus, Entsperren und Status-Badges (`admin/users.php`, `api/admin_ban_user.php`, `api/get_members.php`).
 - Login/Auth modernisiert (Session-Struktur, CSRF-Token, v2-Kompatibilität) in `api/login.php`, `includes/auth.php`, `includes/api_bootstrap.php`.
+
+## [2025-11-06] DB-Dump bereinigt
+- Neues Setup-Skript `SQL_SETUP_CLEAN_BASE.sql` erstellt, das Altlasten entfernt und ein sauberes v1/v2-Grundschema ohne Beispiel-Daten aufsetzt.
+- `DATABASE_SCHEMA.md` komplett aktualisiert, um das bereinigte Schema samt Views, Seeds und Legacy-Hinweisen zu dokumentieren.
+- `SQL_SETUP_03_PROJECT_STRUCTURE.sql` in einen kommentierten Sanity-Check umgewandelt, damit Deploy-Skripte nicht mehr auf veraltete Tabellen verweisen.
