@@ -29,3 +29,8 @@
 - Neues Setup-Skript `SQL_SETUP_CLEAN_BASE.sql` erstellt, das Altlasten entfernt und ein sauberes v1/v2-Grundschema ohne Beispiel-Daten aufsetzt.
 - `DATABASE_SCHEMA.md` komplett aktualisiert, um das bereinigte Schema samt Views, Seeds und Legacy-Hinweisen zu dokumentieren.
 - `SQL_SETUP_03_PROJECT_STRUCTURE.sql` in einen kommentierten Sanity-Check umgewandelt, damit Deploy-Skripte nicht mehr auf veraltete Tabellen verweisen.
+
+## [2025-11-06] Kasse-Schema als Migration konsolidiert
+- `Kasse.sql` auf idempotente Definitionen mit `IF NOT EXISTS` und konsolidierten Fremdschlüsseln/Indizes umgestellt, damit wiederholte Deployments stabil laufen.
+- Vollständige Schema-Migration `migrations/MIGRATION_20251106_sync_latest_kasse.sql` hinzugefügt, die den aktuellen Dump als produktive Baseline verfügbar macht.
+- `deploy.sh` aktualisiert, damit `Kasse.sql` nicht automatisch verschoben wird und als kanonische Schemaquelle im Web-Verzeichnis verbleibt.
