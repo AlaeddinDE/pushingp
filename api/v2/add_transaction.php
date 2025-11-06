@@ -46,7 +46,7 @@ if ($memberId <= 0 || $amount <= 0 || !in_array($type, $allowedTypes, true)) {
     send_response('error', null, 'Ungültige Parameter', 400);
 }
 
-$memberStmt = $mysqli->prepare('SELECT name FROM members_v2 WHERE id = ? LIMIT 1');
+$memberStmt = $conn->prepare('SELECT name FROM members_v2 WHERE id = ? LIMIT 1');
 if (!$memberStmt) {
     send_response('error', null, 'Datenbankfehler bei Mitgliedsabfrage', 500);
 }
@@ -66,7 +66,7 @@ if (!$memberStmt->fetch()) {
 $memberStmt->close();
 
 $reasonParam = $reason !== '' ? $reason : null;
-$insertStmt = $mysqli->prepare('INSERT INTO transactions_v2 (member_id, type, amount, reason) VALUES (?, ?, ?, ?)');
+$insertStmt = $conn->prepare('INSERT INTO transactions_v2 (member_id, type, amount, reason) VALUES (?, ?, ?, ?)');
 if (!$insertStmt) {
     send_response('error', null, 'Konnte Transaktion nicht vorbereiten', 500);
 }

@@ -1,100 +1,52 @@
 -- ============================================
--- SQL SETUP #3: PROJEKT-STRUKTUR & VOLLSTÄNDIGKEIT
+-- SQL SETUP #3 (aktualisiert 2025-11-06)
 -- ============================================
--- Diese Datei stellt sicher, dass alle Tabellen korrekt strukturiert sind
--- und alle notwendigen Indizes vorhanden sind
-
--- ============================================
--- 1. MEMBERS Tabelle - Indizes optimieren
--- ============================================
-
--- Stelle sicher, dass name eindeutig ist (Primary Key bereits vorhanden)
--- Falls nicht, füge Index hinzu:
--- CREATE UNIQUE INDEX idx_member_name ON members(name);
-
--- ============================================
--- 2. TRANSACTIONS Tabelle - Indizes hinzufügen
+-- Dieses Skript fungiert ab sofort als "Sanity-Check" nach
+-- dem Ausführen von `SQL_SETUP_CLEAN_BASE.sql` und der
+-- Migrationen im Ordner `migrations/`.
+--
+-- Ziel: sicherstellen, dass keine Legacy-Tabellen mehr
+-- vorhanden sind und die Kern-Views korrekt existieren.
 -- ============================================
 
--- Index für schnelle Suche nach Name
-CREATE INDEX IF NOT EXISTS idx_transactions_name ON transactions(name);
+-- 1) Prüfen, ob bereinigte Legacy-Tabellen entfernt wurden
+--    (sollten NULL Zeilen liefern):
+-- SELECT table_name
+-- FROM information_schema.tables
+-- WHERE table_schema = DATABASE()
+--   AND table_name IN ('announcements','chat','config','ledger','ledger_items',
+--                      'monthly_payments','monthly_settings','pool_amounts',
+--                      'pool_cache','proposals','proposal_votes');
 
--- Index für schnelle Suche nach Datum
-CREATE INDEX IF NOT EXISTS idx_transactions_date ON transactions(date);
+-- 2) Prüfen, ob Pflicht-Views existieren:
+-- SELECT table_name
+-- FROM information_schema.views
+-- WHERE table_schema = DATABASE()
+--   AND table_name IN ('v2_member_real_balance','v2_member_gross_flow','v2_kassenstand_real');
 
--- Index für schnelle Suche nach Typ
-CREATE INDEX IF NOT EXISTS idx_transactions_type ON transactions(type);
+-- 3) Konsistenz der v2-Tabellen sicherstellen (Anzahl muss >0 sein):
+-- SELECT COUNT(*) FROM information_schema.tables
+-- WHERE table_schema = DATABASE()
+--   AND table_name IN (
+--     'members_v2','transactions_v2','settings_v2','admins_v2',
+--     'admin_board','user_settings','discord_status_cache','shifts',
+--     'events','event_participants','reservations_v2','payment_requests',
+--     'feedback_entries','discord_notifications','admin_logs'
+--   );
 
--- ============================================
--- 3. SHIFTS Tabelle - Indizes hinzufügen
--- ============================================
+-- 4) Optional: alte v1-Tabellen vollständig entfernen, wenn die
+--    API-Migration abgeschlossen ist:
+-- DROP TABLE IF EXISTS admins;
+-- DROP TABLE IF EXISTS members;
+-- DROP TABLE IF EXISTS transactions;
+-- DROP TABLE IF EXISTS shifts;
 
--- Index für schnelle Suche nach Mitglied
-CREATE INDEX IF NOT EXISTS idx_shifts_member_name ON shifts(member_name);
+-- 5) Index-Check (Beispiel für kritische Queries):
+-- SHOW INDEX FROM transactions_v2;
+-- SHOW INDEX FROM members_v2;
+-- SHOW INDEX FROM events;
 
--- Index für schnelle Suche nach Datum
-CREATE INDEX IF NOT EXISTS idx_shifts_date ON shifts(shift_date);
-
--- Index für Kombination aus Mitglied und Datum (für häufigste Queries)
-CREATE INDEX IF NOT EXISTS idx_shifts_member_date ON shifts(member_name, shift_date);
-
--- ============================================
--- 4. ADMINS Tabelle - Sicherstellen dass Struktur korrekt ist
--- ============================================
-
--- Falls member_name Spalte noch nicht existiert (siehe SQL_ADMIN_SETUP.sql)
--- ALTER TABLE `admins` ADD COLUMN IF NOT EXISTS `member_name` VARCHAR(255) NULL AFTER `pin`;
--- ALTER TABLE `admins` ADD INDEX IF NOT EXISTS `idx_member_name` (`member_name`);
-
--- ============================================
--- 5. TRANSACTIONS Tabelle - Prüfe ob alle Spalten vorhanden sind
--- ============================================
-
--- Prüfe ob uid AUTO_INCREMENT ist (sollte bereits vorhanden sein)
--- Falls nicht:
--- ALTER TABLE transactions MODIFY uid INT AUTO_INCREMENT;
-
--- Prüfe ob id UNIQUE ist (sollte bereits vorhanden sein)
--- Falls nicht:
--- ALTER TABLE transactions ADD UNIQUE INDEX IF NOT EXISTS idx_transactions_id (id);
-
--- ============================================
--- 6. SHIFTS Tabelle - Prüfe ob id AUTO_INCREMENT ist
--- ============================================
-
--- Falls nicht:
--- ALTER TABLE shifts MODIFY id INT AUTO_INCREMENT;
-
--- ============================================
--- 7. DATEN-INTEGRITÄT PRÜFEN
--- ============================================
-
--- Finde Transaktionen mit ungültigen Mitgliedernamen
--- SELECT DISTINCT t.name 
--- FROM transactions t 
--- LEFT JOIN members m ON t.name = m.name 
--- WHERE m.name IS NULL;
-
--- Finde Schichten mit ungültigen Mitgliedernamen
--- SELECT DISTINCT s.member_name 
--- FROM shifts s 
--- LEFT JOIN members m ON s.member_name = m.name 
--- WHERE m.name IS NULL;
-
--- ============================================
--- 8. OPTIMIERUNGEN
--- ============================================
-
--- Optimiere Tabellen (falls nötig)
--- OPTIMIZE TABLE members;
--- OPTIMIZE TABLE transactions;
--- OPTIMIZE TABLE shifts;
--- OPTIMIZE TABLE admins;
-
--- ============================================
--- HINWEIS
--- ============================================
--- Diese Befehle sind größtenteils idempotent (können mehrfach ausgeführt werden)
--- Einige Befehle (CREATE INDEX IF NOT EXISTS) funktionieren nur in MySQL 5.7.4+
--- Falls Fehler auftreten, prüfe ob die Indizes bereits existieren
-
+-- Hinweis: Das tatsächliche Schema wird vollständig in
+-- `SQL_SETUP_CLEAN_BASE.sql` gepflegt. Diese Datei bleibt bestehen,
+-- damit bestehende Deploy-Skripte nicht brechen, führt aber selbst
+-- keine destruktiven Aktionen mehr aus.

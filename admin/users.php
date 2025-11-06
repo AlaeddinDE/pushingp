@@ -1,4 +1,16 @@
-<?php require_once '../includes/auth.php'; if(!$isAdmin) die('Zugriff verweigert'); require_once '../includes/db.php'; ?>
+<?php
+require_once '../includes/auth.php';
+if(!$isAdmin){
+  header('Location: ../member.php');
+  exit;
+}
+require_once '../includes/db.php';
+$adminActive = 'members';
+$adminSubnav = [
+  ['label' => 'Mitglieder', 'href' => '#memberRows'],
+  ['label' => 'Aktionen', 'href' => '#memberActions'],
+];
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -7,6 +19,7 @@
   <title>Pushing P — Mitgliederverwaltung</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+  <link rel="stylesheet" href="theme.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -15,11 +28,11 @@
       theme: {
         extend: {
           fontFamily: { display: ['Inter','ui-sans-serif','system-ui','sans-serif'] },
-          boxShadow: { 
-            glow: '0 0 40px rgba(99,102,241,.3), inset 0 0 30px rgba(236,72,153,.2)',
-            glowStrong: '0 0 60px rgba(99,102,241,.5), inset 0 0 40px rgba(236,72,153,.3)'
+          boxShadow: {
+            glow: '0 0 40px rgba(244,63,94,.32), inset 0 0 30px rgba(248,113,113,.25)',
+            glowStrong: '0 0 60px rgba(244,63,94,.45), inset 0 0 40px rgba(248,113,113,.35)'
           },
-          colors: { brand: {600:'#6366f1', 700:'#4f46e5'} }
+          colors: { brand: {600:'#f43f5e', 700:'#be123c'} }
         }
       }
     }
@@ -27,27 +40,24 @@
   <style>
     :root{ color-scheme:dark }
     body{
-      background: radial-gradient(1400px 900px at 10% 10%, rgba(99,102,241,.15), transparent 60%),
-                  radial-gradient(1200px 700px at 90% 30%, rgba(236,72,153,.12), transparent 60%),
-                  radial-gradient(800px 600px at 50% 80%, rgba(59,130,246,.08), transparent 50%),
-                  #0a0b10;
+      background: var(--admin-bg);
       -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
       background-attachment: fixed;
     }
-    .glass{ 
-      background:rgba(255,255,255,.06); 
-      border:1px solid rgba(255,255,255,.12); 
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+    .glass{
+      background:rgba(248,113,113,.1);
+      border:1px solid rgba(248,113,113,.18);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
     .glass-strong {
-      background:rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.15);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
+      background:rgba(15,23,42,.8);
+      border:1px solid rgba(248,113,113,.22);
+      backdrop-filter: blur(24px);
+      -webkit-backdrop-filter: blur(24px);
     }
     .grad-text {
-      background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 30%, #f472b6 60%, #22d3ee 90%);
+      background: linear-gradient(135deg, #f87171 0%, #f43f5e 35%, #be123c 70%, #fb7185 100%);
       -webkit-background-clip: text;
       background-clip: text;
       color: transparent;
@@ -63,22 +73,7 @@
   </style>
 </head>
 <body class="font-display text-white min-h-screen">
-  <header class="sticky top-0 left-0 w-full z-50">
-    <nav class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 pt-4">
-      <div class="flex items-center justify-between glass-strong rounded-2xl px-6 py-4 shadow-glow">
-        <a href="/admin/" class="flex items-center gap-3">
-          <div class="h-10 w-10 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 grid place-items-center shadow-lg">
-            <span class="text-xl font-black">P</span>
-          </div>
-          <span class="font-extrabold tracking-tight text-lg">Mitgliederverwaltung</span>
-        </a>
-        <div class="flex items-center gap-4">
-          <a href="/admin/" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">Dashboard</a>
-          <a href="/logout.php" class="px-4 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-colors text-sm font-medium">Logout</a>
-        </div>
-      </div>
-    </nav>
-  </header>
+  <?php $showSidebarToggle = false; include '../includes/admin_header.php'; ?>
 
   <main class="max-w-7xl mx-auto px-6 py-10">
     <h1 class="text-5xl font-black grad-text mb-8 slide-in">👥 Mitgliederverwaltung</h1>
@@ -101,7 +96,8 @@
               <th class="py-3 px-4 font-semibold">Flag</th>
               <th class="py-3 px-4 font-semibold">PIN</th>
               <th class="py-3 px-4 font-semibold">Start</th>
-              <th class="py-3 px-4 font-semibold w-64">Aktionen</th>
+              <th class="py-3 px-4 font-semibold">Status</th>
+              <th class="py-3 px-4 font-semibold w-72">Aktionen</th>
             </tr>
           </thead>
           <tbody id="memberRows" class="text-sm"></tbody>
@@ -122,32 +118,45 @@
         document.getElementById('memberCount').textContent = list.length;
         
         if (list.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-white/50">Keine Mitglieder gefunden</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="6" class="py-8 text-center text-white/50">Keine Mitglieder gefunden</td></tr>';
           return;
         }
         
         list.forEach((m, i) => {
           const tr = document.createElement('tr');
           tr.className = 'border-b border-white/5 hover:bg-white/5 transition-colors';
+          const locked = Boolean(m.is_locked);
+          const statusLabel = locked ? 'Gesperrt' : 'Aktiv';
+          const statusClass = locked ? 'bg-red-600/20 text-red-200' : 'bg-emerald-500/20 text-emerald-200';
+          const lockAction = locked ? 'unlock' : 'lock';
+          const lockLabel = locked ? '🔓 Entsperren' : '🚫 Sperren';
+          const lockTitleRaw = locked && m.locked_reason ? `Grund: ${m.locked_reason}` : '';
+          const lockTitle = lockTitleRaw.replace(/"/g, '&quot;');
           tr.innerHTML = `
             <td class="py-4 px-4 font-medium">${m.name || 'N/A'}</td>
             <td class="py-4 px-4 text-lg">${m.flag || '🌍'}</td>
             <td class="py-4 px-4">
-              <span class="font-mono text-blue-400">${m.pin || '<span class="text-white/40">Keine PIN</span>'}</span>
+              <span class="font-mono text-rose-200">${m.pin || '<span class="text-white/40">Keine PIN</span>'}</span>
             </td>
             <td class="py-4 px-4 text-white/60">
               ${m.start_date || 'N/A'}
             </td>
             <td class="py-4 px-4">
+              <span class="inline-flex items-center gap-2 px-3 py-1 rounded-lg text-xs font-semibold ${statusClass}" title="${lockTitle}">
+                <span class="h-2 w-2 rounded-full ${locked ? 'bg-red-400 animate-pulse' : 'bg-emerald-400'}"></span>
+                ${statusLabel}
+              </span>
+            </td>
+            <td class="py-4 px-4">
               <div class="flex gap-2 flex-wrap">
-                <button onclick="changePin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 text-xs font-medium transition-colors">
+                <button onclick="changePin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 text-xs font-medium transition-colors">
                   ${m.pin ? '✏️ PIN ändern' : '➕ PIN setzen'}
                 </button>
-                <button onclick="viewPin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 text-purple-400 text-xs font-medium transition-colors">
+                <button onclick="viewPin('${m.name}', '${m.pin || ''}')" class="px-3 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500/30 text-amber-200 text-xs font-medium transition-colors">
                   👁️ PIN anzeigen
                 </button>
-                <button onclick="banUser('${m.name}')" class="px-3 py-1.5 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs font-medium transition-colors">
-                  🚫 Sperren
+                <button onclick="toggleLock('${m.name}', '${lockAction}')" class="px-3 py-1.5 rounded-lg ${locked ? 'bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-200' : 'bg-red-600/20 hover:bg-red-600/30 text-red-200'} text-xs font-medium transition-colors">
+                  ${lockLabel}
                 </button>
               </div>
             </td>
@@ -160,23 +169,28 @@
       }
     }
 
-    async function banUser(name) {
-      if (!confirm(`${name} wirklich sperren? Diese Aktion kann nicht rückgängig gemacht werden.`)) return;
+    async function toggleLock(name, action = 'lock') {
+      const locking = action !== 'unlock';
+      const confirmation = locking
+        ? `${name} wirklich sperren?`
+        : `${name} wieder freigeben?`;
+      if (!confirm(confirmation)) return;
+      const reason = locking ? prompt('Grund für die Sperre (optional):', '') || '' : '';
       try {
         const res = await fetch('/api/admin_ban_user.php', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ name })
+          body: new URLSearchParams({ name, action, reason })
         });
         const data = await res.json();
         if (data.status === 'ok') {
-          alert('Benutzer gesperrt ✅');
+          alert(locking ? 'Benutzer gesperrt ✅' : 'Benutzer entsperrt ✅');
           loadMembers();
         } else {
           alert('Fehler: ' + (data.error || 'Unbekannter Fehler'));
         }
       } catch (e) {
-        alert('Fehler beim Sperren');
+        alert(locking ? 'Fehler beim Sperren' : 'Fehler beim Entsperren');
       }
     }
 

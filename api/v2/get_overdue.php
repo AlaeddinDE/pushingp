@@ -15,7 +15,7 @@ function send_response(string $status, ?array $data = null, ?string $error = nul
     exit;
 }
 
-$settingsStmt = $mysqli->prepare("SELECT value FROM settings_v2 WHERE key_name = 'monthly_fee' LIMIT 1");
+$settingsStmt = $conn->prepare("SELECT value FROM settings_v2 WHERE key_name = 'monthly_fee' LIMIT 1");
 if (!$settingsStmt) {
     send_response('error', null, 'Konnte Monatsbeitrag nicht laden', 500);
 }
@@ -41,7 +41,7 @@ if ($monthlyFee <= 0) {
     send_response('error', null, 'Ungültiger Monatsbeitrag konfiguriert', 500);
 }
 
-$membersStmt = $mysqli->prepare(
+$membersStmt = $conn->prepare(
     "SELECT m.id, m.name, GREATEST(TIMESTAMPDIFF(MONTH, m.joined_at, CURRENT_DATE) + 1, 0) AS months_active, " .
     "COALESCE(rb.real_balance, 0) AS real_balance " .
     "FROM members_v2 m " .

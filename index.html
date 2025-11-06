@@ -15,7 +15,7 @@
   <style>
     :root { color-scheme: dark; }
     html,body { height:100%; }
-    body { 
+    body {
       margin:0;
       font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif;
       color:#fff;
@@ -24,6 +24,68 @@
       -webkit-font-smoothing:antialiased;
       text-rendering:optimizeLegibility;
     }
+    body::before, body::after {
+      content:"";
+      position:fixed;
+      width:120vmax;
+      height:120vmax;
+      top:50%;
+      left:50%;
+      transform:translate(-50%,-50%);
+      z-index:-2;
+      filter:blur(80px);
+      opacity:0.55;
+      background:radial-gradient(circle at center, rgba(96,165,250,0.35), rgba(56,189,248,0) 55%);
+      pointer-events:none;
+    }
+    body::after{
+      background:radial-gradient(circle at center, rgba(244,114,182,0.32), rgba(125,211,252,0) 60%);
+      mix-blend-mode:screen;
+      opacity:0.45;
+    }
+
+    .hero-neon{
+      position:absolute;
+      inset:-10% -20%;
+      background:radial-gradient(circle at 20% 20%, rgba(59,130,246,0.3), transparent 60%),
+                 radial-gradient(circle at 80% 30%, rgba(236,72,153,0.3), transparent 65%),
+                 radial-gradient(circle at 50% 90%, rgba(56,189,248,0.28), transparent 60%);
+      filter:blur(40px);
+      opacity:0.7;
+      z-index:0;
+      transform:translateZ(0);
+      transform-origin:center;
+    }
+
+    .hero-wires{
+      position:absolute;
+      inset:0;
+      background-image:linear-gradient(120deg, rgba(255,255,255,0.04) 1px, transparent 1px),
+                       linear-gradient(-120deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size:120px 120px;
+      mask-image:radial-gradient(circle at center, rgba(0,0,0,0.85), transparent 70%);
+      opacity:0.4;
+      z-index:1;
+      animation:gridFloat 18s linear infinite;
+    }
+    @keyframes gridFloat { to { background-position:200px 0, -200px 0; } }
+
+    .hero-spark {
+      position:absolute;
+      top:50%;
+      left:50%;
+      width:260px;
+      height:260px;
+      margin:-130px 0 0 -130px;
+      border-radius:50%;
+      background:radial-gradient(circle, rgba(255,255,255,0.45), rgba(59,130,246,0) 60%);
+      filter:blur(18px);
+      opacity:0.65;
+      z-index:2;
+      mix-blend-mode:screen;
+      animation:pulseSpark 6s ease-in-out infinite;
+    }
+    @keyframes pulseSpark { 0%,100%{transform:translate(-50%,-50%) scale(0.9);}50%{transform:translate(-50%,-50%) scale(1.05);} }
 
     /* Gradient text */
     .grad-text { 
@@ -37,7 +99,23 @@
     @keyframes gradientShift { 0%,100%{background-position:0% 50%}50%{background-position:100% 50%} }
 
     .glass{ background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.06); backdrop-filter:blur(8px);} 
-    .glass-strong{ background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.08); backdrop-filter:blur(14px);} 
+    .glass-strong{
+      background:linear-gradient(135deg, rgba(255,255,255,0.12), rgba(17,25,40,0.35));
+      border:1px solid rgba(255,255,255,0.1);
+      backdrop-filter:blur(14px) saturate(140%);
+    }
+
+    .aurora-line {
+      position:absolute;
+      inset:10% 12%;
+      border-radius:40px;
+      border:1px solid rgba(255,255,255,0.05);
+      background:linear-gradient(120deg, rgba(99,102,241,0.14), rgba(236,72,153,0.08));
+      mask-image:radial-gradient(circle at top, black 55%, transparent 90%);
+      filter:blur(12px);
+      opacity:0.4;
+      z-index:1;
+    }
 
     /* Interactions */
     .magnet{ transition:transform .24s cubic-bezier(.2,.9,.2,1)}.magnet:active{transform:translateY(1px)}
@@ -49,6 +127,157 @@
 
     /* Small utility */
     .shadow-glow{ box-shadow: 0 20px 60px rgba(99,102,241,0.08) }
+
+    .shift-grid { display:grid; gap:1.5rem; }
+    @media(min-width:1024px){ .shift-grid{ grid-template-columns:repeat(3,minmax(0,1fr)); } }
+
+    .shift-timeline {
+      position:relative;
+      padding:1.5rem;
+      border-radius:1.5rem;
+      background:linear-gradient(135deg, rgba(15,23,42,0.65), rgba(30,41,59,0.45));
+      border:1px solid rgba(148,163,184,0.15);
+      overflow:visible;
+    }
+    .shift-timeline-track{
+      position:relative;
+      height:110px;
+      border-radius:20px;
+      background:rgba(255,255,255,0.04);
+      border:1px solid rgba(148,163,184,0.2);
+      overflow:visible;
+    }
+    .shift-block{
+      position:absolute;
+      top:18px;
+      height:74px;
+      border-radius:16px;
+      padding:0.75rem 1rem;
+      display:flex;
+      flex-direction:column;
+      justify-content:center;
+      align-items:flex-start;
+      gap:0.25rem;
+      box-shadow:0 20px 45px rgba(59,130,246,0.25);
+      background:linear-gradient(135deg, rgba(59,130,246,0.9), rgba(14,165,233,0.9));
+      backdrop-filter:blur(6px);
+      min-width:120px;
+      cursor:pointer;
+      overflow:visible;
+      outline:none;
+      transition:transform .25s ease, box-shadow .25s ease;
+    }
+    .shift-block[data-state="current"]{ background:linear-gradient(135deg, rgba(34,197,94,0.9), rgba(16,185,129,0.95)); box-shadow:0 25px 60px rgba(16,185,129,0.25); }
+    .shift-block[data-state="upcoming"]{ background:linear-gradient(135deg, rgba(244,114,182,0.9), rgba(139,92,246,0.9)); box-shadow:0 25px 60px rgba(244,114,182,0.25); }
+    .shift-block[data-extends="true"]{ box-shadow:0 25px 60px rgba(148,163,184,0.28); }
+    .shift-block strong{ letter-spacing:0.01em; }
+    .shift-block .shift-time{ font-size:0.72rem; color:rgba(255,255,255,0.78); }
+    .shift-block .shift-overnight{
+      display:inline-flex;
+      align-items:center;
+      gap:0.25rem;
+      margin-top:0.25rem;
+      padding:0.2rem 0.55rem;
+      border-radius:9999px;
+      border:1px solid rgba(255,255,255,0.28);
+      background:rgba(15,23,42,0.35);
+      font-size:0.62rem;
+      letter-spacing:0.08em;
+      text-transform:uppercase;
+    }
+    .shift-block:focus,
+    .shift-block:focus-visible{ outline:2px solid rgba(255,255,255,0.55); outline-offset:4px; }
+    .shift-block:hover{ transform:translateY(-4px); }
+    .shift-block[data-state="past"]{ opacity:0.7; box-shadow:0 15px 40px rgba(15,23,42,0.35); }
+    .shift-tooltip{
+      position:absolute;
+      bottom:calc(100% + 12px);
+      left:50%;
+      transform:translate(-50%,-4px);
+      background:rgba(15,23,42,0.92);
+      border:1px solid rgba(148,163,184,0.35);
+      border-radius:0.75rem;
+      padding:0.65rem 0.85rem;
+      box-shadow:0 18px 40px rgba(8,15,30,0.55);
+      display:flex;
+      flex-direction:column;
+      gap:0.25rem;
+      min-width:190px;
+      opacity:0;
+      pointer-events:none;
+      transition:opacity .2s ease, transform .2s ease;
+      z-index:20;
+    }
+    .shift-tooltip::after{
+      content:"";
+      position:absolute;
+      top:100%;
+      left:50%;
+      transform:translateX(-50%);
+      border-width:6px;
+      border-style:solid;
+      border-color:rgba(15,23,42,0.92) transparent transparent transparent;
+    }
+    .shift-block:hover .shift-tooltip,
+    .shift-block:focus .shift-tooltip,
+    .shift-block:focus-visible .shift-tooltip{ opacity:1; transform:translate(-50%,-10px); pointer-events:auto; }
+    .shift-tooltip-name{ font-weight:700; font-size:0.9rem; }
+    .shift-tooltip-time{ font-size:0.8rem; color:rgba(226,232,240,0.85); }
+    .shift-tooltip-status{ font-size:0.78rem; font-weight:600; }
+    .shift-tooltip-status[data-state="current"]{ color:rgba(16,185,129,0.9); }
+    .shift-tooltip-status[data-state="upcoming"]{ color:rgba(244,114,182,0.9); }
+    .shift-tooltip-status[data-state="past"]{ color:rgba(148,163,184,0.85); }
+    .shift-tooltip-note{ font-size:0.68rem; color:rgba(148,163,184,0.85); text-transform:uppercase; letter-spacing:0.08em; }
+    .shift-timeline-hours{
+      position:absolute;
+      inset:0;
+      display:grid;
+      grid-template-columns:repeat(24,minmax(0,1fr));
+      pointer-events:none;
+    }
+    .shift-timeline-hours span{
+      position:relative;
+      font-size:0.65rem;
+      text-align:right;
+      padding-right:4px;
+      color:rgba(255,255,255,0.35);
+    }
+    .shift-timeline-hours span::after{
+      content:"";
+      position:absolute;
+      right:0;
+      top:0;
+      bottom:0;
+      width:1px;
+      background:rgba(255,255,255,0.05);
+    }
+
+    .badge{
+      display:inline-flex;
+      align-items:center;
+      gap:0.4rem;
+      padding:0.35rem 0.7rem;
+      border-radius:9999px;
+      font-size:0.75rem;
+      background:rgba(148,163,184,0.12);
+      border:1px solid rgba(148,163,184,0.2);
+    }
+
+    .availability-pill{
+      display:inline-flex;
+      align-items:center;
+      gap:0.5rem;
+      padding:0.45rem 0.85rem;
+      border-radius:9999px;
+      background:rgba(59,130,246,0.18);
+      border:1px solid rgba(59,130,246,0.3);
+      font-size:0.85rem;
+      margin:0.25rem;
+    }
+
+    .availability-pill span{
+      font-weight:600;
+    }
 
     /* Canvas particles sits behind everything */
     #particles { position:fixed; inset:0; z-index:0; pointer-events:none; }
@@ -79,6 +308,7 @@
 
       <nav class="hidden md:flex gap-6 items-center" role="navigation" aria-label="Hauptnavigation">
         <a href="#crew" class="hover:text-blue-400 transition-colors">Crew</a>
+        <a href="#shiftradar" class="hover:text-blue-400 transition-colors">Schichten</a>
         <a href="#modules" class="hover:text-blue-400 transition-colors">Features</a>
         <a href="#login" class="hover:text-blue-400 transition-colors">Login</a>
         <a href="login.php" class="magnet bg-white/10 px-3 py-1 rounded-xl hover:bg-white/20">Anmelden</a>
@@ -93,6 +323,7 @@
     <div id="mobileMenu" class="md:hidden max-w-7xl mx-auto px-4 pb-4 hidden" role="menu">
       <div class="flex flex-col gap-3">
         <a href="#crew" class="block py-2">Crew</a>
+        <a href="#shiftradar" class="block py-2">Schichten</a>
         <a href="#modules" class="block py-2">Features</a>
         <a href="#login" class="block py-2">Login</a>
         <a href="login.php" class="block py-2">Anmelden</a>
@@ -103,20 +334,87 @@
   <main class="content-wrap">
     <!-- Hero -->
     <section class="pt-28 pb-20 text-center relative overflow-hidden">
+      <div class="hero-neon" aria-hidden="true"></div>
+      <div class="hero-wires" aria-hidden="true"></div>
+      <div class="hero-spark" aria-hidden="true"></div>
+      <div class="aurora-line" aria-hidden="true"></div>
       <div class="max-w-4xl mx-auto px-4">
         <h2 class="hero-title text-6xl md:text-7xl lg:text-8xl font-extrabold grad-text mb-4">PUSHING <span class="inline-block float" style="color:#3b82f6">P</span></h2>
         <p class="text-lg text-white/80 mb-6">Eine Crew. Ein Vibe. Kasse, Schichten, Live-Status — alles an einem Ort.</p>
 
-        <div class="flex gap-4 justify-center items-center mb-8 flex-wrap">
-          <a href="#modules" class="magnet bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-2xl font-bold text-lg shadow-glow pulse-glow">Los geht's 🚀</a>
+        <div class="flex gap-4 justify-center items-center mb-8 flex-wrap hero-actions">
+          <a href="#login" class="magnet bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 rounded-2xl font-bold text-lg shadow-glow pulse-glow">Los geht's 🚀</a>
           <a href="#crew" class="magnet glass-strong px-6 py-3 rounded-2xl font-bold text-lg">Crew ansehen 👥</a>
         </div>
 
-        <div class="flex gap-4 justify-center text-sm text-white/60">
+        <div class="flex gap-4 justify-center text-sm text-white/60 hero-metrics">
           <div class="glass-strong rounded-xl px-4 py-2">Live Kassenstand: <strong id="balance">Lädt...</strong></div>
           <div class="glass-strong rounded-xl px-4 py-2">Schichten heute: <strong id="shiftsCount">–</strong></div>
           <div class="glass-strong rounded-xl px-4 py-2">Online jetzt: <strong id="online">Wird geladen...</strong></div>
         </div>
+      </div>
+    </section>
+
+    <!-- Shift Radar -->
+    <section id="shiftradar" class="py-20 max-w-7xl mx-auto px-6">
+      <div class="text-center mb-14 space-y-4">
+        <div class="flex justify-center">
+          <span class="badge">Schichtsystem 2.0</span>
+        </div>
+        <h3 class="text-4xl sm:text-5xl font-extrabold grad-text">Schicht Radar</h3>
+        <p class="text-white/60 max-w-3xl mx-auto">Behalte die ganzen 25 Stunden im Blick: Wer ist gerade auf Schicht, wer übernimmt als Nächstes und wer steht der Crew spontan zur Verfügung.</p>
+      </div>
+
+      <div class="shift-grid">
+        <div class="glass-strong rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xl font-bold">Jetzt auf Schicht</h4>
+            <span class="badge"><span class="h-2 w-2 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Live</span>
+          </div>
+          <ul id="currentShiftList" class="space-y-3 text-sm text-white/80"></ul>
+          <p id="currentShiftEmpty" class="text-white/40 text-sm hidden">Aktuell keine Schicht – die Crew hat Luft.</p>
+        </div>
+
+        <div class="glass-strong rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xl font-bold">Als nächstes dran</h4>
+            <span class="badge">Plan</span>
+          </div>
+          <ul id="nextShiftList" class="space-y-3 text-sm text-white/80"></ul>
+          <p id="nextShiftEmpty" class="text-white/40 text-sm hidden">Heute steht keine weitere Schicht an.</p>
+        </div>
+
+        <div class="glass-strong rounded-2xl p-6">
+          <div class="flex items-center justify-between mb-4">
+            <h4 class="text-xl font-bold">Verfügbarkeit</h4>
+            <span class="badge">Status</span>
+          </div>
+          <div>
+            <p class="text-xs uppercase tracking-wide text-white/40 mb-2">Jetzt frei</p>
+            <div id="availableNowList" class="flex flex-wrap"></div>
+            <p id="availableNowEmpty" class="text-white/40 text-sm hidden">Alle sind gerade eingespannt.</p>
+          </div>
+          <div class="mt-6 pt-6 border-t border-white/10">
+            <p class="text-xs uppercase tracking-wide text-white/40 mb-2">Danach verfügbar</p>
+            <div id="availableLaterList" class="flex flex-wrap"></div>
+            <p id="availableLaterEmpty" class="text-white/40 text-sm hidden">Alle Schichten verteilt.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-12 shift-timeline">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+          <div>
+            <h4 class="text-2xl font-bold">Der ganze Tag auf einen Blick</h4>
+            <p class="text-white/50 text-sm">Visualisiert 25 Stunden – von 00:00 bis 24:59.</p>
+          </div>
+          <div class="badge">Heute <span id="shiftDayLabel" class="font-semibold"></span></div>
+        </div>
+        <div class="mt-6 shift-timeline-track">
+          <div class="shift-timeline-hours" id="shiftTimelineHours"></div>
+          <div id="shiftTimelineTrack"></div>
+        </div>
+        <div class="mt-6 grid md:grid-cols-2 gap-4" id="shiftScheduleList"></div>
       </div>
     </section>
 
@@ -190,6 +488,8 @@
   // --- Utilities & enhancements ---
   gsap.registerPlugin(ScrollTrigger);
 
+  const state = { members: [], shifts: [] };
+
   // Mobile nav toggle
   const mobileToggle = document.getElementById('mobileToggle');
   const mobileMenu = document.getElementById('mobileMenu');
@@ -216,10 +516,12 @@
       const res = await fetch('api/get_members.php');
       if(!res.ok) throw new Error('Crew load failed');
       const members = await res.json();
+      state.members = Array.isArray(members) ? members : [];
       const list = document.getElementById('crewList');
       const datalist = document.getElementById('names');
       list.innerHTML = '';
-      (members||[]).forEach((m,i)=>{
+      datalist.innerHTML = '';
+      (state.members||[]).forEach((m,i)=>{
         const el = document.createElement('div');
         el.className = 'stat-card glass-strong p-6 rounded-2xl';
         el.innerHTML = `<div class="flex items-center gap-4"><div class="h-16 w-16 rounded-xl bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center text-2xl font-black">${(m.name||'?')[0].toUpperCase()}</div><div class="flex-1"><h4 class="font-bold text-lg mb-1">${m.name}</h4><p class="text-white/60">${m.flag||'🌍'}</p></div></div>`;
@@ -227,7 +529,8 @@
         gsap.from(el,{duration:0.6,y:30,opacity:0,delay:i*0.05,ease:'power3.out'});
         const opt = document.createElement('option'); opt.value = m.name; datalist.appendChild(opt);
       });
-      if(!members || members.length===0) list.innerHTML = '<div class="col-span-full text-center py-12 text-white/50">Keine Mitglieder gefunden</div>';
+      if(!state.members || state.members.length===0) list.innerHTML = '<div class="col-span-full text-center py-12 text-white/50">Keine Mitglieder gefunden</div>';
+      renderShiftBoard();
     }catch(e){ console.error(e); document.getElementById('crewList').innerHTML = '<div class="col-span-full text-center py-12 text-red-400">Fehler beim Laden der Crew</div>' }
   }
 
@@ -235,7 +538,232 @@
 
   async function loadOnline(){ try{ const res = await fetch('api/discord_status.php'); const data = await res.json(); const cnt = data.count||0; document.getElementById('online').textContent = cnt + ' online'; document.getElementById('onlineSmall').textContent = cnt + ' online'; }catch(e){ document.getElementById('online').textContent='Fehler'; document.getElementById('onlineSmall').textContent='Fehler' } }
 
-  async function loadShiftsToday(){ try{ const res = await fetch('api/get_shifts.php'); const data = await res.json(); const today = new Date().toISOString().split('T')[0]; const todayShifts = (data||[]).filter(s=>s.shift_date===today); document.getElementById('shiftsCount').textContent = todayShifts.length; document.getElementById('shiftsCountSmall').textContent = todayShifts.length; }catch(e){ document.getElementById('shiftsCount').textContent='?'; document.getElementById('shiftsCountSmall').textContent='?' } }
+  async function loadShifts(){
+    try{
+      const res = await fetch('api/get_shifts.php');
+      if(!res.ok) throw new Error('Shift load failed');
+      const data = await res.json();
+      state.shifts = Array.isArray(data) ? data : [];
+      updateShiftCounts();
+      renderShiftBoard();
+    }catch(e){
+      console.error(e);
+      document.getElementById('shiftsCount').textContent='?';
+      document.getElementById('shiftsCountSmall').textContent='?';
+    }
+  }
+
+  function getTodayIso(){
+    const now = new Date();
+    const local = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return local.toISOString().split('T')[0];
+  }
+
+  function updateShiftCounts(){
+    const today = getTodayIso();
+    const todayShifts = (state.shifts||[]).filter(s=>s.shift_date===today);
+    const count = todayShifts.length;
+    document.getElementById('shiftsCount').textContent = count;
+    document.getElementById('shiftsCountSmall').textContent = count;
+  }
+
+  function renderShiftBoard(){
+    const currentList = document.getElementById('currentShiftList');
+    if(!currentList) return;
+
+    const nextList = document.getElementById('nextShiftList');
+    const availableNowList = document.getElementById('availableNowList');
+    const availableLaterList = document.getElementById('availableLaterList');
+    const scheduleList = document.getElementById('shiftScheduleList');
+    const timelineTrack = document.getElementById('shiftTimelineTrack');
+    const timelineHours = document.getElementById('shiftTimelineHours');
+    const dayLabel = document.getElementById('shiftDayLabel');
+
+    const todayIso = getTodayIso();
+    const dayStart = new Date(`${todayIso}T00:00:00`);
+    const dayEnd = new Date(dayStart.getTime() + 24*60*60*1000);
+    const now = new Date();
+
+    const dayFormatter = new Intl.DateTimeFormat('de-DE', { weekday:'long', day:'2-digit', month:'2-digit' });
+    const shortDayFormatter = new Intl.DateTimeFormat('de-DE', { weekday:'short', day:'2-digit', month:'2-digit' });
+    const timeFormatter = new Intl.DateTimeFormat('de-DE', { hour: '2-digit', minute: '2-digit' });
+
+    dayLabel.textContent = dayFormatter.format(dayStart);
+
+    const processedShifts = (state.shifts||[])
+      .map(s => {
+        const start = new Date(`${s.shift_date}T${s.shift_start}`);
+        let end = new Date(`${s.shift_date}T${s.shift_end}`);
+        if(Number.isNaN(start.getTime())) return null;
+        if(Number.isNaN(end.getTime())){ end = new Date(start.getTime() + 60 * 60 * 1000); }
+        if(end <= start){ end = new Date(end.getTime() + 24 * 60 * 60 * 1000); }
+        const continuesNextDay = end > dayEnd;
+        const displayStart = (start >= dayStart && start < dayEnd)
+          ? timeFormatter.format(start)
+          : `${shortDayFormatter.format(start)} ${timeFormatter.format(start)}`;
+        const displayEnd = end <= dayEnd
+          ? timeFormatter.format(end)
+          : `${shortDayFormatter.format(end)} ${timeFormatter.format(end)}`;
+        return {
+          ...s,
+          start,
+          end,
+          continuesNextDay,
+          display:`${displayStart} – ${displayEnd}`
+        };
+      })
+      .filter(Boolean);
+
+    const dayShifts = processedShifts
+      .filter(shift => shift.end > dayStart && shift.start < dayEnd)
+      .map(shift => ({
+        ...shift,
+        cappedEnd: shift.end > dayEnd ? dayEnd : shift.end
+      }))
+      .sort((a,b)=>a.start-b.start);
+
+    const current = dayShifts.filter(shift => now >= shift.start && now < shift.end);
+    const upcoming = dayShifts.filter(shift => shift.start > now);
+
+    // Current shifts list
+    currentList.innerHTML = '';
+    document.getElementById('currentShiftEmpty').classList.toggle('hidden', current.length !== 0);
+    current.forEach(shift => {
+      const li = document.createElement('li');
+      li.innerHTML = `<div class="flex items-center justify-between"><span class="font-semibold text-white">${shift.member_name}</span><span class="text-white/50">${shift.display}</span></div>`;
+      currentList.appendChild(li);
+    });
+
+    // Next shifts
+    nextList.innerHTML = '';
+    document.getElementById('nextShiftEmpty').classList.toggle('hidden', upcoming.length !== 0);
+    upcoming.slice(0,3).forEach(shift => {
+      const li = document.createElement('li');
+      li.innerHTML = `<div class="flex items-center justify-between"><span class="font-semibold text-white">${shift.member_name}</span><span class="text-white/50">${shift.display}</span></div>`;
+      nextList.appendChild(li);
+    });
+
+    // Availability
+    availableNowList.innerHTML = '';
+    const currentNames = new Set(current.map(s=>s.member_name));
+    const availableNow = (state.members||[]).filter(m => !currentNames.has(m.name));
+    document.getElementById('availableNowEmpty').classList.toggle('hidden', availableNow.length !== 0);
+    availableNow.forEach(member => {
+      const pill = document.createElement('span');
+      pill.className = 'availability-pill';
+      pill.innerHTML = `<span>${member.flag || '🌍'}</span>${member.name}`;
+      availableNowList.appendChild(pill);
+    });
+
+    const upcomingNames = new Set(upcoming.map(s=>s.member_name));
+    availableLaterList.innerHTML = '';
+    document.getElementById('availableLaterEmpty').classList.toggle('hidden', upcomingNames.size !== 0);
+    Array.from(upcomingNames).slice(0,6).forEach(name => {
+      const pill = document.createElement('span');
+      pill.className = 'availability-pill';
+      pill.style.background = 'rgba(244,114,182,0.18)';
+      pill.style.borderColor = 'rgba(244,114,182,0.3)';
+      pill.textContent = name;
+      availableLaterList.appendChild(pill);
+    });
+
+    // Timeline hours
+    timelineHours.innerHTML = '';
+    for(let h=0; h<24; h++){
+      const span = document.createElement('span');
+      if(h % 3 === 0) span.textContent = `${String(h).padStart(2,'0')}h`;
+      timelineHours.appendChild(span);
+    }
+
+    // Timeline blocks
+    timelineTrack.innerHTML = '';
+    const minutesInDay = 24 * 60;
+    const statusLabels = {
+      current:'Aktive Schicht',
+      upcoming:'Geplante Schicht',
+      past:'Abgeschlossene Schicht'
+    };
+
+    dayShifts.forEach((shift, index) => {
+      const visibleStart = shift.start < dayStart ? dayStart : shift.start;
+      const visibleEnd = shift.cappedEnd;
+      const startMinutes = Math.max(0, Math.floor((visibleStart - dayStart)/60000));
+      const endMinutes = Math.min(minutesInDay, Math.ceil((visibleEnd - dayStart)/60000));
+      const duration = Math.max(30, endMinutes - startMinutes);
+      const block = document.createElement('div');
+      block.className = 'shift-block';
+      const stateAttr = now >= shift.start && now < shift.end ? 'current' : (shift.start > now ? 'upcoming' : 'past');
+      block.dataset.state = stateAttr;
+      if(shift.continuesNextDay) block.dataset.extends = 'true';
+      block.style.left = `${(startMinutes / minutesInDay) * 100}%`;
+      block.style.width = `${Math.max((duration / minutesInDay) * 100, 4)}%`;
+      block.tabIndex = 0;
+      block.setAttribute('aria-label', `${shift.member_name}: ${shift.display}`);
+
+      const nameEl = document.createElement('strong');
+      nameEl.className = 'text-sm';
+      nameEl.textContent = shift.member_name;
+      const timeEl = document.createElement('span');
+      timeEl.className = 'shift-time';
+      timeEl.textContent = shift.display;
+      block.appendChild(nameEl);
+      block.appendChild(timeEl);
+
+      if(shift.continuesNextDay){
+        const badge = document.createElement('span');
+        badge.className = 'shift-overnight';
+        badge.textContent = 'Folgetag';
+        block.appendChild(badge);
+      }
+
+      const tooltip = document.createElement('div');
+      tooltip.className = 'shift-tooltip';
+      const tooltipSlug = shift.id ? String(shift.id).replace(/[^a-zA-Z0-9_-]/g,'') : `idx-${index}`;
+      const tooltipId = `shift-tip-${tooltipSlug}`;
+      tooltip.id = tooltipId;
+      block.setAttribute('aria-describedby', tooltipId);
+
+      const tooltipName = document.createElement('div');
+      tooltipName.className = 'shift-tooltip-name';
+      tooltipName.textContent = shift.member_name;
+      tooltip.appendChild(tooltipName);
+
+      const tooltipTime = document.createElement('div');
+      tooltipTime.className = 'shift-tooltip-time';
+      tooltipTime.textContent = shift.display;
+      tooltip.appendChild(tooltipTime);
+
+      const tooltipStatus = document.createElement('div');
+      tooltipStatus.className = 'shift-tooltip-status';
+      tooltipStatus.dataset.state = stateAttr;
+      tooltipStatus.textContent = statusLabels[stateAttr];
+      tooltip.appendChild(tooltipStatus);
+
+      if(shift.continuesNextDay){
+        const tooltipNote = document.createElement('div');
+        tooltipNote.className = 'shift-tooltip-note';
+        tooltipNote.textContent = `Endet am Folgetag um ${timeFormatter.format(shift.end)}`;
+        tooltip.appendChild(tooltipNote);
+      }
+
+      block.appendChild(tooltip);
+      timelineTrack.appendChild(block);
+    });
+
+    // Schedule list
+    scheduleList.innerHTML = '';
+    if(dayShifts.length === 0){
+      scheduleList.innerHTML = '<div class="text-white/40 text-sm">Heute wurden keine Schichten geplant.</div>';
+    }else{
+      dayShifts.forEach(shift => {
+        const ref = shift.id ? `#${shift.id}` : 'Plan';
+        const card = document.createElement('div');
+        card.className = 'glass-strong rounded-2xl p-4 flex items-center justify-between';
+        card.innerHTML = `<div><div class="text-sm text-white/60">${shift.display}</div><div class="text-lg font-semibold">${shift.member_name}</div></div><div class="text-xs text-white/40 uppercase tracking-wide">${ref}</div>`;
+        scheduleList.appendChild(card);
+      });
+    }
+  }
 
   // Login handler (same endpoints)
   document.getElementById('loginForm').addEventListener('submit', async e => {
@@ -253,6 +781,14 @@
   gsap.utils.toArray('.stat-card, .hero-title, .glass-strong, .grad-text').forEach((el,i)=>{
     gsap.from(el,{ scrollTrigger:{ trigger:el, start:'top 90%', toggleActions:'play none none none', once:true }, duration:0.8, y:40, opacity:0, delay:i*0.06, ease:'power3.out' });
   });
+
+  gsap.timeline({ defaults:{ ease:'power3.out' } })
+    .from('.hero-title', { y:80, opacity:0, duration:1 })
+    .from('.hero-actions', { y:40, opacity:0, duration:0.8 }, '-=0.55')
+    .from('.hero-metrics > div', { y:30, opacity:0, duration:0.6, stagger:0.12 }, '-=0.4');
+
+  gsap.to('.hero-neon', { rotate:3, duration:18, repeat:-1, yoyo:true, ease:'sine.inOut' });
+  gsap.to('.hero-spark', { scale:1.05, duration:8, repeat:-1, yoyo:true, ease:'sine.inOut' });
 
   // --- Subtle particle background ---
   (function particleBg(){
@@ -274,7 +810,16 @@
   })();
 
   // Init data
-  loadCrew(); loadBalance(); loadOnline(); loadShiftsToday();
+  async function initLanding(){
+    await Promise.allSettled([
+      loadCrew(),
+      loadBalance(),
+      loadOnline(),
+      loadShifts()
+    ]);
+  }
+
+  initLanding();
   </script>
 
 </body>

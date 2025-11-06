@@ -118,6 +118,9 @@
             <div class="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></div>
             <span class="text-sm font-medium"><?= htmlspecialchars($user) ?></span>
           </div>
+          <?php if ($isAdmin): ?>
+            <a href="admin/" class="px-4 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 transition-colors text-sm font-medium">Admin</a>
+          <?php endif; ?>
           <a href="index.html" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">🏠 Start</a>
           <a href="logout.php" class="px-4 py-2 rounded-xl bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-colors text-sm font-medium">Abmelden</a>
         </div>
@@ -211,6 +214,12 @@
           <button onclick="openShiftModal()" class="magnet w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 font-semibold shadow-lg hover:shadow-glow transition-all">
             ➕ Schicht eintragen
           </button>
+          <button onclick="openVacationModal()" class="magnet w-full px-4 py-3 rounded-xl glass hover:glass-strong font-semibold transition-all">
+            🛫 Urlaub eintragen
+          </button>
+          <button onclick="openSickModal()" class="magnet w-full px-4 py-3 rounded-xl glass hover:glass-strong font-semibold transition-all">
+            🤒 Krank melden
+          </button>
           <button onclick="toggleTransactions()" class="magnet w-full px-4 py-3 rounded-xl glass hover:glass-strong font-semibold transition-all">
             💰 Transaktionen anzeigen
           </button>
@@ -230,6 +239,40 @@
         <div class="text-center py-12 text-white/50">
           <div class="text-4xl mb-3">⏳</div>
           <p>Lädt Schichten...</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Absences Section -->
+    <section class="glass-strong rounded-2xl p-6 slide-in">
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
+        <div>
+          <h2 class="text-2xl font-bold">🗓️ Abwesenheiten</h2>
+          <p class="text-white/60 text-sm">Urlaub und Krankmeldungen im Überblick</p>
+        </div>
+        <div class="flex gap-2 flex-wrap">
+          <button onclick="openVacationModal()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">🛫 Urlaub eintragen</button>
+          <button onclick="openSickModal()" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 transition-colors text-sm font-medium">🤒 Krank melden</button>
+        </div>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold">Urlaub</h3>
+            <span class="text-white/50 text-sm" id="vacationCount">– Einträge</span>
+          </div>
+          <ul id="vacationList" class="space-y-3">
+            <li class="text-white/50 text-sm text-center py-6">Noch keine Urlaube geplant</li>
+          </ul>
+        </div>
+        <div>
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-xl font-semibold">Krankmeldungen</h3>
+            <span class="text-white/50 text-sm" id="sickdayCount">– Einträge</span>
+          </div>
+          <ul id="sickdayList" class="space-y-3">
+            <li class="text-white/50 text-sm text-center py-6">Keine Krankmeldungen hinterlegt</li>
+          </ul>
         </div>
       </div>
     </section>
@@ -263,6 +306,16 @@
           <label class="block text-sm text-white/70 mb-2">Datum</label>
           <input type="date" name="shift_date" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" value="<?= date('Y-m-d') ?>">
         </div>
+        <div>
+          <label class="block text-sm text-white/70 mb-2">Schichttyp</label>
+          <select name="shift_type" id="shiftType" class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600">
+            <option value="early">Früh (06:00 – 14:00)</option>
+            <option value="late">Spät (14:00 – 22:00)</option>
+            <option value="night">Nacht (22:00 – 06:00)</option>
+            <option value="day">Tag (07:00 – 17:30)</option>
+            <option value="custom" selected>Eigene Zeiten</option>
+          </select>
+        </div>
         <div class="grid grid-cols-2 gap-4">
           <div>
             <label class="block text-sm text-white/70 mb-2">Start</label>
@@ -289,9 +342,128 @@
     </div>
   </div>
 
+  <!-- Vacation Modal -->
+  <div id="vacationModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="glass-strong rounded-2xl p-8 max-w-md w-full slide-in">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold">Urlaub eintragen</h3>
+        <button onclick="closeVacationModal()" class="text-white/60 hover:text-white">✕</button>
+      </div>
+      <form id="vacationForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-white/70 mb-2">Startdatum</label>
+          <input type="date" name="start" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" value="<?= date('Y-m-d') ?>">
+        </div>
+        <div>
+          <label class="block text-sm text-white/70 mb-2">Enddatum</label>
+          <input type="date" name="end" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 px-4 py-3 font-semibold shadow-lg hover:shadow-glow transition-all">Speichern ✨</button>
+          <button type="button" onclick="closeVacationModal()" class="px-4 py-3 rounded-xl glass hover:glass-strong font-semibold transition-all">Abbrechen</button>
+        </div>
+        <p id="vacationMsg" class="text-sm text-center min-h-[20px]"></p>
+      </form>
+    </div>
+  </div>
+
+  <!-- Sickday Modal -->
+  <div id="sickModal" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
+    <div class="glass-strong rounded-2xl p-8 max-w-md w-full slide-in">
+      <div class="flex items-center justify-between mb-6">
+        <h3 class="text-2xl font-bold">Krank melden</h3>
+        <button onclick="closeSickModal()" class="text-white/60 hover:text-white">✕</button>
+      </div>
+      <form id="sickForm" class="space-y-4">
+        <div>
+          <label class="block text-sm text-white/70 mb-2">Startdatum</label>
+          <input type="date" name="start" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" value="<?= date('Y-m-d') ?>">
+        </div>
+        <div>
+          <label class="block text-sm text-white/70 mb-2">Enddatum</label>
+          <input type="date" name="end" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600" value="<?= date('Y-m-d', strtotime('+1 day')) ?>">
+        </div>
+        <div class="flex gap-3">
+          <button type="submit" class="flex-1 rounded-xl bg-gradient-to-r from-brand-600 to-purple-600 px-4 py-3 font-semibold shadow-lg hover:shadow-glow transition-all">Speichern ✨</button>
+          <button type="button" onclick="closeSickModal()" class="px-4 py-3 rounded-xl glass hover:glass-strong font-semibold transition-all">Abbrechen</button>
+        </div>
+        <p id="sickMsg" class="text-sm text-center min-h-[20px]"></p>
+      </form>
+    </div>
+  </div>
+
   <script>
     const user = '<?= $user ?>';
+    const memberId = <?= (int) $memberId ?>;
+    const csrfToken = '<?= htmlspecialchars($csrfToken, ENT_QUOTES) ?>';
     let balanceChart = null;
+
+    const shiftDefaults = {
+      early: ['06:00', '14:00'],
+      late: ['14:00', '22:00'],
+      night: ['22:00', '06:00'],
+      day: ['07:00', '17:30']
+    };
+
+    const shiftTypeLabels = {
+      early: 'Frühschicht',
+      late: 'Spätschicht',
+      night: 'Nachtschicht',
+      day: 'Tagschicht',
+      custom: 'Eigene Zeiten'
+    };
+
+    const shiftTypeClasses = {
+      early: 'bg-blue-500/20 text-blue-200',
+      late: 'bg-purple-500/20 text-purple-200',
+      night: 'bg-slate-500/20 text-slate-200',
+      day: 'bg-emerald-500/20 text-emerald-200',
+      custom: 'bg-white/10 text-white/70'
+    };
+
+    const dateRangeFormatter = new Intl.DateTimeFormat('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    const dateLabelFormatter = new Intl.DateTimeFormat('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit' });
+
+    const absenceState = {
+      vacations: [],
+      sickdays: []
+    };
+
+    function parseDate(dateStr) {
+      if (!dateStr) return null;
+      const iso = `${dateStr}T00:00:00`;
+      const date = new Date(iso);
+      return Number.isNaN(date.getTime()) ? null : date;
+    }
+
+    function formatDateLabel(dateStr) {
+      const date = parseDate(dateStr);
+      return date ? dateLabelFormatter.format(date) : dateStr || 'n/a';
+    }
+
+    function formatDateRangeText(start, end) {
+      const startDate = parseDate(start);
+      const endDate = parseDate(end || start);
+      if (!startDate) return '—';
+      if (!endDate || start === end) {
+        return dateRangeFormatter.format(startDate);
+      }
+      return `${dateRangeFormatter.format(startDate)} – ${dateRangeFormatter.format(endDate)}`;
+    }
+
+    function calcDurationDays(start, end) {
+      const startDate = parseDate(start);
+      const endDate = parseDate(end || start);
+      if (!startDate) return 0;
+      if (!endDate) return 1;
+      const diff = Math.round((endDate - startDate) / (1000 * 60 * 60 * 24));
+      return diff >= 0 ? diff + 1 : 1;
+    }
+
+    function formatTimeLabel(value) {
+      if (!value) return '—';
+      return value.slice(0, 5);
+    }
 
     // Balance laden
     async function loadBalance() {
@@ -388,11 +560,18 @@
       try {
         const res = await fetch('api/get_shifts.php');
         const data = await res.json();
-        const userShifts = data.filter(s => s.member_name === user);
-        
+        const userShifts = data
+          .filter(s => s.member_name === user)
+          .sort((a, b) => {
+            if (a.shift_date === b.shift_date) {
+              return (a.start_time || a.shift_start || '').localeCompare(b.start_time || b.shift_start || '');
+            }
+            return (a.shift_date || '').localeCompare(b.shift_date || '');
+          });
+
         document.getElementById('shiftCount').textContent = userShifts.length;
         document.getElementById('totalShifts').textContent = userShifts.length;
-        
+
         const container = document.getElementById('shiftsList');
         if (userShifts.length === 0) {
           container.innerHTML = `
@@ -403,20 +582,27 @@
           `;
           return;
         }
-        
+
         container.innerHTML = '';
         userShifts.slice(0, 10).forEach((s, i) => {
+          const start = formatTimeLabel(s.start_time || s.shift_start);
+          const end = formatTimeLabel(s.end_time || s.shift_end);
+          const typeKey = (s.shift_type || 'custom');
+          const typeLabel = shiftTypeLabels[typeKey] || shiftTypeLabels.custom;
+          const typeClass = shiftTypeClasses[typeKey] || shiftTypeClasses.custom;
+          const dateLabel = formatDateLabel(s.shift_date);
+
           const shiftEl = document.createElement('div');
           shiftEl.className = 'glass rounded-xl p-4 hover:glass-strong transition-all';
           shiftEl.innerHTML = `
             <div class="flex items-center justify-between">
               <div class="flex-1">
-                <div class="font-semibold">${s.shift_date || 'N/A'}</div>
-                <div class="text-sm text-white/60">${s.shift_start || 'N/A'} - ${s.shift_end || 'N/A'}</div>
+                <div class="font-semibold">${dateLabel}</div>
+                <div class="text-sm text-white/60">${start} – ${end}</div>
               </div>
               <div class="flex items-center gap-2">
-                <div class="px-3 py-1 rounded-lg bg-emerald-500/20 text-emerald-400 text-sm font-medium">
-                  Aktiv
+                <div class="px-3 py-1 rounded-lg text-sm font-medium ${typeClass}">
+                  ${typeLabel}
                 </div>
                 <button onclick="deleteShift(${s.id})" class="px-2 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 text-xs transition-colors" title="Schicht löschen">
                   🗑️
@@ -440,6 +626,97 @@
             <p>Fehler beim Laden der Schichten</p>
           </div>
         `;
+      }
+    }
+
+    async function loadAbsences() {
+      try {
+        const [vacations, sickdays] = await Promise.all([
+          fetch('api/v2/get_vacations.php').then(res => res.json()),
+          fetch('api/v2/get_sickdays.php').then(res => res.json())
+        ]);
+
+        const vacationItems = vacations.status === 'success' ? (vacations.data?.vacations || []) : [];
+        const sickItems = sickdays.status === 'success' ? (sickdays.data?.sickdays || []) : [];
+
+        absenceState.vacations = vacationItems;
+        absenceState.sickdays = sickItems;
+
+        renderAbsenceList('vacationList', 'vacationCount', vacationItems, 'Noch keine Urlaube geplant', removeVacation);
+        renderAbsenceList('sickdayList', 'sickdayCount', sickItems, 'Keine Krankmeldungen hinterlegt', removeSickday);
+      } catch (error) {
+        console.error('Absence error:', error);
+        renderAbsenceList('vacationList', 'vacationCount', [], 'Fehler beim Laden der Urlaube', null);
+        renderAbsenceList('sickdayList', 'sickdayCount', [], 'Fehler beim Laden der Krankmeldungen', null);
+      }
+    }
+
+    function renderAbsenceList(listId, countId, items, emptyText, removeHandler) {
+      const list = document.getElementById(listId);
+      const counter = document.getElementById(countId);
+      if (!list || !counter) return;
+
+      counter.textContent = `${items.length} ${items.length === 1 ? 'Eintrag' : 'Einträge'}`;
+      list.innerHTML = '';
+
+      if (!items.length) {
+        list.innerHTML = `<li class="text-white/50 text-sm text-center py-6">${emptyText}</li>`;
+        return;
+      }
+
+      items.forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'glass rounded-xl p-4 flex items-center justify-between gap-4 hover:glass-strong transition-all';
+        const duration = calcDurationDays(item.start, item.end);
+        li.innerHTML = `
+          <div>
+            <div class="font-semibold">${formatDateRangeText(item.start, item.end)}</div>
+            <div class="text-xs text-white/50">${duration} ${duration === 1 ? 'Tag' : 'Tage'}</div>
+          </div>
+          ${removeHandler ? `<button class="px-2 py-1 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-200 text-xs transition-colors" title="Eintrag löschen">🗑️</button>` : ''}
+        `;
+        if (removeHandler) {
+          li.querySelector('button')?.addEventListener('click', () => removeHandler(item.id));
+        }
+        list.appendChild(li);
+      });
+    }
+
+    async function removeVacation(id) {
+      if (!confirm('Urlaub wirklich löschen?')) return;
+      try {
+        const res = await fetch('api/v2/save_vacation.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id, csrf_token: csrfToken })
+        });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          loadAbsences();
+        } else {
+          alert(payload.error || 'Urlaub konnte nicht gelöscht werden');
+        }
+      } catch (error) {
+        alert('Fehler beim Löschen des Urlaubs');
+      }
+    }
+
+    async function removeSickday(id) {
+      if (!confirm('Krankmeldung wirklich löschen?')) return;
+      try {
+        const res = await fetch('api/v2/save_sickday.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'delete', id, csrf_token: csrfToken })
+        });
+        const payload = await res.json();
+        if (payload.status === 'success') {
+          loadAbsences();
+        } else {
+          alert(payload.error || 'Krankmeldung konnte nicht gelöscht werden');
+        }
+      } catch (error) {
+        alert('Fehler beim Löschen der Krankmeldung');
       }
     }
 
@@ -508,6 +785,35 @@
       document.getElementById('shiftModal').classList.remove('flex');
       document.getElementById('shiftForm').reset();
       document.getElementById('shiftMsg').textContent = '';
+      document.getElementById('shiftType').value = 'custom';
+    }
+
+    function openVacationModal() {
+      const modal = document.getElementById('vacationModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeVacationModal() {
+      const modal = document.getElementById('vacationModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.getElementById('vacationForm').reset();
+      document.getElementById('vacationMsg').textContent = '';
+    }
+
+    function openSickModal() {
+      const modal = document.getElementById('sickModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function closeSickModal() {
+      const modal = document.getElementById('sickModal');
+      modal.classList.add('hidden');
+      modal.classList.remove('flex');
+      document.getElementById('sickForm').reset();
+      document.getElementById('sickMsg').textContent = '';
     }
 
     function toggleTransactions() {
@@ -546,7 +852,7 @@
       e.preventDefault();
       const formData = new FormData(e.target);
       formData.append('member_name', user);
-      
+
       const msg = document.getElementById('shiftMsg');
       try {
         const res = await fetch('api/set_shift.php', {
@@ -554,11 +860,12 @@
           body: formData
         });
         const data = await res.json();
-        
+
         if (data.status === 'ok') {
           msg.textContent = 'Schicht gespeichert ✅';
           msg.className = 'text-sm text-center text-emerald-400';
           e.target.reset();
+          document.getElementById('shiftType').value = 'custom';
           setTimeout(() => {
             closeShiftModal();
             loadShifts();
@@ -573,6 +880,106 @@
       }
     });
 
+    document.getElementById('shiftType')?.addEventListener('change', (event) => {
+      const type = event.target.value;
+      const defaults = shiftDefaults[type];
+      const startInput = document.querySelector('input[name="shift_start"]');
+      const endInput = document.querySelector('input[name="shift_end"]');
+      if (startInput && endInput) {
+        if (defaults) {
+          startInput.value = defaults[0];
+          endInput.value = defaults[1];
+        } else {
+          startInput.value = '';
+          endInput.value = '';
+        }
+      }
+    });
+
+    document.getElementById('vacationForm')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const payload = {
+        start: formData.get('start'),
+        end: formData.get('end'),
+        csrf_token: csrfToken
+      };
+      const msg = document.getElementById('vacationMsg');
+
+      if (!payload.start || !payload.end || payload.end < payload.start) {
+        msg.textContent = 'Bitte gültigen Zeitraum wählen';
+        msg.className = 'text-sm text-center text-red-400';
+        return;
+      }
+
+      try {
+        const res = await fetch('api/v2/save_vacation.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          msg.textContent = 'Urlaub gespeichert ✅';
+          msg.className = 'text-sm text-center text-emerald-400';
+          form.reset();
+          setTimeout(() => {
+            closeVacationModal();
+            loadAbsences();
+          }, 900);
+        } else {
+          msg.textContent = data.error || 'Fehler beim Speichern';
+          msg.className = 'text-sm text-center text-red-400';
+        }
+      } catch (error) {
+        msg.textContent = 'Fehler beim Speichern';
+        msg.className = 'text-sm text-center text-red-400';
+      }
+    });
+
+    document.getElementById('sickForm')?.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const form = event.target;
+      const formData = new FormData(form);
+      const payload = {
+        start: formData.get('start'),
+        end: formData.get('end'),
+        csrf_token: csrfToken
+      };
+      const msg = document.getElementById('sickMsg');
+
+      if (!payload.start || !payload.end || payload.end < payload.start) {
+        msg.textContent = 'Bitte gültigen Zeitraum wählen';
+        msg.className = 'text-sm text-center text-red-400';
+        return;
+      }
+
+      try {
+        const res = await fetch('api/v2/save_sickday.php', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.status === 'success') {
+          msg.textContent = 'Krankmeldung gespeichert ✅';
+          msg.className = 'text-sm text-center text-emerald-400';
+          form.reset();
+          setTimeout(() => {
+            closeSickModal();
+            loadAbsences();
+          }, 900);
+        } else {
+          msg.textContent = data.error || 'Fehler beim Speichern';
+          msg.className = 'text-sm text-center text-red-400';
+        }
+      } catch (error) {
+        msg.textContent = 'Fehler beim Speichern';
+        msg.className = 'text-sm text-center text-red-400';
+      }
+    });
+
     // Event Listeners
     document.getElementById('refreshBalance')?.addEventListener('click', loadBalance);
     document.getElementById('refreshShifts')?.addEventListener('click', loadShifts);
@@ -580,6 +987,7 @@
     // Initial Load
     loadBalance();
     loadShifts();
+    loadAbsences();
 
     // GSAP Animations - nur einmal beim Laden
     gsap.utils.toArray('.slide-in').forEach((el, i) => {

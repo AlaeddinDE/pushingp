@@ -205,3 +205,27 @@ Ziel: ein autonomer, auditierbarer Agentenprozess mit vollständiger Versions- u
 
 ---
 
+## 15. 🚨 Migration
+
+1. **Alle SQL-Migrationsdateien** müssen zwingend im Ordner  
+   `/var/www/html/migrations/`  
+   abgelegt werden.
+
+2. Innerhalb dieses Ordners gilt die Unterteilung:
+   - `/migrations/auto/` → von KI automatisch erstellte Migrationen  
+   - `/migrations/undo/` → Rollback-Skripte für revertete Migrationen  
+
+3. **Setup-Dateien** (`SQL_SETUP_*.sql`) bleiben im Projekt-Root  
+   und dürfen nicht automatisch migriert, gelöscht oder verschoben werden.
+
+4. Wenn ein Agent, Skript oder Commit eine `.sql`-Datei außerhalb dieser Struktur erkennt,  
+   wird sie automatisch nach `/migrations/auto/` verschoben und dort mit Zeitstempel versehen.
+
+5. Die Datei `deploy.sh` prüft bei jedem Lauf die Ordnerstruktur und korrigiert falsche Pfade.
+
+Diese Regel ist verbindlich für alle Codex-Agenten, Deploy-Tasks und automatischen Schema-Änderungen.
+
+Ziel: ein autonomer, auditierbarer Agentenprozess mit vollständiger Versions- und Migrationskontrolle.
+
+---
+
