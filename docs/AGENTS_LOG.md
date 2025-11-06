@@ -34,3 +34,7 @@
 - `Kasse.sql` auf idempotente Definitionen mit `IF NOT EXISTS` und konsolidierten Fremdschlüsseln/Indizes umgestellt, damit wiederholte Deployments stabil laufen.
 - Vollständige Schema-Migration `migrations/MIGRATION_20251106_sync_latest_kasse.sql` hinzugefügt, die den aktuellen Dump als produktive Baseline verfügbar macht.
 - `deploy.sh` aktualisiert, damit `Kasse.sql` nicht automatisch verschoben wird und als kanonische Schemaquelle im Web-Verzeichnis verbleibt.
+
+## [2025-11-06] Login auf v2-Schema gehoben
+- `api/login.php` liest nun bevorzugt `members_v2`/`admins_v2` und fällt bei Bedarf auf Legacy-Tabellen zurück.
+- Verbesserte Fehlerrückgaben mit HTTP-Statuscodes verhindern fatale Fehler bei fehlenden Tabellen.
