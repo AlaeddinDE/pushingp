@@ -51,6 +51,7 @@ rsync -a --delete \
   --exclude "deploy.sh" \
   --exclude "AGENTS.md" \
   --exclude "deploy" \
+  --exclude ".applied_migrations" \
   "$TMP_DIR"/ "$WEB_DIR"/
 log "✅ Files synced"
 
