@@ -1,0 +1,9 @@
+<!DOCTYPE html>
+<html lang="de">
+<head><meta charset="UTF-8"><title>Pushing P</title></head>
+<body>
+  <h1>Pushing P</h1>
+  <a href="login.php">Login</a> |
+  <a href="register.php">Registrieren</a>
+</body>
+</html>

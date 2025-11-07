@@ -1,120 +1,182 @@
 <?php
-session_start();
-if (!empty($_SESSION['user'])) {
-  $redirect = !empty($_SESSION['is_admin']) ? 'admin/' : 'member.php';
-  header('Location: ' . $redirect);
-  exit;
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/db.php';
+secure_session_start();
+if (is_logged_in()) { header('Location: dashboard.php'); exit; }
+check_rate_limit('login', 5, 300);
+
+$login_error = '';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $username = trim($_POST['username'] ?? '');
+    $password = $_POST['password'] ?? '';
+    if (empty($username)) {
+        $login_error = 'Bitte Benutzername eingeben';
+    } else {
+        $stmt = $conn->prepare("SELECT id, username, name, password, role, roles, status FROM users WHERE username = ? AND status = 'active'");
+        $stmt->bind_param('s', $username);
+        $stmt->execute();
+        $stmt->bind_result($user_id, $db_username, $name, $hash, $role, $roles_json, $status);
+        if ($stmt->fetch()) {
+            $stmt->close();
+            if (empty($hash) && $password === '0000') {
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['username'] = $db_username;
+                $_SESSION['name'] = $name ?? $db_username;
+                $_SESSION['role'] = $role ?? 'user';
+                $_SESSION['roles'] = $roles_json ? json_decode($roles_json, true) : [$role ?? 'user'];
+                session_regenerate_id(true);
+                $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                $update_stmt->bind_param('i', $user_id);
+                $update_stmt->execute();
+                $update_stmt->close();
+                header('Location: settings.php?first_login=1');
+                exit;
+            }
+            if (!empty($hash) && password_verify($password, $hash)) {
+                $_SESSION['user_id'] = $user_id;
+                $_SESSION['username'] = $db_username;
+                $_SESSION['name'] = $name ?? $db_username;
+                $_SESSION['role'] = $role ?? 'user';
+                $_SESSION['roles'] = $roles_json ? json_decode($roles_json, true) : [$role ?? 'user'];
+                session_regenerate_id(true);
+                $update_stmt = $conn->prepare("UPDATE users SET last_login = NOW() WHERE id = ?");
+                $update_stmt->bind_param('i', $user_id);
+                $update_stmt->execute();
+                $update_stmt->close();
+                header('Location: dashboard.php');
+                exit;
+            }
+            $login_error = 'Falsches Passwort';
+        } else {
+            $stmt->close();
+            $login_error = 'Benutzer nicht gefunden';
+        }
+    }
 }
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Pushing P — Login</title>
-
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          fontFamily: { display: ['Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'] },
-          boxShadow: { glow: '0 0 32px rgba(99,102,241,0.25), inset 0 0 24px rgba(236,72,153,0.15)' },
-          colors: { brand: {600:'#6366f1'} }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login – PUSHING P</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        body {
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
-      }
-    }
-  </script>
-  <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&display=swap" rel="stylesheet">
-  <style>
-    :root { color-scheme: dark; }
-    html,body { height:100%; -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
-    body {
-      background: radial-gradient(1200px 800px at 10% 10%, rgba(99,102,241,0.12), transparent 55%),
-                  radial-gradient(1000px 600px at 90% 20%, rgba(236,72,153,0.10), transparent 55%),
-                  #0a0b10;
-    }
-    .grad-text {
-      background: linear-gradient(120deg,#60a5fa,#a78bfa 30%,#f472b6 60%,#22d3ee 90%);
-      -webkit-background-clip:text; color:transparent;
-    }
-    .glass { 
-      background: rgba(255,255,255,.06); 
-      border:1px solid rgba(255,255,255,.12); 
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-    }
-    .glass-strong {
-      background: rgba(255,255,255,.08);
-      border:1px solid rgba(255,255,255,.15);
-      backdrop-filter: blur(25px);
-      -webkit-backdrop-filter: blur(25px);
-    }
-    .magnet {
-      transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .magnet:hover {
-      transform: scale(1.02) translateY(-2px);
-    }
-  </style>
+        
+        .login-container {
+            max-width: 420px;
+            width: 100%;
+            padding: 20px;
+            animation: fadeIn 0.6s ease;
+        }
+        
+        .login-card {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 48px 40px;
+            animation: fadeIn 0.8s ease;
+        }
+        
+        .login-logo {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.02em;
+            text-align: center;
+            margin-bottom: 8px;
+            animation: fadeIn 1s ease;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9375rem;
+            margin-bottom: 40px;
+            animation: fadeIn 1.2s ease;
+        }
+        
+        .form-group {
+            animation: slideIn 1s ease forwards;
+            opacity: 0;
+        }
+        
+        .form-group:nth-child(1) { animation-delay: 0.3s; }
+        .form-group:nth-child(2) { animation-delay: 0.4s; }
+        
+        button {
+            animation: fadeIn 1.4s ease;
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 24px;
+            animation: fadeIn 1.6s ease;
+        }
+        
+        .back-link a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+        }
+        
+        .back-link a:hover {
+            color: var(--accent);
+        }
+    </style>
 </head>
-<body class="font-display text-white">
-  <main class="min-h-screen flex items-center justify-center px-4 relative overflow-hidden">
-    <!-- Animated Background Elements -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute top-20 left-20 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-20 right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-    </div>
+<body>
+    <div class="grain"></div>
     
-    <section class="glass-strong rounded-3xl shadow-glow w-full max-w-md p-8 relative z-10">
-      <div class="text-center mb-6">
-        <div class="h-16 w-16 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 grid place-items-center shadow-lg mx-auto mb-4">
-          <span class="text-3xl font-black">P</span>
+    <div class="login-container">
+        <div class="login-card">
+            <h1 class="login-logo">PUSHING P</h1>
+            <p class="subtitle">Crew Platform</p>
+            
+            <?php if ($login_error): ?>
+                <div class="alert alert-error"><?= escape($login_error) ?></div>
+            <?php endif; ?>
+            
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        name="username" 
+                        required 
+                        autocomplete="username"
+                        autofocus
+                        placeholder="Dein Username"
+                        value="<?= escape($_POST['username'] ?? '') ?>"
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Passwort</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        name="password" 
+                        autocomplete="current-password"
+                        placeholder="••••••••"
+                    >
+                </div>
+                
+                <button type="submit" class="btn">Anmelden</button>
+            </form>
+            
+            <div class="back-link">
+                <a href="index.php">← Zurück zur Startseite</a>
+            </div>
         </div>
-        <h1 class="text-4xl font-black grad-text mb-2">Crew Login</h1>
-        <p class="text-white/70">Name & PIN eingeben, um fortzufahren.</p>
-      </div>
-      <form id="loginForm" class="grid gap-4">
-        <div>
-          <label class="block text-sm text-white/70 mb-2">Name</label>
-          <input id="name" name="name" list="names" placeholder="Name eingeben" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600/60 transition-all" autocomplete="off">
-          <datalist id="names"></datalist>
-        </div>
-        <div>
-          <label class="block text-sm text-white/70 mb-2">PIN</label>
-          <input id="pin" name="pin" type="password" minlength="4" maxlength="6" placeholder="PIN eingeben" required class="w-full rounded-xl px-4 py-3 text-black outline-none focus:ring-2 focus:ring-brand-600/60 transition-all">
-        </div>
-        <button class="magnet rounded-2xl bg-gradient-to-r from-brand-600 to-purple-600 px-6 py-3 font-semibold shadow-lg hover:shadow-glow transition-all">
-          Einloggen 🚀
-        </button>
-        <p id="msg" class="text-red-400 text-sm text-center min-h-[20px]"></p>
-      </form>
-    </section>
-  </main>
-  <script>
-    async function loadNames(){
-      try {
-        const res = await fetch('api/get_members.php');
-        const members = await res.json();
-        const dl = document.getElementById('names');
-        members.forEach(m => {
-          const o = document.createElement('option');
-          o.value = m.name; dl.appendChild(o);
-        });
-      } catch {}
-    }
-    document.getElementById('loginForm').addEventListener('submit', async e=>{
-      e.preventDefault();
-      const fd = new FormData(e.target);
-      const res = await fetch('/api/login.php', {method:'POST', body:fd});
-      const data = await res.json().catch(()=>({error:'Serverfehler'}));
-      if(data.status==='ok') window.location.href = data.admin ? 'admin/' : 'member.php';
-      else document.getElementById('msg').textContent = data.error || 'Login fehlgeschlagen';
-    });
-    loadNames();
-  </script>
+    </div>
 </body>
 </html>
