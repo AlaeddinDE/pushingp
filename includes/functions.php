@@ -99,8 +99,17 @@ function is_admin() {
 // Require login
 function require_login() {
     if (!is_logged_in()) {
-        http_response_code(401);
-        echo json_encode(['status' => 'error', 'error' => 'Nicht angemeldet']);
+        // Check if this is an API request (JSON expected)
+        $is_api = strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false 
+                  || strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false;
+        
+        if ($is_api) {
+            http_response_code(401);
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'error' => 'Nicht angemeldet']);
+        } else {
+            header('Location: /login.php');
+        }
         exit;
     }
 }
@@ -109,8 +118,17 @@ function require_login() {
 function require_admin() {
     require_login();
     if (!is_admin()) {
-        http_response_code(403);
-        echo json_encode(['status' => 'error', 'error' => 'Keine Berechtigung']);
+        // Check if this is an API request (JSON expected)
+        $is_api = strpos($_SERVER['REQUEST_URI'] ?? '', '/api/') !== false 
+                  || strpos($_SERVER['HTTP_ACCEPT'] ?? '', 'application/json') !== false;
+        
+        if ($is_api) {
+            http_response_code(403);
+            header('Content-Type: application/json');
+            echo json_encode(['status' => 'error', 'error' => 'Keine Berechtigung']);
+        } else {
+            header('Location: /dashboard.php');
+        }
         exit;
     }
 }
