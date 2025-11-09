@@ -160,6 +160,83 @@ $current_user_id = get_current_user_id();
             display: flex;
         }
         
+        .shift-modal-content {
+            background: var(--bg-secondary);
+            padding: 32px;
+            border-radius: 16px;
+            max-width: 600px;
+            width: 90%;
+            border: 1px solid var(--accent);
+            animation: scaleIn 0.3s ease;
+        }
+        
+        .shift-modal-header {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+            color: var(--accent);
+        }
+        
+        .shift-type-selector {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        .shift-type-btn {
+            padding: 16px;
+            border-radius: 12px;
+            border: 3px solid transparent;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+            font-weight: 700;
+            font-size: 0.875rem;
+        }
+        
+        .shift-type-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .shift-type-btn.selected {
+            border-color: #fff;
+            box-shadow: 0 0 20px currentColor;
+            transform: scale(1.1);
+            animation: pulse 1s infinite;
+        }
+        
+        .shift-type-btn.early {
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            color: #000;
+        }
+        
+        .shift-type-btn.day {
+            background: linear-gradient(135deg, #2196F3, #42a5f5);
+            color: #fff;
+        }
+        
+        .shift-type-btn.late {
+            background: linear-gradient(135deg, #ff8c00, #ffa500);
+            color: #fff;
+        }
+        
+        .shift-type-btn.night {
+            background: linear-gradient(135deg, #4a148c, #6a1b9a);
+            color: #fff;
+        }
+        
+        .shift-type-btn.free {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: #fff;
+        }
+        
+        .shift-type-btn.vacation {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: #fff;
+        }
+        
         .legend-item {
             display: flex;
             align-items: center;
