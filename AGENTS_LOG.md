@@ -312,3 +312,30 @@ Default values inserted into `system_settings`:
 - Quick-Tipps-Bereich für Admin-Guidance
 
 Alle Seiten nutzen jetzt das einheitliche Design-System aus `assets/style.css`.
+
+## [2025-11-07] Auth-Fix: require_login() HTML/JSON-Erkennung
+
+### Problem:
+- `require_login()` gab immer JSON aus
+- HTML-Seiten wie settings.php zeigten 500 Error
+- User bekam JSON statt Redirect
+
+### Lösung:
+- `require_login()` erkennt jetzt Request-Typ
+- API-Requests (enthält `/api/` oder Accept: application/json) → JSON-Response
+- HTML-Seiten → Redirect zu `/login.php`
+- `require_admin()` analog angepasst → Redirect zu `/dashboard.php`
+
+Alle Seiten (dashboard, kasse, events, settings, admin_kasse) funktionieren jetzt korrekt.
+
+## [2025-11-07] User Alaeddin angelegt
+
+### Neuer Admin-User erstellt:
+- **Username**: `alaeddin`
+- **Passwort**: `PushingP2025!`
+- **PIN**: `1234`
+- **Email**: `alaeddin@pushingp.de`
+- **Rolle**: `admin`
+- **Status**: `active`
+
+User kann sich jetzt unter https://pushingp.de/login.php anmelden.

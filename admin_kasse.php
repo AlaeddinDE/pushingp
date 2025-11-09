@@ -114,7 +114,7 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
         }
     </style>
 </head>
-<body>
+<body class="admin-page">
     <div class="grain"></div>
     
     <div class="header">
