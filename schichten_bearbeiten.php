@@ -101,6 +101,16 @@ $current_user_id = get_current_user_id();
             color: #fff;
         }
         
+        .shift-free {
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            color: #fff;
+        }
+        
+        .shift-vacation {
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            color: #fff;
+        }
+        
         .week-nav-btn {
             background: var(--accent);
             color: white;
@@ -217,6 +227,14 @@ $current_user_id = get_current_user_id();
                 <span class="shift-badge shift-night">Nacht</span>
                 <span>Nachtschicht (z.B. 22:00-06:00)</span>
             </div>
+            <div class="legend-item">
+                <span class="shift-badge shift-free">Frei</span>
+                <span>Frei / Kein Dienst</span>
+            </div>
+            <div class="legend-item">
+                <span class="shift-badge shift-vacation">Urlaub</span>
+                <span>Urlaub / Abwesend</span>
+            </div>
         </div>
     </div>
 
@@ -227,6 +245,7 @@ $current_user_id = get_current_user_id();
             <form id="shiftForm">
                 <input type="hidden" id="modalUserId" name="user_id">
                 <input type="hidden" id="modalDate" name="date">
+                <input type="hidden" id="modalType" name="type">
                 
                 <div class="form-group">
                     <label>Mitglied</label>
@@ -239,24 +258,37 @@ $current_user_id = get_current_user_id();
                 </div>
                 
                 <div class="form-group">
-                    <label>Schichttyp</label>
-                    <select name="type" id="modalType" required>
-                        <option value="">-- Keine Schicht --</option>
-                        <option value="early">Frühschicht</option>
-                        <option value="day">Tagschicht</option>
-                        <option value="late">Spätschicht</option>
-                        <option value="night">Nachtschicht</option>
-                    </select>
+                    <label>Schichttyp auswählen (Farbe anklicken)</label>
+                    <div class="shift-type-selector">
+                        <div class="shift-type-btn early" onclick="selectShiftType('early')">
+                            🌅 Früh
+                        </div>
+                        <div class="shift-type-btn day" onclick="selectShiftType('day')">
+                            ☀️ Tag
+                        </div>
+                        <div class="shift-type-btn late" onclick="selectShiftType('late')">
+                            🌆 Spät
+                        </div>
+                        <div class="shift-type-btn night" onclick="selectShiftType('night')">
+                            🌙 Nacht
+                        </div>
+                        <div class="shift-type-btn free" onclick="selectShiftType('free')">
+                            ✅ Frei
+                        </div>
+                        <div class="shift-type-btn vacation" onclick="selectShiftType('vacation')">
+                            🏖️ Urlaub
+                        </div>
+                    </div>
                 </div>
                 
-                <div class="form-group">
-                    <label>Startzeit</label>
-                    <input type="time" name="start_time" id="modalStartTime">
-                </div>
-                
-                <div class="form-group">
-                    <label>Endzeit</label>
-                    <input type="time" name="end_time" id="modalEndTime">
+                <div id="timeInputs" style="display: none;">
+                    <div class="form-group">
+                        <label>Arbeitszeit (optional)</label>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <input type="time" name="start_time" id="modalStartTime" placeholder="Von">
+                            <input type="time" name="end_time" id="modalEndTime" placeholder="Bis">
+                        </div>
+                    </div>
                 </div>
                 
                 <div style="display: flex; gap: 12px; margin-top: 24px;">
@@ -280,11 +312,36 @@ const currentUserId = <?php echo $current_user_id; ?>;
 
 const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const shiftTypes = {
-    'early': { label: 'Früh', class: 'shift-early' },
-    'day': { label: 'Tag', class: 'shift-day' },
-    'late': { label: 'Spät', class: 'shift-late' },
-    'night': { label: 'Nacht', class: 'shift-night' }
+    'early': { label: 'Früh', class: 'shift-early', emoji: '🌅' },
+    'day': { label: 'Tag', class: 'shift-day', emoji: '☀️' },
+    'late': { label: 'Spät', class: 'shift-late', emoji: '🌆' },
+    'night': { label: 'Nacht', class: 'shift-night', emoji: '🌙' },
+    'free': { label: 'Frei', class: 'shift-free', emoji: '✅' },
+    'vacation': { label: 'Urlaub', class: 'shift-vacation', emoji: '🏖️' }
 };
+
+function selectShiftType(type) {
+    // Remove selected class from all
+    document.querySelectorAll('.shift-type-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    // Add selected to clicked
+    document.querySelector(`.shift-type-btn.${type}`).classList.add('selected');
+    
+    // Set hidden input
+    document.getElementById('modalType').value = type;
+    
+    // Show/hide time inputs (not needed for free/vacation)
+    const timeInputs = document.getElementById('timeInputs');
+    if (type === 'free' || type === 'vacation') {
+        timeInputs.style.display = 'none';
+        document.getElementById('modalStartTime').value = '00:00';
+        document.getElementById('modalEndTime').value = '00:00';
+    } else {
+        timeInputs.style.display = 'block';
+    }
+}
 
 async function loadData() {
     try {
@@ -380,6 +437,11 @@ function openModal(user, dateStr, existingShift) {
     const modal = document.getElementById('shiftModal');
     const form = document.getElementById('shiftForm');
     
+    // Reset all selected buttons
+    document.querySelectorAll('.shift-type-btn').forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
     document.getElementById('modalUserId').value = user.id;
     document.getElementById('modalDate').value = dateStr;
     document.getElementById('modalUserName').value = user.name || user.username;
@@ -391,13 +453,14 @@ function openModal(user, dateStr, existingShift) {
     });
     
     if (existingShift) {
-        document.getElementById('modalType').value = existingShift.type;
+        selectShiftType(existingShift.type);
         document.getElementById('modalStartTime').value = existingShift.start_time;
         document.getElementById('modalEndTime').value = existingShift.end_time;
     } else {
         form.reset();
         document.getElementById('modalUserId').value = user.id;
         document.getElementById('modalDate').value = dateStr;
+        document.getElementById('timeInputs').style.display = 'none';
     }
     
     modal.classList.add('active');
