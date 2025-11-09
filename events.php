@@ -488,6 +488,7 @@ async function deleteEvent(id) {
 }
 
 loadEvents();
+renderCalendar(); // Kalender sofort rendern, nicht erst nach Events laden
 </script>
 </body>
 </html>
