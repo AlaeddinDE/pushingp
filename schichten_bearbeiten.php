@@ -18,40 +18,38 @@ $current_user_id = get_current_user_id();
     <style>
         .shift-grid {
             display: grid;
-            grid-template-columns: 120px repeat(auto-fill, minmax(35px, 1fr));
-            gap: 4px;
+            grid-template-columns: 150px repeat(7, 1fr);
+            gap: 8px;
             margin-top: 24px;
         }
         
         .shift-header {
             background: var(--bg-tertiary);
-            padding: 8px 4px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             font-weight: 700;
             text-align: center;
-            font-size: 0.7rem;
+            font-size: 0.875rem;
         }
         
         .shift-member-name {
             background: var(--bg-secondary);
-            padding: 8px;
+            padding: 12px;
             border-radius: 8px;
             font-weight: 600;
             display: flex;
             align-items: center;
             border: 1px solid var(--border);
-            font-size: 0.875rem;
         }
         
         .shift-cell {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 4px;
-            min-height: 35px;
-            width: 35px;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            padding: 8px;
+            min-height: 60px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            cursor: default;
         }
         
         .shift-cell:hover {
@@ -141,6 +139,24 @@ $current_user_id = get_current_user_id();
             padding: 16px;
             background: var(--bg-secondary);
             border-radius: 8px;
+        }
+        
+        .shift-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        
+        .shift-modal.active {
+            display: flex;
         }
         
         .legend-item {
