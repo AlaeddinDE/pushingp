@@ -335,7 +335,7 @@ $current_user_id = get_current_user_id();
     <!-- Modal für Schicht hinzufügen/bearbeiten -->
     <div id="shiftModal" class="shift-modal">
         <div class="shift-modal-content">
-            <div class="shift-modal-header">Schicht bearbeiten</div>
+            <div class="shift-modal-header" id="modalHeader">Schicht bearbeiten</div>
             <form id="shiftForm">
                 <input type="hidden" id="modalUserId" name="user_id">
                 <input type="hidden" id="modalDate" name="date">
@@ -354,11 +354,6 @@ $current_user_id = get_current_user_id();
                     <input type="text" id="modalUserName" disabled style="opacity: 0.6;">
                 </div>
                 <?php endif; ?>
-                
-                <div class="form-group">
-                    <label>Datum</label>
-                    <input type="text" id="modalDateDisplay" disabled style="opacity: 0.6;">
-                </div>
                 
                 <div class="form-group">
                     <label>Schichttyp auswählen (Farbe anklicken)</label>
@@ -574,12 +569,15 @@ function openModal(user, dateStr, existingShift) {
     
     document.getElementById('modalUserId').value = user.id;
     document.getElementById('modalDate').value = dateStr;
-    document.getElementById('modalDateDisplay').value = new Date(dateStr).toLocaleDateString('de-DE', {
+    
+    // Update modal header with date
+    const formattedDate = new Date(dateStr).toLocaleDateString('de-DE', {
         weekday: 'long',
         day: '2-digit',
         month: 'long',
         year: 'numeric'
     });
+    document.getElementById('modalHeader').textContent = `📅 Schicht für ${formattedDate}`;
     
     if (existingShift) {
         selectShiftType(existingShift.type);
