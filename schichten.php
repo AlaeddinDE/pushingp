@@ -5,176 +5,110 @@ secure_session_start();
 require_login();
 
 $is_admin = is_admin();
-$current_user_id = get_current_user_id();
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Schichtplan – PUSHING P</title>
+    <title>Schichtplan-Übersicht – PUSHING P</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
         .shift-grid {
             display: grid;
-            grid-template-columns: 150px repeat(7, 1fr);
-            gap: 8px;
+            grid-template-columns: 120px repeat(auto-fill, minmax(30px, 1fr));
+            gap: 2px;
             margin-top: 24px;
+            overflow-x: auto;
         }
         
         .shift-header {
             background: var(--bg-tertiary);
-            padding: 12px;
-            border-radius: 8px;
+            padding: 6px 2px;
+            border-radius: 4px;
             font-weight: 700;
             text-align: center;
-            font-size: 0.875rem;
+            font-size: 0.65rem;
+            writing-mode: vertical-lr;
+            transform: rotate(180deg);
         }
         
         .shift-member-name {
             background: var(--bg-secondary);
-            padding: 12px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 6px;
             font-weight: 600;
-            display: flex;
-            align-items: center;
             border: 1px solid var(--border);
+            font-size: 0.8rem;
+            position: sticky;
+            left: 0;
+            z-index: 10;
         }
         
         .shift-cell {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px;
-            min-height: 60px;
+            border-radius: 3px;
+            min-height: 30px;
+            width: 30px;
+            transition: all 0.2s;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
         
         .shift-cell:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent);
-            transform: translateY(-2px);
+            transform: scale(1.3);
+            z-index: 20;
             box-shadow: 0 4px 12px var(--accent-glow);
         }
         
-        .shift-cell.has-shift {
-            border-color: var(--accent);
-            background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+        .shift-cell.today {
+            border: 2px solid var(--accent);
+            box-shadow: 0 0 8px var(--accent-glow);
         }
         
-        .shift-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            animation: scaleIn 0.3s ease;
-        }
+        .shift-early { background: #ffd700; }
+        .shift-day { background: #2196F3; }
+        .shift-late { background: #ff8c00; }
+        .shift-night { background: #4a148c; }
         
-        .shift-early {
-            background: #ffd700;
-            color: #000;
-        }
-        
-        .shift-late {
-            background: #ff8c00;
-            color: #fff;
-        }
-        
-        .shift-night {
-            background: #4a148c;
-            color: #fff;
-        }
-        
-        .shift-day {
-            background: #2196F3;
-            color: #fff;
-        }
-        
-        .shift-time {
-            font-size: 0.7rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-        
-        .week-nav {
+        .month-nav {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border-radius: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         
-        .week-nav-btn {
+        .month-btn {
             background: var(--accent);
             color: white;
             border: none;
-            padding: 10px 20px;
+            padding: 8px 16px;
             border-radius: 8px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s;
         }
         
-        .week-nav-btn:hover {
+        .month-btn:hover {
             background: var(--accent-hover);
             transform: scale(1.05);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
         
-        .week-label {
+        .month-label {
             font-weight: 700;
             font-size: 1.125rem;
-        }
-        
-        .shift-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 1000;
-            justify-content: center;
-            align-items: center;
-            animation: fadeIn 0.3s ease;
-        }
-        
-        .shift-modal.active {
-            display: flex;
-        }
-        
-        .shift-modal-content {
-            background: var(--bg-secondary);
-            padding: 32px;
-            border-radius: 16px;
-            max-width: 500px;
-            width: 90%;
-            border: 1px solid var(--accent);
-            animation: scaleIn 0.3s ease;
-        }
-        
-        .shift-modal-header {
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-bottom: 24px;
-            color: var(--accent);
         }
         
         .legend {
             display: flex;
             gap: 16px;
             flex-wrap: wrap;
-            margin-top: 24px;
-            padding: 16px;
+            margin-top: 20px;
+            padding: 12px;
             background: var(--bg-secondary);
             border-radius: 8px;
         }
@@ -186,16 +120,23 @@ $current_user_id = get_current_user_id();
             font-size: 0.875rem;
         }
         
-        @media (max-width: 1200px) {
-            .shift-grid {
-                grid-template-columns: 120px repeat(7, 1fr);
-                gap: 4px;
-            }
-            
-            .shift-header, .shift-member-name {
-                font-size: 0.75rem;
-                padding: 8px;
-            }
+        .legend-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .tooltip {
+            position: fixed;
+            background: var(--bg-primary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            padding: 12px;
+            font-size: 0.875rem;
+            pointer-events: none;
+            z-index: 1000;
+            display: none;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
     </style>
 </head>
@@ -221,99 +162,55 @@ $current_user_id = get_current_user_id();
 
     <div class="container">
         <div class="welcome">
-            <h1>📅 Schichtplan</h1>
-            <p class="text-secondary">Übersicht der Arbeitsschichten aller Mitglieder</p>
+            <h1>📅 Schichtplan-Übersicht</h1>
+            <p class="text-secondary">Jahresübersicht aller Arbeitsschichten</p>
         </div>
 
-        <div class="week-nav">
-            <button class="week-nav-btn" onclick="changeWeek(-1)">◀ Vorherige Woche</button>
-            <div class="week-label" id="weekLabel"></div>
-            <button class="week-nav-btn" onclick="changeWeek(1)">Nächste Woche ▶</button>
+        <div class="month-nav">
+            <a href="schichten_bearbeiten.php" class="btn">✏️ Meine Schichten bearbeiten</a>
+            <div style="display: flex; gap: 12px; align-items: center;">
+                <button class="month-btn" onclick="changeMonth(-1)">◀</button>
+                <div class="month-label" id="monthLabel"></div>
+                <button class="month-btn" onclick="changeMonth(1)">▶</button>
+            </div>
         </div>
 
-        <div class="section">
+        <div class="section" style="overflow-x: auto;">
             <div id="shiftGrid" class="shift-grid"></div>
         </div>
 
         <div class="legend">
             <div class="legend-item">
-                <span class="shift-badge shift-early">Früh</span>
-                <span>Frühschicht (z.B. 06:00-14:00)</span>
+                <div class="legend-box shift-early"></div>
+                <span>Frühschicht</span>
             </div>
             <div class="legend-item">
-                <span class="shift-badge shift-day">Tag</span>
-                <span>Tagschicht (z.B. 08:00-16:00)</span>
+                <div class="legend-box shift-day"></div>
+                <span>Tagschicht</span>
             </div>
             <div class="legend-item">
-                <span class="shift-badge shift-late">Spät</span>
-                <span>Spätschicht (z.B. 14:00-22:00)</span>
+                <div class="legend-box shift-late"></div>
+                <span>Spätschicht</span>
             </div>
             <div class="legend-item">
-                <span class="shift-badge shift-night">Nacht</span>
-                <span>Nachtschicht (z.B. 22:00-06:00)</span>
+                <div class="legend-box shift-night"></div>
+                <span>Nachtschicht</span>
             </div>
         </div>
     </div>
 
-    <!-- Modal für Schicht hinzufügen/bearbeiten -->
-    <div id="shiftModal" class="shift-modal">
-        <div class="shift-modal-content">
-            <div class="shift-modal-header">Schicht bearbeiten</div>
-            <form id="shiftForm">
-                <input type="hidden" id="modalUserId" name="user_id">
-                <input type="hidden" id="modalDate" name="date">
-                
-                <div class="form-group">
-                    <label>Mitglied</label>
-                    <input type="text" id="modalUserName" disabled style="opacity: 0.6;">
-                </div>
-                
-                <div class="form-group">
-                    <label>Datum</label>
-                    <input type="text" id="modalDateDisplay" disabled style="opacity: 0.6;">
-                </div>
-                
-                <div class="form-group">
-                    <label>Schichttyp</label>
-                    <select name="type" id="modalType" required>
-                        <option value="">-- Keine Schicht --</option>
-                        <option value="early">Frühschicht</option>
-                        <option value="day">Tagschicht</option>
-                        <option value="late">Spätschicht</option>
-                        <option value="night">Nachtschicht</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label>Startzeit</label>
-                    <input type="time" name="start_time" id="modalStartTime">
-                </div>
-                
-                <div class="form-group">
-                    <label>Endzeit</label>
-                    <input type="time" name="end_time" id="modalEndTime">
-                </div>
-                
-                <div style="display: flex; gap: 12px; margin-top: 24px;">
-                    <button type="submit" class="btn" style="flex: 1;">Speichern</button>
-                    <button type="button" class="btn btn-secondary" style="flex: 1;" onclick="closeModal()">Abbrechen</button>
-                    <button type="button" class="btn-leave" onclick="deleteShift()" style="flex: 0;">🗑️</button>
-                </div>
-            </form>
-        </div>
-    </div>
+    <div id="tooltip" class="tooltip"></div>
 
 <script>
-let currentWeekStart = new Date();
-currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1); // Montag
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
 
 let allUsers = [];
 let allShifts = [];
 
-const isAdmin = <?php echo $is_admin ? 'true' : 'false'; ?>;
-const currentUserId = <?php echo $current_user_id; ?>;
+const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+                    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
 
-const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const shiftTypes = {
     'early': { label: 'Früh', class: 'shift-early' },
     'day': { label: 'Tag', class: 'shift-day' },
@@ -334,157 +231,92 @@ async function loadData() {
         renderShiftGrid();
     } catch (e) {
         console.error('Fehler:', e);
-        allUsers = <?php
-            $users = $conn->query("SELECT id, username, name FROM users WHERE status='active' ORDER BY name ASC");
-            $userList = [];
-            while ($u = $users->fetch_assoc()) {
-                $userList[] = $u;
-            }
-            echo json_encode($userList);
-        ?>;
-        renderShiftGrid();
     }
 }
 
-function changeWeek(delta) {
-    currentWeekStart.setDate(currentWeekStart.getDate() + (delta * 7));
+function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+    } else if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+    }
     renderShiftGrid();
 }
 
 function renderShiftGrid() {
     const grid = document.getElementById('shiftGrid');
-    const weekLabel = document.getElementById('weekLabel');
+    const monthLabel = document.getElementById('monthLabel');
     
     grid.innerHTML = '';
+    monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
     
-    const weekEnd = new Date(currentWeekStart);
-    weekEnd.setDate(weekEnd.getDate() + 6);
+    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    const today = new Date().toISOString().slice(0, 10);
     
-    weekLabel.textContent = `KW ${getWeekNumber(currentWeekStart)} – ${formatDate(currentWeekStart)} bis ${formatDate(weekEnd)}`;
+    // Header-Zeile (Tage)
+    grid.appendChild(createCell('Mitglied', 'shift-member-name'));
     
-    // Header-Zeile
-    grid.appendChild(createCell('Mitglied', 'shift-header'));
-    
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(currentWeekStart);
-        date.setDate(date.getDate() + i);
-        
-        const header = createCell(`${weekdays[i]}<br>${date.getDate()}.${date.getMonth() + 1}.`, 'shift-header');
-        grid.appendChild(header);
+    for (let day = 1; day <= daysInMonth; day++) {
+        const date = new Date(currentYear, currentMonth, day);
+        const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
+        grid.appendChild(createCell(`${day}<br>${dayName}`, 'shift-header'));
     }
     
     // Mitglieder-Zeilen
     allUsers.forEach(user => {
-        const nameCell = createCell(user.name || user.username, 'shift-member-name');
-        grid.appendChild(nameCell);
+        grid.appendChild(createCell(user.name || user.username, 'shift-member-name'));
         
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(currentWeekStart);
-            date.setDate(date.getDate() + i);
-            const dateStr = date.toISOString().slice(0, 10);
-            
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
             
             const cell = document.createElement('div');
             cell.className = 'shift-cell';
             
             if (shift) {
-                cell.classList.add('has-shift');
                 const typeInfo = shiftTypes[shift.type];
-                cell.innerHTML = `
-                    <div class="shift-badge ${typeInfo.class}">${typeInfo.label}</div>
-                    <div class="shift-time">${shift.start_time.slice(0,5)} - ${shift.end_time.slice(0,5)}</div>
-                `;
+                cell.classList.add(typeInfo.class);
+                cell.dataset.shift = JSON.stringify(shift);
+                cell.dataset.user = user.name || user.username;
             }
             
-            if (isAdmin) {
-                cell.addEventListener('click', () => openModal(user, dateStr, shift));
+            if (dateStr === today) {
+                cell.classList.add('today');
             }
+            
+            cell.addEventListener('mouseenter', showTooltip);
+            cell.addEventListener('mouseleave', hideTooltip);
             
             grid.appendChild(cell);
         }
     });
 }
 
-function openModal(user, dateStr, existingShift) {
-    const modal = document.getElementById('shiftModal');
-    const form = document.getElementById('shiftForm');
+function showTooltip(e) {
+    const cell = e.target;
+    const tooltip = document.getElementById('tooltip');
     
-    document.getElementById('modalUserId').value = user.id;
-    document.getElementById('modalDate').value = dateStr;
-    document.getElementById('modalUserName').value = user.name || user.username;
-    document.getElementById('modalDateDisplay').value = new Date(dateStr).toLocaleDateString('de-DE', {
-        weekday: 'long',
-        day: '2-digit',
-        month: 'long',
-        year: 'numeric'
-    });
-    
-    if (existingShift) {
-        document.getElementById('modalType').value = existingShift.type;
-        document.getElementById('modalStartTime').value = existingShift.start_time;
-        document.getElementById('modalEndTime').value = existingShift.end_time;
-    } else {
-        form.reset();
-        document.getElementById('modalUserId').value = user.id;
-        document.getElementById('modalDate').value = dateStr;
+    if (cell.dataset.shift) {
+        const shift = JSON.parse(cell.dataset.shift);
+        const user = cell.dataset.user;
+        const typeInfo = shiftTypes[shift.type];
+        
+        tooltip.innerHTML = `
+            <strong>${user}</strong><br>
+            ${typeInfo.label}: ${shift.start_time.slice(0,5)} - ${shift.end_time.slice(0,5)}<br>
+            ${shift.date}
+        `;
+        tooltip.style.display = 'block';
+        tooltip.style.left = e.pageX + 10 + 'px';
+        tooltip.style.top = e.pageY + 10 + 'px';
     }
-    
-    modal.classList.add('active');
 }
 
-function closeModal() {
-    document.getElementById('shiftModal').classList.remove('active');
-}
-
-document.getElementById('shiftForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    
-    const fd = new FormData(e.target);
-    
-    if (!fd.get('type')) {
-        await deleteShift();
-        return;
-    }
-    
-    const resp = await fetch('/api/shift_save.php', { method: 'POST', body: fd });
-    const res = await resp.json();
-    
-    if (res.ok) {
-        closeModal();
-        loadData();
-    } else {
-        alert('Fehler beim Speichern: ' + (res.error || 'Unbekannt'));
-    }
-});
-
-async function deleteShift() {
-    if (!confirm('Schicht wirklich löschen?')) return;
-    
-    const fd = new FormData();
-    fd.set('user_id', document.getElementById('modalUserId').value);
-    fd.set('date', document.getElementById('modalDate').value);
-    
-    await fetch('/api/shift_delete.php', { method: 'POST', body: fd });
-    closeModal();
-    loadData();
-}
-
-// Modal schließen bei Klick außerhalb
-document.getElementById('shiftModal').addEventListener('click', (e) => {
-    if (e.target.id === 'shiftModal') closeModal();
-});
-
-function getWeekNumber(date) {
-    const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
-    const dayNum = d.getUTCDay() || 7;
-    d.setUTCDate(d.getUTCDate() + 4 - dayNum);
-    const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
-    return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
-}
-
-function formatDate(date) {
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+function hideTooltip() {
+    document.getElementById('tooltip').style.display = 'none';
 }
 
 function createCell(html, className) {
@@ -495,6 +327,7 @@ function createCell(html, className) {
 }
 
 loadData();
+renderShiftGrid();
 </script>
 </body>
 </html>
