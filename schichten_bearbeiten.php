@@ -53,8 +53,9 @@ $current_user_id = get_current_user_id();
         }
         
         .shift-cell:hover {
-            transform: scale(1.2);
-            z-index: 10;
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-2px);
             box-shadow: 0 4px 12px var(--accent-glow);
         }
         
