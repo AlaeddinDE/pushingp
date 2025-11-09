@@ -15,62 +15,114 @@ $is_admin = is_admin();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
+        .shift-layout {
+            display: flex;
+            gap: 24px;
+            margin-top: 24px;
+        }
+        
+        .members-sidebar {
+            width: 250px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 16px;
+            max-height: 600px;
+            overflow-y: auto;
+            position: sticky;
+            top: 80px;
+        }
+        
+        .members-sidebar h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+        
+        .member-item {
+            padding: 10px 12px;
+            margin-bottom: 8px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+        
+        .member-item:hover {
+            background: var(--bg-primary);
+            border-color: var(--accent);
+            transform: translateX(4px);
+        }
+        
+        .shift-content {
+            flex: 1;
+            overflow-x: auto;
+        }
+        
         .shift-grid {
             display: grid;
-            grid-template-columns: 120px repeat(auto-fill, minmax(30px, 1fr));
-            gap: 2px;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 6px;
             margin-top: 24px;
-            overflow-x: auto;
         }
         
         .shift-header {
             background: var(--bg-tertiary);
-            padding: 6px 2px;
-            border-radius: 4px;
+            padding: 10px 4px;
+            border-radius: 8px;
             font-weight: 700;
             text-align: center;
-            font-size: 0.65rem;
-            writing-mode: vertical-lr;
-            transform: rotate(180deg);
+            font-size: 0.75rem;
+            border: 1px solid var(--border);
         }
         
-        .shift-member-name {
-            background: var(--bg-secondary);
-            padding: 8px;
-            border-radius: 6px;
-            font-weight: 600;
-            border: 1px solid var(--border);
-            font-size: 0.8rem;
-            position: sticky;
-            left: 0;
-            z-index: 10;
+        .shift-row {
+            display: contents;
         }
         
         .shift-cell {
             background: var(--bg-secondary);
             border: 1px solid var(--border);
-            border-radius: 3px;
-            min-height: 30px;
-            width: 30px;
-            transition: all 0.2s;
+            border-radius: 6px;
+            min-height: 45px;
+            width: 45px;
+            transition: all 0.3s;
             cursor: pointer;
+            position: relative;
         }
         
         .shift-cell:hover {
-            transform: scale(1.3);
+            transform: scale(1.15);
             z-index: 20;
-            box-shadow: 0 4px 12px var(--accent-glow);
+            box-shadow: 0 6px 16px var(--accent-glow);
         }
         
         .shift-cell.today {
             border: 2px solid var(--accent);
-            box-shadow: 0 0 8px var(--accent-glow);
+            box-shadow: 0 0 12px var(--accent-glow);
+            animation: pulse 2s infinite;
         }
         
-        .shift-early { background: #ffd700; }
-        .shift-day { background: #2196F3; }
-        .shift-late { background: #ff8c00; }
-        .shift-night { background: #4a148c; }
+        .shift-early { 
+            background: linear-gradient(135deg, #ffd700, #ffed4e);
+            border-color: #ccac00;
+        }
+        .shift-day { 
+            background: linear-gradient(135deg, #2196F3, #42a5f5);
+            border-color: #1976D2;
+        }
+        .shift-late { 
+            background: linear-gradient(135deg, #ff8c00, #ffa500);
+            border-color: #cc7000;
+        }
+        .shift-night { 
+            background: linear-gradient(135deg, #4a148c, #6a1b9a);
+            border-color: #311B92;
+        }
         
         .month-nav {
             display: flex;
@@ -175,8 +227,17 @@ $is_admin = is_admin();
             </div>
         </div>
 
-        <div class="section" style="overflow-x: auto;">
-            <div id="shiftGrid" class="shift-grid"></div>
+        <div class="shift-layout">
+            <div class="members-sidebar">
+                <h3>👥 Mitglieder</h3>
+                <div id="membersList"></div>
+            </div>
+            
+            <div class="shift-content">
+                <div class="section">
+                    <div id="shiftGrid" class="shift-grid"></div>
+                </div>
+            </div>
         </div>
 
         <div class="legend">
@@ -228,10 +289,29 @@ async function loadData() {
         allUsers = await usersRes.json();
         allShifts = await shiftsRes.json();
         
+        renderMembersList();
         renderShiftGrid();
     } catch (e) {
         console.error('Fehler:', e);
     }
+}
+
+function renderMembersList() {
+    const membersList = document.getElementById('membersList');
+    membersList.innerHTML = '';
+    
+    if (allUsers.length === 0) {
+        membersList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.875rem;">Keine Schichtarbeiter</div>';
+        return;
+    }
+    
+    allUsers.forEach(user => {
+        const item = document.createElement('div');
+        item.className = 'member-item';
+        item.textContent = user.name || user.username;
+        item.dataset.userId = user.id;
+        membersList.appendChild(item);
+    });
 }
 
 function changeMonth(delta) {
@@ -256,19 +336,18 @@ function renderShiftGrid() {
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     const today = new Date().toISOString().slice(0, 10);
     
-    // Header-Zeile (Tage)
-    grid.appendChild(createCell('Mitglied', 'shift-member-name'));
-    
+    // Header-Zeile (nur Tage)
     for (let day = 1; day <= daysInMonth; day++) {
         const date = new Date(currentYear, currentMonth, day);
         const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-        grid.appendChild(createCell(`${day}<br>${dayName}`, 'shift-header'));
+        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+        const header = createCell(`<strong>${day}</strong><br><small>${dayName}</small>`, 'shift-header');
+        if (isWeekend) header.style.background = 'var(--bg-primary)';
+        grid.appendChild(header);
     }
     
-    // Mitglieder-Zeilen
+    // Mitglieder-Zeilen (Zellen für jeden Tag)
     allUsers.forEach(user => {
-        grid.appendChild(createCell(user.name || user.username, 'shift-member-name'));
-        
         for (let day = 1; day <= daysInMonth; day++) {
             const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
