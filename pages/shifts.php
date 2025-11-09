@@ -11,7 +11,7 @@ if($uid){
   $aktiv=$r&&$row=$r->fetch_assoc()?$row['aktiv']:0;
   echo "<form method='post'><button class='btn' name='toggle'>".($aktiv?"Schicht beenden":"Schicht starten")."</button></form>";
 }
-$res=$conn->query("SELECT m.name,s.aktiv,s.startzeit FROM schichten s JOIN mitglieder m ON m.id=s.mitglied_id");
+$res=$conn->query("SELECT m.name,s.aktiv,s.startzeit FROM schichten s JOIN users m ON m.id=s.mitglied_id");
 ?>
 <table><tr><th>Name</th><th>Status</th><th>Startzeit</th></tr>
 <?php while($r=$res->fetch_assoc()): ?>

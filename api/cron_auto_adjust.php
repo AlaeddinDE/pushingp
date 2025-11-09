@@ -8,7 +8,7 @@ include '/var/www/html/includes/db.php';
   - Wenn Guthaben < Pflichtbeitrag -> bucht Differenz als 'Pflicht-Einzahlung'
 */
 
-$mitglieder = $conn->query("SELECT id, name, pflicht_monatlich FROM mitglieder");
+$mitglieder = $conn->query("SELECT id, name, pflicht_monatlich FROM users");
 
 while ($m = $mitglieder->fetch_assoc()) {
     $id = $m['id'];

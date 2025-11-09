@@ -339,3 +339,593 @@ Alle Seiten (dashboard, kasse, events, settings, admin_kasse) funktionieren jetz
 - **Status**: `active`
 
 User kann sich jetzt unter https://pushingp.de/login.php anmelden.
+
+## [2025-11-09] Member Management: Konsolidierung von users/mitglieder
+
+### Problem:
+- Zwei parallele Tabellen: `users` (5 Einträge) und `mitglieder` (12 Einträge)
+- Alle Mitglieder sind User → Redundanz und Inkonsistenz
+- Keine Admin-APIs für Member-Verwaltung (Hinzufügen, Sperren, Entfernen)
+
+### Lösung:
+
+#### 1. Datenbank-Konsolidierung
+- **Migration**: `004_consolidate_members.sql`
+- Alle 12 Mitglieder von `mitglieder` → `users` migriert
+- Tabelle `mitglieder` → `mitglieder_legacy` umbenannt
+- Neue Tabelle `admin_member_actions` für Audit-Trail
+- Felder bereits vorhanden: pflicht_monatlich, shift_enabled, shift_mode, bio
+
+#### 2. Neue Admin-APIs erstellt
+Alle unter `/api/` mit Admin-Autorisierung:
+
+**a) admin_member_add.php**
+- Neues Mitglied anlegen (username, name, email, password, role)
+- Validierung: Duplikat-Check (username/email)
+- Logging: admin_member_actions (action_type='add')
+- Response: JSON mit user_id
+
+**b) admin_member_lock.php**
+- Mitglied sperren (status='locked', inaktiv_ab=NOW())
+- Schutz: Admin kann sich nicht selbst sperren
+- Logging: action_type='lock' mit Grund
+- Response: JSON success/error
+
+**c) admin_member_unlock.php**
+- Mitglied entsperren (status='active', inaktiv_ab=NULL)
+- Logging: action_type='unlock'
+- Response: JSON success/error
+
+**d) admin_member_remove.php**
+- Mitglied entfernen (status='inactive', inaktiv_ab=NOW())
+- Schutz: Admin kann sich nicht selbst entfernen
+- Logging: action_type='remove' mit Grund
+- Response: JSON success/error
+
+**e) admin_member_list.php**
+- Liste aller Mitglieder mit Balance
+- Parameter: ?include_inactive=true (optional)
+- JOIN mit v_member_balance für Saldo
+- Response: JSON Array mit allen User-Daten
+
+#### 3. Daten-Migration erfolgreich
+Vor Migration:
+- users: 5 Einträge
+- mitglieder: 12 Einträge
+
+Nach Migration:
+- users: 15 Einträge (konsolidiert)
+- mitglieder_legacy: 12 Einträge (Backup)
+
+Migrierte Member:
+- Ayyub, Adis, Salva, Elbasan, Sahin, Yassin, Vagif
+- Alessio Italien, Alessio Spanien, Bora
+
+#### 4. Audit-System
+Neue Tabelle `admin_member_actions`:
+- admin_id (FK users)
+- target_user_id (FK users)
+- action_type ENUM('add','lock','unlock','remove','reactivate')
+- reason TEXT
+- created_at TIMESTAMP
+- Alle Admin-Aktionen werden automatisch geloggt
+
+#### 5. Status-Logik
+- **active**: Normales Mitglied, kann sich einloggen
+- **locked**: Temporär gesperrt, kein Login möglich
+- **inactive**: Entfernt/ausgetreten, bleibt in DB für Historie
+
+### API-Beispiele:
+
+```bash
+# Mitglied hinzufügen
+curl -X POST https://pushingp.de/api/admin_member_add.php \
+  -H "Content-Type: application/json" \
+  -d '{"username":"newuser","name":"New User","email":"new@pushingp.de","password":"Pass123!","role":"user"}'
+
+# Mitglied sperren
+curl -X POST https://pushingp.de/api/admin_member_lock.php \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":10,"reason":"Verstoss gegen Regeln"}'
+
+# Mitglied entsperren
+curl -X POST https://pushingp.de/api/admin_member_unlock.php \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":10}'
+
+# Mitglied entfernen
+curl -X POST https://pushingp.de/api/admin_member_remove.php \
+  -H "Content-Type: application/json" \
+  -d '{"user_id":10,"reason":"Austritt aus Crew"}'
+
+# Alle Mitglieder abrufen
+curl https://pushingp.de/api/admin_member_list.php
+curl https://pushingp.de/api/admin_member_list.php?include_inactive=true
+```
+
+### Compliance:
+✅ AGENTS.md Regel 4.1: APIs in `/api/` mit JSON-Output
+✅ AGENTS.md Regel 4.2: Migration in `/migrations/auto/`
+✅ AGENTS.md Regel 6: Prepared statements, keine get_result()
+✅ AGENTS.md Regel 5: Admin-Check via `$_SESSION['role']`
+✅ AGENTS.md Regel 13: Selbstprüfung (php -l) erfolgreich
+
+### Files:
+- `/var/www/html/migrations/auto/004_consolidate_members.sql`
+- `/var/www/html/api/admin_member_add.php`
+- `/var/www/html/api/admin_member_lock.php`
+- `/var/www/html/api/admin_member_unlock.php`
+- `/var/www/html/api/admin_member_remove.php`
+- `/var/www/html/api/admin_member_list.php`
+
+**Status**: ✅ Migration applied, APIs tested, ready for deployment
+
+## [2025-11-09] Kassenstand jetzt via PayPal Pool
+
+### Problem:
+- Kassenstand wurde falsch aus `transaktionen` berechnet (286,46 €)
+- Echter Kassenstand ist im PayPal Pool: **109,05 €**
+- Alle Auszahlungen von Alaeddin sind Gruppenausgaben, keine individuellen Transaktionen
+
+### Lösung:
+
+#### 1. PayPal Pool Integration
+Neuer **setting_key** in `system_settings`:
+- `paypal_pool_amount` = aktueller Kassenstand aus PayPal Pool
+
+#### 2. Neue APIs:
+**a) api/get_paypal_pool.php**
+- Versucht automatisch den Betrag vom PayPal Pool zu scrapen
+- URL: https://www.paypal.com/pool/9etnO1r4Cl?sr=wccr
+- Speichert Betrag in `system_settings`
+
+**b) api/set_paypal_pool.php** (Admin-only)
+- Manuelles Setzen des Kassenstands
+- Input: `{"amount": 109.05}`
+- Response: JSON mit formattiertem Betrag
+
+#### 3. Kasse-Seite aktualisiert:
+- Zeigt jetzt PayPal Pool Betrag an: **109,05 €**
+- Admin kann Betrag per Button aktualisieren
+- Link zum PayPal Pool direkt in der Anzeige
+- Mitgliedersalden bleiben unverändert (aus transaktionen)
+
+#### 4. Transaktions-Logik klargestellt:
+**Gruppenkasse (PayPal Pool):**
+- EINZAHLUNG: Mitglied zahlt ein → Pool +
+- AUSZAHLUNG: Jemand zahlt für Gruppe → Pool -
+
+**Individual-Schulden (transaktionen):**
+- GRUPPENAKTION_ANTEILIG: Kosten aufgeteilt
+- SCHADEN: Individueller Schaden
+- Werden NICHT vom Pool abgezogen!
+
+### Verwendung:
+
+**Admin aktualisiert Kassenstand:**
+```javascript
+// Auf kasse.php Button klicken: "🔄 Betrag aktualisieren"
+// Oder via API:
+curl -X POST https://pushingp.de/api/set_paypal_pool.php \
+  -H "Content-Type: application/json" \
+  -d '{"amount": 109.05}'
+```
+
+**PayPal Pool Link:**
+https://www.paypal.com/pool/9etnO1r4Cl?sr=wccr
+
+### Files:
+- `/var/www/html/api/get_paypal_pool.php` (PayPal Scraper)
+- `/var/www/html/api/set_paypal_pool.php` (Manuelles Update)
+- `/var/www/html/kasse.php` (aktualisiert mit PayPal Anzeige)
+- `system_settings`: `paypal_pool_amount` = 109.05
+
+**Status**: ✅ Kassenstand jetzt korrekt: 109,05 €
+
+## [2025-11-09] PayPal Pool Auto-Scraping funktioniert!
+
+### Problem gelöst:
+Automatisches Scraping des PayPal Pools war zunächst fehlgeschlagen.
+
+### Lösung gefunden:
+**Pattern entdeckt:** `"collectedAmount":{"currencyCode":"EUR","value":"323.88"}`
+
+### Implementierung:
+1. **Scraper korrigiert** in `get_paypal_pool.php`
+   - Pattern: `/"collectedAmount":\{"currencyCode":"EUR","value":"([0-9.]+)"\}/`
+   - Funktioniert jetzt! ✅
+
+2. **Cron-Job eingerichtet:**
+   - Script: `/var/www/html/api/cron_paypal_pool.sh`
+   - Läuft alle **10 Minuten**
+   - Aktualisiert automatisch den Kassenstand
+
+3. **Aktueller Stand:**
+   - PayPal Pool: **323,88 €**
+   - (Vorher manuell: 109,05 €)
+
+### Test:
+```bash
+curl https://pushingp.de/api/get_paypal_pool.php
+# {"status":"success","amount":323.88,"formatted":"323,88 €","last_update":"2025-11-09 22:13:21"}
+```
+
+**Status**: ✅ Automatisches Scraping funktioniert perfekt!
+
+## [2025-11-09] Korrektur: currentAmount statt collectedAmount
+
+### Problem:
+Scraper holte **collectedAmount** (323,88 €) statt **currentAmount** (109,05 €)
+
+### PayPal Pool Felder erklärt:
+- **`currentAmount`**: 109,05 € ✅ (Verfügbarer Betrag - DAS IST DER RICHTIGE!)
+- **`collectedAmount`**: 323,88 € (Gesamtbetrag jemals gesammelt)
+- **`targetAmount`**: 500,00 € (Sparziel)
+
+### Fix:
+Pattern geändert von `collectedAmount` → `currentAmount`
+
+```php
+/"currentAmount":\{"currencyCode":"EUR","value":"([0-9.]+)"\}/
+```
+
+### Test:
+```bash
+curl https://pushingp.de/api/get_paypal_pool.php
+# {"status":"success","amount":109.05,"formatted":"109,05 €","last_update":"2025-11-09 22:16:02"}
+```
+
+**Status**: ✅ Jetzt wird der korrekte Betrag (109,05 €) alle 10 Minuten aktualisiert!
+
+## [2025-11-09] Komplettes Kassensystem neu: Monatliche Deckung
+
+### Was wurde komplett neu gemacht:
+
+#### 1. Alte Transaktionen archiviert
+- `transaktionen` → `transaktionen_archive_2025_11_09`
+- Frischer Start mit sauberem System!
+
+#### 2. Neues Deckungssystem (10€/Monat)
+**Neue Tabelle:** `member_payment_status`
+- Monatsbeitrag: 10,00 €
+- `gedeckt_bis`: Datum bis wann Mitglied gedeckt ist
+- `naechste_zahlung_faellig`: Wann nächste Zahlung fällig
+- `guthaben`: Aktuelles Guthaben in Euro
+
+**Neue View:** `v_member_payment_overview`
+- Status-Icons: 🟢 gedeckt | 🟡 Mahnung (7 Tage) | 🔴 überfällig
+- Sortiert nach Ablaufdatum
+
+#### 3. Startguthaben vergeben
+- **Alaeddin**: 40,00 € (gedeckt bis 09.03.2026)
+- **Alessio**: 40,00 € (gedeckt bis 09.03.2026)
+- **Ayyub**: 40,00 € (gedeckt bis 09.03.2026)
+- **Alle anderen**: 0,00 € (Zahlung fällig bis 09.12.2025)
+
+#### 4. Neue API
+**`einzahlung_buchen.php`**
+- Bucht Einzahlung
+- Aktualisiert automatisch Deckungsstatus
+- Berechnet: Guthaben / 10€ = Monate gedeckt
+- Response: neues Datum "gedeckt_bis"
+
+#### 5. Kassen-Seite komplett überarbeitet
+**Neue Anzeige:**
+- PayPal Pool Betrag (109,05 €)
+- Deckungsstatus-Tabelle mit:
+  - Name
+  - Guthaben
+  - Gedeckt bis (Datum)
+  - Nächste Zahlung (Datum)
+  - Status-Icon (🟢🟡🔴)
+- Letzte Transaktionen (neue Liste)
+
+### Status nach Reset:
+
+| Name     | Guthaben | Gedeckt bis | Nächste Zahlung | Status |
+|----------|----------|-------------|-----------------|--------|
+| Adis     | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Salva    | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Elbasan  | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Sahin    | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Yassin   | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Vagif    | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Bora     | 0,00 €   | 09.11.2025  | 09.12.2025      | 🟢      |
+| Alaeddin | 40,00 €  | 09.03.2026  | 10.03.2026      | 🟢      |
+| Alessio  | 40,00 €  | 09.03.2026  | 10.03.2026      | 🟢      |
+| Ayyub    | 40,00 €  | 09.03.2026  | 10.03.2026      | 🟢      |
+
+### Verwendung:
+
+**Einzahlung buchen:**
+```bash
+curl -X POST https://pushingp.de/api/einzahlung_buchen.php \
+  -H "Content-Type: application/json" \
+  -d '{"mitglied_id": 7, "betrag": 10.00, "beschreibung": "November 2025"}'
+```
+
+### Files:
+- `/var/www/html/migrations/auto/007_monthly_payment_tracking.sql`
+- `/var/www/html/api/einzahlung_buchen.php`
+- `/var/www/html/kasse.php` (komplett überarbeitet)
+- `transaktionen_archive_2025_11_09` (Backup der alten Daten)
+
+**Status**: ✅ Kassensystem komplett neu mit monatlicher Deckungsübersicht!
+
+## [2025-11-09] Fair-Share-System für Gruppenaktionen
+
+### Konzept:
+**Wenn aus der Kasse was bezahlt wird (z.B. Kino), bekommen die Nicht-Teilnehmer ihren Anteil gutgeschrieben!**
+
+### Beispiel:
+- **Kino**: 60€ aus der Kasse
+- **6 Leute** gehen hin → 60€ / 6 = **10€ pro Teilnehmer**
+- **4 Leute** sind nicht dabei
+- **Gutschrift**: Die 4 Nicht-Teilnehmer bekommen jeweils **10€** Guthaben
+
+### Berechnung:
+**Fair-Share = Gesamtbetrag / Anzahl Teilnehmer**
+- Kino 60€ / 6 Teilnehmer = 10€ pro Person
+- → Jeder Nicht-Teilnehmer bekommt 10€ gutgeschrieben
+
+### Implementierung:
+
+#### 1. Neue API: `gruppenaktion_buchen.php`
+**Input:**
+```json
+{
+  "betrag": 60.00,
+  "beschreibung": "Kino - The Batman",
+  "teilnehmer_ids": [4, 5, 6, 7, 8, 9]
+}
+```
+
+**Ablauf:**
+1. Alle aktiven Mitglieder holen (z.B. 10)
+2. Fair-Share berechnen: 60€ / 10 = 6€
+3. Nicht-Teilnehmer identifizieren (4 Personen)
+4. Auszahlung buchen: -60€ aus Kasse (`GRUPPENAKTION_KASSE`)
+5. Gutschrift buchen: 4x 6€ für Nicht-Teilnehmer (`GRUPPENAKTION_ANTEILIG`)
+6. Guthaben automatisch aktualisieren → `gedeckt_bis` verlängert sich!
+
+**Response:**
+```json
+{
+  "status": "success",
+  "data": {
+    "betrag": 60.00,
+    "fair_share": 6.00,
+    "anzahl_gesamt": 10,
+    "anzahl_teilnehmer": 6,
+    "anzahl_nicht_teilnehmer": 4,
+    "nicht_teilnehmer": ["Adis", "Salva", "Elbasan", "Sahin"]
+  }
+}
+```
+
+#### 2. Neue Tabelle: `gruppenaktion_teilnehmer`
+- Speichert wer bei welcher Aktion dabei war
+- Historie für spätere Auswertungen
+
+#### 3. Neue View: `v_fair_share_uebersicht`
+- Zeigt pro Mitglied: Anzahl Gutschriften + Gesamtbetrag
+
+### Transaktionstypen:
+- **GRUPPENAKTION_KASSE**: Auszahlung aus Kasse (negativ, z.B. -60€)
+- **GRUPPENAKTION_ANTEILIG**: Gutschrift für Nicht-Teilnehmer (positiv, z.B. +6€)
+
+### Vorteile:
+✅ **Fair**: Wer nicht dabei ist, wird nicht benachteiligt
+✅ **Automatisch**: Guthaben wird direkt aktualisiert
+✅ **Transparent**: Jeder sieht seine Gutschriften in der Transaktionsliste
+✅ **Monatsbeitrag-kompatibel**: Gutschrift verlängert automatisch "gedeckt_bis"
+
+### Verwendung:
+
+```bash
+# Kino-Besuch buchen (6 Leute dabei)
+curl -X POST https://pushingp.de/api/gruppenaktion_buchen.php \
+  -H "Content-Type: application/json" \
+  -d '{
+    "betrag": 60.00,
+    "beschreibung": "Kino - The Batman",
+    "teilnehmer_ids": [4, 5, 6, 7, 8, 9]
+  }'
+```
+
+### Files:
+- `/var/www/html/api/gruppenaktion_buchen.php` (neue API)
+- `/var/www/html/migrations/auto/008_fair_share_system.sql`
+
+**Status**: ✅ Fair-Share-System implementiert! Gerechtigkeit für alle! 🎯
+
+## [2025-11-09] Admin-UI: Gruppenaktion-Formular
+
+### Problem:
+Keine UI zum Buchen von Gruppenaktionen vorhanden.
+
+### Lösung:
+**Neues Formular auf Admin-Kasse-Seite** (`admin_kasse.php`)
+
+### Features:
+1. **Betrag eingeben** (z.B. 60€)
+2. **Beschreibung** (z.B. "Kino - The Batman")
+3. **Teilnehmer auswählen** (Checkboxen für alle aktiven Mitglieder)
+4. **Live-Berechnung** nach Submit:
+   - Fair-Share wird automatisch berechnet
+   - Zeigt an: Wer bekommt wie viel gutgeschrieben
+5. **Auto-Reload** nach 3 Sekunden
+
+### Anzeige nach Buchung:
+```
+✅ Gruppenaktion gebucht!
+💰 Betrag: 60,00€
+👥 Teilnehmer: 6
+🎁 Fair-Share: 10,00€ pro Person
+✨ Gutgeschrieben an: Adis, Salva, Elbasan, Sahin
+```
+
+### Verwendung:
+1. Gehe zu **https://pushingp.de/admin_kasse.php**
+2. Scrolle zu "🎬 Gruppenaktion buchen"
+3. Trage Betrag und Beschreibung ein
+4. Wähle Teilnehmer aus (Checkboxen)
+5. Klicke "🎯 Gruppenaktion buchen"
+6. Fertig! 🚀
+
+**Status**: ✅ Admin-UI für Gruppenaktionen fertig!
+
+## [2025-11-09] Events: Zahlungsoptionen hinzugefügt
+
+### Feature:
+Bei Event-Erstellung kann jetzt gewählt werden, wie bezahlt wird!
+
+### Optionen:
+1. **Jeder zahlt selbst** (private) - Standard
+2. **Aus Kasse (Pool)** - Wird aus der Gruppenkasse bezahlt
+3. **Anteilig aufteilen** - Kosten werden auf Teilnehmer verteilt
+
+### Neue Felder im Event-Formular:
+- **Kosten (€)**: Betrag eingeben
+- **Zahlungsart**: Dropdown mit 3 Optionen
+
+### Anzeige:
+Events zeigen jetzt farbige Badges:
+- 💰 **Grün**: "60€ aus Kasse" (Pool)
+- 🔀 **Orange**: "60€ anteilig" (Aufteilen)
+- 💳 **Grau**: "60€ privat" (Jeder selbst)
+
+### API-Update:
+`events_create.php` speichert jetzt:
+- `cost` (Betrag)
+- `paid_by` (pool/anteilig/private)
+
+### Verwendung:
+1. Event erstellen auf **https://pushingp.de/events.php**
+2. Kosten eingeben (z.B. 60€)
+3. Zahlungsart wählen
+4. Event wird mit Badge angezeigt
+
+**Status**: ✅ Events mit Zahlungsoptionen fertig!
+
+## [2025-11-09] Admin: Transaktionen bearbeiten & löschen
+
+### Feature:
+Admins können jetzt Transaktionen direkt auf der Kassen-Seite bearbeiten oder löschen!
+
+### Neue Funktionen:
+
+#### 1. Transaktion bearbeiten (✏️)
+- **Beschreibung ändern**
+- **Betrag ändern**
+- Guthaben wird automatisch neu berechnet
+- "Gedeckt bis" wird aktualisiert
+
+#### 2. Transaktion löschen (🗑️)
+- Setzt Status auf `storniert` (nicht komplett gelöscht!)
+- Guthaben wird neu berechnet
+- Historie bleibt erhalten
+
+### Neue APIs:
+1. **`transaktion_bearbeiten.php`**
+   - Input: `{id, betrag, beschreibung}`
+   - Aktualisiert Transaktion
+   - Berechnet Guthaben neu
+
+2. **`transaktion_loeschen.php`**
+   - Input: `{id}`
+   - Setzt `status = 'storniert'`
+   - Berechnet Guthaben neu
+
+### UI-Update (kasse.php):
+- **Neue Spalte**: "Aktionen" (nur für Admins)
+- **Buttons pro Transaktion**:
+  - ✏️ Bearbeiten
+  - 🗑️ Löschen
+
+### Ablauf beim Bearbeiten:
+1. Klick auf ✏️
+2. Prompt: Beschreibung ändern
+3. Prompt: Betrag ändern
+4. ✅ Transaktion aktualisiert
+5. Seite lädt neu
+
+### Sicherheit:
+✅ Nur Admins haben Zugriff
+✅ Transaktionen werden nicht gelöscht, nur storniert
+✅ Guthaben wird automatisch neu berechnet
+✅ Historie bleibt erhalten
+
+### Verwendung:
+1. Gehe zu **https://pushingp.de/kasse.php**
+2. Scrolle zu "Letzte Transaktionen"
+3. Klicke ✏️ zum Bearbeiten oder 🗑️ zum Löschen
+
+**Status**: ✅ Admin kann Transaktionen bearbeiten & löschen!
+
+## [2025-11-09] Admin: Vollständiges Transaktions-Management
+
+### NEU: Dedizierte Admin-Seite für Transaktionen!
+
+**URL:** https://pushingp.de/admin_transaktionen.php
+
+### Features:
+
+#### 1. **Übersichtliche Tabelle**
+- Alle Transaktionen auf einen Blick
+- Filter: Alle | Gebucht | Storniert
+- 100 neueste Transaktionen
+- ID, Datum, Typ, Mitglied, Betrag, Beschreibung, Status
+
+#### 2. **Vollständige Bearbeitung (Modal)**
+Jede Transaktion kann komplett bearbeitet werden:
+- ✏️ **Typ ändern** (EINZAHLUNG, AUSZAHLUNG, GRUPPENAKTION_KASSE, etc.)
+- 👤 **Mitglied zuweisen/ändern**
+- 💰 **Betrag ändern**
+- 📝 **Beschreibung ändern**
+- 🎯 **Status ändern** (gebucht, storniert, gesperrt)
+- 📅 **Datum & Uhrzeit ändern**
+
+#### 3. **Neue Transaktionen erstellen**
+- Button: "➕ Neue Transaktion"
+- Alle Felder editierbar
+- Guthaben wird automatisch berechnet
+
+#### 4. **Mehrere Lösch-Optionen**
+- 🚫 **Stornieren** (Status = storniert, bleibt in DB)
+- 🗑️ **Endgültig löschen** (komplett aus DB entfernen)
+
+#### 5. **Automatische Neuberechnung**
+- Guthaben wird automatisch aktualisiert
+- "Gedeckt bis" Datum wird neu berechnet
+- Betrifft nur EINZAHLUNG & GRUPPENAKTION_ANTEILIG
+
+### Neue APIs:
+
+1. **`transaktion_vollstaendig_bearbeiten.php`**
+   - Alle Felder editierbar
+   - Typ, Mitglied, Betrag, Beschreibung, Status, Datum
+
+2. **`transaktion_erstellen.php`**
+   - Neue Transaktion manuell anlegen
+   - Alle Felder frei wählbar
+
+3. **`transaktion_vollstaendig_loeschen.php`**
+   - ENDGÜLTIGES Löschen (Vorsicht!)
+   - Kann nicht rückgängig gemacht werden
+
+### Sicherheit:
+✅ Nur für Admins
+✅ Confirmation-Dialoge
+✅ Automatische Guthaben-Neuberechnung
+✅ Historie bei Stornierung erhalten
+
+### Verwendung:
+
+1. **https://pushingp.de/admin_transaktionen.php**
+2. Klicke ✏️ → Modal öffnet sich
+3. Bearbeite alle Felder
+4. Speichern → Guthaben wird neu berechnet
+
+**Du hast jetzt VOLLSTÄNDIGE Kontrolle über alle Transaktionen!** 🎯
+

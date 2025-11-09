@@ -71,6 +71,49 @@ $is_admin = is_admin();
             margin-bottom: 4px;
         }
         
+        /* Feiertage & Ferienzeiten */
+        .day-cell.holiday .day-header {
+            background: linear-gradient(135deg, #d32f2f, #f44336);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-weight: 800;
+            position: relative;
+        }
+        
+        .day-cell.holiday .day-header::before {
+            content: '🎉';
+            margin-right: 4px;
+        }
+        
+        .day-cell.vacation-period {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 235, 59, 0.1));
+        }
+        
+        .day-cell.vacation-period .day-cell {
+            border: 1px dashed #ffc107;
+        }
+        
+        .holiday-label {
+            font-size: 0.65rem;
+            color: #d32f2f;
+            font-weight: 700;
+            margin-top: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .vacation-indicator {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #ffc107, #ffeb3b);
+            border-radius: 4px 4px 0 0;
+        }
+        
         .shift-cell {
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
@@ -324,6 +367,7 @@ currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() 
 
 let allUsers = [];
 let allShifts = [];
+let allHolidays = [];
 
 const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
@@ -337,13 +381,15 @@ const shiftTypes = {
 
 async function loadData() {
     try {
-        const [usersRes, shiftsRes] = await Promise.all([
+        const [usersRes, shiftsRes, holidaysRes] = await Promise.all([
             fetch('/api/users_list.php'),
-            fetch('/api/shifts_list.php')
+            fetch('/api/shifts_list.php'),
+            fetch('/api/holidays_list.php')
         ]);
         
         allUsers = await usersRes.json();
         allShifts = await shiftsRes.json();
+        allHolidays = await holidaysRes.json();
         
         renderShiftOverview();
     } catch (e) {
@@ -410,13 +456,38 @@ function renderShiftOverview() {
                 dayCell.classList.add('today');
             }
             
+            // Check for holidays
+            const holiday = allHolidays.find(h => h.date === dateStr && h.type === 'holiday');
+            if (holiday) {
+                dayCell.classList.add('holiday');
+                dayCell.setAttribute('title', holiday.name);
+            }
+            
+            // Check if in vacation period
+            const vacationStart = allHolidays.filter(h => h.type === 'vacation_start');
+            const vacationEnd = allHolidays.filter(h => h.type === 'vacation_end');
+            
+            for (let v = 0; v < vacationStart.length; v++) {
+                const start = new Date(vacationStart[v].date);
+                const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
+                if (end && date >= start && date <= end) {
+                    dayCell.classList.add('vacation-period');
+                    break;
+                }
+            }
+            
             const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
             const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
             
-            dayCell.innerHTML = `
-                <div class="day-header">${dayName}</div>
-                <div class="day-date">${dayDate}</div>
-            `;
+            let headerHTML = `<div class="day-header">${dayName}</div>`;
+            if (holiday) {
+                headerHTML = `<div class="day-header">🎉 ${dayName}</div>`;
+            }
+            if (dayCell.classList.contains('vacation-period')) {
+                headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
+            }
+            
+            dayCell.innerHTML = headerHTML + `<div class="day-date">${dayDate}</div>`;
             
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
             

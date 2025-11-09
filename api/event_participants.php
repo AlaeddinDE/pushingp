@@ -6,7 +6,7 @@ $eid = intval($_GET['event_id'] ?? 0);
 if(!$eid){ echo json_encode([]); exit; }
 
 $q = "SELECT m.name,p.status FROM event_participants p
-      JOIN mitglieder m ON m.id=p.mitglied_id
+      JOIN users m ON m.id=p.mitglied_id
       WHERE p.event_id=$eid ORDER BY m.name";
 $res = $conn->query($q);
 $out=[];

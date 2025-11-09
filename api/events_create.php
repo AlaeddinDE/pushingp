@@ -22,7 +22,7 @@ if (!isset($_SESSION['mitglied_id'])) {
     $host === '' ||
     strpos($host, 'localhost') !== false
   ) {
-    $res = $conn->query("SELECT id, role FROM mitglieder WHERE name='Alaeddin' LIMIT 1");
+    $res = $conn->query("SELECT id, role FROM users WHERE name='Alaeddin' LIMIT 1");
     if ($r = $res->fetch_assoc()) {
       $_SESSION['mitglied_id'] = $r['id'];
       $_SESSION['role'] = $r['role'];
@@ -50,17 +50,25 @@ $location = trim($_POST['location'] ?? '');
 $desc = trim($_POST['description'] ?? '');
 $start = $_POST['start_time'] ?? null;
 $end   = $_POST['end_time'] ?? null;
+$cost = floatval($_POST['cost'] ?? 0);
+$paid_by = trim($_POST['paid_by'] ?? 'private'); // pool, anteilig, private
 
 if ($title === '' || $datum === '') {
   echo json_encode(['ok'=>false,'msg'=>'missing fields']);
   exit;
 }
 
-$stmt = $conn->prepare("INSERT INTO events (title, datum, start_time, end_time, location, description, created_by)
-                        VALUES (?,?,?,?,?,?,?)");
-$stmt->bind_param('ssssssi', $title, $datum, $start, $end, $location, $desc, $_SESSION['mitglied_id']);
+// Validate paid_by
+if (!in_array($paid_by, ['pool', 'anteilig', 'private'])) {
+  $paid_by = 'private';
+}
+
+$stmt = $conn->prepare("INSERT INTO events (title, datum, start_time, end_time, location, description, created_by, cost, paid_by)
+                        VALUES (?,?,?,?,?,?,?,?,?)");
+$stmt->bind_param('ssssssids', $title, $datum, $start, $end, $location, $desc, $_SESSION['mitglied_id'], $cost, $paid_by);
 $ok = $stmt->execute();
+$event_id = $conn->insert_id;
 $stmt->close();
 
-echo json_encode(['ok'=>$ok,'user'=>$_SESSION['mitglied_id']]);
+echo json_encode(['ok'=>$ok,'user'=>$_SESSION['mitglied_id'],'event_id'=>$event_id,'paid_by'=>$paid_by]);
 ?>

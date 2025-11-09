@@ -154,6 +154,42 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
         </div>
 
         <div class="admin-grid">
+            <!-- Gruppenaktion buchen (NEU!) -->
+            <div class="section" style="grid-column: 1 / -1;">
+                <div class="section-header">
+                    <span>🎬</span>
+                    <h2 class="section-title">Gruppenaktion buchen (Kino, Essen, etc.)</h2>
+                </div>
+                
+                <form id="gruppenaktionForm" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="form-group">
+                        <label>Betrag (€) aus Kasse</label>
+                        <input type="number" id="gruppenaktion_betrag" step="0.01" placeholder="60.00" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Beschreibung</label>
+                        <input type="text" id="gruppenaktion_beschreibung" placeholder="z.B. Kino - The Batman" required>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Wer war dabei? (Mehrfachauswahl)</label>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; margin-top: 8px;">
+                            <?php foreach($mitglieder_list as $m): ?>
+                                <label style="display: flex; align-items: center; gap: 8px; padding: 8px; background: var(--bg-tertiary); border-radius: 6px; cursor: pointer;">
+                                    <input type="checkbox" name="teilnehmer[]" value="<?= $m['id'] ?>" style="width: 18px; height: 18px;">
+                                    <span><?= htmlspecialchars($m['name']) ?></span>
+                                </label>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="background: var(--accent); grid-column: 1 / -1;">🎯 Gruppenaktion buchen</button>
+                </form>
+                
+                <div id="gruppenaktion_result" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+        
             <div class="section">
                 <div class="section-header">
                     <span>💸</span>
@@ -230,5 +266,63 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
             </div>
         </div>
     </div>
+
+    <script>
+    // Gruppenaktion buchen
+    document.getElementById('gruppenaktionForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const betrag = parseFloat(document.getElementById('gruppenaktion_betrag').value);
+        const beschreibung = document.getElementById('gruppenaktion_beschreibung').value.trim();
+        const checkboxes = document.querySelectorAll('input[name="teilnehmer[]"]:checked');
+        const teilnehmer_ids = Array.from(checkboxes).map(cb => parseInt(cb.value));
+        
+        if (teilnehmer_ids.length === 0) {
+            alert('Bitte mindestens 1 Teilnehmer auswählen!');
+            return;
+        }
+        
+        const resultDiv = document.getElementById('gruppenaktion_result');
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = 'var(--bg-tertiary)';
+        resultDiv.innerHTML = '⏳ Wird gebucht...';
+        
+        try {
+            const response = await fetch('/api/gruppenaktion_buchen.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ betrag, beschreibung, teilnehmer_ids })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                resultDiv.style.background = '#10b981';
+                resultDiv.style.color = 'white';
+                resultDiv.innerHTML = `
+                    ✅ <strong>Gruppenaktion gebucht!</strong><br>
+                    💰 Betrag: ${data.data.betrag.toFixed(2)}€<br>
+                    👥 Teilnehmer: ${data.data.anzahl_teilnehmer}<br>
+                    🎁 Fair-Share: ${data.data.fair_share.toFixed(2)}€ pro Person<br>
+                    ✨ Gutgeschrieben an: ${data.data.nicht_teilnehmer.join(', ')}
+                `;
+                
+                // Form zurücksetzen
+                e.target.reset();
+                
+                // Nach 3 Sekunden Seite neu laden
+                setTimeout(() => location.reload(), 3000);
+            } else {
+                resultDiv.style.background = '#ef4444';
+                resultDiv.style.color = 'white';
+                resultDiv.innerHTML = `❌ Fehler: ${data.error}`;
+            }
+        } catch (error) {
+            resultDiv.style.background = '#ef4444';
+            resultDiv.style.color = 'white';
+            resultDiv.innerHTML = `❌ Fehler: ${error.message}`;
+        }
+    });
+    </script>
 </body>
 </html>

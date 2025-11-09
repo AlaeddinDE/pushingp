@@ -7,7 +7,7 @@ $to   = $_GET['to'] ?? '';
 $off  = intval($_GET['offset'] ?? 0);
 
 $sql = "SELECT t.id,DATE_FORMAT(t.datum,'%Y-%m-%d %H:%i') as datum,m.name,t.typ,t.betrag,t.beschreibung
-        FROM transaktionen t LEFT JOIN mitglieder m ON m.id=t.mitglied_id WHERE 1=1";
+        FROM transaktionen t LEFT JOIN users m ON m.id=t.mitglied_id WHERE 1=1";
 if($type!==''){ $sql .= " AND t.typ='".$conn->real_escape_string($type)."'"; }
 if($mid>0){ $sql .= " AND t.mitglied_id=".$mid; }
 if($from!==''){ $sql .= " AND DATE(t.datum)>='".$conn->real_escape_string($from)."'"; }

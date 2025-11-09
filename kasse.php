@@ -13,10 +13,24 @@ if ($paypal_result && $row = $paypal_result->fetch_assoc()) {
     $paypal_amount = floatval($row['setting_value']);
 }
 
-$res1 = $conn->query("
-  SELECT m.name, ROUND(SUM(t.betrag),2) AS saldo
-  FROM transaktionen t JOIN users m ON m.id=t.mitglied_id
-  GROUP BY m.name ORDER BY saldo DESC
+// Member Payment Overview holen
+$payment_overview = $conn->query("SELECT * FROM v_member_payment_overview ORDER BY tage_bis_ablauf ASC");
+
+// Letzte Transaktionen
+$res2 = $conn->query("
+    SELECT 
+        t.id,
+        DATE_FORMAT(t.datum,'%d.%m.%Y %H:%i') AS datum, 
+        u.name, 
+        t.typ, 
+        t.betrag, 
+        t.beschreibung,
+        t.status
+    FROM transaktionen t 
+    LEFT JOIN users u ON u.id=t.mitglied_id
+    WHERE t.status = 'gebucht'
+    ORDER BY t.datum DESC 
+    LIMIT 25
 ");
 ?>
 <!DOCTYPE html>
@@ -122,22 +136,28 @@ $res1 = $conn->query("
         <div class="section">
             <div class="section-header">
                 <span>👥</span>
-                <h2 class="section-title">Mitgliedersalden</h2>
+                <h2 class="section-title">Deckungsstatus (10€/Monat)</h2>
             </div>
             
             <table class="balance-table">
                 <thead>
                     <tr>
                         <th>Name</th>
-                        <th style="text-align: right;">Saldo (€)</th>
+                        <th>Guthaben</th>
+                        <th>Gedeckt bis</th>
+                        <th>Nächste Zahlung</th>
+                        <th>Status</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($r=$res1->fetch_assoc()): ?>
+                    <?php while($m = $payment_overview->fetch_assoc()): ?>
                     <tr>
-                        <td><?= htmlspecialchars($r['name']) ?></td>
-                        <td style="text-align: right;" class="<?= $r['saldo'] >= 0 ? 'balance-positive' : 'balance-negative' ?>">
-                            <?= number_format($r['saldo'],2,',','.') ?> €
+                        <td><?= htmlspecialchars($m['name']) ?></td>
+                        <td style="text-align: right;"><?= number_format($m['guthaben'], 2, ',', '.') ?> €</td>
+                        <td><?= date('d.m.Y', strtotime($m['gedeckt_bis'])) ?></td>
+                        <td><?= date('d.m.Y', strtotime($m['naechste_zahlung_faellig'])) ?></td>
+                        <td style="text-align: center; font-size: 1.5rem;">
+                            <?= $m['status_icon'] ?>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -159,25 +179,28 @@ $res1 = $conn->query("
                         <th>Typ</th>
                         <th style="text-align: right;">Betrag (€)</th>
                         <th>Beschreibung</th>
+                        <?php if ($is_admin): ?>
+                        <th style="text-align: right;">Aktionen</th>
+                        <?php endif; ?>
                     </tr>
                 </thead>
                 <tbody>
-                    <?php
-                    $res2=$conn->query("SELECT DATE_FORMAT(t.datum,'%d.%m.%Y') AS datum, m.name, t.typ, t.betrag, t.beschreibung
-                                        FROM transaktionen t JOIN users m ON m.id=t.mitglied_id
-                                        ORDER BY t.datum DESC LIMIT 25");
-                    while($t=$res2->fetch_assoc()):
-                    ?>
-                    <tr>
+                    <?php while($t = $res2->fetch_assoc()): ?>
+                    <tr data-transaction-id="<?= $t['id'] ?? 0 ?>">
                         <td><?= $t['datum'] ?></td>
-                        <td><?= htmlspecialchars($t['name']) ?></td>
+                        <td><?= htmlspecialchars($t['name'] ?? 'System') ?></td>
                         <td><span class="badge"><?= htmlspecialchars($t['typ']) ?></span></td>
                         <td style="text-align: right;" class="<?= $t['betrag'] >= 0 ? 'balance-positive' : 'balance-negative' ?>">
                             <?= number_format($t['betrag'],2,',','.') ?> €
                         </td>
                         <td style="color: var(--text-secondary); font-size: 0.875rem;">
-                            <?= htmlspecialchars($t['beschreibung']) ?>
+                            <?= htmlspecialchars($t['beschreibung'] ?? '') ?>
                         </td>
+                        <?php if ($is_admin): ?>
+                        <td style="text-align: right;">
+                            <a href="admin_transaktionen.php?edit=<?= $t['id'] ?? 0 ?>" class="btn" style="font-size: 0.75rem; padding: 4px 8px; text-decoration: none;">✏️ Bearbeiten</a>
+                        </td>
+                        <?php endif; ?>
                     </tr>
                     <?php endwhile; ?>
                 </tbody>
@@ -187,6 +210,58 @@ $res1 = $conn->query("
 
     <?php if ($is_admin): ?>
     <script>
+    async function editTransaction(id, beschreibung, betrag) {
+        const newBeschreibung = prompt('Beschreibung ändern:', beschreibung);
+        if (newBeschreibung === null) return;
+        
+        const newBetrag = prompt('Betrag ändern:', betrag);
+        if (newBetrag === null) return;
+        
+        try {
+            const response = await fetch('/api/transaktion_bearbeiten.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    id: id, 
+                    beschreibung: newBeschreibung, 
+                    betrag: parseFloat(newBetrag) 
+                })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                alert('✅ Transaktion aktualisiert!');
+                location.reload();
+            } else {
+                alert('❌ Fehler: ' + data.error);
+            }
+        } catch (error) {
+            alert('❌ Fehler: ' + error.message);
+        }
+    }
+    
+    async function deleteTransaction(id) {
+        if (!confirm('Transaktion wirklich löschen (stornieren)?')) return;
+        
+        try {
+            const response = await fetch('/api/transaktion_loeschen.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ id: id })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                alert('✅ Transaktion storniert!');
+                location.reload();
+            } else {
+                alert('❌ Fehler: ' + data.error);
+            }
+        } catch (error) {
+            alert('❌ Fehler: ' + error.message);
+        }
+    }
+    
     async function updatePayPalAmount() {
         const newAmount = prompt('Neuer Kassenstand (aus PayPal Pool):', '<?php echo number_format($paypal_amount, 2, '.', ''); ?>');
         if (newAmount === null) return;

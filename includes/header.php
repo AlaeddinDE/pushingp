@@ -13,7 +13,7 @@ if ($res = $conn->query("SELECT IFNULL(SUM(betrag),0) AS s FROM transaktionen"))
 $now = date('H:i:s');
 $stmt = $conn->prepare("
 SELECT id,name,shift_mode,shift_start,shift_end
-FROM mitglieder
+FROM users
 WHERE shift_enabled=1
 ");
 $stmt->execute();

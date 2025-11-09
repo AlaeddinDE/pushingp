@@ -1,0 +1,71 @@
+<?php
+// API: Transaktion vollständig bearbeiten (alle Felder)
+session_start();
+header('Content-Type: application/json');
+require_once __DIR__ . '/../includes/db.php';
+
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'admin') {
+    echo json_encode(['status' => 'error', 'error' => 'Unauthorized']);
+    exit;
+}
+
+$data = json_decode(file_get_contents('php://input'), true);
+$transaction_id = intval($data['id'] ?? 0);
+$typ = trim($data['typ'] ?? '');
+$mitglied_id = !empty($data['mitglied_id']) ? intval($data['mitglied_id']) : null;
+$betrag = floatval($data['betrag'] ?? 0);
+$beschreibung = trim($data['beschreibung'] ?? '');
+$status = trim($data['status'] ?? 'gebucht');
+$datum = trim($data['datum'] ?? '');
+
+if ($transaction_id <= 0) {
+    echo json_encode(['status' => 'error', 'error' => 'Invalid transaction ID']);
+    exit;
+}
+
+// Validate typ
+$valid_types = ['EINZAHLUNG', 'AUSZAHLUNG', 'GRUPPENAKTION_KASSE', 'GRUPPENAKTION_ANTEILIG', 'SCHADEN', 'AUSGLEICH', 'RESERVIERUNG', 'UMBUCHUNG', 'KORREKTUR'];
+if (!in_array($typ, $valid_types)) {
+    echo json_encode(['status' => 'error', 'error' => 'Ungültiger Typ']);
+    exit;
+}
+
+// Validate status
+if (!in_array($status, ['gebucht', 'storniert', 'gesperrt'])) {
+    echo json_encode(['status' => 'error', 'error' => 'Ungültiger Status']);
+    exit;
+}
+
+// Datum formatieren
+if (empty($datum)) {
+    $datum = date('Y-m-d H:i:s');
+} else {
+    $datum = date('Y-m-d H:i:s', strtotime($datum));
+}
+
+// Transaktion aktualisieren
+if ($mitglied_id) {
+    $stmt = $conn->prepare("UPDATE transaktionen SET typ = ?, betrag = ?, mitglied_id = ?, beschreibung = ?, status = ?, datum = ? WHERE id = ?");
+    $stmt->bind_param("sdisssi", $typ, $betrag, $mitglied_id, $beschreibung, $status, $datum, $transaction_id);
+} else {
+    $stmt = $conn->prepare("UPDATE transaktionen SET typ = ?, betrag = ?, mitglied_id = NULL, beschreibung = ?, status = ?, datum = ? WHERE id = ?");
+    $stmt->bind_param("sdssi", $typ, $betrag, $beschreibung, $status, $datum, $transaction_id);
+}
+
+if ($stmt->execute()) {
+    $stmt->close();
+    
+    // Guthaben neu berechnen für betroffenes Mitglied
+    if ($mitglied_id && in_array($typ, ['EINZAHLUNG', 'GRUPPENAKTION_ANTEILIG']) && $status === 'gebucht') {
+        $total = $conn->query("SELECT SUM(betrag) as total FROM transaktionen WHERE mitglied_id = $mitglied_id AND typ IN ('EINZAHLUNG', 'GRUPPENAKTION_ANTEILIG') AND status = 'gebucht'")->fetch_assoc()['total'] ?? 0;
+        
+        $update = $conn->prepare("UPDATE member_payment_status SET guthaben = ?, gedeckt_bis = DATE_ADD(CURDATE(), INTERVAL FLOOR(? / monatsbeitrag) MONTH) WHERE mitglied_id = ?");
+        $update->bind_param("ddi", $total, $total, $mitglied_id);
+        $update->execute();
+        $update->close();
+    }
+    
+    echo json_encode(['status' => 'success', 'message' => 'Transaktion aktualisiert']);
+} else {
+    echo json_encode(['status' => 'error', 'error' => 'Fehler beim Aktualisieren']);
+}

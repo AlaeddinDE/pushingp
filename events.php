@@ -330,8 +330,21 @@ function renderUpcomingEvents(events) {
   upcoming.forEach(e => {
     const card = document.createElement('div');
     card.className = 'event-card';
+    
+    // Payment badge
+    let paymentBadge = '';
+    if (e.cost > 0) {
+        if (e.paid_by === 'pool') {
+            paymentBadge = `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💰 ${e.cost}€ aus Kasse</span>`;
+        } else if (e.paid_by === 'anteilig') {
+            paymentBadge = `<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">🔀 ${e.cost}€ anteilig</span>`;
+        } else {
+            paymentBadge = `<span style="background: var(--text-tertiary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💳 ${e.cost}€ privat</span>`;
+        }
+    }
+    
     card.innerHTML = `
-      <div class="event-title">${e.title}</div>
+      <div class="event-title">${e.title} ${paymentBadge}</div>
       <div class="event-meta">
         📅 ${new Date(e.datum).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
         ${e.start_time ? '⏰ ' + e.start_time : ''} ${e.end_time ? '– ' + e.end_time : ''}<br>
@@ -422,7 +435,17 @@ function selectDate(dateStr, events, dateObj) {
                     <input type="time" name="start_time" placeholder="Startzeit">
                     <input type="time" name="end_time" placeholder="Endzeit">
                     <input type="text" name="location" placeholder="Ort">
-                    <button type="submit" class="btn" style="width: 100%;">Event erstellen</button>
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                        <input type="number" name="cost" step="0.01" placeholder="Kosten (€)" min="0">
+                        <select name="paid_by" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary);">
+                            <option value="private">Jeder zahlt selbst</option>
+                            <option value="pool">Aus Kasse (Pool)</option>
+                            <option value="anteilig">Anteilig aufteilen</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 8px;">Event erstellen</button>
                     <div id="quickEventMsg" style="margin-top: 8px; font-size: 0.875rem;"></div>
                 </form>
             </div>

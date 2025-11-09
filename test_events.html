@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head><title>Test</title></head>
+<body>
+<div id="test"></div>
+<script>
+async function test() {
+    try {
+        const r = await fetch('/api/events_list.php');
+        const data = await r.json();
+        document.getElementById('test').textContent = 'Events: ' + JSON.stringify(data);
+    } catch(e) {
+        document.getElementById('test').textContent = 'Error: ' + e;
+    }
+}
+test();
+</script>
+</body>
+</html>
