@@ -91,6 +91,7 @@ if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
                 <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
                 <?php if ($is_admin_user): ?>
                     <a href="admin_kasse.php" class="nav-item">Admin</a>
                 <?php endif; ?>

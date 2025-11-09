@@ -6,9 +6,16 @@ require_login();
 
 $is_admin = is_admin();
 
+// PayPal Pool Betrag holen
+$paypal_result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'paypal_pool_amount'");
+$paypal_amount = 0.00;
+if ($paypal_result && $row = $paypal_result->fetch_assoc()) {
+    $paypal_amount = floatval($row['setting_value']);
+}
+
 $res1 = $conn->query("
   SELECT m.name, ROUND(SUM(t.betrag),2) AS saldo
-  FROM transaktionen t JOIN mitglieder m ON m.id=t.mitglied_id
+  FROM transaktionen t JOIN users m ON m.id=t.mitglied_id
   GROUP BY m.name ORDER BY saldo DESC
 ");
 ?>
@@ -71,6 +78,7 @@ $res1 = $conn->query("
                 <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
                 <?php if ($is_admin): ?>
                     <a href="admin_kasse.php" class="nav-item">Admin</a>
                 <?php endif; ?>
@@ -84,6 +92,31 @@ $res1 = $conn->query("
         <div class="welcome">
             <h1>💼 Kassenübersicht</h1>
             <p class="text-secondary">Mitgliedersalden und Transaktionen im Überblick</p>
+        </div>
+
+        <div class="section">
+            <div class="section-header">
+                <h2>💰 Kassenstand (PayPal Pool)</h2>
+            </div>
+            <div class="stats-grid" style="margin-bottom: 32px;">
+                <div class="stat-card">
+                    <div class="stat-label">Aktueller Kassenstand</div>
+                    <div class="stat-value" style="color: var(--accent);"><?php echo number_format($paypal_amount, 2, ',', '.'); ?> €</div>
+                    <div class="stat-sublabel">
+                        <a href="https://www.paypal.com/pool/9etnO1r4Cl?sr=wccr" target="_blank" style="color: var(--text-secondary); text-decoration: none;">
+                            🔗 PayPal Pool öffnen
+                        </a>
+                    </div>
+                </div>
+                <?php if ($is_admin): ?>
+                <div class="stat-card">
+                    <div class="stat-label">Admin-Aktion</div>
+                    <button onclick="updatePayPalAmount()" class="button" style="margin-top: 8px;">
+                        🔄 Betrag aktualisieren
+                    </button>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
 
         <div class="section">
@@ -131,7 +164,7 @@ $res1 = $conn->query("
                 <tbody>
                     <?php
                     $res2=$conn->query("SELECT DATE_FORMAT(t.datum,'%d.%m.%Y') AS datum, m.name, t.typ, t.betrag, t.beschreibung
-                                        FROM transaktionen t JOIN mitglieder m ON m.id=t.mitglied_id
+                                        FROM transaktionen t JOIN users m ON m.id=t.mitglied_id
                                         ORDER BY t.datum DESC LIMIT 25");
                     while($t=$res2->fetch_assoc()):
                     ?>
@@ -151,5 +184,38 @@ $res1 = $conn->query("
             </table>
         </div>
     </div>
+
+    <?php if ($is_admin): ?>
+    <script>
+    async function updatePayPalAmount() {
+        const newAmount = prompt('Neuer Kassenstand (aus PayPal Pool):', '<?php echo number_format($paypal_amount, 2, '.', ''); ?>');
+        if (newAmount === null) return;
+        
+        const amount = parseFloat(newAmount.replace(',', '.'));
+        if (isNaN(amount) || amount < 0) {
+            alert('Ungültiger Betrag!');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/set_paypal_pool.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount })
+            });
+            
+            const data = await response.json();
+            if (data.status === 'success') {
+                alert('Kassenstand aktualisiert: ' + data.formatted);
+                location.reload();
+            } else {
+                alert('Fehler: ' + data.error);
+            }
+        } catch (error) {
+            alert('Fehler beim Aktualisieren: ' + error.message);
+        }
+    }
+    </script>
+    <?php endif; ?>
 </body>
 </html>

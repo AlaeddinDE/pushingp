@@ -119,6 +119,7 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                 <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
                 <?php if ($is_admin): ?>
                     <a href="admin_kasse.php" class="nav-item">Admin</a>
                 <?php endif; ?>

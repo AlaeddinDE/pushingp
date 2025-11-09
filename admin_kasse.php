@@ -9,7 +9,7 @@ if (!is_admin()) {
     exit;
 }
 
-$mitglieder=$conn->query("SELECT id,name FROM mitglieder ORDER BY name ASC");
+$mitglieder=$conn->query("SELECT id,name FROM users WHERE status='active' ORDER BY name ASC");
 $mitglieder_list = [];
 while($m=$mitglieder->fetch_assoc()) {
     $mitglieder_list[] = $m;
@@ -17,7 +17,7 @@ while($m=$mitglieder->fetch_assoc()) {
 
 // Stats for admin dashboard
 $stats = [];
-$result = $conn->query("SELECT COUNT(*) as cnt FROM mitglieder");
+$result = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE status='active'");
 if ($result && $row = $result->fetch_assoc()) $stats['members'] = $row['cnt'];
 $result = $conn->query("SELECT COUNT(*) as cnt FROM transaktionen WHERE MONTH(datum) = MONTH(NOW())");
 if ($result && $row = $result->fetch_assoc()) $stats['transactions'] = $row['cnt'];
@@ -124,6 +124,7 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                 <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
                 <a href="admin_kasse.php" class="nav-item">Admin</a>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
