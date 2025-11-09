@@ -78,6 +78,7 @@ $is_admin = is_admin();
             border-radius: 8px;
             padding: 8px 4px;
             min-height: 60px;
+            height: 60px;
             transition: all 0.3s;
             cursor: pointer;
             display: flex;
@@ -85,6 +86,7 @@ $is_admin = is_admin();
             align-items: center;
             justify-content: center;
             font-size: 0.7rem;
+            box-sizing: border-box;
         }
         
         .shift-cell:hover {
@@ -98,6 +100,7 @@ $is_admin = is_admin();
         
         .shift-cell.today {
             border: 3px solid #fff !important;
+            padding: 6px 2px !important;
             box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4) !important;
             position: relative;
             animation: pulse-today 2s ease-in-out infinite;
@@ -125,11 +128,9 @@ $is_admin = is_admin();
         @keyframes pulse-today {
             0%, 100% {
                 transform: scale(1);
-                box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4);
             }
             50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 30px rgba(16, 65, 134, 1), 0 0 60px rgba(16, 65, 134, 0.6);
+                transform: scale(1.03);
             }
         }
         
