@@ -164,7 +164,7 @@ $current_user_id = get_current_user_id();
             background: var(--bg-secondary);
             padding: 32px;
             border-radius: 16px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
             border: 1px solid var(--accent);
             animation: scaleIn 0.3s ease;
@@ -235,6 +235,77 @@ $current_user_id = get_current_user_id();
         .shift-type-btn.vacation {
             background: linear-gradient(135deg, #f44336, #ef5350);
             color: #fff;
+        }
+        
+        .date-range-selector {
+            background: var(--bg-tertiary);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+        }
+        
+        .date-range-selector h3 {
+            font-size: 0.9rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--accent);
+        }
+        
+        .date-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+        }
+        
+        .date-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.8rem;
+        }
+        
+        .date-checkbox:hover {
+            border-color: var(--accent);
+            background: var(--bg-primary);
+        }
+        
+        .date-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
+        
+        .date-checkbox.selected {
+            border-color: var(--accent);
+            background: var(--accent);
+            color: white;
+            font-weight: 700;
+        }
+        
+        .select-all-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 12px;
+        }
+        
+        .select-all-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
         }
         
         .legend-item {
@@ -336,6 +407,7 @@ $current_user_id = get_current_user_id();
                 <input type="hidden" id="modalUserId" name="user_id">
                 <input type="hidden" id="modalDate" name="date">
                 <input type="hidden" id="modalType" name="type">
+                <input type="hidden" id="selectedDates" name="selected_dates">
                 
                 <?php if ($is_admin): ?>
                 <div class="form-group">
@@ -350,6 +422,12 @@ $current_user_id = get_current_user_id();
                     <input type="text" id="modalUserName" disabled style="opacity: 0.6;">
                 </div>
                 <?php endif; ?>
+                
+                <div class="date-range-selector">
+                    <h3>📅 Mehrere Tage auswählen (optional)</h3>
+                    <button type="button" class="select-all-btn" onclick="toggleAllDates()">Alle auswählen / abwählen</button>
+                    <div id="dateCheckboxes" class="date-checkboxes"></div>
+                </div>
                 
                 <div class="form-group">
                     <label>Schichttyp auswählen (Farbe anklicken)</label>
@@ -559,6 +637,9 @@ function openModal(user, dateStr, existingShift) {
     document.getElementById('modalUserId').value = user.id;
     document.getElementById('modalDate').value = dateStr;
     
+    // Populate date checkboxes for the current week
+    populateDateCheckboxes(dateStr);
+    
     // Update modal header with date
     const formattedDate = new Date(dateStr).toLocaleDateString('de-DE', {
         weekday: 'long',
@@ -586,9 +667,77 @@ function openModal(user, dateStr, existingShift) {
         }
         document.getElementById('modalUserId').value = user.id;
         document.getElementById('modalDate').value = dateStr;
+        populateDateCheckboxes(dateStr);
     }
     
     modal.classList.add('active');
+}
+
+function populateDateCheckboxes(clickedDate) {
+    const container = document.getElementById('dateCheckboxes');
+    container.innerHTML = '';
+    
+    // Generate 7 days from current week
+    for (let i = 0; i < 7; i++) {
+        const date = new Date(currentWeekStart);
+        date.setDate(date.getDate() + i);
+        const dateStr = date.toISOString().slice(0, 10);
+        
+        const label = document.createElement('label');
+        label.className = 'date-checkbox';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.value = dateStr;
+        checkbox.name = 'dates[]';
+        
+        // Auto-select the clicked date
+        if (dateStr === clickedDate) {
+            checkbox.checked = true;
+            label.classList.add('selected');
+        }
+        
+        checkbox.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                label.classList.add('selected');
+            } else {
+                label.classList.remove('selected');
+            }
+            updateSelectedDates();
+        });
+        
+        const dateLabel = document.createElement('span');
+        dateLabel.textContent = `${weekdays[i]} ${date.getDate()}.${date.getMonth() + 1}.`;
+        
+        label.appendChild(checkbox);
+        label.appendChild(dateLabel);
+        container.appendChild(label);
+    }
+    
+    updateSelectedDates();
+}
+
+function toggleAllDates() {
+    const checkboxes = document.querySelectorAll('#dateCheckboxes input[type="checkbox"]');
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    
+    checkboxes.forEach(cb => {
+        cb.checked = !allChecked;
+        const label = cb.closest('.date-checkbox');
+        if (cb.checked) {
+            label.classList.add('selected');
+        } else {
+            label.classList.remove('selected');
+        }
+    });
+    
+    updateSelectedDates();
+}
+
+function updateSelectedDates() {
+    const checkboxes = document.querySelectorAll('#dateCheckboxes input[type="checkbox"]:checked');
+    const dates = Array.from(checkboxes).map(cb => cb.value);
+    document.getElementById('selectedDates').value = JSON.stringify(dates);
 }
 
 function changeMember() {
@@ -629,14 +778,38 @@ document.getElementById('shiftForm').addEventListener('submit', async (e) => {
         return;
     }
     
-    const resp = await fetch('/api/shift_save.php', { method: 'POST', body: fd });
-    const res = await resp.json();
+    // Get selected dates
+    const selectedDates = JSON.parse(document.getElementById('selectedDates').value || '[]');
     
-    if (res.ok) {
+    if (selectedDates.length === 0) {
+        alert('Bitte mindestens einen Tag auswählen!');
+        return;
+    }
+    
+    // Save shift for each selected date
+    let successCount = 0;
+    for (const date of selectedDates) {
+        const shiftData = new FormData();
+        shiftData.set('user_id', fd.get('user_id'));
+        shiftData.set('date', date);
+        shiftData.set('type', fd.get('type'));
+        shiftData.set('start_time', fd.get('start_time'));
+        shiftData.set('end_time', fd.get('end_time'));
+        
+        const resp = await fetch('/api/shift_save.php', { method: 'POST', body: shiftData });
+        const res = await resp.json();
+        
+        if (res.ok) {
+            successCount++;
+        }
+    }
+    
+    if (successCount > 0) {
         closeModal();
         loadData();
+        alert(`✅ ${successCount} Schicht(en) erfolgreich gespeichert!`);
     } else {
-        alert('Fehler beim Speichern: ' + (res.error || 'Unbekannt'));
+        alert('❌ Fehler beim Speichern der Schichten!');
     }
 });
 
