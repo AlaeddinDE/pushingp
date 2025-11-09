@@ -9,7 +9,7 @@ if (!is_logged_in()) {
     exit;
 }
 
-$sql = "SELECT id, username, name FROM users WHERE status = 'active' ORDER BY name ASC";
+$sql = "SELECT id, username, name FROM users WHERE status = 'active' AND shift_enabled = 1 ORDER BY name ASC";
 $result = $conn->query($sql);
 
 $users = [];

@@ -8,10 +8,10 @@ $user_id = get_current_user_id();
 $is_admin = is_admin();
 
 // Load user data
-$stmt = $conn->prepare("SELECT username, name, email, avatar FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT username, name, email, avatar, shift_enabled FROM users WHERE id = ?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$stmt->bind_result($username, $name, $email, $avatar);
+$stmt->bind_result($username, $name, $email, $avatar, $shift_enabled);
 $stmt->fetch();
 $stmt->close();
 
@@ -25,9 +25,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $name_new = trim($_POST['name'] ?? '');
         $email_new = trim($_POST['email'] ?? '');
         $avatar_new = trim($_POST['avatar'] ?? '');
+        $shift_enabled_new = isset($_POST['shift_enabled']) ? 1 : 0;
         
-        $stmt = $conn->prepare("UPDATE users SET name=?, email=?, avatar=? WHERE id=?");
-        $stmt->bind_param('sssi', $name_new, $email_new, $avatar_new, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET name=?, email=?, avatar=?, shift_enabled=? WHERE id=?");
+        $stmt->bind_param('sssii', $name_new, $email_new, $avatar_new, $shift_enabled_new, $user_id);
         $stmt->execute();
         $stmt->close();
         $success = 'Profil gespeichert!';
@@ -171,6 +172,13 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                     <div class="form-group">
                         <label>Avatar URL</label>
                         <input type="url" name="avatar" value="<?= escape($avatar) ?>" placeholder="https://...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="shift_enabled" value="1" <?= $shift_enabled ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>Ich arbeite in Schichten (im Schichtplan anzeigen)</span>
+                        </label>
                     </div>
                     
                     <button type="submit" class="btn">Profil speichern</button>
