@@ -97,8 +97,45 @@ $is_admin = is_admin();
         }
         
         .shift-cell.today {
-            border: 2px solid var(--accent);
-            box-shadow: 0 0 12px var(--accent-glow);
+            border: 3px solid #fff !important;
+            box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4) !important;
+            position: relative;
+            animation: pulse-today 2s ease-in-out infinite;
+        }
+        
+        .shift-cell.today::before {
+            content: '●';
+            position: absolute;
+            top: 2px;
+            right: 2px;
+            color: #fff;
+            font-size: 0.6rem;
+            text-shadow: 0 0 8px var(--accent);
+            animation: blink 1.5s ease-in-out infinite;
+        }
+        
+        .day-cell.today .day-header {
+            background: var(--accent);
+            color: white;
+            padding: 4px;
+            border-radius: 4px;
+            font-weight: 800;
+        }
+        
+        @keyframes pulse-today {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 30px rgba(16, 65, 134, 1), 0 0 60px rgba(16, 65, 134, 0.6);
+            }
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
         }
         
         .shift-early { 
@@ -367,6 +404,11 @@ function renderShiftOverview() {
             
             const dayCell = document.createElement('div');
             dayCell.className = 'day-cell';
+            
+            // Mark today's column
+            if (dateStr === today) {
+                dayCell.classList.add('today');
+            }
             
             const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
             const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
