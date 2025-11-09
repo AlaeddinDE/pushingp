@@ -180,13 +180,14 @@ $current_user_id = get_current_user_id();
             <p class="text-secondary">Trage deine Arbeitszeiten ein</p>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
-            <a href="schichten_bearbeiten.php" class="btn">✏️ Meine Schichten bearbeiten</a>
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <button class="week-nav-btn" onclick="changeMonth(-1)">◀</button>
-                <div class="week-label" id="monthLabel"></div>
-                <button class="week-nav-btn" onclick="changeMonth(1)">▶</button>
-            </div>
+        <div style="margin-bottom: 24px;">
+            <a href="schichten.php" class="btn btn-secondary">← Zurück zur Übersicht</a>
+        </div>
+
+        <div class="week-nav">
+            <button class="week-nav-btn" onclick="changeWeek(-1)">◀ Vorherige Woche</button>
+            <div class="week-label" id="weekLabel"></div>
+            <button class="week-nav-btn" onclick="changeWeek(1)">Nächste Woche ▶</button>
         </div>
 
         <div class="section">
