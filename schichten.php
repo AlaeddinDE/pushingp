@@ -50,7 +50,7 @@ $is_admin = is_admin();
         .week-grid {
             display: grid;
             grid-template-columns: repeat(14, 1fr);
-            gap: 6px;
+            gap: 3px;
             flex: 1;
         }
         
@@ -65,38 +65,38 @@ $is_admin = is_admin();
         }
         
         .day-header {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-weight: 700;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--text-secondary);
         }
         
         .day-date {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-secondary);
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
         
         .holiday-name {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: #d32f2f;
             font-weight: 700;
-            margin-bottom: 4px;
-            line-height: 1.2;
-            padding: 2px 4px;
+            margin-bottom: 2px;
+            line-height: 1.1;
+            padding: 1px 3px;
             background: rgba(211, 47, 47, 0.1);
-            border-radius: 4px;
+            border-radius: 3px;
         }
         
         .vacation-name {
-            font-size: 0.6rem;
+            font-size: 0.55rem;
             color: #f57c00;
             font-weight: 700;
-            margin-bottom: 4px;
-            line-height: 1.2;
-            padding: 2px 4px;
+            margin-bottom: 2px;
+            line-height: 1.1;
+            padding: 1px 3px;
             background: rgba(255, 193, 7, 0.2);
-            border-radius: 4px;
+            border-radius: 3px;
         }
         
         /* Feiertage & Ferienzeiten */
@@ -145,17 +145,17 @@ $is_admin = is_admin();
         .shift-cell {
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 8px 4px;
-            min-height: 60px;
-            height: 60px;
+            border-radius: 6px;
+            padding: 6px 2px;
+            min-height: 55px;
+            height: 55px;
             transition: all 0.3s;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             box-sizing: border-box;
         }
         
@@ -169,8 +169,8 @@ $is_admin = is_admin();
         }
         
         .shift-cell.today {
-            border: 3px solid #fff !important;
-            padding: 6px 2px !important;
+            border: 2px solid #fff !important;
+            padding: 5px 1px !important;
             box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4) !important;
             position: relative;
             animation: pulse-today 2s ease-in-out infinite;
@@ -179,10 +179,10 @@ $is_admin = is_admin();
         .shift-cell.today::before {
             content: '●';
             position: absolute;
-            top: 2px;
-            right: 2px;
+            top: 1px;
+            right: 1px;
             color: #fff;
-            font-size: 0.6rem;
+            font-size: 0.5rem;
             text-shadow: 0 0 8px var(--accent);
             animation: blink 1.5s ease-in-out infinite;
         }
