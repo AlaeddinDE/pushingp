@@ -430,9 +430,21 @@ function renderShiftGrid() {
             if (shift) {
                 cell.classList.add('has-shift');
                 const typeInfo = shiftTypes[shift.type];
+                
+                // Emoji und Label
+                const displayLabel = `${typeInfo.emoji} ${typeInfo.label}`;
+                
+                // Zeit nur anzeigen wenn nicht Frei/Urlaub und nicht 00:00
+                let timeDisplay = '';
+                if (shift.type !== 'free' && shift.type !== 'vacation') {
+                    if (shift.start_time && shift.end_time && shift.start_time !== '00:00:00') {
+                        timeDisplay = `<div class="shift-time">${shift.start_time.slice(0,5)} - ${shift.end_time.slice(0,5)}</div>`;
+                    }
+                }
+                
                 cell.innerHTML = `
-                    <div class="shift-badge ${typeInfo.class}">${typeInfo.label}</div>
-                    <div class="shift-time">${shift.start_time.slice(0,5)} - ${shift.end_time.slice(0,5)}</div>
+                    <div class="shift-badge ${typeInfo.class}">${displayLabel}</div>
+                    ${timeDisplay}
                 `;
             }
             
