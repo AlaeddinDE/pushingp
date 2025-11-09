@@ -9,6 +9,26 @@ $username = $_SESSION['username'] ?? 'User';
 $name = $_SESSION['name'] ?? $username;
 $is_admin_user = is_admin();
 
+// Alle AKTIVEN Schichten (egal wann gestartet)
+$next_24h_shifts = [];
+$result = $conn->query("
+    SELECT 
+        s.mitglied_id,
+        s.startzeit,
+        s.aktiv,
+        u.name,
+        u.id
+    FROM schichten s
+    JOIN users u ON u.id = s.mitglied_id
+    WHERE s.aktiv = 1
+    ORDER BY u.name ASC
+");
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $next_24h_shifts[] = $row;
+    }
+}
+
 $stats = [];
 $result = $conn->query("SELECT kassenstand_verfuegbar FROM v_kasse_position");
 if ($result && $row = $result->fetch_assoc()) $stats['balance'] = floatval($row['kassenstand_verfuegbar']);
@@ -130,7 +150,114 @@ if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
             </div>
         </div>
 
+        <!-- Live Schichten Timeline (24h) -->
+        <div class="section" style="margin-bottom: 32px;">
+            <div class="section-header">
+                <span>🔴</span>
+                <h2 class="section-title">Aktive Schichten (LIVE)</h2>
+                <div id="currentTime" style="color: var(--text-secondary); font-size: 0.875rem;"></div>
+            </div>
+            
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <?php if (empty($next_24h_shifts)): ?>
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        Aktuell keine aktiven Schichten
+                    </div>
+                <?php else: ?>
+                    <!-- Aktive Schichten als Karten -->
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <?php 
+                        $colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
+                        $color_index = 0;
+                        foreach($next_24h_shifts as $shift): 
+                            $shift_color = $colors[$color_index % count($colors)];
+                            $color_index++;
+                            $shift_start = new DateTime($shift['startzeit']);
+                            $now = new DateTime();
+                            $diff = $now->diff($shift_start);
+                            
+                            if ($shift_start > $now) {
+                                $duration_text = "startet in " . ($diff->days * 24 + $diff->h) . "h " . $diff->i . "min";
+                            } else {
+                                $duration_text = "seit " . ($diff->days * 24 + $diff->h) . "h " . $diff->i . "min";
+                            }
+                        ?>
+                        <div style="background: <?= $shift_color ?>; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; overflow: hidden;">
+                            <!-- Pulse Animation -->
+                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.1); animation: pulse 2s infinite;"></div>
+                            
+                            <div style="position: relative; z-index: 1;">
+                                <div style="font-size: 2rem; margin-bottom: 8px;">🔴</div>
+                                <div style="color: white; font-weight: 700; font-size: 1.25rem; margin-bottom: 4px;">
+                                    <?= htmlspecialchars($shift['name']) ?>
+                                </div>
+                                <div style="color: rgba(255,255,255,0.9); font-size: 0.875rem; margin-bottom: 8px;">
+                                    seit <?= $shift_start->format('d.m.Y H:i') ?> Uhr
+                                </div>
+                                <div style="background: rgba(0,0,0,0.2); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; display: inline-block;">
+                                    <?= $duration_text ?>
+                                </div>
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                    
+                    <style>
+                    @keyframes pulse {
+                        0%, 100% { opacity: 0.3; }
+                        50% { opacity: 0.6; }
+                    }
+                    </style>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <script>
+        // Live-Update der aktuellen Zeit
+        function updateCurrentTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('de-DE', { weekday: 'long', day: '2-digit', month: 'long' });
+            document.getElementById('currentTime').textContent = `${dateStr}, ${timeStr}`;
+        }
+        
+        updateCurrentTime();
+        setInterval(updateCurrentTime, 1000);
+        
+        // Seite alle 30 Sekunden neu laden für aktuelle Schicht-Dauer
+        setInterval(() => location.reload(), 30000);
+        </script>
+
         <div class="grid">
+            <!-- Schichten der nächsten 24 Stunden -->
+            <div class="section" style="grid-column: 1 / -1;">
+                <div class="section-header">
+                    <span>🕐</span>
+                    <h2 class="section-title">Schichten nächste 24 Stunden</h2>
+                </div>
+                <?php if (empty($next_24h_shifts)): ?>
+                    <div class="empty-state">Keine Schichten in den nächsten 24 Stunden</div>
+                <?php else: ?>
+                    <div style="display: grid; gap: 12px;">
+                        <?php foreach($next_24h_shifts as $shift): ?>
+                        <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <div style="font-weight: 600; font-size: 1.125rem;">
+                                    <?= htmlspecialchars($shift['name']) ?>
+                                </div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 4px;">
+                                    📅 <?= date('d.m.Y H:i', strtotime($shift['startzeit'])) ?> Uhr
+                                </div>
+                            </div>
+                            <div style="padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; font-weight: 600;">
+                                🔴 Live
+                            </div>
+                        </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+
             <div class="section">
                 <div class="section-header">
                     <span>📅</span>

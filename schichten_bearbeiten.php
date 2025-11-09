@@ -450,38 +450,6 @@ $current_user_id = get_current_user_id();
                     </div>
                 </div>
                 
-                <div class="form-group" style="margin-top: 20px;">
-                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-weight: 700;">
-                        <input type="checkbox" id="enableMultiShift" style="width: 20px; height: 20px; cursor: pointer; accent-color: var(--accent);">
-                        <span>🔄 Mehrere Schichttypen gleichzeitig eintragen</span>
-                    </label>
-                    <div id="multiShiftContainer" style="display: none; margin-top: 12px;">
-                        <div style="background: var(--bg-tertiary); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                            <p style="font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 12px;">
-                                ℹ️ Klicke auf die Schichttypen, die du für die ausgewählten Tage eintragen möchtest:
-                            </p>
-                            <div class="shift-type-selector" id="multiShiftSelector">
-                                <div class="shift-type-btn early" onclick="toggleMultiShift('early')" data-shift-type="early">
-                                    🌅 Früh
-                                </div>
-                                <div class="shift-type-btn late" onclick="toggleMultiShift('late')" data-shift-type="late">
-                                    🌆 Spät
-                                </div>
-                                <div class="shift-type-btn night" onclick="toggleMultiShift('night')" data-shift-type="night">
-                                    🌙 Nacht
-                                </div>
-                                <div class="shift-type-btn free" onclick="toggleMultiShift('free')" data-shift-type="free">
-                                    ✅ Frei
-                                </div>
-                                <div class="shift-type-btn vacation" onclick="toggleMultiShift('vacation')" data-shift-type="vacation">
-                                    🏖️ Urlaub
-                                </div>
-                            </div>
-                            <div id="multiShiftPreview" style="margin-top: 12px; font-size: 0.85rem; color: var(--accent); font-weight: 700;"></div>
-                        </div>
-                    </div>
-                </div>
-                
                 <input type="hidden" name="start_time" id="modalStartTime">
                 <input type="hidden" name="end_time" id="modalEndTime">
                 
@@ -504,8 +472,6 @@ let allShifts = [];
 const isAdmin = <?php echo $is_admin ? 'true' : 'false'; ?>;
 const currentUserId = <?php echo $current_user_id; ?>;
 
-let selectedMultiShifts = [];
-
 const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const shiftTypes = {
     'early': { label: 'Früh', class: 'shift-early', emoji: '🌅', start: '06:00', end: '14:00' },
@@ -514,49 +480,6 @@ const shiftTypes = {
     'free': { label: 'Frei', class: 'shift-free', emoji: '✅', start: '00:00', end: '00:00' },
     'vacation': { label: 'Urlaub', class: 'shift-vacation', emoji: '🏖️', start: '00:00', end: '00:00' }
 };
-
-// Toggle multi-shift mode
-document.getElementById('enableMultiShift').addEventListener('change', (e) => {
-    const container = document.getElementById('multiShiftContainer');
-    const singleSelector = document.querySelector('.shift-type-selector');
-    
-    if (e.target.checked) {
-        container.style.display = 'block';
-        singleSelector.style.opacity = '0.3';
-        singleSelector.style.pointerEvents = 'none';
-    } else {
-        container.style.display = 'none';
-        singleSelector.style.opacity = '1';
-        singleSelector.style.pointerEvents = 'auto';
-        selectedMultiShifts = [];
-        updateMultiShiftPreview();
-    }
-});
-
-function toggleMultiShift(type) {
-    const btn = document.querySelector(`#multiShiftSelector .shift-type-btn[data-shift-type="${type}"]`);
-    
-    if (selectedMultiShifts.includes(type)) {
-        selectedMultiShifts = selectedMultiShifts.filter(t => t !== type);
-        btn.classList.remove('selected');
-    } else {
-        selectedMultiShifts.push(type);
-        btn.classList.add('selected');
-    }
-    
-    updateMultiShiftPreview();
-}
-
-function updateMultiShiftPreview() {
-    const preview = document.getElementById('multiShiftPreview');
-    
-    if (selectedMultiShifts.length === 0) {
-        preview.textContent = '';
-    } else {
-        const labels = selectedMultiShifts.map(type => shiftTypes[type].emoji + ' ' + shiftTypes[type].label).join(' + ');
-        preview.textContent = `✨ Ausgewählt: ${labels}`;
-    }
-}
 
 function selectShiftType(type) {
     // Remove selected class from all in single selector
@@ -687,14 +610,6 @@ function openModal(user, dateStr, existingShift) {
     document.querySelectorAll('.shift-type-btn').forEach(btn => {
         btn.classList.remove('selected');
     });
-    
-    // Reset multi-shift mode
-    document.getElementById('enableMultiShift').checked = false;
-    document.getElementById('multiShiftContainer').style.display = 'none';
-    document.querySelector('.shift-type-selector').style.opacity = '1';
-    document.querySelector('.shift-type-selector').style.pointerEvents = 'auto';
-    selectedMultiShifts = [];
-    updateMultiShiftPreview();
     
     // Populate user selector for admins
     if (isAdmin) {
@@ -849,7 +764,11 @@ document.getElementById('shiftForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
     const fd = new FormData(e.target);
-    const isMultiShiftMode = document.getElementById('enableMultiShift').checked;
+    
+    if (!fd.get('type')) {
+        await deleteShift();
+        return;
+    }
     
     // Get selected dates
     const selectedDates = JSON.parse(document.getElementById('selectedDates').value || '[]');
@@ -859,54 +778,15 @@ document.getElementById('shiftForm').addEventListener('submit', async (e) => {
         return;
     }
     
-    let shiftsToSave = [];
-    
-    if (isMultiShiftMode) {
-        // Multi-shift mode: save multiple shift types
-        if (selectedMultiShifts.length === 0) {
-            alert('Bitte mindestens einen Schichttyp auswählen!');
-            return;
-        }
-        
-        // Create all combinations of dates and shift types
-        for (const date of selectedDates) {
-            for (const shiftType of selectedMultiShifts) {
-                shiftsToSave.push({
-                    user_id: fd.get('user_id'),
-                    date: date,
-                    type: shiftType,
-                    start_time: shiftTypes[shiftType].start,
-                    end_time: shiftTypes[shiftType].end
-                });
-            }
-        }
-    } else {
-        // Single shift mode: save one type for all dates
-        if (!fd.get('type')) {
-            await deleteShift();
-            return;
-        }
-        
-        for (const date of selectedDates) {
-            shiftsToSave.push({
-                user_id: fd.get('user_id'),
-                date: date,
-                type: fd.get('type'),
-                start_time: fd.get('start_time'),
-                end_time: fd.get('end_time')
-            });
-        }
-    }
-    
-    // Save all shifts
+    // Save shift for each selected date
     let successCount = 0;
-    for (const shift of shiftsToSave) {
+    for (const date of selectedDates) {
         const shiftData = new FormData();
-        shiftData.set('user_id', shift.user_id);
-        shiftData.set('date', shift.date);
-        shiftData.set('type', shift.type);
-        shiftData.set('start_time', shift.start_time);
-        shiftData.set('end_time', shift.end_time);
+        shiftData.set('user_id', fd.get('user_id'));
+        shiftData.set('date', date);
+        shiftData.set('type', fd.get('type'));
+        shiftData.set('start_time', fd.get('start_time'));
+        shiftData.set('end_time', fd.get('end_time'));
         
         const resp = await fetch('/api/shift_save.php', { method: 'POST', body: shiftData });
         const res = await resp.json();
@@ -919,13 +799,7 @@ document.getElementById('shiftForm').addEventListener('submit', async (e) => {
     if (successCount > 0) {
         closeModal();
         loadData();
-        
-        if (isMultiShiftMode) {
-            const shiftTypeLabels = selectedMultiShifts.map(t => shiftTypes[t].emoji + ' ' + shiftTypes[t].label).join(', ');
-            alert(`✅ ${successCount} Schicht(en) erfolgreich gespeichert!\n(${selectedDates.length} Tag(e) × ${selectedMultiShifts.length} Schichttyp(en))\n\nSchichten: ${shiftTypeLabels}`);
-        } else {
-            alert(`✅ ${successCount} Schicht(en) erfolgreich gespeichert!`);
-        }
+        alert(`✅ ${successCount} Schicht(en) erfolgreich gespeichert!`);
     } else {
         alert('❌ Fehler beim Speichern der Schichten!');
     }

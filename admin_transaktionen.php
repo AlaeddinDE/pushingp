@@ -9,6 +9,30 @@ if (!is_admin()) {
     exit;
 }
 
+// Transaktion zum Bearbeiten laden (wenn edit Parameter)
+$edit_transaction = null;
+$is_new = false;
+if (isset($_GET['edit'])) {
+    if ($_GET['edit'] === 'new') {
+        $is_new = true;
+        $edit_transaction = [
+            'id' => 0,
+            'typ' => 'EINZAHLUNG',
+            'mitglied_id' => null,
+            'betrag' => 0,
+            'beschreibung' => '',
+            'status' => 'gebucht',
+            'datum' => date('Y-m-d H:i:s')
+        ];
+    } else {
+        $edit_id = intval($_GET['edit']);
+        $edit_result = $conn->query("SELECT * FROM transaktionen WHERE id = $edit_id");
+        if ($edit_result && $edit_result->num_rows > 0) {
+            $edit_transaction = $edit_result->fetch_assoc();
+        }
+    }
+}
+
 // Alle Transaktionen holen (auch stornierte)
 $filter = $_GET['filter'] ?? 'alle';
 $where = "";
@@ -126,6 +150,70 @@ while($m = $mitglieder->fetch_assoc()) {
             <p class="text-secondary">Alle Transaktionen bearbeiten, löschen und neu erstellen</p>
         </div>
 
+        <?php if ($edit_transaction): ?>
+        <!-- Edit Form (direkt sichtbar wenn ?edit=ID) -->
+        <div class="section" style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+            <h2><?= $is_new ? '➕ Neue Transaktion erstellen' : '✏️ Transaktion #' . $edit_transaction['id'] . ' bearbeiten' ?></h2>
+            <form id="directEditForm" style="display: grid; gap: 16px; margin-top: 24px; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                <input type="hidden" id="direct_edit_id" value="<?= $edit_transaction['id'] ?>">
+                <input type="hidden" id="is_new" value="<?= $is_new ? '1' : '0' ?>">
+                
+                <div class="form-group">
+                    <label>Typ</label>
+                    <select id="direct_edit_typ" required>
+                        <option value="EINZAHLUNG" <?= $edit_transaction['typ'] === 'EINZAHLUNG' ? 'selected' : '' ?>>EINZAHLUNG</option>
+                        <option value="AUSZAHLUNG" <?= $edit_transaction['typ'] === 'AUSZAHLUNG' ? 'selected' : '' ?>>AUSZAHLUNG</option>
+                        <option value="GRUPPENAKTION_KASSE" <?= $edit_transaction['typ'] === 'GRUPPENAKTION_KASSE' ? 'selected' : '' ?>>GRUPPENAKTION_KASSE</option>
+                        <option value="GRUPPENAKTION_ANTEILIG" <?= $edit_transaction['typ'] === 'GRUPPENAKTION_ANTEILIG' ? 'selected' : '' ?>>GRUPPENAKTION_ANTEILIG</option>
+                        <option value="SCHADEN" <?= $edit_transaction['typ'] === 'SCHADEN' ? 'selected' : '' ?>>SCHADEN</option>
+                        <option value="AUSGLEICH" <?= $edit_transaction['typ'] === 'AUSGLEICH' ? 'selected' : '' ?>>AUSGLEICH</option>
+                        <option value="KORREKTUR" <?= $edit_transaction['typ'] === 'KORREKTUR' ? 'selected' : '' ?>>KORREKTUR</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Mitglied</label>
+                    <select id="direct_edit_mitglied_id">
+                        <option value="">-- Kein Mitglied (System) --</option>
+                        <?php foreach($mitglieder_list as $m): ?>
+                        <option value="<?= $m['id'] ?>" <?= $edit_transaction['mitglied_id'] == $m['id'] ? 'selected' : '' ?>><?= htmlspecialchars($m['name']) ?></option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Betrag (€)</label>
+                    <input type="number" id="direct_edit_betrag" step="0.01" value="<?= $edit_transaction['betrag'] ?>" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Beschreibung</label>
+                    <input type="text" id="direct_edit_beschreibung" value="<?= htmlspecialchars($edit_transaction['beschreibung'] ?? '') ?>">
+                </div>
+
+                <div class="form-group">
+                    <label>Status</label>
+                    <select id="direct_edit_status">
+                        <option value="gebucht" <?= $edit_transaction['status'] === 'gebucht' ? 'selected' : '' ?>>gebucht</option>
+                        <option value="storniert" <?= $edit_transaction['status'] === 'storniert' ? 'selected' : '' ?>>storniert</option>
+                        <option value="gesperrt" <?= $edit_transaction['status'] === 'gesperrt' ? 'selected' : '' ?>>gesperrt</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Datum</label>
+                    <input type="datetime-local" id="direct_edit_datum" value="<?= date('Y-m-d\TH:i', strtotime($edit_transaction['datum'])) ?>">
+                </div>
+
+                <div style="grid-column: 1 / -1; display: flex; gap: 8px;">
+                    <button type="submit" class="btn" style="flex: 1;">💾 Speichern</button>
+                    <a href="admin_transaktionen.php" class="btn" style="flex: 1; background: var(--text-tertiary); text-decoration: none; display: flex; align-items: center; justify-content: center;">✖ Abbrechen</a>
+                    <button type="button" onclick="loescheTransaktion(<?= $edit_transaction['id'] ?>)" class="btn" style="background: var(--error);">🗑️ Löschen</button>
+                </div>
+            </form>
+        </div>
+        <?php endif; ?>
+
         <div class="filter-tabs">
             <a href="?filter=alle" class="filter-tab <?= $filter === 'alle' ? 'active' : '' ?>">Alle</a>
             <a href="?filter=gebucht" class="filter-tab <?= $filter === 'gebucht' ? 'active' : '' ?>">Gebucht</a>
@@ -135,7 +223,7 @@ while($m = $mitglieder->fetch_assoc()) {
         <div class="section">
             <div class="section-header">
                 <h2>Transaktionen</h2>
-                <button onclick="openCreateModal()" class="btn">➕ Neue Transaktion</button>
+                <a href="?edit=new" class="btn">➕ Neue Transaktion</a>
             </div>
 
             <table class="balance-table">
@@ -164,11 +252,7 @@ while($m = $mitglieder->fetch_assoc()) {
                         <td><?= htmlspecialchars($t['beschreibung'] ?? '') ?></td>
                         <td><?= $t['status'] ?></td>
                         <td>
-                            <button onclick='openEditModal(<?= json_encode($t) ?>)' class="btn" style="font-size: 0.75rem; padding: 4px 8px;">✏️</button>
-                            <?php if ($t['status'] === 'gebucht'): ?>
-                            <button onclick="storniereTransaktion(<?= $t['id'] ?>)" class="btn" style="font-size: 0.75rem; padding: 4px 8px; background: var(--warning);">🚫</button>
-                            <?php endif; ?>
-                            <button onclick="loescheTransaktion(<?= $t['id'] ?>)" class="btn" style="font-size: 0.75rem; padding: 4px 8px; background: var(--error);">🗑️</button>
+                            <a href="?edit=<?= $t['id'] ?>" class="btn" style="font-size: 0.75rem; padding: 4px 8px; text-decoration: none;">✏️</a>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -177,183 +261,5 @@ while($m = $mitglieder->fetch_assoc()) {
         </div>
     </div>
 
-    <!-- Edit Modal -->
-    <div id="editModal" class="edit-modal">
-        <div class="modal-content">
-            <h2 id="modalTitle">Transaktion bearbeiten</h2>
-            <form id="editForm" style="display: grid; gap: 16px; margin-top: 24px;">
-                <input type="hidden" id="edit_id">
-                
-                <div class="form-group">
-                    <label>Typ</label>
-                    <select id="edit_typ" required>
-                        <option value="EINZAHLUNG">EINZAHLUNG</option>
-                        <option value="AUSZAHLUNG">AUSZAHLUNG</option>
-                        <option value="GRUPPENAKTION_KASSE">GRUPPENAKTION_KASSE</option>
-                        <option value="GRUPPENAKTION_ANTEILIG">GRUPPENAKTION_ANTEILIG</option>
-                        <option value="SCHADEN">SCHADEN</option>
-                        <option value="AUSGLEICH">AUSGLEICH</option>
-                        <option value="KORREKTUR">KORREKTUR</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Mitglied</label>
-                    <select id="edit_mitglied_id">
-                        <option value="">-- Kein Mitglied (System) --</option>
-                        <?php foreach($mitglieder_list as $m): ?>
-                        <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['name']) ?></option>
-                        <?php endforeach; ?>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Betrag (€)</label>
-                    <input type="number" id="edit_betrag" step="0.01" required>
-                </div>
-
-                <div class="form-group">
-                    <label>Beschreibung</label>
-                    <input type="text" id="edit_beschreibung">
-                </div>
-
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="edit_status">
-                        <option value="gebucht">gebucht</option>
-                        <option value="storniert">storniert</option>
-                        <option value="gesperrt">gesperrt</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label>Datum</label>
-                    <input type="datetime-local" id="edit_datum">
-                </div>
-
-                <div style="display: flex; gap: 8px;">
-                    <button type="submit" class="btn" style="flex: 1;">💾 Speichern</button>
-                    <button type="button" onclick="closeEditModal()" class="btn" style="flex: 1; background: var(--text-tertiary);">✖ Abbrechen</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script>
-    let isCreateMode = false;
-
-    function openCreateModal() {
-        isCreateMode = true;
-        document.getElementById('modalTitle').textContent = 'Neue Transaktion erstellen';
-        document.getElementById('edit_id').value = '';
-        document.getElementById('edit_typ').value = 'EINZAHLUNG';
-        document.getElementById('edit_mitglied_id').value = '';
-        document.getElementById('edit_betrag').value = '';
-        document.getElementById('edit_beschreibung').value = '';
-        document.getElementById('edit_status').value = 'gebucht';
-        document.getElementById('edit_datum').value = new Date().toISOString().slice(0, 16);
-        document.getElementById('editModal').classList.add('active');
-    }
-
-    function openEditModal(transaction) {
-        isCreateMode = false;
-        document.getElementById('modalTitle').textContent = 'Transaktion #' + transaction.id + ' bearbeiten';
-        document.getElementById('edit_id').value = transaction.id;
-        document.getElementById('edit_typ').value = transaction.typ;
-        document.getElementById('edit_mitglied_id').value = transaction.mitglied_id || '';
-        document.getElementById('edit_betrag').value = transaction.betrag;
-        document.getElementById('edit_beschreibung').value = transaction.beschreibung || '';
-        document.getElementById('edit_status').value = transaction.status;
-        document.getElementById('edit_datum').value = new Date(transaction.datum).toISOString().slice(0, 16);
-        document.getElementById('editModal').classList.add('active');
-    }
-
-    function closeEditModal() {
-        document.getElementById('editModal').classList.remove('active');
-    }
-
-    document.getElementById('editForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        
-        const data = {
-            id: document.getElementById('edit_id').value || null,
-            typ: document.getElementById('edit_typ').value,
-            mitglied_id: document.getElementById('edit_mitglied_id').value || null,
-            betrag: parseFloat(document.getElementById('edit_betrag').value),
-            beschreibung: document.getElementById('edit_beschreibung').value,
-            status: document.getElementById('edit_status').value,
-            datum: document.getElementById('edit_datum').value
-        };
-
-        const endpoint = isCreateMode ? '/api/transaktion_erstellen.php' : '/api/transaktion_vollstaendig_bearbeiten.php';
-
-        try {
-            const response = await fetch(endpoint, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data)
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                alert('✅ Transaktion ' + (isCreateMode ? 'erstellt' : 'gespeichert') + '!');
-                location.reload();
-            } else {
-                alert('❌ Fehler: ' + result.error);
-            }
-        } catch (error) {
-            alert('❌ Fehler: ' + error.message);
-        }
-    });
-
-    async function storniereTransaktion(id) {
-        if (!confirm('Transaktion wirklich stornieren?')) return;
-        
-        try {
-            const response = await fetch('/api/transaktion_loeschen.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                alert('✅ Transaktion storniert!');
-                location.reload();
-            } else {
-                alert('❌ Fehler: ' + result.error);
-            }
-        } catch (error) {
-            alert('❌ Fehler: ' + error.message);
-        }
-    }
-
-    async function loescheTransaktion(id) {
-        if (!confirm('Transaktion ENDGÜLTIG löschen? (Kann nicht rückgängig gemacht werden!)')) return;
-        
-        try {
-            const response = await fetch('/api/transaktion_vollstaendig_loeschen.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ id })
-            });
-
-            const result = await response.json();
-            if (result.status === 'success') {
-                alert('✅ Transaktion gelöscht!');
-                location.reload();
-            } else {
-                alert('❌ Fehler: ' + result.error);
-            }
-        } catch (error) {
-            alert('❌ Fehler: ' + error.message);
-        }
-    }
-
-    // ESC to close modal
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeEditModal();
-    });
-    </script>
 </body>
 </html>
