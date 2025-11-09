@@ -336,7 +336,9 @@ function renderShiftOverview() {
     
     weekLabel.textContent = `${formatDate(currentWeekStart)} – ${formatDate(weekEnd)}`;
     
-    const today = new Date().toISOString().slice(0, 10);
+    // Today in local timezone
+    const todayDate = new Date();
+    const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
     
     // Render each member as a row
     allUsers.forEach(user => {
@@ -356,7 +358,12 @@ function renderShiftOverview() {
         for (let i = 0; i < 14; i++) {
             const date = new Date(currentWeekStart);
             date.setDate(date.getDate() + i);
-            const dateStr = date.toISOString().slice(0, 10);
+            
+            // Fix timezone offset - use local date
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const dateStr = `${year}-${month}-${day}`;
             
             const dayCell = document.createElement('div');
             dayCell.className = 'day-cell';
