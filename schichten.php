@@ -24,7 +24,7 @@ $is_admin = is_admin();
             border: 1px solid var(--border);
             border-radius: 12px;
             padding: 20px;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             transition: all 0.3s;
             display: flex;
             align-items: center;
@@ -50,13 +50,18 @@ $is_admin = is_admin();
         .week-grid {
             display: grid;
             grid-template-columns: repeat(14, 1fr);
-            gap: 8px;
+            gap: 6px;
             flex: 1;
         }
         
         .day-cell {
             text-align: center;
             position: relative;
+            min-height: 20px;
+        }
+        
+        .day-cell.no-header {
+            min-height: 0;
         }
         
         .day-header {
@@ -504,42 +509,45 @@ function renderShiftOverview() {
             const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
             const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
             
-            // Build header HTML
-            let headerHTML = `<div class="day-header">${dayName}</div>`;
+            // Build header HTML - only for first row
+            let headerHTML = '';
             let extraHTML = '';
             
-            // Add holiday name
-            if (holiday) {
-                headerHTML = `<div class="day-header">🎉 ${dayName}</div>`;
-                const holidayShortName = holiday.name.length > 12 ? holiday.name.substring(0, 12) + '...' : holiday.name;
-                extraHTML += `<div class="holiday-name">${holidayShortName}</div>`;
-            }
-            
-            // Add vacation period indicator and name
-            if (dayCell.classList.contains('vacation-period')) {
-                headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
+            if (isFirstRow) {
+                headerHTML = `<div class="day-header">${dayName}</div>`;
                 
-                // Find which vacation period we're in
-                for (let v = 0; v < vacationStart.length; v++) {
-                    const start = new Date(vacationStart[v].date);
-                    const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
-                    if (end && date >= start && date <= end) {
-                        // Extract vacation name (e.g. "Sommerferien Start" -> "Sommer")
-                        let vacName = vacationStart[v].name.replace(' Start', '').replace(' Ende', '');
-                        if (vacName.includes('ferien')) {
-                            vacName = vacName.replace('ferien', '');
+                // Add holiday name
+                if (holiday) {
+                    headerHTML = `<div class="day-header">🎉 ${dayName}</div>`;
+                    const holidayShortName = holiday.name.length > 12 ? holiday.name.substring(0, 12) + '...' : holiday.name;
+                    extraHTML += `<div class="holiday-name">${holidayShortName}</div>`;
+                }
+                
+                // Add vacation period indicator and name
+                if (dayCell.classList.contains('vacation-period')) {
+                    headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
+                    
+                    // Find which vacation period we're in
+                    for (let v = 0; v < vacationStart.length; v++) {
+                        const start = new Date(vacationStart[v].date);
+                        const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
+                        if (end && date >= start && date <= end) {
+                            // Extract vacation name (e.g. "Sommerferien Start" -> "Sommer")
+                            let vacName = vacationStart[v].name.replace(' Start', '').replace(' Ende', '');
+                            if (vacName.includes('ferien')) {
+                                vacName = vacName.replace('ferien', '');
+                            }
+                            extraHTML += `<div class="vacation-name">${vacName}</div>`;
+                            break;
                         }
-                        extraHTML += `<div class="vacation-name">${vacName}</div>`;
-                        break;
                     }
                 }
-            }
-            
-            // Show date only for first row, otherwise just show header and extra info
-            if (isFirstRow) {
+                
                 dayCell.innerHTML = headerHTML + extraHTML + `<div class="day-date">${dayDate}</div>`;
             } else {
-                dayCell.innerHTML = headerHTML + extraHTML;
+                // For other rows: no header, no date, no labels
+                dayCell.classList.add('no-header');
+                dayCell.innerHTML = '';
             }
             
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
