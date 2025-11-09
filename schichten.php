@@ -447,7 +447,7 @@ function renderShiftOverview() {
     const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
     
     // Render each member as a row
-    allUsers.forEach(user => {
+    allUsers.forEach((user, userIndex) => {
         const row = document.createElement('div');
         row.className = 'shift-row';
         
@@ -460,6 +460,8 @@ function renderShiftOverview() {
         // Week grid (14 days)
         const grid = document.createElement('div');
         grid.className = 'week-grid';
+        
+        const isFirstRow = userIndex === 0; // Only show dates for first member (Alessio)
         
         for (let i = 0; i < 14; i++) {
             const date = new Date(currentWeekStart);
@@ -533,7 +535,12 @@ function renderShiftOverview() {
                 }
             }
             
-            dayCell.innerHTML = headerHTML + extraHTML + `<div class="day-date">${dayDate}</div>`;
+            // Show date only for first row, otherwise just show header and extra info
+            if (isFirstRow) {
+                dayCell.innerHTML = headerHTML + extraHTML + `<div class="day-date">${dayDate}</div>`;
+            } else {
+                dayCell.innerHTML = headerHTML + extraHTML;
+            }
             
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
             
