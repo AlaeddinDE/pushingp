@@ -341,10 +341,19 @@ $current_user_id = get_current_user_id();
                 <input type="hidden" id="modalDate" name="date">
                 <input type="hidden" id="modalType" name="type">
                 
+                <?php if ($is_admin): ?>
+                <div class="form-group">
+                    <label>Mitglied auswählen</label>
+                    <select id="modalUserSelect" onchange="changeMember()" style="padding: 10px; font-size: 1rem;">
+                        <option value="">-- Mitglied wählen --</option>
+                    </select>
+                </div>
+                <?php else: ?>
                 <div class="form-group">
                     <label>Mitglied</label>
                     <input type="text" id="modalUserName" disabled style="opacity: 0.6;">
                 </div>
+                <?php endif; ?>
                 
                 <div class="form-group">
                     <label>Datum</label>
@@ -548,9 +557,23 @@ function openModal(user, dateStr, existingShift) {
         btn.classList.remove('selected');
     });
     
+    // Populate user selector for admins
+    if (isAdmin) {
+        const select = document.getElementById('modalUserSelect');
+        select.innerHTML = '<option value="">-- Mitglied wählen --</option>';
+        allUsers.forEach(u => {
+            const option = document.createElement('option');
+            option.value = u.id;
+            option.textContent = u.name || u.username;
+            if (u.id == user.id) option.selected = true;
+            select.appendChild(option);
+        });
+    } else {
+        document.getElementById('modalUserName').value = user.name || user.username;
+    }
+    
     document.getElementById('modalUserId').value = user.id;
     document.getElementById('modalDate').value = dateStr;
-    document.getElementById('modalUserName').value = user.name || user.username;
     document.getElementById('modalDateDisplay').value = new Date(dateStr).toLocaleDateString('de-DE', {
         weekday: 'long',
         day: '2-digit',
@@ -564,12 +587,51 @@ function openModal(user, dateStr, existingShift) {
         document.getElementById('modalEndTime').value = existingShift.end_time;
     } else {
         form.reset();
+        // Re-populate select after reset
+        if (isAdmin) {
+            const select = document.getElementById('modalUserSelect');
+            select.innerHTML = '<option value="">-- Mitglied wählen --</option>';
+            allUsers.forEach(u => {
+                const option = document.createElement('option');
+                option.value = u.id;
+                option.textContent = u.name || u.username;
+                if (u.id == user.id) option.selected = true;
+                select.appendChild(option);
+            });
+        }
         document.getElementById('modalUserId').value = user.id;
         document.getElementById('modalDate').value = dateStr;
         document.getElementById('timeInputs').style.display = 'none';
     }
     
     modal.classList.add('active');
+}
+
+function changeMember() {
+    const select = document.getElementById('modalUserSelect');
+    const userId = select.value;
+    if (userId) {
+        document.getElementById('modalUserId').value = userId;
+        
+        // Load existing shift for selected member on this date
+        const dateStr = document.getElementById('modalDate').value;
+        const shift = allShifts.find(s => s.user_id == userId && s.date === dateStr);
+        
+        // Reset selection
+        document.querySelectorAll('.shift-type-btn').forEach(btn => {
+            btn.classList.remove('selected');
+        });
+        
+        if (shift) {
+            selectShiftType(shift.type);
+            document.getElementById('modalStartTime').value = shift.start_time;
+            document.getElementById('modalEndTime').value = shift.end_time;
+        } else {
+            document.getElementById('modalStartTime').value = '';
+            document.getElementById('modalEndTime').value = '';
+            document.getElementById('timeInputs').style.display = 'none';
+        }
+    }
 }
 
 function closeModal() {
