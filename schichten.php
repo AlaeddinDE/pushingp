@@ -123,6 +123,14 @@ $is_admin = is_admin();
             background: linear-gradient(135deg, #4a148c, #6a1b9a);
             border-color: #311B92;
         }
+        .shift-free { 
+            background: linear-gradient(135deg, #4caf50, #66bb6a);
+            border-color: #388e3c;
+        }
+        .shift-vacation { 
+            background: linear-gradient(135deg, #f44336, #ef5350);
+            border-color: #d32f2f;
+        }
         
         .month-nav {
             display: flex;
@@ -257,6 +265,14 @@ $is_admin = is_admin();
                 <div class="legend-box shift-night"></div>
                 <span>Nachtschicht</span>
             </div>
+            <div class="legend-item">
+                <div class="legend-box shift-free"></div>
+                <span>Frei</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-box shift-vacation"></div>
+                <span>Urlaub</span>
+            </div>
         </div>
     </div>
 
@@ -276,7 +292,9 @@ const shiftTypes = {
     'early': { label: 'Früh', class: 'shift-early' },
     'day': { label: 'Tag', class: 'shift-day' },
     'late': { label: 'Spät', class: 'shift-late' },
-    'night': { label: 'Nacht', class: 'shift-night' }
+    'night': { label: 'Nacht', class: 'shift-night' },
+    'free': { label: 'Frei', class: 'shift-free' },
+    'vacation': { label: 'Urlaub', class: 'shift-vacation' }
 };
 
 async function loadData() {
