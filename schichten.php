@@ -281,21 +281,21 @@ $is_admin = is_admin();
     <div id="tooltip" class="tooltip"></div>
 
 <script>
-let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth();
+let currentWeekStart = new Date();
+// Start on Monday
+currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1);
 
 let allUsers = [];
 let allShifts = [];
 
-const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
-                    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 
 const shiftTypes = {
-    'early': { label: 'Früh', class: 'shift-early' },
-    'late': { label: 'Spät', class: 'shift-late' },
-    'night': { label: 'Nacht', class: 'shift-night' },
-    'free': { label: 'Frei', class: 'shift-free' },
-    'vacation': { label: 'Urlaub', class: 'shift-vacation' }
+    'early': { label: 'Früh', class: 'shift-early', emoji: '🌅' },
+    'late': { label: 'Spät', class: 'shift-late', emoji: '🌆' },
+    'night': { label: 'Nacht', class: 'shift-night', emoji: '🌙' },
+    'free': { label: 'Frei', class: 'shift-free', emoji: '✅' },
+    'vacation': { label: 'Urlaub', class: 'shift-vacation', emoji: '🏖️' }
 };
 
 async function loadData() {
@@ -308,124 +308,97 @@ async function loadData() {
         allUsers = await usersRes.json();
         allShifts = await shiftsRes.json();
         
-        renderMembersList();
-        renderShiftGrid();
+        renderShiftOverview();
     } catch (e) {
         console.error('Fehler:', e);
     }
 }
 
-function renderMembersList() {
-    const membersList = document.getElementById('membersList');
-    membersList.innerHTML = '';
+function changeWeeks(weeks) {
+    currentWeekStart.setDate(currentWeekStart.getDate() + (weeks * 7));
+    renderShiftOverview();
+}
+
+function renderShiftOverview() {
+    const overview = document.getElementById('shiftOverview');
+    const weekLabel = document.getElementById('weekLabel');
     
-    if (allUsers.length === 0) {
-        membersList.innerHTML = '<div style="color: var(--text-secondary); font-size: 0.875rem;">Keine Schichtarbeiter</div>';
+    if (!overview) {
+        console.error('shiftOverview element not found');
         return;
     }
     
-    allUsers.forEach(user => {
-        const item = document.createElement('div');
-        item.className = 'member-item';
-        item.textContent = user.name || user.username;
-        item.dataset.userId = user.id;
-        membersList.appendChild(item);
-    });
-}
-
-function changeMonth(delta) {
-    currentMonth += delta;
-    if (currentMonth > 11) {
-        currentMonth = 0;
-        currentYear++;
-    } else if (currentMonth < 0) {
-        currentMonth = 11;
-        currentYear--;
-    }
-    renderShiftGrid();
-}
-
-function renderShiftGrid() {
-    const grid = document.getElementById('shiftGrid');
-    const monthLabel = document.getElementById('monthLabel');
+    overview.innerHTML = '';
     
-    grid.innerHTML = '';
-    monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+    // Calculate 2 weeks (14 days)
+    const weekEnd = new Date(currentWeekStart);
+    weekEnd.setDate(weekEnd.getDate() + 13);
     
-    const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    weekLabel.textContent = `${formatDate(currentWeekStart)} – ${formatDate(weekEnd)}`;
+    
     const today = new Date().toISOString().slice(0, 10);
     
-    // Header-Zeile (nur Tage)
-    for (let day = 1; day <= daysInMonth; day++) {
-        const date = new Date(currentYear, currentMonth, day);
-        const dayName = ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'][date.getDay()];
-        const isWeekend = date.getDay() === 0 || date.getDay() === 6;
-        const header = createCell(`<strong>${day}</strong><br><small>${dayName}</small>`, 'shift-header');
-        if (isWeekend) header.style.background = 'var(--bg-primary)';
-        grid.appendChild(header);
-    }
-    
-    // Mitglieder-Zeilen (Zellen für jeden Tag)
+    // Render each member as a row
     allUsers.forEach(user => {
-        for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const row = document.createElement('div');
+        row.className = 'shift-row';
+        
+        // Header with member name
+        const header = document.createElement('div');
+        header.className = 'shift-row-header';
+        header.innerHTML = `<div class="member-name">${user.name || user.username}</div>`;
+        row.appendChild(header);
+        
+        // Week grid (14 days)
+        const grid = document.createElement('div');
+        grid.className = 'week-grid';
+        
+        for (let i = 0; i < 14; i++) {
+            const date = new Date(currentWeekStart);
+            date.setDate(date.getDate() + i);
+            const dateStr = date.toISOString().slice(0, 10);
+            
+            const dayCell = document.createElement('div');
+            dayCell.className = 'day-cell';
+            
+            const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
+            const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
+            
+            dayCell.innerHTML = `
+                <div class="day-header">${dayName}</div>
+                <div class="day-date">${dayDate}</div>
+            `;
+            
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
             
             const cell = document.createElement('div');
             cell.className = 'shift-cell';
             
-            if (shift) {
-                const typeInfo = shiftTypes[shift.type];
-                cell.classList.add(typeInfo.class);
-                cell.dataset.shift = JSON.stringify(shift);
-                cell.dataset.user = user.name || user.username;
-            }
-            
             if (dateStr === today) {
                 cell.classList.add('today');
             }
             
-            cell.addEventListener('mouseenter', showTooltip);
-            cell.addEventListener('mouseleave', hideTooltip);
+            if (shift && shiftTypes[shift.type]) {
+                cell.classList.add('has-shift', shiftTypes[shift.type].class);
+                cell.innerHTML = shiftTypes[shift.type].emoji;
+            } else {
+                cell.innerHTML = '-';
+            }
             
-            grid.appendChild(cell);
+            dayCell.appendChild(cell);
+            grid.appendChild(dayCell);
         }
+        
+        row.appendChild(grid);
+        overview.appendChild(row);
     });
 }
 
-function showTooltip(e) {
-    const cell = e.target;
-    const tooltip = document.getElementById('tooltip');
-    
-    if (cell.dataset.shift) {
-        const shift = JSON.parse(cell.dataset.shift);
-        const user = cell.dataset.user;
-        const typeInfo = shiftTypes[shift.type];
-        
-        tooltip.innerHTML = `
-            <strong>${user}</strong><br>
-            ${typeInfo.label}: ${shift.start_time.slice(0,5)} - ${shift.end_time.slice(0,5)}<br>
-            ${shift.date}
-        `;
-        tooltip.style.display = 'block';
-        tooltip.style.left = e.pageX + 10 + 'px';
-        tooltip.style.top = e.pageY + 10 + 'px';
-    }
-}
-
-function hideTooltip() {
-    document.getElementById('tooltip').style.display = 'none';
-}
-
-function createCell(html, className) {
-    const cell = document.createElement('div');
-    cell.className = className;
-    cell.innerHTML = html;
-    return cell;
+function formatDate(date) {
+    return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
 }
 
 loadData();
-renderShiftGrid();
 </script>
 </body>
 </html>
