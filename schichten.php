@@ -15,126 +15,146 @@ $is_admin = is_admin();
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
-        .shift-layout {
-            display: flex;
-            gap: 24px;
+        .shift-overview {
             margin-top: 24px;
-        }
-        
-        .members-sidebar {
-            width: 250px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 16px;
-            max-height: 600px;
-            overflow-y: auto;
-            position: sticky;
-            top: 80px;
-        }
-        
-        .members-sidebar h3 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 16px;
-            color: var(--accent);
-        }
-        
-        .member-item {
-            padding: 10px 12px;
-            margin-bottom: 8px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 0.875rem;
-            font-weight: 500;
-            transition: all 0.3s;
-            cursor: pointer;
-        }
-        
-        .member-item:hover {
-            background: var(--bg-primary);
-            border-color: var(--accent);
-            transform: translateX(4px);
-        }
-        
-        .shift-content {
-            flex: 1;
-            overflow-x: auto;
-        }
-        
-        .shift-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
-            gap: 6px;
-            margin-top: 24px;
-        }
-        
-        .shift-header {
-            background: var(--bg-tertiary);
-            padding: 10px 4px;
-            border-radius: 8px;
-            font-weight: 700;
-            text-align: center;
-            font-size: 0.75rem;
-            border: 1px solid var(--border);
         }
         
         .shift-row {
-            display: contents;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        
+        .shift-row:hover {
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        
+        .shift-row-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid var(--border);
+        }
+        
+        .member-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--accent);
+            min-width: 120px;
+        }
+        
+        .week-grid {
+            display: grid;
+            grid-template-columns: repeat(14, 1fr);
+            gap: 8px;
+        }
+        
+        .day-cell {
+            text-align: center;
+        }
+        
+        .day-header {
+            font-size: 0.75rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+        }
+        
+        .day-date {
+            font-size: 0.7rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
         }
         
         .shift-cell {
-            background: var(--bg-secondary);
+            background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            border-radius: 6px;
-            min-height: 45px;
-            width: 45px;
+            border-radius: 8px;
+            padding: 8px 4px;
+            min-height: 60px;
             transition: all 0.3s;
             cursor: pointer;
-            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
         }
         
         .shift-cell:hover {
-            transform: scale(1.15);
-            z-index: 20;
-            box-shadow: 0 6px 16px var(--accent-glow);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        
+        .shift-cell.has-shift {
+            font-weight: 700;
         }
         
         .shift-cell.today {
             border: 2px solid var(--accent);
             box-shadow: 0 0 12px var(--accent-glow);
-            animation: pulse 2s infinite;
         }
         
         .shift-early { 
             background: linear-gradient(135deg, #ffd700, #ffed4e);
             border-color: #ccac00;
+            color: #000;
         }
         .shift-late { 
             background: linear-gradient(135deg, #ff8c00, #ffa500);
             border-color: #cc7000;
+            color: #fff;
         }
         .shift-night { 
             background: linear-gradient(135deg, #4a148c, #6a1b9a);
             border-color: #311B92;
+            color: #fff;
         }
         .shift-free { 
             background: linear-gradient(135deg, #4caf50, #66bb6a);
             border-color: #388e3c;
+            color: #fff;
         }
         .shift-vacation { 
             background: linear-gradient(135deg, #f44336, #ef5350);
             border-color: #d32f2f;
+            color: #fff;
         }
         
-        .month-nav {
+        .nav-buttons {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
+            justify-content: center;
             gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .nav-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+        }
+        
+        .week-label {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 24px;
         }
         
         .month-btn {
@@ -222,27 +242,17 @@ $is_admin = is_admin();
             <p class="text-secondary">Jahresübersicht aller Arbeitsschichten</p>
         </div>
 
-        <div class="month-nav">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
             <a href="schichten_bearbeiten.php" class="btn">✏️ Meine Schichten bearbeiten</a>
-            <div style="display: flex; gap: 12px; align-items: center;">
-                <button class="month-btn" onclick="changeMonth(-1)">◀</button>
-                <div class="month-label" id="monthLabel"></div>
-                <button class="month-btn" onclick="changeMonth(1)">▶</button>
-            </div>
+            <div class="week-label" id="weekLabel"></div>
         </div>
 
-        <div class="shift-layout">
-            <div class="members-sidebar">
-                <h3>👥 Mitglieder</h3>
-                <div id="membersList"></div>
-            </div>
-            
-            <div class="shift-content">
-                <div class="section">
-                    <div id="shiftGrid" class="shift-grid"></div>
-                </div>
-            </div>
+        <div class="nav-buttons">
+            <button class="nav-btn" onclick="changeWeeks(-2)">◀◀ 2 Wochen zurück</button>
+            <button class="nav-btn" onclick="changeWeeks(2)">2 Wochen weiter ▶▶</button>
         </div>
+
+        <div class="shift-overview" id="shiftOverview"></div>
 
         <div class="legend">
             <div class="legend-item">
