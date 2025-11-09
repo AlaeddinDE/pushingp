@@ -56,6 +56,7 @@ $is_admin = is_admin();
         
         .day-cell {
             text-align: center;
+            position: relative;
         }
         
         .day-header {
@@ -69,6 +70,28 @@ $is_admin = is_admin();
             font-size: 0.7rem;
             color: var(--text-secondary);
             margin-bottom: 4px;
+        }
+        
+        .holiday-name {
+            font-size: 0.6rem;
+            color: #d32f2f;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            padding: 2px 4px;
+            background: rgba(211, 47, 47, 0.1);
+            border-radius: 4px;
+        }
+        
+        .vacation-name {
+            font-size: 0.6rem;
+            color: #f57c00;
+            font-weight: 700;
+            margin-bottom: 4px;
+            line-height: 1.2;
+            padding: 2px 4px;
+            background: rgba(255, 193, 7, 0.2);
+            border-radius: 4px;
         }
         
         /* Feiertage & Ferienzeiten */
@@ -479,15 +502,38 @@ function renderShiftOverview() {
             const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
             const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
             
+            // Build header HTML
             let headerHTML = `<div class="day-header">${dayName}</div>`;
+            let extraHTML = '';
+            
+            // Add holiday name
             if (holiday) {
                 headerHTML = `<div class="day-header">🎉 ${dayName}</div>`;
-            }
-            if (dayCell.classList.contains('vacation-period')) {
-                headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
+                const holidayShortName = holiday.name.length > 12 ? holiday.name.substring(0, 12) + '...' : holiday.name;
+                extraHTML += `<div class="holiday-name">${holidayShortName}</div>`;
             }
             
-            dayCell.innerHTML = headerHTML + `<div class="day-date">${dayDate}</div>`;
+            // Add vacation period indicator and name
+            if (dayCell.classList.contains('vacation-period')) {
+                headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
+                
+                // Find which vacation period we're in
+                for (let v = 0; v < vacationStart.length; v++) {
+                    const start = new Date(vacationStart[v].date);
+                    const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
+                    if (end && date >= start && date <= end) {
+                        // Extract vacation name (e.g. "Sommerferien Start" -> "Sommer")
+                        let vacName = vacationStart[v].name.replace(' Start', '').replace(' Ende', '');
+                        if (vacName.includes('ferien')) {
+                            vacName = vacName.replace('ferien', '');
+                        }
+                        extraHTML += `<div class="vacation-name">${vacName}</div>`;
+                        break;
+                    }
+                }
+            }
+            
+            dayCell.innerHTML = headerHTML + extraHTML + `<div class="day-date">${dayDate}</div>`;
             
             const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
             
