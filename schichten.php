@@ -26,6 +26,9 @@ $is_admin = is_admin();
             padding: 20px;
             margin-bottom: 16px;
             transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         
         .shift-row:hover {
@@ -33,26 +36,22 @@ $is_admin = is_admin();
             box-shadow: 0 4px 12px var(--accent-glow);
         }
         
-        .shift-row-header {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            margin-bottom: 16px;
-            padding-bottom: 12px;
-            border-bottom: 2px solid var(--border);
-        }
-        
         .member-name {
-            font-size: 1.25rem;
+            font-size: 1.1rem;
             font-weight: 700;
             color: var(--accent);
-            min-width: 120px;
+            min-width: 100px;
+            max-width: 100px;
+            text-align: right;
+            padding-right: 20px;
+            border-right: 2px solid var(--border);
         }
         
         .week-grid {
             display: grid;
             grid-template-columns: repeat(14, 1fr);
             gap: 8px;
+            flex: 1;
         }
         
         .day-cell {
@@ -383,11 +382,11 @@ function renderShiftOverview() {
         const row = document.createElement('div');
         row.className = 'shift-row';
         
-        // Header with member name
-        const header = document.createElement('div');
-        header.className = 'shift-row-header';
-        header.innerHTML = `<div class="member-name">${user.name || user.username}</div>`;
-        row.appendChild(header);
+        // Member name on the left
+        const nameDiv = document.createElement('div');
+        nameDiv.className = 'member-name';
+        nameDiv.textContent = user.name || user.username;
+        row.appendChild(nameDiv);
         
         // Week grid (14 days)
         const grid = document.createElement('div');
