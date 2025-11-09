@@ -184,6 +184,12 @@ $current_user_id = get_current_user_id();
             <a href="schichten.php" class="btn btn-secondary">← Zurück zur Übersicht</a>
         </div>
 
+        <?php if ($is_admin): ?>
+        <div class="alert alert-success" style="margin-bottom: 24px;">
+            ✅ <strong>Admin-Modus:</strong> Du kannst die Schichten aller Mitglieder bearbeiten
+        </div>
+        <?php endif; ?>
+
         <div class="week-nav">
             <button class="week-nav-btn" onclick="changeWeek(-1)">◀ Vorherige Woche</button>
             <div class="week-label" id="weekLabel"></div>
@@ -356,8 +362,13 @@ function renderShiftGrid() {
                 `;
             }
             
-            if (isAdmin) {
+            // Admins können alle Schichten bearbeiten, normale User nur ihre eigenen
+            if (isAdmin || user.id == currentUserId) {
                 cell.addEventListener('click', () => openModal(user, dateStr, shift));
+                cell.style.cursor = 'pointer';
+            } else {
+                cell.style.cursor = 'not-allowed';
+                cell.style.opacity = '0.6';
             }
             
             grid.appendChild(cell);
