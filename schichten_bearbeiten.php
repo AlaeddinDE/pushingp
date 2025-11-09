@@ -310,10 +310,6 @@ $current_user_id = get_current_user_id();
                 <span>Frühschicht (06:00-14:00)</span>
             </div>
             <div class="legend-item">
-                <span class="shift-badge shift-day">Tag</span>
-                <span>Tagschicht (08:00-16:00)</span>
-            </div>
-            <div class="legend-item">
                 <span class="shift-badge shift-late">Spät</span>
                 <span>Spätschicht (14:00-22:00)</span>
             </div>
@@ -361,9 +357,6 @@ $current_user_id = get_current_user_id();
                         <div class="shift-type-btn early" onclick="selectShiftType('early')">
                             🌅 Früh
                         </div>
-                        <div class="shift-type-btn day" onclick="selectShiftType('day')">
-                            ☀️ Tag
-                        </div>
                         <div class="shift-type-btn late" onclick="selectShiftType('late')">
                             🌆 Spät
                         </div>
@@ -404,7 +397,6 @@ const currentUserId = <?php echo $current_user_id; ?>;
 const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 const shiftTypes = {
     'early': { label: 'Früh', class: 'shift-early', emoji: '🌅' },
-    'day': { label: 'Tag', class: 'shift-day', emoji: '☀️' },
     'late': { label: 'Spät', class: 'shift-late', emoji: '🌆' },
     'night': { label: 'Nacht', class: 'shift-night', emoji: '🌙' },
     'free': { label: 'Frei', class: 'shift-free', emoji: '✅' },
@@ -426,7 +418,6 @@ function selectShiftType(type) {
     // Automatisch Zeiten setzen basierend auf Schichttyp
     const shiftTimes = {
         'early': { start: '06:00', end: '14:00' },
-        'day': { start: '08:00', end: '16:00' },
         'late': { start: '14:00', end: '22:00' },
         'night': { start: '22:00', end: '06:00' },
         'free': { start: '00:00', end: '00:00' },

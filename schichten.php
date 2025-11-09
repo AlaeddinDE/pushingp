@@ -111,10 +111,6 @@ $is_admin = is_admin();
             background: linear-gradient(135deg, #ffd700, #ffed4e);
             border-color: #ccac00;
         }
-        .shift-day { 
-            background: linear-gradient(135deg, #2196F3, #42a5f5);
-            border-color: #1976D2;
-        }
         .shift-late { 
             background: linear-gradient(135deg, #ff8c00, #ffa500);
             border-color: #cc7000;
@@ -254,10 +250,6 @@ $is_admin = is_admin();
                 <span>Frühschicht</span>
             </div>
             <div class="legend-item">
-                <div class="legend-box shift-day"></div>
-                <span>Tagschicht</span>
-            </div>
-            <div class="legend-item">
                 <div class="legend-box shift-late"></div>
                 <span>Spätschicht</span>
             </div>
@@ -290,7 +282,6 @@ const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
 
 const shiftTypes = {
     'early': { label: 'Früh', class: 'shift-early' },
-    'day': { label: 'Tag', class: 'shift-day' },
     'late': { label: 'Spät', class: 'shift-late' },
     'night': { label: 'Nacht', class: 'shift-night' },
     'free': { label: 'Frei', class: 'shift-free' },
