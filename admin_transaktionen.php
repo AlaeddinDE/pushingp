@@ -137,7 +137,7 @@ while($m = $mitglieder->fetch_assoc()) {
             <nav class="nav">
                 <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="admin_kasse.php" class="nav-item">Admin</a>
+                <a href="admin.php" class="nav-item">Admin</a>
                 <a href="admin_transaktionen.php" class="nav-item">Transaktionen</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>

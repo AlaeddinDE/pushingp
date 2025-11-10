@@ -1,0 +1,694 @@
+<?php
+require_once __DIR__ . '/includes/functions.php';
+require_once __DIR__ . '/includes/db.php';
+secure_session_start();
+require_login();
+
+if (!is_admin()) {
+    header('Location: dashboard.php');
+    exit;
+}
+
+$success = '';
+$error = '';
+
+// Event-Status ändern
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['change_status'])) {
+    $event_id = intval($_POST['event_id']);
+    $new_status = $_POST['new_status'];
+    
+    $stmt = $conn->prepare("UPDATE events SET event_status = ? WHERE id = ?");
+    $stmt->bind_param('si', $new_status, $event_id);
+    
+    if ($stmt->execute()) {
+        $success = "Event-Status aktualisiert!";
+    } else {
+        $error = "Fehler beim Aktualisieren";
+    }
+    $stmt->close();
+}
+
+// Event komplett löschen
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_event'])) {
+    $event_id = intval($_POST['event_id']);
+    
+    // Lösche Teilnahmen
+    $conn->query("DELETE FROM event_participation WHERE event_id = $event_id");
+    
+    // Lösche Event
+    $stmt = $conn->prepare("DELETE FROM events WHERE id = ?");
+    $stmt->bind_param('i', $event_id);
+    
+    if ($stmt->execute()) {
+        $success = "Event vollständig gelöscht!";
+    } else {
+        $error = "Fehler beim Löschen";
+    }
+    $stmt->close();
+}
+
+// Alle Events mit Details
+$all_events = [];
+$query = "
+    SELECT 
+        e.*,
+        u.name as creator_name,
+        u.username as creator_username,
+        (SELECT COUNT(*) FROM event_participation ep WHERE ep.event_id = e.id AND ep.status = 'zusage') as zusagen,
+        (SELECT COUNT(*) FROM event_participation ep WHERE ep.event_id = e.id AND ep.status = 'absage') as absagen,
+        (SELECT COUNT(*) FROM event_participation ep WHERE ep.event_id = e.id AND ep.status = 'vielleicht') as vielleicht,
+        (SELECT COUNT(*) FROM event_participation ep WHERE ep.event_id = e.id) as total_responses
+    FROM events e
+    LEFT JOIN users u ON e.created_by = u.id
+    ORDER BY e.datum DESC, e.created_at DESC
+";
+
+$result = $conn->query($query);
+if ($result) {
+    while ($row = $result->fetch_assoc()) {
+        $all_events[] = $row;
+    }
+}
+
+// Statistiken
+$stats = [];
+$stats['total'] = count($all_events);
+$stats['active'] = 0;
+$stats['upcoming'] = 0;
+$stats['past'] = 0;
+$stats['canceled'] = 0;
+
+$today = date('Y-m-d');
+
+foreach ($all_events as $event) {
+    if ($event['event_status'] === 'active') {
+        $stats['active']++;
+    }
+    if ($event['datum'] >= $today && $event['event_status'] === 'active') {
+        $stats['upcoming']++;
+    }
+    if ($event['datum'] < $today) {
+        $stats['past']++;
+    }
+    if ($event['event_status'] === 'canceled') {
+        $stats['canceled']++;
+    }
+}
+?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Event Verwaltung – PUSHING P Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        body.admin-page {
+            --accent: #7f1010;
+            --accent-hover: #650d0d;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 32px;
+        }
+        
+        .stat-box {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        .stat-box .label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .stat-box .value {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        
+        .filter-bar {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .filter-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        .filter-btn.active {
+            background: var(--accent);
+            color: white;
+            border-color: var(--accent);
+        }
+        
+        .filter-btn:hover {
+            border-color: var(--accent);
+        }
+        
+        .event-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+        
+        .event-table th {
+            background: var(--bg-tertiary);
+            padding: 14px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            border-bottom: 2px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .event-table td {
+            padding: 16px;
+            border-bottom: 1px solid var(--border);
+            vertical-align: top;
+        }
+        
+        .event-table tr:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .event-row.past {
+            opacity: 0.6;
+        }
+        
+        .event-row.canceled {
+            opacity: 0.5;
+            text-decoration: line-through;
+        }
+        
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge.active {
+            background: rgba(59, 186, 93, 0.15);
+            color: #3bba5d;
+        }
+        
+        .badge.canceled {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+        }
+        
+        .badge.completed {
+            background: rgba(100, 100, 100, 0.15);
+            color: #999;
+        }
+        
+        .badge.pool {
+            background: rgba(16, 65, 134, 0.15);
+            color: #104186;
+        }
+        
+        .badge.anteilig {
+            background: rgba(255, 165, 0, 0.15);
+            color: #ffa500;
+        }
+        
+        .badge.private {
+            background: rgba(139, 92, 246, 0.15);
+            color: #8b5cf6;
+        }
+        
+        .participants-info {
+            display: flex;
+            gap: 12px;
+            font-size: 0.875rem;
+        }
+        
+        .participants-info span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.75rem;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 600;
+            margin: 2px;
+        }
+        
+        .btn-edit {
+            background: var(--accent);
+            color: white;
+        }
+        
+        .btn-edit:hover {
+            background: var(--accent-hover);
+        }
+        
+        .btn-view {
+            background: rgba(16, 65, 134, 0.2);
+            color: #104186;
+        }
+        
+        .btn-view:hover {
+            background: rgba(16, 65, 134, 0.3);
+        }
+        
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        .btn-delete:hover {
+            background: rgba(239, 68, 68, 0.3);
+        }
+        
+        .btn-status {
+            background: rgba(255, 165, 0, 0.2);
+            color: #ffa500;
+        }
+        
+        .btn-status:hover {
+            background: rgba(255, 165, 0, 0.3);
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 2rem;
+            cursor: pointer;
+            line-height: 1;
+        }
+        
+        .alert {
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: rgba(59, 186, 93, 0.1);
+            color: #3bba5d;
+            border: 1px solid rgba(59, 186, 93, 0.3);
+        }
+        
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: #fca5a5;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .event-detail {
+            margin-bottom: 16px;
+        }
+        
+        .event-detail .label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+        }
+        
+        .event-detail .value {
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+        
+        .search-box {
+            width: 100%;
+            max-width: 400px;
+            padding: 12px 16px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+        }
+        
+        .search-box:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+    </style>
+</head>
+<body class="admin-page">
+    <div class="grain"></div>
+    
+    <div class="header">
+        <div class="header-content">
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
+                PUSHING P
+                <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(127, 16, 16, 0.3);">Admin</span>
+            </a>
+            <nav class="nav">
+                <a href="kasse.php" class="nav-item">Kasse</a>
+                <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
+                <a href="admin.php" class="nav-item">Admin</a>
+                <a href="settings.php" class="nav-item">Settings</a>
+                <a href="logout.php" class="nav-item">Logout</a>
+            </nav>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="welcome">
+            <h1>🎉 Event Verwaltung</h1>
+            <p class="text-secondary">Alle Events verwalten, bearbeiten und überwachen</p>
+        </div>
+
+        <?php if ($success): ?>
+            <div class="alert alert-success"><?= htmlspecialchars($success) ?></div>
+        <?php endif; ?>
+        
+        <?php if ($error): ?>
+            <div class="alert alert-error"><?= htmlspecialchars($error) ?></div>
+        <?php endif; ?>
+
+        <!-- Statistiken -->
+        <div class="stats-grid">
+            <div class="stat-box">
+                <div class="label">Gesamt</div>
+                <div class="value"><?= $stats['total'] ?></div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Aktiv</div>
+                <div class="value" style="color: var(--success);"><?= $stats['active'] ?></div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Bevorstehend</div>
+                <div class="value" style="color: #104186;"><?= $stats['upcoming'] ?></div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Vergangen</div>
+                <div class="value" style="color: var(--text-secondary);"><?= $stats['past'] ?></div>
+            </div>
+            <div class="stat-box">
+                <div class="label">Abgesagt</div>
+                <div class="value" style="color: var(--error);"><?= $stats['canceled'] ?></div>
+            </div>
+        </div>
+
+        <!-- Filter & Suche -->
+        <div style="display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap;">
+            <div class="filter-bar">
+                <button class="filter-btn active" data-filter="all">Alle</button>
+                <button class="filter-btn" data-filter="active">Aktiv</button>
+                <button class="filter-btn" data-filter="upcoming">Bevorstehend</button>
+                <button class="filter-btn" data-filter="past">Vergangen</button>
+                <button class="filter-btn" data-filter="canceled">Abgesagt</button>
+            </div>
+            
+            <input type="text" id="searchBox" class="search-box" placeholder="🔍 Events durchsuchen...">
+        </div>
+
+        <!-- Event-Tabelle -->
+        <div class="section">
+            <table class="event-table">
+                <thead>
+                    <tr>
+                        <th>Event</th>
+                        <th>Datum & Zeit</th>
+                        <th>Ort</th>
+                        <th>Ersteller</th>
+                        <th>Teilnehmer</th>
+                        <th>Kosten</th>
+                        <th>Status</th>
+                        <th>Aktionen</th>
+                    </tr>
+                </thead>
+                <tbody id="eventsTableBody">
+                    <?php foreach ($all_events as $event): 
+                        $is_past = $event['datum'] < date('Y-m-d');
+                        $is_canceled = $event['event_status'] === 'canceled';
+                        $row_class = $is_canceled ? 'canceled' : ($is_past ? 'past' : '');
+                    ?>
+                    <tr class="event-row <?= $row_class ?>" 
+                        data-status="<?= $event['event_status'] ?>"
+                        data-date="<?= $event['datum'] ?>"
+                        data-search="<?= strtolower($event['title'] . ' ' . $event['location'] . ' ' . $event['creator_name']) ?>">
+                        <td>
+                            <strong style="font-size: 1.125rem;"><?= htmlspecialchars($event['title']) ?></strong>
+                            <?php if ($event['description']): ?>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-top: 4px;">
+                                    <?= htmlspecialchars(substr($event['description'], 0, 80)) ?><?= strlen($event['description']) > 80 ? '...' : '' ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;"><?= date('d.m.Y', strtotime($event['datum'])) ?></div>
+                            <?php if ($event['start_time']): ?>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    <?= date('H:i', strtotime($event['start_time'])) ?>
+                                    <?php if ($event['end_time']): ?>
+                                        - <?= date('H:i', strtotime($event['end_time'])) ?> Uhr
+                                    <?php endif; ?>
+                                </div>
+                            <?php endif; ?>
+                        </td>
+                        <td><?= htmlspecialchars($event['location'] ?? '-') ?></td>
+                        <td>
+                            <div style="font-weight: 600;"><?= htmlspecialchars($event['creator_name'] ?? 'Unbekannt') ?></div>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">@<?= htmlspecialchars($event['creator_username'] ?? '') ?></div>
+                        </td>
+                        <td>
+                            <div class="participants-info">
+                                <span style="color: var(--success);">✅ <?= $event['zusagen'] ?></span>
+                                <span style="color: var(--error);">❌ <?= $event['absagen'] ?></span>
+                                <span style="color: var(--warning);">❓ <?= $event['vielleicht'] ?></span>
+                            </div>
+                        </td>
+                        <td>
+                            <?php if ($event['cost'] > 0): ?>
+                                <div style="font-weight: 600;">€<?= number_format($event['cost'], 2) ?></div>
+                                <span class="badge <?= $event['paid_by'] ?>"><?= ucfirst($event['paid_by']) ?></span>
+                            <?php else: ?>
+                                <span style="color: var(--text-secondary);">Kostenlos</span>
+                            <?php endif; ?>
+                        </td>
+                        <td>
+                            <span class="badge <?= $event['event_status'] ?>"><?= ucfirst($event['event_status']) ?></span>
+                        </td>
+                        <td>
+                            <button class="btn-small btn-view" onclick="viewEvent(<?= $event['id'] ?>)">👁️ Details</button>
+                            <button class="btn-small btn-status" onclick="openStatusModal(<?= $event['id'] ?>, '<?= $event['event_status'] ?>')">🔄 Status</button>
+                            <button class="btn-small btn-edit" onclick="window.location.href='events.php'">✏️ Bearbeiten</button>
+                            <button class="btn-small btn-delete" onclick="confirmDelete(<?= $event['id'] ?>, '<?= htmlspecialchars($event['title'], ENT_QUOTES) ?>')">🗑️ Löschen</button>
+                        </td>
+                    </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Status ändern Modal -->
+    <div id="statusModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div class="modal-header">
+                <h2 class="modal-title">Status ändern</h2>
+                <button class="close-modal" onclick="closeStatusModal()">×</button>
+            </div>
+            
+            <form method="POST">
+                <input type="hidden" name="event_id" id="status_event_id">
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600;">Neuer Status</label>
+                    <select name="new_status" id="new_status" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary); font-size: 1rem;">
+                        <option value="active">Aktiv</option>
+                        <option value="canceled">Abgesagt</option>
+                        <option value="completed">Abgeschlossen</option>
+                    </select>
+                </div>
+                
+                <button type="submit" name="change_status" class="btn" style="width: 100%;">Status ändern</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Event Details Modal -->
+    <div id="detailModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title" id="detail_title">Event Details</h2>
+                <button class="close-modal" onclick="closeDetailModal()">×</button>
+            </div>
+            
+            <div id="detail_content"></div>
+        </div>
+    </div>
+
+    <script>
+        // Filter
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const eventRows = document.querySelectorAll('.event-row');
+        
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', function() {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const today = new Date().toISOString().split('T')[0];
+                
+                eventRows.forEach(row => {
+                    const status = row.dataset.status;
+                    const date = row.dataset.date;
+                    let show = false;
+                    
+                    switch(filter) {
+                        case 'all':
+                            show = true;
+                            break;
+                        case 'active':
+                            show = status === 'active';
+                            break;
+                        case 'upcoming':
+                            show = status === 'active' && date >= today;
+                            break;
+                        case 'past':
+                            show = date < today;
+                            break;
+                        case 'canceled':
+                            show = status === 'canceled';
+                            break;
+                    }
+                    
+                    row.style.display = show ? '' : 'none';
+                });
+            });
+        });
+        
+        // Suche
+        document.getElementById('searchBox').addEventListener('input', function(e) {
+            const search = e.target.value.toLowerCase();
+            
+            eventRows.forEach(row => {
+                const searchText = row.dataset.search;
+                row.style.display = searchText.includes(search) ? '' : 'none';
+            });
+        });
+        
+        // Status Modal
+        function openStatusModal(id, currentStatus) {
+            document.getElementById('status_event_id').value = id;
+            document.getElementById('new_status').value = currentStatus;
+            document.getElementById('statusModal').classList.add('active');
+        }
+        
+        function closeStatusModal() {
+            document.getElementById('statusModal').classList.remove('active');
+        }
+        
+        // Delete Confirmation
+        function confirmDelete(id, title) {
+            if (confirm(`Event "${title}" wirklich ENDGÜLTIG löschen?\n\nDies entfernt auch alle Teilnahmen!`)) {
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.innerHTML = `
+                    <input type="hidden" name="event_id" value="${id}">
+                    <input type="hidden" name="delete_event" value="1">
+                `;
+                document.body.appendChild(form);
+                form.submit();
+            }
+        }
+        
+        // View Event Details
+        function viewEvent(id) {
+            // Find event data
+            const row = document.querySelector(`tr[data-event-id="${id}"]`);
+            // In real implementation, fetch from API
+            alert('Detail-Ansicht würde hier Event-Details zeigen');
+            // For now just open the detail modal
+            document.getElementById('detailModal').classList.add('active');
+        }
+        
+        function closeDetailModal() {
+            document.getElementById('detailModal').classList.remove('active');
+        }
+        
+        // Close modals on background click
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) {
+                    this.classList.remove('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

@@ -3,6 +3,7 @@
 session_start();
 header('Content-Type: application/json');
 require_once __DIR__ . '/../includes/db.php';
+require_once __DIR__ . '/../includes/xp_system.php';
 
 if (!isset($_SESSION['user_id'])) {
     echo json_encode(['status' => 'error', 'error' => 'Unauthorized']);
@@ -51,6 +52,30 @@ $stmt->execute();
 $stmt->bind_result($gedeckt_bis, $naechste_zahlung, $guthaben);
 $stmt->fetch();
 $stmt->close();
+
+// Award XP for payment
+add_xp($mitglied_id, 'payment_ontime', $beschreibung, null, 'transaktionen');
+
+// Extra XP for large deposits (100€)
+if ($betrag >= 100) {
+    add_xp($mitglied_id, 'large_deposit', "Große Einzahlung: {$betrag}€", null, 'transaktionen');
+}
+
+// Extra XP for voluntary extra payments (per 10€ over minimum)
+$stmt = $conn->prepare("SELECT pflicht_monatlich FROM users WHERE id = ?");
+$stmt->bind_param("i", $mitglied_id);
+$stmt->execute();
+$stmt->bind_result($pflicht_monatlich);
+$stmt->fetch();
+$stmt->close();
+
+$extra_amount = $betrag - $pflicht_monatlich;
+if ($extra_amount > 0) {
+    $extra_xp_multiplier = floor($extra_amount / 10);
+    for ($i = 0; $i < $extra_xp_multiplier; $i++) {
+        add_xp($mitglied_id, 'extra_payment_10', 'Extra-Zahlung', null, 'transaktionen');
+    }
+}
 
 echo json_encode([
     'status' => 'success',

@@ -13,6 +13,7 @@ $data = json_decode(file_get_contents('php://input'), true);
 $betrag = floatval($data['betrag'] ?? 0);
 $beschreibung = trim($data['beschreibung'] ?? '');
 $teilnehmer_ids = $data['teilnehmer_ids'] ?? []; // Array von User-IDs, die dabei waren
+$typ = $data['typ'] ?? 'ausgabe'; // 'ausgabe' oder 'einzahlung'
 
 if ($betrag <= 0) {
     echo json_encode(['status' => 'error', 'error' => 'Betrag muss größer 0 sein']);
@@ -21,6 +22,34 @@ if ($betrag <= 0) {
 
 if (empty($beschreibung)) {
     echo json_encode(['status' => 'error', 'error' => 'Beschreibung erforderlich']);
+    exit;
+}
+
+// Bei Einzahlung: Geld wird auf ausgewählte Mitglieder AUFGETEILT
+if ($typ === 'einzahlung') {
+    $anzahl_teilnehmer = count($teilnehmer_ids);
+    if ($anzahl_teilnehmer == 0) {
+        echo json_encode(['status' => 'error', 'error' => 'Mindestens 1 Teilnehmer erforderlich']);
+        exit;
+    }
+    
+    $betrag_pro_person = $betrag / $anzahl_teilnehmer;
+    
+    // Buche Einzahlung für jeden Teilnehmer
+    foreach ($teilnehmer_ids as $user_id) {
+        $stmt = $conn->prepare("
+            INSERT INTO transaktionen (mitglied_id, typ, betrag, beschreibung, datum, status)
+            VALUES (?, 'EINZAHLUNG', ?, ?, NOW(), 'gebucht')
+        ");
+        $stmt->bind_param('ids', $user_id, $betrag_pro_person, $beschreibung);
+        $stmt->execute();
+        $stmt->close();
+    }
+    
+    echo json_encode([
+        'status' => 'success',
+        'message' => "Einzahlung erfolgreich! €{$betrag} aufgeteilt auf {$anzahl_teilnehmer} Personen (je €" . number_format($betrag_pro_person, 2) . ")"
+    ]);
     exit;
 }
 

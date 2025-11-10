@@ -1,0 +1,24 @@
+# Apple Wallet Web Service URL Routing
+
+RewriteEngine On
+RewriteBase /api/wallet/
+
+# POST /v1/devices/:deviceLibraryIdentifier/registrations/:passTypeIdentifier/:serialNumber
+RewriteCond %{REQUEST_METHOD} ^POST$
+RewriteRule ^v1/devices/[^/]+/registrations/.+$ v1/register.php [L,QSA]
+
+# GET /v1/devices/:deviceLibraryIdentifier/registrations/:passTypeIdentifier
+RewriteCond %{REQUEST_METHOD} ^GET$
+RewriteRule ^v1/devices/[^/]+/registrations/[^/]+$ v1/get_passes.php [L,QSA]
+
+# GET /v1/passes/:passTypeIdentifier/:serialNumber
+RewriteCond %{REQUEST_METHOD} ^GET$
+RewriteRule ^v1/passes/[^/]+/[^/]+$ v1/get_pass.php [L,QSA]
+
+# DELETE /v1/devices/:deviceLibraryIdentifier/registrations/:passTypeIdentifier/:serialNumber
+RewriteCond %{REQUEST_METHOD} ^DELETE$
+RewriteRule ^v1/devices/[^/]+/registrations/.+$ v1/unregister.php [L,QSA]
+
+# POST /v1/log
+RewriteCond %{REQUEST_METHOD} ^POST$
+RewriteRule ^v1/log$ v1/log.php [L,QSA]

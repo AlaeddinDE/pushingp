@@ -457,7 +457,7 @@ $current_user_id = get_current_user_id();
                 <a href="events.php" class="nav-item">Events</a>
                 <a href="schichten.php" class="nav-item">Schichten</a>
                 <?php if ($is_admin): ?>
-                    <a href="admin_kasse.php" class="nav-item">Admin</a>
+                    <a href="admin.php" class="nav-item">Admin</a>
                 <?php endif; ?>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>

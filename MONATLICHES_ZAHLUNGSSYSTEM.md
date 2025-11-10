@@ -1,174 +1,79 @@
-# 📅 Monatliches Zahlungssystem
+# 💳 Monatliches Zahlungssystem
 
-## 🎯 Konzept
+## Übersicht
 
-**Zahlungen sind IMMER am Monatsersten fällig.**
-
-### Wie es funktioniert:
-
-1. **Guthaben** = Summe aller Ein-/Auszahlungen (live berechnet)
-2. **Gedeckt bis** = 1. des Monats + (Guthaben ÷ Monatsbeitrag) Monate
-3. **Nächste Zahlung fällig** = 1. des Monats NACH "Gedeckt bis"
-4. **Abbuchung** = Nur am 1. des Monats automatisch
+**Start:** 01.12.2025  
+**Monatsbeitrag:** 10,00 €  
+**Rhythmus:** Monatlich am 1. des Monats
 
 ---
 
-## 📊 Beispiel-Rechnung
+## 📌 Konzept
 
-**Mitglied:** Alessio  
-**Monatsbeitrag:** 10,00 €  
-**Aktuelles Guthaben:** 35,00 €  
-**Heute:** 09.11.2025
+### Konto statt Guthaben
+- Jedes Mitglied hat ein **Konto** (vorher "Guthaben")
+- Das Konto wird durch Einzahlungen aufgefüllt
+- Ab 01.12.2025 wird **monatlich automatisch 10 €** vom Konto abgebucht
 
-### Berechnung:
+### Beispiel
+- Mitglied zahlt am 15.11. **40 €** ein → Konto: **40,00 €**
+- Am 01.12.: Abbuchung 10 € → Konto: **30,00 €**
+- Am 01.01.: Abbuchung 10 € → Konto: **20,00 €**
+- Am 01.02.: Abbuchung 10 € → Konto: **10,00 €**
+- Am 01.03.: Abbuchung 10 € → Konto: **0,00 €**
+- Am 01.04.: **Keine Abbuchung** (kein Guthaben) → Mitglied muss nachzahlen
 
-```
-Gedeckte Monate = floor(35 / 10) = 3 Monate
+---
 
-Start = 01.11.2025 (Erster des aktuellen Monats)
-Gedeckt bis = 01.11.2025 + 3 Monate = 01.02.2026
-Nächste Zahlung = 01.03.2026
-```
+## 🔧 Technische Umsetzung
 
-### Timeline:
+### 1. Datenbank-Struktur
 
-```
-01.11  01.12  01.01  01.02  01.03
-  |------|------|------|------|
-  ✅     ✅     ✅     ✅     🔴
-                            ZAHLUNG
-                            FÄLLIG
-```
+#### Tabelle: `monthly_fee_tracking`
+Trackt alle monatlichen Abbuchungen.
+
+#### View: `v_member_konto`
+Zeigt aktuelles Konto-Saldo jedes Mitglieds.
+
+#### View: `v_monthly_fee_overview`
+Übersicht über Zahlungsstatus.
 
 ---
 
 ## 🤖 Automatische Abbuchung
 
-**Cronjob läuft:** Jeden 1. des Monats um 00:00 Uhr
+### API-Endpunkt
+**Datei:** `/api/v2/process_monthly_fees.php`
+
+**Aufruf:**
+```bash
+# Manuell als Admin:
+https://pushingp.de/api/v2/process_monthly_fees.php
+
+# Via Cronjob (am 1. des Monats):
+curl -k "https://pushingp.de/api/v2/process_monthly_fees.php?secret=pushingp_cron_2025"
+```
+
+---
+
+## ⚙️ Cronjob einrichten
 
 ```bash
-0 0 1 * * cd /var/www/html/api && php cron_monatliche_abbuchung.php
+# Am 1. jeden Monats um 00:05 Uhr
+5 0 1 * * curl -k "https://pushingp.de/api/v2/process_monthly_fees.php?secret=pushingp_cron_2025" >> /var/log/monthly_fees.log 2>&1
 ```
-
-### Was passiert:
-
-1. Prüft alle aktiven Mitglieder
-2. Wenn Guthaben ≥ Monatsbeitrag → Abbuchung als Transaktion
-3. Neu-Berechnung von "Gedeckt bis" und "Nächste Zahlung"
-4. Log in `/var/log/monthly_billing.log`
 
 ---
 
-## 🔧 Manuelle Neuberechnung
-
-### Für ein Mitglied:
+## 📝 Migration anwenden
 
 ```bash
-php -r "
-require_once '/var/www/html/api/berechne_zahlungsstatus.php';
-\$result = berechneZahlungsstatus(4); // Mitglied ID
-print_r(\$result);
-"
-```
-
-### Für alle Mitglieder:
-
-```bash
-mysql -u root pushingp -e "
-    SELECT id FROM users WHERE status='active'
-" | tail -n +2 | while read id; do
-    php -r "
-        require_once '/var/www/html/api/berechne_zahlungsstatus.php';
-        berechneZahlungsstatus($id);
-    "
-done
+cd /var/www/html
+mysql -u root -p pushingp < migrations/auto/20251110_monthly_fee_system.sql
 ```
 
 ---
 
-## 📈 Status-Anzeige
-
-### In der Kasse:
-
-- **Guthaben:** Live aus Transaktionen
-- **Gedeckt bis:** Berechnet nach Formel
-- **Nächste Zahlung:** Immer 1. des Monats nach "Gedeckt bis"
-
-### Farben:
-
-- 🟢 Grün = Gedeckt > 2 Monate
-- 🟡 Gelb = Gedeckt 1-2 Monate
-- 🔴 Rot = Gedeckt < 1 Monat (Zahlung fällig!)
-
----
-
-## 🔄 API-Endpunkte
-
-### `berechne_zahlungsstatus.php`
-
-Berechnet für ein Mitglied:
-- Guthaben
-- Gedeckte Monate
-- Gedeckt bis
-- Nächste Zahlung fällig
-
-### `cron_monatliche_abbuchung.php`
-
-Führt monatliche Abbuchungen durch (nur am 1. des Monats).
-
----
-
-## ⚙️ Konfiguration
-
-### Monatsbeitrag ändern:
-
-```sql
-UPDATE member_payment_status 
-SET monatsbeitrag = 15.00 
-WHERE mitglied_id = 4;
-```
-
-### Startguthaben setzen:
-
-```sql
-INSERT INTO transaktionen 
-(mitglied_id, typ, betrag, beschreibung, status, datum)
-VALUES
-(4, 'EINZAHLUNG', 40.00, 'Startguthaben', 'gebucht', NOW());
-```
-
-Dann neu berechnen:
-
-```bash
-php -r "
-require_once '/var/www/html/api/berechne_zahlungsstatus.php';
-berechneZahlungsstatus(4);
-"
-```
-
----
-
-## 🛡️ Sicherheit
-
-- Nur Admins können Transaktionen erstellen/bearbeiten
-- Abbuchungen werden als Transaktionen geloggt (nachvollziehbar)
-- Kein Löschen, nur Stornieren möglich
-- Cronjob läuft als root → Log-Überwachung wichtig
-
----
-
-## 📝 Logs
-
-```bash
-# Monatliche Abbuchungen
-tail -f /var/log/monthly_billing.log
-
-# Cronjob-Status
-grep cron_monatliche_abbuchung /var/log/syslog
-```
-
----
-
-**Stand:** 09.11.2025  
-**Version:** 1.0  
-**Autor:** Codex Agent
+**Erstellt:** 10.11.2025  
+**Agent:** Codex  
+**Version:** 1.0

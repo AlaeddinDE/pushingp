@@ -119,13 +119,13 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
     
     <div class="header">
         <div class="header-content">
-            <div class="logo">PUSHING P</div>
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
             <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
                 <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="admin_kasse.php" class="nav-item">Admin</a>
+                <a href="chat.php" class="nav-item">Chat</a>
+                <a href="admin.php" class="nav-item">Admin</a>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>
@@ -163,11 +163,19 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                 
                 <form id="gruppenaktionForm" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
                     <div class="form-group">
-                        <label>Betrag (€) aus Kasse</label>
-                        <input type="number" id="gruppenaktion_betrag" step="0.01" placeholder="60.00" required>
+                        <label>Art der Transaktion</label>
+                        <select id="gruppenaktion_typ" style="width: 100%; padding: 12px; background: var(--bg-tertiary); border: 1px solid var(--border); border-radius: 8px; color: var(--text-primary);">
+                            <option value="ausgabe">Ausgabe (aus Kasse nehmen)</option>
+                            <option value="einzahlung">Einzahlung (in Kasse einzahlen)</option>
+                        </select>
                     </div>
                     
                     <div class="form-group">
+                        <label id="betrag_label">Betrag (€) aus Kasse</label>
+                        <input type="number" id="gruppenaktion_betrag" step="0.01" placeholder="60.00" required>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
                         <label>Beschreibung</label>
                         <input type="text" id="gruppenaktion_beschreibung" placeholder="z.B. Kino - The Batman" required>
                     </div>
@@ -184,7 +192,7 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                         </div>
                     </div>
                     
-                    <button type="submit" class="btn" style="background: var(--accent); grid-column: 1 / -1;">🎯 Gruppenaktion buchen</button>
+                    <button type="submit" class="btn" id="gruppenaktion_submit_btn" style="background: var(--accent); grid-column: 1 / -1;">🎯 Gruppenaktion buchen</button>
                 </form>
                 
                 <div id="gruppenaktion_result" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
@@ -268,10 +276,28 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
     </div>
 
     <script>
+    // Gruppenaktion Typ-Wechsel
+    document.getElementById('gruppenaktion_typ').addEventListener('change', function() {
+        const typ = this.value;
+        const label = document.getElementById('betrag_label');
+        const btn = document.getElementById('gruppenaktion_submit_btn');
+        
+        if (typ === 'einzahlung') {
+            label.textContent = 'Betrag (€) in Kasse';
+            btn.innerHTML = '💰 Einzahlung buchen';
+            btn.style.background = 'var(--success)';
+        } else {
+            label.textContent = 'Betrag (€) aus Kasse';
+            btn.innerHTML = '🎯 Gruppenaktion buchen';
+            btn.style.background = 'var(--accent)';
+        }
+    });
+    
     // Gruppenaktion buchen
     document.getElementById('gruppenaktionForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         
+        const typ = document.getElementById('gruppenaktion_typ').value;
         const betrag = parseFloat(document.getElementById('gruppenaktion_betrag').value);
         const beschreibung = document.getElementById('gruppenaktion_beschreibung').value.trim();
         const checkboxes = document.querySelectorAll('input[name="teilnehmer[]"]:checked');
@@ -291,7 +317,7 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
             const response = await fetch('/api/gruppenaktion_buchen.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ betrag, beschreibung, teilnehmer_ids })
+                body: JSON.stringify({ betrag, beschreibung, teilnehmer_ids, typ })
             });
             
             const data = await response.json();
@@ -300,7 +326,7 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                 resultDiv.style.background = '#10b981';
                 resultDiv.style.color = 'white';
                 resultDiv.innerHTML = `
-                    ✅ <strong>Gruppenaktion gebucht!</strong><br>
+                    ✅ <strong>${typ === 'einzahlung' ? 'Einzahlung' : 'Gruppenaktion'} gebucht!</strong><br>
                     💰 Betrag: ${data.data.betrag.toFixed(2)}€<br>
                     👥 Teilnehmer: ${data.data.anzahl_teilnehmer}<br>
                     🎁 Fair-Share: ${data.data.fair_share.toFixed(2)}€ pro Person<br>

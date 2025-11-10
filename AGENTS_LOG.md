@@ -1018,3 +1018,248 @@ Jede Transaktion kann komplett bearbeitet werden:
 - ⏳ Automatisches Deployment läuft
 
 ---
+
+## [2025-11-10] Monatliches Kassensystem implementiert
+
+**Änderungen:**
+- Umbenennung: "Guthaben" → **"Konto"**
+- Monatliche Abbuchung ab 01.12.2025: 10 €/Monat
+- Automatisches Tracking aller Zahlungen
+
+**Backend:**
+- Neue Tabelle: `monthly_fee_tracking` (trackt monatliche Abbuchungen)
+- Neue Views:
+  - `v_member_konto` (aktuelles Konto-Saldo)
+  - `v_monthly_fee_overview` (Zahlungsstatus-Übersicht)
+- Neuer Transaktionstyp: `MONATSBEITRAG`
+
+**API:**
+- `/api/v2/process_monthly_fees.php` (automatische Abbuchung)
+  - Prüft Konto-Saldo vor Abbuchung
+  - Loggt Status: `abgebucht` / `übersprungen`
+  - Cronjob-fähig mit Secret-Auth
+
+**Frontend:**
+- `kasse.php`: Spalte "Guthaben" → "Konto"
+
+**Migration:**
+- `/migrations/auto/20251110_monthly_fee_system.sql`
+- System-Settings: `kasse_start_date`, `monthly_fee`
+
+**Dokumentation:**
+- `MONATLICHES_ZAHLUNGSSYSTEM.md` erstellt
+
+**Nächste Schritte:**
+- [ ] Migration auf Prod-Server anwenden
+- [ ] Cronjob einrichten (1. des Monats, 00:05 Uhr)
+- [ ] Alle Mitglieder auf min. 10 € Startguthaben prüfen
+
+---
+
+## [2025-11-10] Complete XP/Leveling System Implementation
+
+### 🎮 Features Added
+- **11-Level Progression System** (Rookie → Unantastbar)
+- **XP for Events, Payments, Community Activity**
+- **11 Auto-Awarded Badges** (Event Legend, Financial Hero, etc.)
+- **Leaderboard Page** with Top 3 Podium
+- **Streak Tracking** (Login, Events, Payments)
+- **Dashboard XP Widget** with progress bar
+
+### 📊 Database Changes
+- Created tables: `level_config`, `xp_history`, `badges`, `user_badges`, `user_streaks`, `xp_actions`
+- Added to `users`: `xp_total`, `level_id`, `xp_multiplier`, `badges_json`, `last_xp_update`
+- Created views: `v_xp_leaderboard`, `v_user_xp_progress`
+
+### 🔗 API Endpoints Created
+- `/api/v2/get_user_xp.php` - User XP & level info
+- `/api/v2/get_leaderboard.php` - Top users ranking
+- `/api/v2/get_xp_history.php` - XP transaction log
+
+### 🔄 Integrations
+- **Login:** Auto-awards daily XP + streak tracking
+- **Events:** XP on join (+20), create (+80), complete (+30)
+- **Payments:** XP on deposit (+30) + bonuses for large amounts
+- **Dashboard:** Live XP display with progress bar & badges
+
+### 📄 Files Modified
+- `/includes/xp_system.php` (NEW) - Core XP logic
+- `/login.php` - Added login streak tracking
+- `/api/events_join.php` - Added event XP
+- `/api/einzahlung_buchen.php` - Added payment XP bonuses
+- `/dashboard.php` - Added XP widget
+- `/leaderboard.php` (NEW) - Full leaderboard page
+
+### 🔧 Maintenance
+- Created `/api/cron/daily_xp_maintenance.php` for daily badge checks & penalties
+- Run daily at 00:00: `0 0 * * * php /var/www/html/api/cron/daily_xp_maintenance.php`
+
+### ✅ Status
+- Migration applied successfully
+- All functions tested & working
+- XP tracking active on all integrated features
+- Ready for production use
+
+### 📖 Documentation
+- Created `/var/www/html/LEVELING_SYSTEM.md` with full technical docs
+
+
+## [2025-11-10] Admin XP Management System
+
+### 🎯 Created Admin Interface
+- **admin_xp.php** (28 KB) - Main admin dashboard with 5 tabs
+- **admin_user_xp.php** (14 KB) - Detailed user XP view
+
+### 📊 Admin Features
+- User Management (award XP, reset, view details)
+- XP History (last 50 transactions)
+- XP Actions Config (20 actions, enable/disable)
+- Badge Management (11 badges, manual award)
+- Level Overview (11 levels, user distribution)
+
+### 🔧 Admin APIs Created (5)
+- admin_award_xp.php - Manual XP award/deduct
+- admin_reset_user_xp.php - Reset user XP
+- admin_award_badge.php - Manual badge award
+- admin_toggle_xp_action.php - Enable/disable actions
+- admin_update_xp_action.php - Update XP values
+
+### 🔗 Integration
+- Added "⚙️ XP Admin" link in header (admin-only)
+- Added "🏆 Leaderboard" link in header (all users)
+
+### ✅ Status
+- Vollständig funktionsfähig
+- Alle Admin-Funktionen verfügbar
+- Produktionsbereit
+
+
+## [2025-01-10] Chat System Verbesserungen
+
+### Behobene Probleme:
+- **Flackern der Nachrichten**: Optimierte loadMessages() Funktion, die nur bei Änderungen neu rendert
+- **Mobile Chat-Auswahl**: Floating 💬 Button hinzugefügt für einfachen Zugriff auf Chat-Liste
+
+### Neue Features:
+
+#### 1. Passwortgeschützte Gruppen 🔒
+- Beim Erstellen einer Gruppe kann ein Passwort gesetzt werden
+- Alle Mitglieder müssen das Passwort eingeben, um die Gruppe zu öffnen
+- Geschützte Gruppen werden mit 🔒 Symbol angezeigt
+- Passwörter werden sicher gehasht (password_hash)
+
+**Verwendung:**
+1. "Neue Gruppe erstellen" klicken
+2. Checkbox "Gruppe mit Passwort schützen" aktivieren
+3. Passwort eingeben
+4. Mitglieder auswählen → Gruppe erstellen
+5. Beim Öffnen der Gruppe muss jedes Mitglied das Passwort eingeben
+
+#### 2. Große Dateiuploads 📦
+- Upload-Limit erhöht: 10MB → **100MB**
+- PHP-Konfiguration angepasst:
+  - `upload_max_filesize = 100M`
+  - `post_max_size = 100M`
+  - `max_execution_time = 300s`
+  - `memory_limit = 256M`
+
+**Dateien können jetzt verschickt werden:**
+- Videos (bis 100MB)
+- Große PDFs und Präsentationen
+- ZIP-Archive
+- Alle gängigen Dateitypen
+
+### Technische Änderungen:
+- Neue DB-Spalten: `chat_groups.password_hash`, `chat_groups.is_protected`
+- Neue API: `/api/chat/verify_group_password.php`
+- Upload-Konfiguration: `/etc/php/8.3/apache2/conf.d/99-upload-limits.ini`
+- Migration: `migrations/auto/20250110_chat_group_password.sql`
+
+### Mobile Optimierungen:
+- Floating Chat-Button (💬) unten rechts
+- Sidebar gleitet von links ein
+- Zurück-Button (←) im Chat-Header
+- Touch-optimierte Buttons
+
+
+## [2025-01-10 15:07] Upload-Limit auf 1GB erhöht
+
+### Änderungen:
+- **Upload-Limit**: 100MB → **1GB**
+- **PHP-Konfiguration angepasst:**
+  - `upload_max_filesize = 1G`
+  - `post_max_size = 1G`
+  - `max_execution_time = 600s` (10 Minuten)
+  - `max_input_time = 600s` (10 Minuten)
+  - `memory_limit = 512M`
+
+### Verwendung:
+Jetzt können im Chat folgende große Dateien verschickt werden:
+- Videos bis 1GB
+- Große Backup-Dateien
+- ISO-Images
+- Große Datenbanken
+- Projektarchive
+
+**Hinweis:** Bei sehr großen Dateien kann der Upload etwas dauern, besonders auf langsameren Verbindungen.
+
+
+## [2025-01-10 15:25] Admin Ghost Mode für Chat
+
+### Änderungen:
+- **Chat gelöscht**: Alle Nachrichten zwischen Alessio und Alaeddin wurden entfernt
+- **Admin Ghost Mode implementiert**:
+  - Admins sehen ALLE Gruppen (auch ohne Mitglied zu sein)
+  - Admins können in ALLEN Gruppen lesen und schreiben
+  - Admins werden NICHT in der Mitgliederliste angezeigt
+  - Normale User sehen nur ihre eigenen Gruppen
+
+### Funktionalität:
+**Als Admin:**
+- ✅ Sieht alle Gruppen im "Gruppen"-Tab
+- ✅ Kann jede Gruppe öffnen (ohne Passwort bei geschützten Gruppen)
+- ✅ Kann Nachrichten lesen
+- ✅ Kann Nachrichten schreiben
+- ✅ Kann Dateien hochladen
+- ✅ Wird NICHT in der Mitgliederzahl gezählt
+- ✅ Komplett unsichtbar für normale User
+
+**Als normaler User:**
+- Sieht nur Gruppen, wo er Mitglied ist
+- Kann nur in seine Gruppen schreiben
+- Sieht Admin nicht in Mitgliederliste
+
+### Technische Details:
+**Geänderte Dateien:**
+- `chat.php` - Admin sieht alle Gruppen
+- `api/chat/get_messages.php` - Admin-Check für Gruppennachrichten
+- `api/chat/send_message.php` - Admin kann in alle Gruppen schreiben
+- `api/chat/upload_file.php` - Admin kann in alle Gruppen Dateien hochladen
+
+
+## [2025-01-10 15:30] Chat Ausblenden-Funktion
+
+### Neue Funktionalität:
+- **🗑️ Chats ausblenden**: User können Chats aus "Kürzlich" entfernen
+
+### Features:
+- **Ausblenden-Button** (🗑️) im Chat-Header rechts oben
+- Chat verschwindet aus "Kürzlich"-Tab
+- Chat bleibt in "Direkt" oder "Gruppen" verfügbar
+- Kann jederzeit wieder geöffnet werden
+- Keine Nachrichten werden gelöscht
+- Nur für den jeweiligen User ausgeblendet
+
+### Verwendung:
+1. Chat öffnen
+2. Auf 🗑️ klicken (rechts oben im Header)
+3. Bestätigen
+4. Chat verschwindet aus "Kürzlich"
+5. Über "Direkt" oder "Gruppen" kann der Chat wieder geöffnet werden
+
+### Technische Details:
+- **Neue Tabelle**: `chat_hidden`
+- **Neue API**: `/api/chat/hide_chat.php`
+- **Queries aktualisiert**: Versteckte Chats werden in "Kürzlich" ausgefiltert
+- Soft-Delete Prinzip (Nachrichten bleiben erhalten)
+

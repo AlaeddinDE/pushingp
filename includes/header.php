@@ -39,9 +39,11 @@ $stmt->close();
     <a href="/index.php" style="color:#7ee0ff;text-decoration:none;font-weight:700;font-size:18px;">PushingP</a>
     <a href="/kasse.php" style="color:#cfe7ee;text-decoration:none;">Kasse</a>
     <a href="/events.php" style="color:#cfe7ee;text-decoration:none;">Events</a>
+    <a href="/leaderboard.php" style="color:#cfe7ee;text-decoration:none;">🏆 Leaderboard</a>
     <a href="/settings.php" style="color:#cfe7ee;text-decoration:none;">Einstellungen</a>
     <?php if(isset($_SESSION['role']) && $_SESSION['role']==='admin'): ?>
       <a href="/admin_kasse.php" style="color:#ffe27e;text-decoration:none;">Admin</a>
+      <a href="/admin_xp.php" style="color:#ffe27e;text-decoration:none;">⚙️ XP Admin</a>
     <?php endif; ?>
   </nav>
   <div style="display:flex;align-items:center;gap:14px;">

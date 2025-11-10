@@ -304,3 +304,19 @@ function get_payment_status($user_id) {
         return ['status' => 'open', 'difference' => $difference];
     }
 }
+
+// Check if user has 10€+ balance for casino access
+function user_can_access_casino($user_id) {
+    require_once __DIR__ . '/db.php';
+    global $conn;
+    
+    $stmt = $conn->prepare("SELECT pool_balance FROM members_v2 WHERE user_id = ?");
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $stmt->bind_result($balance);
+    $has_balance = $stmt->fetch();
+    $stmt->close();
+    
+    if (!$has_balance) return false;
+    return ($balance >= 10.00);
+}

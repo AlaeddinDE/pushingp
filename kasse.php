@@ -80,6 +80,113 @@ $res2 = $conn->query("
             color: var(--error);
             font-weight: 600;
         }
+        
+        /* Mobile Card Layout */
+        .mobile-card {
+            display: none;
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border-left: 4px solid var(--accent);
+        }
+        
+        .mobile-card-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .mobile-card-row:last-child {
+            margin-bottom: 0;
+        }
+        
+        .mobile-card-label {
+            color: var(--text-secondary);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .mobile-card-value {
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        /* Mobile Optimierungen */
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px !important;
+            }
+            
+            .welcome h1 {
+                font-size: 1.5rem !important;
+            }
+            
+            .section {
+                margin-bottom: 24px !important;
+            }
+            
+            .section-title {
+                font-size: 1.125rem !important;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr !important;
+                gap: 12px !important;
+            }
+            
+            .stat-card {
+                padding: 16px !important;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem !important;
+            }
+            
+            /* Verstecke Tabellen auf Mobile */
+            .balance-table {
+                display: none;
+            }
+            
+            /* Zeige Cards auf Mobile */
+            .mobile-card {
+                display: block;
+            }
+            
+            .button, .btn {
+                width: 100%;
+                text-align: center;
+                padding: 12px !important;
+            }
+        }
+        
+        /* iPhone spezifisch */
+        @media (max-width: 430px) {
+            body {
+                font-size: 14px;
+            }
+            
+            .welcome h1 {
+                font-size: 1.375rem !important;
+            }
+            
+            .section-header {
+                flex-direction: column;
+                align-items: flex-start !important;
+                gap: 8px;
+            }
+            
+            .mobile-card {
+                padding: 12px;
+            }
+            
+            .mobile-card-value {
+                font-size: 0.8rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -87,14 +194,14 @@ $res2 = $conn->query("
     
     <div class="header">
         <div class="header-content">
-            <div class="logo">PUSHING P</div>
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
             <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
                 <a href="schichten.php" class="nav-item">Schichten</a>
+                <a href="chat.php" class="nav-item">Chat</a>
                 <?php if ($is_admin): ?>
-                    <a href="admin_kasse.php" class="nav-item">Admin</a>
+                    <a href="admin.php" class="nav-item">Admin</a>
                 <?php endif; ?>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
@@ -122,14 +229,6 @@ $res2 = $conn->query("
                         </a>
                     </div>
                 </div>
-                <?php if ($is_admin): ?>
-                <div class="stat-card">
-                    <div class="stat-label">Admin-Aktion</div>
-                    <button onclick="updatePayPalAmount()" class="button" style="margin-top: 8px;">
-                        🔄 Betrag aktualisieren
-                    </button>
-                </div>
-                <?php endif; ?>
             </div>
         </div>
 
@@ -139,6 +238,7 @@ $res2 = $conn->query("
                 <h2 class="section-title">Deckungsstatus (10€/Monat)</h2>
             </div>
             
+            <!-- Desktop Tabelle -->
             <table class="balance-table">
                 <thead>
                     <tr>
@@ -150,7 +250,10 @@ $res2 = $conn->query("
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($m = $payment_overview->fetch_assoc()): ?>
+                    <?php 
+                    $payment_overview->data_seek(0); // Reset pointer
+                    while($m = $payment_overview->fetch_assoc()): 
+                    ?>
                     <tr>
                         <td><?= htmlspecialchars($m['name']) ?></td>
                         <td style="text-align: right;"><?= number_format($m['guthaben'], 2, ',', '.') ?> €</td>
@@ -163,6 +266,44 @@ $res2 = $conn->query("
                     <?php endwhile; ?>
                 </tbody>
             </table>
+            
+            <!-- Mobile Cards -->
+            <div class="mobile-cards-container">
+                <?php 
+                $payment_overview->data_seek(0); // Reset pointer
+                while($m = $payment_overview->fetch_assoc()): 
+                    $balance_class = $m['guthaben'] >= 0 ? 'balance-positive' : 'balance-negative';
+                ?>
+                <div class="mobile-card">
+                    <div class="mobile-card-row" style="margin-bottom: 12px;">
+                        <div style="font-weight: 700; font-size: 1.125rem;">
+                            <?= htmlspecialchars($m['name']) ?>
+                        </div>
+                        <div style="font-size: 1.5rem;">
+                            <?= $m['status_icon'] ?>
+                        </div>
+                    </div>
+                    <div class="mobile-card-row">
+                        <div class="mobile-card-label">Guthaben</div>
+                        <div class="mobile-card-value <?= $balance_class ?>">
+                            <?= number_format($m['guthaben'], 2, ',', '.') ?> €
+                        </div>
+                    </div>
+                    <div class="mobile-card-row">
+                        <div class="mobile-card-label">Gedeckt bis</div>
+                        <div class="mobile-card-value">
+                            <?= date('d.m.Y', strtotime($m['gedeckt_bis'])) ?>
+                        </div>
+                    </div>
+                    <div class="mobile-card-row">
+                        <div class="mobile-card-label">Nächste Zahlung</div>
+                        <div class="mobile-card-value">
+                            <?= date('d.m.Y', strtotime($m['naechste_zahlung_faellig'])) ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endwhile; ?>
+            </div>
         </div>
 
         <div class="section" style="margin-top: 24px;">
@@ -171,6 +312,7 @@ $res2 = $conn->query("
                 <h2 class="section-title">Letzte Transaktionen</h2>
             </div>
             
+            <!-- Desktop Tabelle -->
             <table class="balance-table">
                 <thead>
                     <tr>
@@ -185,12 +327,15 @@ $res2 = $conn->query("
                     </tr>
                 </thead>
                 <tbody>
-                    <?php while($t = $res2->fetch_assoc()): ?>
+                    <?php 
+                    $res2->data_seek(0); // Reset pointer
+                    while($t = $res2->fetch_assoc()): 
+                    ?>
                     <tr data-transaction-id="<?= $t['id'] ?? 0 ?>">
                         <td><?= $t['datum'] ?></td>
                         <td><?= htmlspecialchars($t['name'] ?? 'System') ?></td>
                         <td><span class="badge"><?= htmlspecialchars($t['typ']) ?></span></td>
-                        <td style="text-align: right;" class="<?= $t['betrag'] >= 0 ? 'balance-positive' : 'balance-negative' ?>">
+                        <td style="text-align: right;" class="<?= $t['typ'] === 'EINZAHLUNG' ? 'balance-positive' : 'balance-negative' ?>">
                             <?= number_format($t['betrag'],2,',','.') ?> €
                         </td>
                         <td style="color: var(--text-secondary); font-size: 0.875rem;">
@@ -205,6 +350,53 @@ $res2 = $conn->query("
                     <?php endwhile; ?>
                 </tbody>
             </table>
+            
+            <!-- Mobile Cards -->
+            <div class="mobile-cards-container">
+                <?php 
+                $res2->data_seek(0); // Reset pointer
+                while($t = $res2->fetch_assoc()): 
+                    $balance_class = $t['typ'] === 'EINZAHLUNG' ? 'balance-positive' : 'balance-negative';
+                    $border_color = $t['typ'] === 'EINZAHLUNG' ? 'var(--success)' : 'var(--error)';
+                ?>
+                <div class="mobile-card" style="border-left-color: <?= $border_color ?>;">
+                    <div class="mobile-card-row" style="margin-bottom: 12px;">
+                        <div>
+                            <div style="font-weight: 700; font-size: 1rem; margin-bottom: 4px;">
+                                <?= htmlspecialchars($t['name'] ?? 'System') ?>
+                            </div>
+                            <div style="color: var(--text-secondary); font-size: 0.75rem;">
+                                <?= $t['datum'] ?>
+                            </div>
+                        </div>
+                        <div class="mobile-card-value <?= $balance_class ?>" style="font-size: 1.125rem;">
+                            <?= number_format($t['betrag'],2,',','.') ?> €
+                        </div>
+                    </div>
+                    <div class="mobile-card-row">
+                        <div class="mobile-card-label">Typ</div>
+                        <div class="mobile-card-value">
+                            <span class="badge"><?= htmlspecialchars($t['typ']) ?></span>
+                        </div>
+                    </div>
+                    <?php if (!empty($t['beschreibung'])): ?>
+                    <div class="mobile-card-row">
+                        <div class="mobile-card-label">Beschreibung</div>
+                        <div class="mobile-card-value" style="font-size: 0.75rem; color: var(--text-secondary); text-align: right; max-width: 60%;">
+                            <?= htmlspecialchars($t['beschreibung']) ?>
+                        </div>
+                    </div>
+                    <?php endif; ?>
+                    <?php if ($is_admin): ?>
+                    <div class="mobile-card-row" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border);">
+                        <a href="admin_transaktionen.php?edit=<?= $t['id'] ?? 0 ?>" class="btn" style="font-size: 0.75rem; padding: 8px 16px; text-decoration: none; width: 100%; text-align: center; display: block;">
+                            ✏️ Bearbeiten
+                        </a>
+                    </div>
+                    <?php endif; ?>
+                </div>
+                <?php endwhile; ?>
+            </div>
         </div>
     </div>
 

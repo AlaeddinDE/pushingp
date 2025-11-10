@@ -1,0 +1,111 @@
+<?php
+error_reporting(E_ALL);
+ini_set('display_errors', 0);
+ini_set('log_errors', 1);
+
+require_once __DIR__ . '/../../includes/functions.php';
+require_once __DIR__ . '/../../includes/db.php';
+require_once __DIR__ . '/../../includes/xp_system.php';
+
+try {
+    secure_session_start();
+    require_login();
+} catch (Exception $e) {
+    header('Content-Type: application/json');
+    echo json_encode(['status' => 'error', 'error' => 'Session error: ' . $e->getMessage()]);
+    exit;
+}
+
+header('Content-Type: application/json');
+
+$user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : 0;
+
+if ($user_id <= 0) {
+    echo json_encode(['status' => 'error', 'error' => 'Invalid user_id']);
+    exit;
+}
+
+// Get basic user info
+$stmt = $conn->prepare("SELECT id, name, username, created_at, is_admin FROM users WHERE id = ? AND status = 'active'");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$stmt->bind_result($id, $name, $username, $created_at, $is_admin);
+
+if (!$stmt->fetch()) {
+    $stmt->close();
+    echo json_encode(['status' => 'error', 'error' => 'User not found']);
+    exit;
+}
+$stmt->close();
+
+// Get XP and level info
+$xp_info = get_user_level_info($user_id);
+
+// Get badges manually (avoid get_result)
+$stmt = $conn->prepare("
+    SELECT b.id, b.name, b.description, b.icon, b.color, ub.earned_at 
+    FROM user_badges ub
+    JOIN badges b ON ub.badge_id = b.id
+    WHERE ub.user_id = ?
+    ORDER BY ub.earned_at DESC
+");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$stmt->bind_result($badge_id, $badge_name, $badge_desc, $badge_icon, $badge_color, $badge_earned);
+
+$badges = [];
+while ($stmt->fetch()) {
+    $badges[] = [
+        'id' => $badge_id,
+        'name' => $badge_name,
+        'description' => $badge_desc,
+        'icon' => $badge_icon,
+        'color' => $badge_color,
+        'earned_at' => $badge_earned
+    ];
+}
+$stmt->close();
+
+// Calculate initials
+$name_parts = explode(' ', $name);
+if (count($name_parts) >= 2) {
+    $initials = strtoupper(substr($name_parts[0], 0, 1) . substr($name_parts[1], 0, 1));
+} else {
+    $initials = strtoupper(substr($name, 0, 2));
+}
+
+// Calculate member since
+$joined = new DateTime($created_at);
+$now = new DateTime();
+$member_diff = $joined->diff($now);
+if ($member_diff->y > 0) {
+    $member_since = $member_diff->y . ' Jahr' . ($member_diff->y > 1 ? 'e' : '');
+} elseif ($member_diff->m > 0) {
+    $member_since = $member_diff->m . ' Monat' . ($member_diff->m > 1 ? 'e' : '');
+} else {
+    $member_since = 'Neu';
+}
+
+// Prepare response
+$response = [
+    'status' => 'success',
+    'data' => [
+        'id' => $id,
+        'name' => $name,
+        'username' => $username,
+        'initials' => $initials,
+        'is_admin' => $is_admin == 1,
+        'created_at' => $created_at,
+        'member_since' => $member_since,
+        'level_id' => $xp_info['level_id'] ?? 1,
+        'level_title' => $xp_info['current_level'] ?? 'Rookie',
+        'level_image' => $xp_info['level_image'] ?? '',
+        'level_emoji' => $xp_info['level_emoji'] ?? '🎖️',
+        'xp_total' => $xp_info['xp_total'] ?? 0,
+        'xp_in_current_level' => $xp_info['xp_in_current_level'] ?? 0,
+        'xp_needed_for_next' => $xp_info['xp_needed_for_next'] ?? 100,
+        'badges' => $badges
+    ]
+];
+
+echo json_encode($response);

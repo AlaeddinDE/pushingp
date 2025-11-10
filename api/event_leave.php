@@ -1,13 +1,23 @@
 <?php
-session_start();
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/db.php';
+secure_session_start();
+require_login();
+
 header('Content-Type: application/json');
-include '../includes/db.php';
 
 $eid = intval($_POST['event_id'] ?? 0);
-if(!$eid || !isset($_SESSION['mitglied_id'])){ http_response_code(403); echo json_encode(['ok'=>false]); exit; }
-$mid = $_SESSION['mitglied_id'];
+if(!$eid){ 
+    echo json_encode(['ok'=>false, 'error' => 'Missing event_id']); 
+    exit; 
+}
 
-$conn->query("UPDATE event_participants SET status='declined'
-              WHERE event_id=$eid AND mitglied_id=$mid");
-echo json_encode(['ok'=>true]);
+$mid = $_SESSION['user_id'];
+
+$stmt = $conn->prepare("UPDATE event_participants SET status='declined' WHERE event_id=? AND mitglied_id=?");
+$stmt->bind_param('ii', $eid, $mid);
+$success = $stmt->execute();
+$stmt->close();
+
+echo json_encode(['ok' => $success]);
 ?>
