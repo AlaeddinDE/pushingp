@@ -16,8 +16,8 @@ $current_date->modify("$week_offset week");
 $week_start = clone $current_date;
 $week_start->modify('monday this week');
 
-// Hole alle aktiven Mitglieder
-$members_query = "SELECT id, name FROM users WHERE status = 'active' ORDER BY name ASC";
+// Hole alle aktiven Mitglieder MIT aktivierten Schichten
+$members_query = "SELECT id, name FROM users WHERE status = 'active' AND shift_enabled = 1 ORDER BY shift_sort_order ASC, name ASC";
 $members_result = $conn->query($members_query);
 $members = [];
 while ($row = $members_result->fetch_assoc()) {
