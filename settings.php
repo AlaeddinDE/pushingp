@@ -8,10 +8,10 @@ $user_id = get_current_user_id();
 $is_admin = is_admin();
 
 // Load user data
-$stmt = $conn->prepare("SELECT username, name, email, avatar, shift_enabled, bio, discord_tag, notifications_enabled, event_notifications, shift_notifications, phone, birthday, team_role, city, two_factor_enabled, email_verified, receive_newsletter, calendar_sync, visibility_status, auto_decline_events FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT username, name, email, avatar, shift_enabled, bio, discord_tag, notifications_enabled, event_notifications, phone, birthday, team_role, city, two_factor_enabled, email_verified, visibility_status, auto_decline_events FROM users WHERE id = ?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$stmt->bind_result($username, $name, $email, $avatar, $shift_enabled, $bio, $discord_tag, $notifications_enabled, $event_notifications, $shift_notifications, $phone, $birthday, $team_role, $city, $two_factor_enabled, $email_verified, $receive_newsletter, $calendar_sync, $visibility_status, $auto_decline_events);
+$stmt->bind_result($username, $name, $email, $avatar, $shift_enabled, $bio, $discord_tag, $notifications_enabled, $event_notifications, $phone, $birthday, $team_role, $city, $two_factor_enabled, $email_verified, $visibility_status, $auto_decline_events);
 $stmt->fetch();
 $stmt->close();
 
@@ -49,14 +49,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($action === 'preferences') {
         $notifications_enabled_new = isset($_POST['notifications_enabled']) ? 1 : 0;
         $event_notifications_new = isset($_POST['event_notifications']) ? 1 : 0;
-        $shift_notifications_new = isset($_POST['shift_notifications']) ? 1 : 0;
-        $receive_newsletter_new = isset($_POST['receive_newsletter']) ? 1 : 0;
-        $calendar_sync_new = isset($_POST['calendar_sync']) ? 1 : 0;
         $auto_decline_events_new = isset($_POST['auto_decline_events']) ? 1 : 0;
         $visibility_status_new = $_POST['visibility_status'] ?? 'online';
         
-        $stmt = $conn->prepare("UPDATE users SET notifications_enabled=?, event_notifications=?, shift_notifications=?, receive_newsletter=?, calendar_sync=?, auto_decline_events=?, visibility_status=? WHERE id=?");
-        $stmt->bind_param('iiiiiisi', $notifications_enabled_new, $event_notifications_new, $shift_notifications_new, $receive_newsletter_new, $calendar_sync_new, $auto_decline_events_new, $visibility_status_new, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET notifications_enabled=?, event_notifications=?, auto_decline_events=?, visibility_status=? WHERE id=?");
+        $stmt->bind_param('iiisi', $notifications_enabled_new, $event_notifications_new, $auto_decline_events_new, $visibility_status_new, $user_id);
         $stmt->execute();
         $stmt->close();
         $success = 'Einstellungen gespeichert!';
@@ -65,19 +62,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    if ($action === 'security') {
-        $two_factor_enabled_new = isset($_POST['two_factor_enabled']) ? 1 : 0;
-        
-        $stmt = $conn->prepare("UPDATE users SET two_factor_enabled=? WHERE id=?");
-        $stmt->bind_param('ii', $two_factor_enabled_new, $user_id);
-        $stmt->execute();
-        $stmt->close();
-        $success = 'Sicherheitseinstellungen gespeichert!';
-        
-        header('Location: settings.php?saved=1');
-        exit;
-    }
-    
+
     if ($action === 'password') {
         $new_pass = $_POST['new_password'] ?? '';
         $hash = password_hash($new_pass, PASSWORD_DEFAULT);
@@ -365,30 +350,6 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                     
                     <div class="form-group">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                            <input type="checkbox" name="shift_notifications" value="1" <?= $shift_notifications ? 'checked' : '' ?> style="width: auto; margin: 0;">
-                            <span>⏰ Schicht-Erinnerungen</span>
-                        </label>
-                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Erinnerung vor Schichtbeginn</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                            <input type="checkbox" name="receive_newsletter" value="1" <?= $receive_newsletter ? 'checked' : '' ?> style="width: auto; margin: 0;">
-                            <span>📧 Team-Newsletter erhalten</span>
-                        </label>
-                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Regelmäßige Updates über Team-Aktivitäten</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                            <input type="checkbox" name="calendar_sync" value="1" <?= $calendar_sync ? 'checked' : '' ?> style="width: auto; margin: 0;">
-                            <span>📅 Kalender-Synchronisation</span>
-                        </label>
-                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Synchronisiere Events mit deinem Kalender (Google/Outlook)</small>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
                             <input type="checkbox" name="auto_decline_events" value="1" <?= $auto_decline_events ? 'checked' : '' ?> style="width: auto; margin: 0;">
                             <span>🚫 Auto-Ablehnung bei Konflikten</span>
                         </label>
@@ -416,49 +377,7 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                 </div>
             </div>
             
-            <div class="section">
-                <div class="section-header">
-                    <span>🔒</span>
-                    <h2 class="section-title">Sicherheit & Datenschutz</h2>
-                </div>
-                <form method="POST">
-                    <input type="hidden" name="action" value="security">
-                    
-                    <div class="form-group">
-                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                            <input type="checkbox" name="two_factor_enabled" value="1" <?= $two_factor_enabled ? 'checked' : '' ?> style="width: auto; margin: 0;">
-                            <span>🔐 Zwei-Faktor-Authentifizierung (2FA)</span>
-                        </label>
-                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Zusätzliche Sicherheitsebene beim Login</small>
-                    </div>
-                    
-                    <button type="submit" class="btn">Sicherheit speichern</button>
-                </form>
-                
-                <div style="margin-top: 24px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
-                    <div style="display: flex; align-items: start; gap: 12px;">
-                        <?php if ($email_verified): ?>
-                            <span style="color: #10b981; font-size: 1.5rem;">✓</span>
-                            <div>
-                                <div style="font-weight: 600; color: #10b981; margin-bottom: 4px;">E-Mail verifiziert</div>
-                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">Deine E-Mail-Adresse wurde bestätigt</p>
-                            </div>
-                        <?php else: ?>
-                            <span style="color: #f59e0b; font-size: 1.5rem;">⚠️</span>
-                            <div>
-                                <div style="font-weight: 600; color: #f59e0b; margin-bottom: 4px;">E-Mail nicht verifiziert</div>
-                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">Bitte bestätige deine E-Mail-Adresse</p>
-                            </div>
-                        <?php endif; ?>
-                    </div>
-                </div>
-                
-                <div style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
-                    <p class="text-secondary" style="font-size: 0.875rem;">
-                        💡 2FA erhöht die Sicherheit deines Accounts erheblich. Wir empfehlen die Aktivierung.
-                    </p>
-                </div>
-            </div>
+
         </div>
     </div>
     
@@ -473,6 +392,8 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                 group.style.transform = 'translateY(0)';
             }, index * 50);
         });
+        
+
     </script>
 </body>
 </html>

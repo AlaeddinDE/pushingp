@@ -391,8 +391,7 @@ if ($result) while ($row = $result->fetch_assoc()) $crew_members[] = $row;
                 <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
             </div>
             
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; margin-top: 16px;">
                 <?php 
                 $colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6', '#f97316'];
                 $color_index = 0;
@@ -421,7 +420,7 @@ if ($result) while ($row = $result->fetch_assoc()) $crew_members[] = $row;
                         $member_since = 'Neu';
                     }
                 ?>
-                <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;"
+                <div style="background: var(--bg-tertiary); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;"
                      onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';"
                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     
@@ -449,7 +448,6 @@ if ($result) while ($row = $result->fetch_assoc()) $crew_members[] = $row;
                     <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px #10b98133; flex-shrink: 0;"></div>
                 </div>
                 <?php endforeach; ?>
-            </div>
             </div>
         </div>
     </div>

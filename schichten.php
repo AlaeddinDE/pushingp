@@ -10,13 +10,15 @@ $is_admin = is_admin();
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Schichtplan-Übersicht – PUSHING P</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
         .shift-overview {
             margin-top: 24px;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         
         .shift-row {
@@ -29,6 +31,7 @@ $is_admin = is_admin();
             display: flex;
             align-items: center;
             gap: 20px;
+            min-width: fit-content;
         }
         
         .shift-row:hover {
@@ -45,6 +48,7 @@ $is_admin = is_admin();
             text-align: right;
             padding-right: 20px;
             border-right: 2px solid var(--border);
+            flex-shrink: 0;
         }
         
         .week-grid {
@@ -52,12 +56,94 @@ $is_admin = is_admin();
             grid-template-columns: repeat(14, 1fr);
             gap: 3px;
             flex: 1;
+            min-width: fit-content;
+        }
+        
+        /* Mobile Responsive Styles */
+        @media (max-width: 768px) {
+            .shift-row {
+                padding: 12px;
+                gap: 12px;
+            }
+            
+            .member-name {
+                min-width: 70px;
+                max-width: 70px;
+                font-size: 0.9rem;
+                padding-right: 12px;
+            }
+            
+            .week-grid {
+                gap: 2px;
+            }
+            
+            .schichtplan-logo {
+                flex-direction: column;
+                gap: 12px;
+                padding: 12px;
+            }
+            
+            .logo-svg {
+                width: 60px;
+                height: 60px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.8rem;
+            }
+            
+            .nav-buttons {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .nav-btn {
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                width: 100%;
+            }
+            
+            .week-label {
+                font-size: 1rem;
+            }
+            
+            .legend {
+                gap: 8px;
+                padding: 8px;
+            }
+            
+            .legend-item {
+                font-size: 0.75rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .member-name {
+                min-width: 60px;
+                max-width: 60px;
+                font-size: 0.8rem;
+            }
+            
+            .shift-row {
+                padding: 8px;
+                gap: 8px;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.5rem;
+            }
+            
+            .btn {
+                font-size: 0.8rem;
+                padding: 8px 12px;
+            }
         }
         
         .day-cell {
             text-align: center;
             position: relative;
             min-height: 20px;
+            min-width: 55px;
         }
         
         .day-cell.no-header {
@@ -75,6 +161,35 @@ $is_admin = is_admin();
             font-size: 0.65rem;
             color: var(--text-secondary);
             margin-bottom: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .day-cell {
+                min-width: 45px;
+            }
+            
+            .day-header {
+                font-size: 0.6rem;
+                margin-bottom: 4px;
+            }
+            
+            .day-date {
+                font-size: 0.55rem;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .day-cell {
+                min-width: 40px;
+            }
+            
+            .day-header {
+                font-size: 0.55rem;
+            }
+            
+            .day-date {
+                font-size: 0.5rem;
+            }
         }
         
         .holiday-name {
@@ -149,6 +264,7 @@ $is_admin = is_admin();
             padding: 6px 2px;
             min-height: 55px;
             height: 55px;
+            min-width: 45px;
             transition: all 0.3s;
             cursor: pointer;
             display: flex;
@@ -162,6 +278,27 @@ $is_admin = is_admin();
         .shift-cell:hover {
             transform: translateY(-2px);
             box-shadow: 0 4px 12px var(--accent-glow);
+        }
+        
+        @media (max-width: 768px) {
+            .shift-cell {
+                min-height: 45px;
+                height: 45px;
+                min-width: 40px;
+                padding: 4px 1px;
+                font-size: 0.6rem;
+                border-radius: 4px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .shift-cell {
+                min-height: 38px;
+                height: 38px;
+                min-width: 35px;
+                padding: 3px 1px;
+                font-size: 0.55rem;
+            }
         }
         
         .shift-cell.has-shift {
@@ -559,7 +696,7 @@ $is_admin = is_admin();
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
             <a href="schichten_bearbeiten.php" class="btn">✏️ Meine Schichten bearbeiten</a>
             <div class="week-label" id="weekLabel"></div>
         </div>

@@ -10,7 +10,7 @@ $is_admin = is_admin();
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Events – PUSHING P</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
@@ -25,6 +25,42 @@ $is_admin = is_admin();
         @media (max-width: 968px) {
             .events-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .calendar {
+                gap: 4px;
+            }
+            
+            .day-box {
+                min-height: 60px;
+                padding: 4px;
+                font-size: 0.75rem;
+            }
+            
+            .weekday-header {
+                font-size: 0.65rem;
+                padding: 4px;
+            }
+            
+            .calendar-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .calendar-nav-btn {
+                width: 100%;
+            }
+            
+            .event-card {
+                padding: 12px;
+            }
+            
+            .event-actions {
+                flex-direction: column;
+            }
+            
+            .btn-join, .btn-leave {
+                width: 100%;
             }
         }
         
@@ -343,8 +379,14 @@ function renderUpcomingEvents(events) {
         }
     }
     
+    // Cost per person badge
+    let costPerPersonBadge = '';
+    if (e.cost_per_person > 0) {
+        costPerPersonBadge = `<span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">👤 ~${e.cost_per_person}€/Person</span>`;
+    }
+    
     card.innerHTML = `
-      <div class="event-title">${e.title} ${paymentBadge}</div>
+      <div class="event-title">${e.title} ${paymentBadge} ${costPerPersonBadge}</div>
       <div class="event-meta">
         📅 ${new Date(e.datum).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
         ${e.start_time ? '⏰ ' + e.start_time : ''} ${e.end_time ? '– ' + e.end_time : ''}<br>
@@ -437,13 +479,15 @@ function selectDate(dateStr, events, dateObj) {
                     <input type="text" name="location" placeholder="Ort">
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                        <input type="number" name="cost" step="0.01" placeholder="Kosten (€)" min="0">
-                        <select name="paid_by" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary);">
-                            <option value="private">Jeder zahlt selbst</option>
-                            <option value="pool">Aus Kasse (Pool)</option>
-                            <option value="anteilig">Anteilig aufteilen</option>
-                        </select>
+                        <input type="number" name="cost" step="0.01" placeholder="Gesamtkosten (€)" min="0">
+                        <input type="number" name="cost_per_person" step="0.01" placeholder="Kosten/Person (€)" min="0">
                     </div>
+                    
+                    <select name="paid_by" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); margin-top: 8px;">
+                        <option value="private">Jeder zahlt selbst</option>
+                        <option value="pool">Aus Kasse (Pool)</option>
+                        <option value="anteilig">Anteilig aufteilen</option>
+                    </select>
                     
                     <button type="submit" class="btn" style="width: 100%; margin-top: 8px;">Event erstellen</button>
                     <div id="quickEventMsg" style="margin-top: 8px; font-size: 0.875rem;"></div>

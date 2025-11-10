@@ -51,6 +51,7 @@ $desc = trim($_POST['description'] ?? '');
 $start = $_POST['start_time'] ?? null;
 $end   = $_POST['end_time'] ?? null;
 $cost = floatval($_POST['cost'] ?? 0);
+$cost_per_person = floatval($_POST['cost_per_person'] ?? 0);
 $paid_by = trim($_POST['paid_by'] ?? 'private'); // pool, anteilig, private
 
 if ($title === '' || $datum === '') {
@@ -63,9 +64,9 @@ if (!in_array($paid_by, ['pool', 'anteilig', 'private'])) {
   $paid_by = 'private';
 }
 
-$stmt = $conn->prepare("INSERT INTO events (title, datum, start_time, end_time, location, description, created_by, cost, paid_by)
-                        VALUES (?,?,?,?,?,?,?,?,?)");
-$stmt->bind_param('ssssssids', $title, $datum, $start, $end, $location, $desc, $_SESSION['mitglied_id'], $cost, $paid_by);
+$stmt = $conn->prepare("INSERT INTO events (title, datum, start_time, end_time, location, description, created_by, cost, cost_per_person, paid_by)
+                        VALUES (?,?,?,?,?,?,?,?,?,?)");
+$stmt->bind_param('ssssssidds', $title, $datum, $start, $end, $location, $desc, $_SESSION['mitglied_id'], $cost, $cost_per_person, $paid_by);
 $ok = $stmt->execute();
 $event_id = $conn->insert_id;
 $stmt->close();
