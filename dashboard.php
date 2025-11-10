@@ -360,6 +360,20 @@ if ($result && $result->num_rows > 0) {
                         <span class="notification-badge" style="background: #10b981;">🔴</span>
                     <?php endif; ?>
                 </a>
+                <?php
+                // Casino nur anzeigen wenn Guthaben > 10€
+                $user_balance = 0;
+                $stmt_bal = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+                $stmt_bal->bind_param('i', $user_id);
+                $stmt_bal->execute();
+                $stmt_bal->bind_result($user_balance);
+                $stmt_bal->fetch();
+                $stmt_bal->close();
+                if ($user_balance >= 10.00):
+                ?>
+                    <a href="casino.php" class="nav-item">🎰 Casino</a>
+                <?php endif; ?>
+                <a href="leaderboard.php" class="nav-item">Leaderboard</a>
                 <a href="chat.php" class="nav-item" style="position: relative;">
                     Chat
                     <?php if ($unread_messages_count > 0): ?>
@@ -678,6 +692,8 @@ if ($result && $result->num_rows > 0) {
                 <?php endif; ?>
             </div>
 
+        </div>
+
         <!-- Kassen-Kurs Chart (30 Tage) -->
         <div class="section" style="margin-top: 32px;">
             <div class="section-header">
@@ -697,12 +713,12 @@ if ($result && $result->num_rows > 0) {
                 </div>
             </div>
             
-            <div class="card" style="padding: 32px; margin-top: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 32px; border-radius: 12px; margin-top: 16px;">
                 <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;">
-                    <button class="timeframe-btn" data-days="1" style="padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">1T</button>
-                    <button class="timeframe-btn" data-days="5" style="padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">5T</button>
+                    <button class="timeframe-btn" data-days="1" style="padding: 8px 16px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">1T</button>
+                    <button class="timeframe-btn" data-days="5" style="padding: 8px 16px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">5T</button>
                     <button class="timeframe-btn active" data-days="30" style="padding: 8px 16px; background: var(--accent); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">1M</button>
-                    <button class="timeframe-btn" data-days="180" style="padding: 8px 16px; background: var(--bg-tertiary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">6M</button>
+                    <button class="timeframe-btn" data-days="180" style="padding: 8px 16px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">6M</button>
                 </div>
                 
                 <canvas id="kasseChart" style="width: 100%; height: 250px;"></canvas>
@@ -896,7 +912,8 @@ if ($result && $result->num_rows > 0) {
                 <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
             </div>
             
-            <div class="crew-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px; margin-top: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div class="crew-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px;">
                 <?php 
                 $colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6', '#f97316'];
                 $color_index = 0;
@@ -962,7 +979,7 @@ if ($result && $result->num_rows > 0) {
                 <div class="crew-member-card" 
                      data-member='<?= json_encode($member_data) ?>'
                      onclick="openMemberModal(this)"
-                     style="background: var(--bg-tertiary); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer;"
+                     style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; position: relative; overflow: hidden; cursor: pointer;"
                      onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';"
                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     
@@ -994,6 +1011,7 @@ if ($result && $result->num_rows > 0) {
                     <?php endif; ?>
                 </div>
                 <?php endforeach; ?>
+            </div>
             </div>
         </div>
         

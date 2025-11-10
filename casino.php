@@ -224,27 +224,141 @@ if ($result) {
         /* Slots Specific */
         .slots-reels {
             display: flex;
-            gap: 20px;
+            gap: 24px;
             justify-content: center;
             margin: 40px 0;
+            perspective: 1000px;
         }
         
         .slot-reel {
-            width: 120px;
-            height: 120px;
-            background: var(--bg-secondary);
-            border-radius: 16px;
+            width: 140px;
+            height: 140px;
+            background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
-            border: 3px solid var(--border);
+            font-size: 5rem;
+            border: 4px solid var(--accent);
             position: relative;
             overflow: hidden;
+            box-shadow: 
+                inset 0 0 30px rgba(0,0,0,0.5),
+                0 10px 30px rgba(0,0,0,0.4),
+                0 0 20px rgba(139, 92, 246, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .slot-reel::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(
+                45deg,
+                transparent 30%,
+                rgba(255,255,255,0.1) 50%,
+                transparent 70%
+            );
+            transform: rotate(45deg);
+            animation: shine 3s linear infinite;
+        }
+        
+        @keyframes shine {
+            0% {
+                transform: translateX(-100%) translateY(-100%) rotate(45deg);
+            }
+            100% {
+                transform: translateX(100%) translateY(100%) rotate(45deg);
+            }
         }
         
         .slot-reel.spinning {
-            animation: spin 0.1s linear infinite;
+            animation: 
+                slotSpin 0.08s linear infinite,
+                slotShake 0.15s ease-in-out infinite,
+                slotGlow 0.2s ease-in-out infinite;
+            border-color: #10b981;
+        }
+        
+        .slot-reel.stopping {
+            animation: 
+                slotBounce 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards,
+                slotFlash 0.3s ease-out;
+        }
+        
+        @keyframes slotSpin {
+            0% { 
+                transform: translateY(0) rotateX(0deg);
+            }
+            25% {
+                transform: translateY(-25%) rotateX(90deg);
+            }
+            50% {
+                transform: translateY(-50%) rotateX(180deg);
+            }
+            75% {
+                transform: translateY(-75%) rotateX(270deg);
+            }
+            100% { 
+                transform: translateY(-100%) rotateX(360deg);
+            }
+        }
+        
+        @keyframes slotShake {
+            0%, 100% {
+                transform: translateX(0) scale(1);
+            }
+            25% {
+                transform: translateX(-3px) scale(1.02);
+            }
+            75% {
+                transform: translateX(3px) scale(0.98);
+            }
+        }
+        
+        @keyframes slotGlow {
+            0%, 100% {
+                box-shadow: 
+                    inset 0 0 30px rgba(0,0,0,0.5),
+                    0 10px 30px rgba(0,0,0,0.4),
+                    0 0 20px rgba(16, 185, 129, 0.5);
+            }
+            50% {
+                box-shadow: 
+                    inset 0 0 30px rgba(0,0,0,0.5),
+                    0 10px 30px rgba(0,0,0,0.4),
+                    0 0 40px rgba(16, 185, 129, 1);
+            }
+        }
+        
+        @keyframes slotBounce {
+            0% {
+                transform: scale(1) rotateX(0deg);
+            }
+            30% {
+                transform: scale(1.15) rotateX(10deg);
+            }
+            50% {
+                transform: scale(0.95) rotateX(-5deg);
+            }
+            70% {
+                transform: scale(1.05) rotateX(3deg);
+            }
+            100% {
+                transform: scale(1) rotateX(0deg);
+            }
+        }
+        
+        @keyframes slotFlash {
+            0%, 100% {
+                background: linear-gradient(145deg, var(--bg-secondary), var(--bg-tertiary));
+            }
+            50% {
+                background: linear-gradient(145deg, rgba(16, 185, 129, 0.3), rgba(16, 185, 129, 0.2));
+            }
         }
         
         @keyframes spin {
@@ -254,40 +368,146 @@ if ($result) {
         
         /* Wheel Specific */
         .wheel-container {
-            width: 400px;
-            height: 400px;
+            width: 450px;
+            height: 450px;
             margin: 40px auto;
             position: relative;
+            filter: drop-shadow(0 10px 40px rgba(0,0,0,0.5));
         }
         
         .wheel {
             width: 100%;
             height: 100%;
             border-radius: 50%;
-            border: 8px solid var(--border);
+            border: 12px solid transparent;
+            background: 
+                linear-gradient(var(--bg-primary), var(--bg-primary)) padding-box,
+                linear-gradient(45deg, #8b5cf6, #10b981, #eab308, #ef4444, #8b5cf6) border-box;
             position: relative;
-            transition: transform 3s cubic-bezier(0.17, 0.67, 0.12, 0.99);
-            background: conic-gradient(
-                #ef4444 0deg 72deg,
-                #eab308 72deg 144deg,
-                #10b981 144deg 216deg,
-                #3b82f6 216deg 288deg,
-                #8b5cf6 288deg 345deg,
-                #f59e0b 345deg 360deg
+            transition: transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99);
+            background-image: conic-gradient(
+                #ef4444 0deg 60deg,
+                #eab308 60deg 120deg,
+                #10b981 120deg 180deg,
+                #3b82f6 180deg 240deg,
+                #8b5cf6 240deg 300deg,
+                #f59e0b 300deg 360deg
             );
+            box-shadow: 
+                inset 0 0 50px rgba(0,0,0,0.3),
+                0 0 30px rgba(139, 92, 246, 0.5),
+                0 0 60px rgba(139, 92, 246, 0.3);
+            animation: wheelIdle 4s ease-in-out infinite;
+        }
+        
+        @keyframes wheelIdle {
+            0%, 100% {
+                box-shadow: 
+                    inset 0 0 50px rgba(0,0,0,0.3),
+                    0 0 30px rgba(139, 92, 246, 0.5),
+                    0 0 60px rgba(139, 92, 246, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    inset 0 0 50px rgba(0,0,0,0.3),
+                    0 0 40px rgba(16, 185, 129, 0.7),
+                    0 0 80px rgba(16, 185, 129, 0.5);
+            }
+        }
+        
+        .wheel.spinning {
+            animation: wheelSpin 4s cubic-bezier(0.17, 0.67, 0.12, 0.99) forwards,
+                       wheelGlow 0.3s ease-in-out infinite;
+        }
+        
+        @keyframes wheelSpin {
+            0% {
+                transform: rotate(0deg) scale(1);
+            }
+            20% {
+                transform: rotate(720deg) scale(1.05);
+            }
+            40% {
+                transform: rotate(1440deg) scale(1);
+            }
+            60% {
+                transform: rotate(2160deg) scale(1.05);
+            }
+            80% {
+                transform: rotate(2880deg) scale(1);
+            }
+            100% {
+                transform: rotate(3600deg) scale(1);
+            }
+        }
+        
+        @keyframes wheelGlow {
+            0%, 100% {
+                filter: brightness(1) drop-shadow(0 0 20px rgba(139, 92, 246, 0.5));
+            }
+            50% {
+                filter: brightness(1.3) drop-shadow(0 0 40px rgba(139, 92, 246, 1));
+            }
+        }
+        
+        .wheel::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            background: radial-gradient(circle, #8b5cf6, #6d28d9);
+            border-radius: 50%;
+            border: 4px solid #fff;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+            z-index: 10;
+        }
+        
+        .wheel::after {
+            content: '🎯';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 2.5rem;
+            z-index: 11;
+            animation: centerSpin 2s linear infinite reverse;
+        }
+        
+        @keyframes centerSpin {
+            from {
+                transform: translate(-50%, -50%) rotate(0deg);
+            }
+            to {
+                transform: translate(-50%, -50%) rotate(360deg);
+            }
         }
         
         .wheel-pointer {
             position: absolute;
-            top: -20px;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 20px solid transparent;
-            border-right: 20px solid transparent;
-            border-top: 40px solid var(--accent);
+            border-left: 25px solid transparent;
+            border-right: 25px solid transparent;
+            border-top: 50px solid #8b5cf6;
             z-index: 10;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+            animation: pointerBounce 0.6s ease-in-out infinite;
+        }
+        
+        @keyframes pointerBounce {
+            0%, 100% {
+                transform: translateX(-50%) translateY(0);
+            }
+            50% {
+                transform: translateX(-50%) translateY(-5px);
+            }
+        }
         }
         
         /* Crash Specific */
@@ -724,8 +944,298 @@ if ($result) {
             </div>
 
             <div class="crash-graph">
-                <div class="crash-multiplier" id="crashMultiplier">1.00x</div>
+                <div class="crash-sky">
+                    <!-- Clouds -->
+                    <div class="cloud" style="left: 10%; animation-delay: 0s;"></div>
+                    <div class="cloud" style="left: 50%; animation-delay: 3s;"></div>
+                    <div class="cloud" style="left: 80%; animation-delay: 6s;"></div>
+                    
+                    <!-- Airplane -->
+                    <div class="airplane" id="crashAirplane">
+                        ✈️
+                        <!-- Smoke trail -->
+                        <div class="smoke-trail"></div>
+                    </div>
+                    
+                    <!-- Explosion (hidden initially) -->
+                    <div class="explosion" id="crashExplosion" style="display: none;">
+                        💥
+                        <div class="explosion-particles"></div>
+                    </div>
+                </div>
+                <div class="crash-multiplier" id="crashMultiplier">0.00x</div>
             </div>
+
+            <style>
+                .crash-graph {
+                    position: relative;
+                    height: 400px;
+                    background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+                    border-radius: 16px;
+                    margin-bottom: 24px;
+                    overflow: hidden;
+                    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+                }
+                
+                .crash-sky {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                }
+                
+                .cloud {
+                    position: absolute;
+                    top: 20%;
+                    width: 80px;
+                    height: 40px;
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 50px;
+                    animation: cloudFloat 20s linear infinite;
+                }
+                
+                .cloud::before,
+                .cloud::after {
+                    content: '';
+                    position: absolute;
+                    background: rgba(255,255,255,0.1);
+                    border-radius: 50%;
+                }
+                
+                .cloud::before {
+                    width: 50px;
+                    height: 50px;
+                    top: -25px;
+                    left: 10px;
+                }
+                
+                .cloud::after {
+                    width: 40px;
+                    height: 40px;
+                    top: -20px;
+                    right: 10px;
+                }
+                
+                @keyframes cloudFloat {
+                    0% {
+                        transform: translateX(0);
+                    }
+                    100% {
+                        transform: translateX(-100vw);
+                    }
+                }
+                
+                .airplane {
+                    position: absolute;
+                    left: 10%;
+                    bottom: 20%;
+                    font-size: 4rem;
+                    filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.6));
+                    transition: all 0.15s ease-out;
+                    z-index: 10;
+                    transform-origin: center center;
+                }
+                
+                .airplane.flying {
+                    animation: airplaneFly 0.3s ease-in-out infinite, airplaneGlow 1s ease-in-out infinite;
+                }
+                
+                .airplane.crashed {
+                    animation: airplaneCrash 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+                }
+                
+                @keyframes airplaneFly {
+                    0%, 100% {
+                        transform: translateY(0) rotate(-20deg) scale(1);
+                    }
+                    25% {
+                        transform: translateY(-8px) rotate(-15deg) scale(1.05);
+                    }
+                    50% {
+                        transform: translateY(-4px) rotate(-18deg) scale(1.02);
+                    }
+                    75% {
+                        transform: translateY(-6px) rotate(-22deg) scale(1.04);
+                    }
+                }
+                
+                @keyframes airplaneGlow {
+                    0%, 100% {
+                        filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.6));
+                    }
+                    50% {
+                        filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(139, 92, 246, 1));
+                    }
+                }
+                
+                @keyframes airplaneCrash {
+                    0% {
+                        transform: translateY(0) rotate(-20deg) scale(1);
+                        opacity: 1;
+                        filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
+                    }
+                    10% {
+                        transform: translateY(-40px) rotate(-30deg) scale(1.15);
+                        filter: drop-shadow(0 0 30px rgba(255, 100, 100, 0.8));
+                    }
+                    20% {
+                        transform: translateY(-20px) rotate(-60deg) scale(1.2);
+                    }
+                    35% {
+                        transform: translateY(20px) rotate(-120deg) scale(1.1);
+                        filter: drop-shadow(0 0 40px rgba(255, 0, 0, 1));
+                    }
+                    50% {
+                        transform: translateY(80px) rotate(-200deg) scale(0.95);
+                    }
+                    65% {
+                        transform: translateY(150px) rotate(-280deg) scale(0.7);
+                    }
+                    80% {
+                        transform: translateY(220px) rotate(-340deg) scale(0.5);
+                        filter: drop-shadow(0 0 50px rgba(255, 100, 0, 1));
+                    }
+                    100% {
+                        transform: translateY(350px) rotate(-450deg) scale(0.2);
+                        opacity: 0;
+                        filter: drop-shadow(0 0 0px transparent);
+                    }
+                }
+                
+                .smoke-trail {
+                    position: absolute;
+                    right: 100%;
+                    top: 50%;
+                    width: 250px;
+                    height: 30px;
+                    background: linear-gradient(90deg, 
+                        rgba(255,255,255,0.8) 0%,
+                        rgba(200,200,255,0.6) 30%,
+                        rgba(150,150,255,0.4) 60%,
+                        transparent 100%
+                    );
+                    border-radius: 15px;
+                    filter: blur(12px);
+                    opacity: 0;
+                }
+                
+                .airplane.flying .smoke-trail {
+                    opacity: 1;
+                    animation: smokeTrail 0.4s ease-out infinite;
+                }
+                
+                .airplane.crashed .smoke-trail {
+                    animation: smokeTrailCrash 0.6s ease-out infinite;
+                    background: linear-gradient(90deg, 
+                        rgba(255,100,0,0.9) 0%,
+                        rgba(255,50,0,0.6) 40%,
+                        rgba(100,100,100,0.4) 70%,
+                        transparent 100%
+                    );
+                }
+                
+                @keyframes smokeTrail {
+                    0% {
+                        transform: scaleX(1) translateY(0);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: scaleX(2) translateY(-5px);
+                        opacity: 0;
+                    }
+                }
+                
+                @keyframes smokeTrailCrash {
+                    0% {
+                        transform: scaleX(1) translateY(0) rotate(0deg);
+                        opacity: 1;
+                    }
+                    100% {
+                        transform: scaleX(3) translateY(20px) rotate(10deg);
+                        opacity: 0;
+                    }
+                }
+                
+                .explosion {
+                    position: absolute;
+                    left: 50%;
+                    top: 50%;
+                    transform: translate(-50%, -50%);
+                    font-size: 12rem;
+                    z-index: 20;
+                    animation: explosionBurst 1s ease-out forwards;
+                    filter: drop-shadow(0 0 40px rgba(255, 100, 0, 1));
+                }
+                
+                @keyframes explosionBurst {
+                    0% {
+                        transform: translate(-50%, -50%) scale(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    10% {
+                        transform: translate(-50%, -50%) scale(0.3) rotate(20deg);
+                        opacity: 1;
+                    }
+                    30% {
+                        transform: translate(-50%, -50%) scale(1.8) rotate(-15deg);
+                        opacity: 1;
+                    }
+                    60% {
+                        transform: translate(-50%, -50%) scale(2.5) rotate(10deg);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: translate(-50%, -50%) scale(3.5) rotate(-5deg);
+                        opacity: 0;
+                    }
+                }
+                
+                .explosion-particles {
+                    position: absolute;
+                    width: 200%;
+                    height: 200%;
+                    top: -50%;
+                    left: -50%;
+                }
+                
+                .explosion-particles::before,
+                .explosion-particles::after {
+                    content: '🔥';
+                    position: absolute;
+                    font-size: 4rem;
+                    animation: particleSpread 1s ease-out forwards;
+                }
+                
+                .explosion-particles::before {
+                    top: 20%;
+                    left: 10%;
+                    --x: -100px;
+                    --y: -80px;
+                    animation-delay: 0.05s;
+                }
+                
+                .explosion-particles::after {
+                    top: 20%;
+                    right: 10%;
+                    --x: 100px;
+                    --y: -80px;
+                    animation-delay: 0.1s;
+                }
+                
+                @keyframes particleSpread {
+                    0% {
+                        transform: translate(0, 0) scale(1) rotate(0deg);
+                        opacity: 1;
+                    }
+                    50% {
+                        transform: translate(calc(var(--x) * 0.6), calc(var(--y) * 0.6)) scale(1.5) rotate(180deg);
+                        opacity: 0.8;
+                    }
+                    100% {
+                        transform: translate(var(--x), var(--y)) scale(0.2) rotate(360deg);
+                        opacity: 0;
+                    }
+                }
+            </style>
 
             <div class="quick-bet-btns">
                 <button class="quick-bet-btn" onclick="setCrashBet(1)">1€</button>
@@ -751,7 +1261,7 @@ if ($result) {
     </div>
 
     <script>
-    let userBalance = <?= $balance ?>;
+    let userBalance = parseFloat(<?= $balance ?>) || 0;
     
     function openGame(game) {
         document.getElementById(game + 'Modal').classList.add('active');
@@ -823,21 +1333,42 @@ if ($result) {
             }
             
             if (data.status === 'success') {
-                // Stop spinning after 2 seconds
-                setTimeout(() => {
-                    reels.forEach((id, index) => {
+                // Stop reels sequentially with bounce effect
+                reels.forEach((id, index) => {
+                    setTimeout(() => {
                         const reel = document.getElementById(id);
                         reel.classList.remove('spinning');
+                        reel.classList.add('stopping');
                         reel.textContent = data.result[index];
-                    });
-                    
-                    userBalance = data.new_balance;
+                        
+                        // Remove stopping class after animation
+                        setTimeout(() => {
+                            reel.classList.remove('stopping');
+                        }, 600);
+                    }, 1500 + (index * 400)); // Stagger: 1.5s, 1.9s, 2.3s
+                });
+                
+                // Update balance after all reels stopped
+                setTimeout(() => {
+                    userBalance = parseFloat(data.new_balance) || 0;
                     document.getElementById('slotsBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
                     
                     if (data.win_amount > 0) {
                         document.getElementById('slotsWin').textContent = `🎉 Gewonnen: ${data.win_amount.toFixed(2)}€ (${data.multiplier}x)`;
                         document.getElementById('slotsWin').classList.add('show');
                     } else {
+                        document.getElementById('slotsLoss').textContent = `Verloren: ${bet.toFixed(2)}€`;
+                        document.getElementById('slotsLoss').classList.add('show');
+                    }
+                    
+                    setTimeout(() => {
+                        document.getElementById('slotsWin').classList.remove('show');
+                        document.getElementById('slotsLoss').classList.remove('show');
+                    }, 3000);
+                    
+                    slotsSpinning = false;
+                    document.getElementById('slotsSpin').disabled = false;
+                }, 2700); // After all reels stopped (1500 + 400*3 = 2700ms)
                         document.getElementById('slotsLoss').textContent = `😢 Verloren: ${bet.toFixed(2)}€`;
                         document.getElementById('slotsLoss').classList.add('show');
                     }
@@ -898,7 +1429,7 @@ if ($result) {
                 wheel.style.transform = `rotate(${rotation}deg)`;
                 
                 setTimeout(() => {
-                    userBalance = data.new_balance;
+                    userBalance = parseFloat(data.new_balance) || 0;
                     document.getElementById('wheelBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
                     
                     if (data.multiplier >= 1) {
@@ -926,7 +1457,7 @@ if ($result) {
     
     // CRASH GAME
     let crashRunning = false;
-    let crashMultiplier = 1.00;
+    let crashMultiplier = 0.00;
     let crashInterval = null;
     let crashPoint = 0;
     
@@ -959,23 +1490,41 @@ if ($result) {
             
             if (data.status === 'success') {
                 crashRunning = true;
-                crashPoint = data.crash_point;
-                crashMultiplier = 1.00;
+                crashPoint = (Math.random() * 5 + 1.5).toFixed(2); // Random crash point 1.5x - 6.5x
+                crashMultiplier = 0.00;
+                
+                // Reset airplane and explosion
+                const airplane = document.getElementById('crashAirplane');
+                const explosion = document.getElementById('crashExplosion');
+                airplane.classList.remove('crashed');
+                airplane.classList.add('flying');
+                airplane.style.opacity = '1';
+                explosion.style.display = 'none';
                 
                 document.getElementById('crashStartBtn').style.display = 'none';
                 document.getElementById('crashCashoutBtn').style.display = 'block';
                 document.getElementById('crashWin').classList.remove('show');
                 document.getElementById('crashLoss').classList.remove('show');
                 
-                // Animate multiplier
+                // Animate airplane upward and multiplier
+                let altitude = 20; // Starting bottom %
                 crashInterval = setInterval(() => {
                     crashMultiplier += 0.01;
+                    altitude += 0.3; // Fly higher
+                    
+                    airplane.style.bottom = altitude + '%';
+                    airplane.style.left = (10 + (altitude - 20) * 0.5) + '%';
+                    
                     document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
+                    document.getElementById('crashMultiplier').style.color = crashMultiplier >= 2 ? '#10b981' : '#8b5cf6';
                     
                     if (crashMultiplier >= crashPoint) {
                         crashGame();
                     }
                 }, 100);
+                
+                userBalance = parseFloat(data.balance) || 0;
+                document.getElementById('crashBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
             } else {
                 alert('Fehler: ' + data.error);
             }
@@ -991,25 +1540,35 @@ if ($result) {
         crashRunning = false;
         
         const bet = parseFloat(document.getElementById('crashBet').value);
+        const airplane = document.getElementById('crashAirplane');
+        
+        // Stop flying animation
+        airplane.classList.remove('flying');
         
         try {
             const response = await fetch('/api/casino/cashout_crash.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ multiplier: crashMultiplier })
+                body: JSON.stringify({ bet: bet, multiplier: crashMultiplier })
             });
             
             const data = await response.json();
             
             if (data.status === 'success') {
-                userBalance = data.new_balance;
+                userBalance = parseFloat(data.new_balance) || 0;
                 document.getElementById('crashBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
                 document.getElementById('crashWin').textContent = `🎉 Cashed Out! ${crashMultiplier.toFixed(2)}x = ${data.win_amount.toFixed(2)}€`;
                 document.getElementById('crashWin').classList.add('show');
                 
-                document.getElementById('crashStartBtn').style.display = 'block';
-                document.getElementById('crashCashoutBtn').style.display = 'none';
-                document.getElementById('crashMultiplier').textContent = '1.00x';
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    airplane.style.bottom = '20%';
+                    airplane.style.left = '10%';
+                    document.getElementById('crashStartBtn').style.display = 'block';
+                    document.getElementById('crashCashoutBtn').style.display = 'none';
+                    document.getElementById('crashMultiplier').textContent = '0.00x';
+                    document.getElementById('crashMultiplier').style.color = 'var(--success)';
+                }, 3000);
             }
         } catch (error) {
             alert('Verbindungsfehler: ' + error.message);
@@ -1021,21 +1580,38 @@ if ($result) {
         crashRunning = false;
         
         const bet = parseFloat(document.getElementById('crashBet').value);
+        const airplane = document.getElementById('crashAirplane');
+        const explosion = document.getElementById('crashExplosion');
+        
+        // Crash animation
+        airplane.classList.remove('flying');
+        airplane.classList.add('crashed');
+        
+        // Show explosion
+        setTimeout(() => {
+            explosion.style.display = 'block';
+            explosion.style.left = airplane.style.left;
+            explosion.style.top = (100 - parseFloat(airplane.style.bottom)) + '%';
+        }, 400);
         
         document.getElementById('crashMultiplier').textContent = 'CRASHED!';
         document.getElementById('crashMultiplier').style.color = 'var(--error)';
-        document.getElementById('crashLoss').textContent = `💥 CRASHED bei ${crashPoint.toFixed(2)}x! Verloren: ${bet.toFixed(2)}€`;
+        document.getElementById('crashLoss').textContent = `💥 CRASHED bei ${crashPoint}x!`;
         document.getElementById('crashLoss').classList.add('show');
         
+        // Reset after 3 seconds
         setTimeout(() => {
-            document.getElementById('crashMultiplier').textContent = '1.00x';
+            airplane.classList.remove('crashed');
+            airplane.style.bottom = '20%';
+            airplane.style.left = '10%';
+            airplane.style.opacity = '1';
+            explosion.style.display = 'none';
+            
+            document.getElementById('crashMultiplier').textContent = '0.00x';
             document.getElementById('crashMultiplier').style.color = 'var(--success)';
             document.getElementById('crashStartBtn').style.display = 'block';
             document.getElementById('crashCashoutBtn').style.display = 'none';
-        }, 2000);
-        
-        userBalance -= bet;
-        document.getElementById('crashBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
+        }, 3000);
     }
     
     // Close modals on ESC

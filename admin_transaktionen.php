@@ -126,6 +126,36 @@ while($m = $mitglieder->fetch_assoc()) {
             max-height: 90vh;
             overflow-y: auto;
         }
+        .transaction-row.selected {
+            background: rgba(124, 58, 237, 0.2) !important;
+            border-left: 4px solid var(--accent);
+        }
+        .bulk-actions-bar {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-primary);
+            border: 2px solid var(--accent);
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+            display: none;
+            align-items: center;
+            gap: 16px;
+            z-index: 999;
+            animation: slideInBottom 0.3s;
+        }
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            accent-color: var(--accent);
+        }
     </style>
 </head>
 <body>
@@ -229,6 +259,7 @@ while($m = $mitglieder->fetch_assoc()) {
             <table class="balance-table">
                 <thead>
                     <tr>
+                        <th class="checkbox-cell"><input type="checkbox" id="selectAll" title="Alle auswählen"></th>
                         <th>ID</th>
                         <th>Datum</th>
                         <th>Typ</th>
@@ -239,9 +270,10 @@ while($m = $mitglieder->fetch_assoc()) {
                         <th>Aktionen</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="transactionTableBody">
                     <?php while($t = $transaktionen->fetch_assoc()): ?>
-                    <tr class="transaction-row <?= $t['status'] ?>">
+                    <tr class="transaction-row <?= $t['status'] ?>" data-transaction-id="<?= $t['id'] ?>">
+                        <td class="checkbox-cell"><input type="checkbox" class="transaction-checkbox" value="<?= $t['id'] ?>"></td>
                         <td><?= $t['id'] ?></td>
                         <td><?= date('d.m.Y H:i', strtotime($t['datum'])) ?></td>
                         <td><span class="badge"><?= htmlspecialchars($t['typ']) ?></span></td>
@@ -259,11 +291,25 @@ while($m = $mitglieder->fetch_assoc()) {
                 </tbody>
             </table>
         </div>
+
+        <!-- Bulk Actions Bar -->
+        <div id="bulkActionsBar" class="bulk-actions-bar">
+            <span style="font-weight: 600; color: var(--text-primary);">
+                <span id="selectedCount">0</span> ausgewählt
+            </span>
+            <button onclick="bulkDelete()" class="btn" style="background: var(--error); padding: 8px 16px;">
+                🗑️ Löschen
+            </button>
+            <button onclick="clearSelection()" class="btn" style="background: var(--text-tertiary); padding: 8px 16px;">
+                ✖ Abbrechen
+            </button>
+        </div>
     </div>
 
     <script>
-    // Bulk Selection System
+    // Bulk Selection System with Ctrl/Shift Support
     let selectedTransactions = new Set();
+    let lastSelectedIndex = -1;
     
     function updateBulkBar() {
         const count = selectedTransactions.size;
@@ -276,29 +322,115 @@ while($m = $mitglieder->fetch_assoc()) {
         } else {
             bar.style.display = 'none';
         }
+        
+        // Update row highlighting
+        document.querySelectorAll('.transaction-row').forEach(row => {
+            const id = parseInt(row.dataset.transactionId);
+            if (selectedTransactions.has(id)) {
+                row.classList.add('selected');
+            } else {
+                row.classList.remove('selected');
+            }
+        });
     }
     
+    // Select All checkbox
     document.getElementById('selectAll')?.addEventListener('change', (e) => {
         const checkboxes = document.querySelectorAll('.transaction-checkbox');
+        selectedTransactions.clear();
+        
         checkboxes.forEach(cb => {
             cb.checked = e.target.checked;
             if (e.target.checked) {
                 selectedTransactions.add(parseInt(cb.value));
-            } else {
-                selectedTransactions.delete(parseInt(cb.value));
             }
         });
         updateBulkBar();
     });
     
-    document.querySelectorAll('.transaction-checkbox').forEach(cb => {
-        cb.addEventListener('change', (e) => {
-            if (e.target.checked) {
-                selectedTransactions.add(parseInt(e.target.value));
+    // Individual checkbox with Ctrl/Shift support
+    document.querySelectorAll('.transaction-checkbox').forEach((cb, index) => {
+        cb.addEventListener('click', (e) => {
+            const currentId = parseInt(e.target.value);
+            const checkboxes = Array.from(document.querySelectorAll('.transaction-checkbox'));
+            
+            if (e.shiftKey && lastSelectedIndex !== -1) {
+                // Shift-Click: Select range
+                e.preventDefault();
+                const start = Math.min(lastSelectedIndex, index);
+                const end = Math.max(lastSelectedIndex, index);
+                
+                for (let i = start; i <= end; i++) {
+                    checkboxes[i].checked = true;
+                    selectedTransactions.add(parseInt(checkboxes[i].value));
+                }
+            } else if (e.ctrlKey || e.metaKey) {
+                // Ctrl-Click: Toggle individual
+                if (e.target.checked) {
+                    selectedTransactions.add(currentId);
+                } else {
+                    selectedTransactions.delete(currentId);
+                }
             } else {
-                selectedTransactions.delete(parseInt(e.target.value));
-                document.getElementById('selectAll').checked = false;
+                // Normal click: Clear others and select this one
+                if (!e.target.checked) {
+                    selectedTransactions.delete(currentId);
+                } else {
+                    selectedTransactions.add(currentId);
+                }
             }
+            
+            lastSelectedIndex = index;
+            updateBulkBar();
+            
+            // Update selectAll checkbox state
+            const allChecked = checkboxes.every(c => c.checked);
+            document.getElementById('selectAll').checked = allChecked;
+        });
+    });
+    
+    // Row click support (with Ctrl/Shift)
+    document.querySelectorAll('.transaction-row').forEach((row, index) => {
+        row.addEventListener('click', (e) => {
+            // Skip if clicking on checkbox, button, or link
+            if (e.target.type === 'checkbox' || e.target.tagName === 'A' || e.target.tagName === 'BUTTON' || e.target.closest('a, button')) {
+                return;
+            }
+            
+            const checkbox = row.querySelector('.transaction-checkbox');
+            const checkboxes = Array.from(document.querySelectorAll('.transaction-checkbox'));
+            
+            if (e.shiftKey && lastSelectedIndex !== -1) {
+                // Shift-Click: Select range
+                e.preventDefault();
+                const start = Math.min(lastSelectedIndex, index);
+                const end = Math.max(lastSelectedIndex, index);
+                
+                for (let i = start; i <= end; i++) {
+                    checkboxes[i].checked = true;
+                    selectedTransactions.add(parseInt(checkboxes[i].value));
+                }
+            } else if (e.ctrlKey || e.metaKey) {
+                // Ctrl-Click: Toggle
+                checkbox.checked = !checkbox.checked;
+                const id = parseInt(checkbox.value);
+                if (checkbox.checked) {
+                    selectedTransactions.add(id);
+                } else {
+                    selectedTransactions.delete(id);
+                }
+            } else {
+                // Normal click: Toggle only this one
+                checkbox.checked = !checkbox.checked;
+                const id = parseInt(checkbox.value);
+                if (checkbox.checked) {
+                    selectedTransactions.add(id);
+                } else {
+                    selectedTransactions.delete(id);
+                }
+            }
+            
+            lastSelectedIndex = index;
             updateBulkBar();
         });
     });
@@ -307,101 +439,17 @@ while($m = $mitglieder->fetch_assoc()) {
         selectedTransactions.clear();
         document.querySelectorAll('.transaction-checkbox').forEach(cb => cb.checked = false);
         document.getElementById('selectAll').checked = false;
+        lastSelectedIndex = -1;
         updateBulkBar();
-    }
-    
-    async function bulkChangeStatus(newStatus) {
-        const count = selectedTransactions.size;
-        const statusText = newStatus === 'gebucht' ? 'gebucht' : 'storniert';
-        
-        showModal(
-            `📝 Status ändern`,
-            `${count} Transaktionen auf "${statusText}" setzen?`,
-            async () => {
-                const ids = Array.from(selectedTransactions);
-                
-                try {
-                    const response = await fetch('/api/bulk_update_status.php', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ ids, status: newStatus })
-                    });
-                    
-                    const result = await response.json();
-                    if (result.status === 'success') {
-                        showSuccess(`${count} Transaktionen aktualisiert!`);
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showError(result.error || 'Fehler beim Aktualisieren');
-                    }
-                } catch (error) {
-                    showError(error.message);
-                }
-            },
-            'Ändern',
-            'Abbrechen'
-        );
-    }
-    
-    function bulkChangeType() {
-        const count = selectedTransactions.size;
-        
-        const modal = document.createElement('div');
-        modal.style.cssText = 'position: fixed; inset: 0; background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center; z-index: 9999; animation: fadeIn 0.2s;';
-        
-        modal.innerHTML = `
-            <div style="background: var(--bg-primary); padding: 32px; border-radius: 16px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: slideUp 0.3s;">
-                <h3 style="margin: 0 0 16px 0; font-size: 1.5rem; color: var(--text-primary);">🔄 Typ ändern</h3>
-                <p style="margin: 0 0 16px 0; color: var(--text-secondary);">${count} Transaktionen - Neuer Typ:</p>
-                
-                <select id="bulkTypeSelect" style="width: 100%; padding: 12px; background: var(--bg-secondary); color: var(--text-primary); border: 1px solid var(--border); border-radius: 8px; margin-bottom: 24px; font-size: 1rem;">
-                    <option value="EINZAHLUNG">💰 Einzahlung</option>
-                    <option value="AUSZAHLUNG">💸 Auszahlung</option>
-                    <option value="GRUPPENAKTION">🎯 Gruppenaktion</option>
-                    <option value="GRUPPENAKTION_ANTEILIG">➗ Gruppenaktion Anteilig</option>
-                    <option value="SCHADEN">⚠️ Schaden</option>
-                    <option value="GUTSCHRIFT">✨ Gutschrift</option>
-                </select>
-                
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button class="btn-cancel" style="padding: 10px 24px; background: var(--bg-tertiary); color: var(--text-primary); border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Abbrechen</button>
-                    <button class="btn-confirm" style="padding: 10px 24px; background: var(--accent); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600;">Ändern</button>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        modal.querySelector('.btn-cancel').onclick = () => modal.remove();
-        
-        modal.querySelector('.btn-confirm').onclick = async () => {
-            const newType = document.getElementById('bulkTypeSelect').value;
-            const ids = Array.from(selectedTransactions);
-            
-            modal.remove();
-            
-            try {
-                const response = await fetch('/api/bulk_update_type.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ ids, type: newType })
-                });
-                
-                const result = await response.json();
-                if (result.status === 'success') {
-                    showSuccess(`${count} Transaktionen auf "${newType}" geändert!`);
-                    setTimeout(() => location.reload(), 1000);
-                } else {
-                    showError(result.error || 'Fehler beim Ändern');
-                }
-            } catch (error) {
-                showError(error.message);
-            }
-        };
     }
     
     function bulkDelete() {
         const count = selectedTransactions.size;
+        
+        if (count === 0) {
+            showError('Keine Transaktionen ausgewählt');
+            return;
+        }
         
         showModal(
             '🗑️ ACHTUNG: Massen-Stornierung',
@@ -410,7 +458,7 @@ while($m = $mitglieder->fetch_assoc()) {
                 const ids = Array.from(selectedTransactions);
                 
                 try {
-                    const response = await fetch('/api/bulk_delete.php', {
+                    const response = await fetch('/api/bulk_delete_transactions.php', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ ids })
