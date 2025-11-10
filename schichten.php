@@ -262,6 +262,16 @@ $stmt->close();
             box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
         }
         
+        .shift-item.late {
+            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);
+        }
+        
+        .shift-item.night {
+            background: linear-gradient(135deg, #6366f1, #4f46e5);
+            box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+        }
+        
         .shift-time {
             font-size: 0.7rem;
             opacity: 0.9;
@@ -417,12 +427,16 @@ $stmt->close();
     <div class="calendar-container">
         <div class="legend">
             <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
-                <span>Schicht</span>
+                <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+                <span>🌅 Früh (06-14)</span>
             </div>
             <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
-                <span>Frühschicht</span>
+                <div class="legend-color" style="background: linear-gradient(135deg, #3b82f6, #2563eb);"></div>
+                <span>🌆 Spät (14-22)</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #6366f1, #4f46e5);"></div>
+                <span>🌙 Nacht (22-06)</span>
             </div>
         </div>
 
@@ -478,9 +492,21 @@ $stmt->close();
                             $shift_class = '';
                             $shift_icon = '🕐';
                             
-                            if (strpos($shift['start_time'], '06:') === 0 || strpos($shift['start_time'], '07:') === 0) {
+                            // Schichttyp basierend auf Startzeit erkennen
+                            $start_hour = (int)substr($shift['start_time'], 0, 2);
+                            
+                            if ($start_hour >= 6 && $start_hour < 14) {
+                                // Frühschicht: 06:00 - 13:59
                                 $shift_class = 'morning';
                                 $shift_icon = '🌅';
+                            } elseif ($start_hour >= 14 && $start_hour < 22) {
+                                // Spätschicht: 14:00 - 21:59
+                                $shift_class = 'late';
+                                $shift_icon = '🌆';
+                            } else {
+                                // Nachtschicht: 22:00 - 05:59
+                                $shift_class = 'night';
+                                $shift_icon = '🌙';
                             }
                             
                             $time_str = substr($shift['start_time'], 0, 5) . '-' . substr($shift['end_time'], 0, 5);
