@@ -1,8 +1,7 @@
 // PREMIUM CHAT FEATURES - PUSHING P
 
 // ===== 1. VOICE MESSAGES =====
-let mediaRecorder = null;
-let audioChunks = [];
+// Variables declared in chat.php: mediaRecorder, audioChunks
 
 function startVoiceRecording() {
     navigator.mediaDevices.getUserMedia({ audio: true })
