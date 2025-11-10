@@ -475,8 +475,7 @@ if ($result && $result->num_rows > 0) {
                 <h2 class="section-title">Kommende Events</h2>
             </div>
             
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
-                <div style="display: grid; gap: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px; display: grid; gap: 16px;">
                 <?php foreach ($next_events as $event): 
                     try {
                         $start_time = $event['start_time'] ?? '00:00:00';
@@ -542,7 +541,6 @@ if ($result && $result->num_rows > 0) {
                     </div>
                 </div>
                 <?php endforeach; ?>
-                </div>
             </div>
         </div>
         <?php endif; ?>
@@ -555,7 +553,7 @@ if ($result && $result->num_rows > 0) {
                 <div id="currentTime" style="color: var(--text-secondary); font-size: 0.875rem;"></div>
             </div>
             
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px;">
                 <?php if (empty($next_24h_shifts)): ?>
                     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         Aktuell keine aktiven Schichten
@@ -914,7 +912,7 @@ if ($result && $result->num_rows > 0) {
                 <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
             </div>
             
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px;">
                 <div class="crew-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px;">
                 <?php 
                 $colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6', '#f97316'];
