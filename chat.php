@@ -472,6 +472,41 @@ while ($row = $groups_result->fetch_assoc()) {
             background: #7c3aed;
         }
         
+        /* Voice Message Styles */
+        .voice-message-container {
+            position: relative;
+        }
+        
+        .voice-message-container:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        
+        .wave-bar {
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        @keyframes waveAnimation {
+            0%, 100% {
+                transform: scaleY(0.5);
+            }
+            50% {
+                transform: scaleY(1.5);
+            }
+        }
+        
+        .voice-message-container.playing .wave-bar {
+            animation: waveAnimation 1s ease-in-out infinite;
+        }
+        
+        .voice-message-container.playing .wave-bar:nth-child(2n) {
+            animation-delay: 0.1s;
+        }
+        
+        .voice-message-container.playing .wave-bar:nth-child(3n) {
+            animation-delay: 0.2s;
+        }
+        
         .chat-tool-btn.money-btn {
             background: #10b981;
             color: white;
@@ -1637,12 +1672,73 @@ while ($row = $groups_result->fetch_assoc()) {
             }
             // Audio / Voice Messages
             else if (['mp3', 'wav', 'ogg', 'webm'].includes(ext) || msg.file_path.includes('voice_messages')) {
+                const isVoiceMsg = msg.file_path.includes('voice_messages');
+                const audioId = 'audio_' + msg.id;
+                const waveId = 'wave_' + msg.id;
+                
                 fileContent = `
-                    <div class="chat-message-audio">
-                        <audio controls style="max-width: 300px;">
+                    <div class="voice-message-container" style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 12px 16px;
+                        background: ${msg.sender_id === currentUserId ? 'rgba(139, 92, 246, 0.1)' : 'var(--bg-secondary)'};
+                        border-radius: 24px;
+                        max-width: 280px;
+                        position: relative;
+                        border: 1px solid ${msg.sender_id === currentUserId ? 'rgba(139, 92, 246, 0.2)' : 'var(--border)'};
+                    ">
+                        <audio id="${audioId}" style="display: none;">
                             <source src="${msg.file_path}" type="audio/${ext}">
-                            Audio wird nicht unterstützt
                         </audio>
+                        
+                        <!-- Play/Pause Button -->
+                        <button onclick="toggleVoicePlayback('${audioId}', '${waveId}')" style="
+                            width: 40px;
+                            height: 40px;
+                            border-radius: 50%;
+                            background: var(--accent);
+                            border: none;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-shrink: 0;
+                            transition: all 0.2s;
+                            box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);
+                        " onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
+                            <span id="${audioId}_icon" style="color: white; font-size: 1rem;">▶️</span>
+                        </button>
+                        
+                        <!-- Waveform Visualization -->
+                        <div class="voice-waveform" id="${waveId}" style="
+                            flex: 1;
+                            display: flex;
+                            align-items: center;
+                            gap: 2px;
+                            height: 32px;
+                        ">
+                            ${Array.from({length: 25}, (_, i) => {
+                                const height = Math.random() * 100;
+                                return `<div class="wave-bar" style="
+                                    width: 3px;
+                                    height: ${20 + height * 0.4}%;
+                                    background: ${msg.sender_id === currentUserId ? 'var(--accent)' : 'var(--text-tertiary)'};
+                                    border-radius: 2px;
+                                    transition: all 0.3s;
+                                    opacity: 0.6;
+                                "></div>`;
+                            }).join('')}
+                        </div>
+                        
+                        <!-- Duration -->
+                        <span id="${audioId}_duration" style="
+                            font-size: 0.75rem;
+                            color: var(--text-secondary);
+                            font-weight: 600;
+                            min-width: 35px;
+                            text-align: right;
+                        ">0:00</span>
                     </div>
                 `;
             }
@@ -2315,6 +2411,111 @@ while ($row = $groups_result->fetch_assoc()) {
             alert('Fehler: ' + error.message);
         }
     }
+    
+    // Voice Message Playback with Waveform Animation
+    const activeAudios = new Map();
+    
+    function toggleVoicePlayback(audioId, waveId) {
+        const audio = document.getElementById(audioId);
+        const icon = document.getElementById(audioId + '_icon');
+        const durationEl = document.getElementById(audioId + '_duration');
+        const waveContainer = document.getElementById(waveId);
+        const waveBars = waveContainer ? waveContainer.querySelectorAll('.wave-bar') : [];
+        
+        if (!audio) return;
+        
+        // Pause all other audios
+        activeAudios.forEach((otherAudio, otherId) => {
+            if (otherId !== audioId && !otherAudio.paused) {
+                otherAudio.pause();
+                const otherIcon = document.getElementById(otherId + '_icon');
+                if (otherIcon) otherIcon.textContent = '▶️';
+            }
+        });
+        
+        if (audio.paused) {
+            audio.play();
+            icon.textContent = '⏸️';
+            activeAudios.set(audioId, audio);
+            
+            // Add playing class for animation
+            if (waveContainer) {
+                waveContainer.parentElement.classList.add('playing');
+            }
+            
+            // Animate waveform
+            waveBars.forEach((bar, index) => {
+                setTimeout(() => {
+                    bar.style.opacity = '1';
+                }, index * 20);
+            });
+            
+        } else {
+            audio.pause();
+            icon.textContent = '▶️';
+            
+            // Remove playing class
+            if (waveContainer) {
+                waveContainer.parentElement.classList.remove('playing');
+            }
+            
+            // Reset waveform
+            waveBars.forEach(bar => {
+                bar.style.opacity = '0.6';
+            });
+        }
+        
+        // Update duration
+        audio.addEventListener('loadedmetadata', () => {
+            if (!isNaN(audio.duration)) {
+                durationEl.textContent = formatDuration(audio.duration);
+            }
+        });
+        
+        audio.addEventListener('timeupdate', () => {
+            const remaining = audio.duration - audio.currentTime;
+            durationEl.textContent = formatDuration(remaining);
+            
+            // Update waveform progress
+            const progress = audio.currentTime / audio.duration;
+            waveBars.forEach((bar, index) => {
+                if (index / waveBars.length <= progress) {
+                    bar.style.background = 'var(--accent)';
+                    bar.style.opacity = '1';
+                } else {
+                    bar.style.opacity = '0.4';
+                }
+            });
+        });
+        
+        audio.addEventListener('ended', () => {
+            icon.textContent = '▶️';
+            durationEl.textContent = formatDuration(audio.duration);
+            
+            // Remove playing class
+            if (waveContainer) {
+                waveContainer.parentElement.classList.remove('playing');
+            }
+            
+            // Reset waveform
+            waveBars.forEach(bar => {
+                bar.style.opacity = '0.6';
+                bar.style.background = '';
+            });
+            
+            activeAudios.delete(audioId);
+        });
+    }
+    
+    function formatDuration(seconds) {
+        if (isNaN(seconds)) return '0:00';
+        const mins = Math.floor(seconds / 60);
+        const secs = Math.floor(seconds % 60);
+        return `${mins}:${secs.toString().padStart(2, '0')}`;
+    }
+    
+    // Make functions global
+    window.toggleVoicePlayback = toggleVoicePlayback;
     
     // Make hideChat global
     window.hideChat = hideChat;
