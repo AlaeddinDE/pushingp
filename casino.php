@@ -530,181 +530,84 @@ if ($result) {
             transition: all 0.05s linear;
         }
         
-        .crash-multiplier {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            font-size: 4rem;
-            font-weight: 900;
-            color: var(--success);
+        }
+
+        /* Easter Eggs */
+        .easter-egg {
+            animation: easterEggFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+            z-index: 3;
         }
         
-        .bet-input-group {
-            display: flex;
-            gap: 12px;
-            margin: 24px 0;
-        }
-        
-        .bet-input {
-            flex: 1;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1.125rem;
-            font-weight: 700;
-            text-align: center;
-        }
-        
-        .bet-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .bet-btn {
-            padding: 16px 32px;
-            background: var(--accent);
-            border: none;
-            border-radius: 12px;
-            color: white;
-            font-weight: 700;
-            font-size: 1.125rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .bet-btn:hover {
-            background: #7c3aed;
-            transform: translateY(-2px);
-        }
-        
-        .bet-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-        
-        .quick-bet-btns {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-        }
-        
-        .quick-bet-btn {
-            flex: 1;
-            padding: 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-bet-btn:hover {
-            background: var(--accent);
-            color: white;
-            border-color: var(--accent);
-        }
-        
-        .win-message {
-            text-align: center;
-            padding: 24px;
-            background: linear-gradient(135deg, var(--success), #059669);
-            border-radius: 12px;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-top: 24px;
-            display: none;
-        }
-        
-        .win-message.show {
-            display: block;
-            animation: bounceIn 0.6s;
-        }
-        
-        @keyframes bounceIn {
-            0% { transform: scale(0); }
-            50% { transform: scale(1.1); }
-            100% { transform: scale(1); }
-        }
-        
-        .loss-message {
-            text-align: center;
-            padding: 24px;
-            background: linear-gradient(135deg, var(--error), #b91c1c);
-            border-radius: 12px;
-            color: white;
-            font-size: 1.5rem;
-            font-weight: 800;
-            margin-top: 24px;
-            display: none;
-        }
-        
-        .loss-message.show {
-            display: block;
-            animation: shake 0.6s;
-        }
-        
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-        
-        .recent-wins {
-            margin-top: 40px;
-        }
-        
-        .win-item {
-            background: var(--bg-tertiary);
-            padding: 16px;
-            border-radius: 12px;
-            margin-bottom: 12px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .win-amount {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--success);
-        }
-        
-        @media (max-width: 768px) {
-            .casino-grid {
-                grid-template-columns: 1fr;
+        @keyframes easterEggFloat {
+            0%, 100% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 0.8;
             }
-            
-            .wheel-container {
-                width: 300px;
-                height: 300px;
+            25% {
+                transform: translateY(-10px) rotate(5deg);
+                opacity: 1;
             }
-            
-            .slots-reels {
-                gap: 10px;
+            50% {
+                transform: translateY(-5px) rotate(-5deg);
+                opacity: 0.9;
             }
-            
-            .slot-reel {
-                width: 80px;
-                height: 80px;
-                font-size: 3rem;
+            75% {
+                transform: translateY(-15px) rotate(3deg);
+                opacity: 1;
             }
         }
         
-        /* Crash Game Sky Animation */
+        #egg9 {
+            animation: kingPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes kingPulse {
+            0%, 100% {
+                transform: translate(-50%, -50%) scale(1) rotate(0deg);
+                filter: drop-shadow(0 0 20px gold);
+            }
+            50% {
+                transform: translate(-50%, -50%) scale(1.2) rotate(10deg);
+                filter: drop-shadow(0 0 40px gold);
+            }
+        }
+        
+        /* Rocket Crash Game - Complete Overhaul */
         .crash-graph {
             position: relative;
-            height: 400px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+            height: 600px;
+            background: linear-gradient(180deg, 
+                #87CEEB 0%,    /* Sky blue (earth) */
+                #4A90E2 20%,   /* Deep blue */
+                #2C5AA0 40%,   /* Darker blue */
+                #1a1a2e 70%,   /* Dark space */
+                #0a0a1e 100%   /* Deep space */
+            );
             border-radius: 16px;
             margin-bottom: 24px;
             overflow: hidden;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+            transition: background 0.5s ease;
+        }
+        
+        /* Dynamic background based on altitude */
+        .crash-graph.space-level-1 {
+            background: linear-gradient(180deg, 
+                #4A90E2 0%, #2C5AA0 30%, #1a1a2e 60%, #0a0a1e 100%
+            );
+        }
+        
+        .crash-graph.space-level-2 {
+            background: linear-gradient(180deg, 
+                #2C5AA0 0%, #1a1a2e 40%, #0a0a1e 70%, #000 100%
+            );
+        }
+        
+        .crash-graph.space-level-3 {
+            background: linear-gradient(180deg, 
+                #1a1a2e 0%, #0a0a1e 50%, #000 100%
+            );
         }
         
         .crash-sky {
@@ -713,47 +616,532 @@ if ($result) {
             height: 100%;
         }
         
-        .cloud {
+        /* Earth ground */
+        .ground {
             position: absolute;
-            top: 20%;
-            width: 80px;
-            height: 40px;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50px;
-            animation: cloudFloat 20s linear infinite;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 120px;
+            background: linear-gradient(180deg, #228B22 0%, #1a5c1a 100%);
+            transition: transform 0.1s linear;
+            z-index: 1;
         }
         
-        .cloud::before,
-        .cloud::after {
-            content: '';
+        .ground::before {
+            content: '🏙️🌳🏠🌲🏢🌴🏡🌲🏭🌳';
             position: absolute;
-            background: rgba(255,255,255,0.1);
-            border-radius: 50%;
-        }
-        
-        .cloud::before {
-            width: 50px;
-            height: 50px;
-            top: -25px;
-            left: 10px;
-        }
-        
-        .cloud::after {
-            width: 40px;
-            height: 40px;
             top: -20px;
-            right: 10px;
+            left: 0;
+            width: 100%;
+            font-size: 2rem;
+            text-align: center;
+            letter-spacing: 10px;
         }
         
-        @keyframes cloudFloat {
+        /* ROCKET - centered, moves up */
+        .airplane {
+            position: absolute;
+            left: 50%;
+            bottom: 150px;
+            transform: translateX(-50%) rotate(270deg);
+            font-size: 5rem;
+            filter: drop-shadow(0 0 20px rgba(255,100,0,0.8)) 
+                    drop-shadow(0 0 40px rgba(255,200,0,0.6));
+            transition: all 0.05s linear;
+            z-index: 10;
+        }
+        
+        .airplane.flying {
+            animation: rocketShake 0.1s ease-in-out infinite, rocketGlow 0.5s ease-in-out infinite;
+        }
+        
+        .airplane.crashed {
+            animation: rocketCrash 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
+        }
+        
+        @keyframes rocketShake {
+            0%, 100% { transform: translateX(-50%) rotate(270deg); }
+            25% { transform: translateX(-48%) rotate(268deg); }
+            75% { transform: translateX(-52%) rotate(272deg); }
+        }
+        
+        @keyframes rocketGlow {
+            0%, 100% {
+                filter: drop-shadow(0 0 20px rgba(255,100,0,0.8)) 
+                        drop-shadow(0 0 40px rgba(255,200,0,0.6));
+            }
+            50% {
+                filter: drop-shadow(0 0 30px rgba(255,100,0,1)) 
+                        drop-shadow(0 0 60px rgba(255,200,0,1));
+            }
+        }
+        
+        @keyframes rocketCrash {
             0% {
-                transform: translateX(0);
+                transform: translateX(-50%) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            20% {
+                transform: translateX(-40%) rotate(-30deg) scale(1.2);
+            }
+            40% {
+                transform: translateX(-60%) rotate(30deg) scale(1.1);
+            }
+            60% {
+                transform: translateX(-50%) rotate(-60deg) scale(0.9);
+            }
+            80% {
+                transform: translateX(-30%) rotate(270deg) scale(0.6);
             }
             100% {
-                transform: translateX(-100vw);
+                transform: translateX(-50%) rotate(180deg) scale(0.2);
+                opacity: 0;
             }
         }
+        
+        /* Rocket flame */
+        .rocket-flame {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3rem;
+            opacity: 0;
+        }
+        
+        .airplane.flying .rocket-flame {
+            opacity: 1;
+            animation: flameFlicker 0.1s ease-in-out infinite;
+        }
+        
+        @keyframes flameFlicker {
+            0%, 100% { 
+                transform: translateX(-50%) scaleY(1);
+                filter: brightness(1);
+            }
+            50% { 
+                transform: translateX(-50%) scaleY(1.3);
+                filter: brightness(1.5);
+            }
+        }
+        
+        /* Stars - more visible in space */
+        .stars, .stars2 {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            opacity: 0;
+            transition: opacity 1s ease;
+            box-shadow: 
+                50px 30px #FFF, 100px 50px #FFF, 150px 80px #FFF,
+                200px 40px #FFF, 250px 90px #FFF, 300px 60px #FFF,
+                350px 100px #FFF, 400px 20px #FFF, 450px 70px #FFF,
+                500px 110px #FFF, 550px 45px #FFF, 600px 85px #FFF,
+                80px 150px #FFF, 180px 200px #FFF, 280px 180px #FFF,
+                380px 220px #FFF, 480px 160px #FFF, 580px 190px #FFF;
+        }
+        
+        .crash-graph.space-level-1 .stars,
+        .crash-graph.space-level-2 .stars,
+        .crash-graph.space-level-3 .stars {
+            opacity: 0.8;
+        }
+        
+        .stars2 {
+            box-shadow: 
+                75px 45px #FFF, 125px 65px #FFF, 175px 25px #FFF,
+                225px 95px #FFF, 275px 35px #FFF, 325px 75px #FFF,
+                120px 180px #FFF, 220px 210px #FFF, 320px 195px #FFF;
+        }
+        
+        /* Sun - disappears in space */
+        .celestial-body {
+            position: absolute;
+            top: 10%;
+            right: 10%;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, #ffd700, #ffed4e);
+            border-radius: 50%;
+            box-shadow: 0 0 20px #ffd700, 0 0 40px #ffd700;
+            animation: celestialPulse 4s ease-in-out infinite;
+            transition: opacity 1s ease;
+        }
+        
+        .crash-graph.space-level-2 .celestial-body,
+        .crash-graph.space-level-3 .celestial-body {
+            opacity: 0.3;
+        }
+        
+        @keyframes celestialPulse {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+        
+        /* Altitude meter */
+        .altitude-meter {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid #10b981;
+            min-width: 140px;
+            z-index: 100;
+        }
+        
+        .altitude-label {
+            font-size: 0.75rem;
+            color: #10b981;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .altitude-value {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 900;
+            margin-top: 4px;
+        }
+        
+        /* Speed meter */
+        .speed-meter {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0,0,0,0.8);
+            padding: 12px 20px;
+            border-radius: 12px;
+            border: 2px solid #8b5cf6;
+            min-width: 140px;
+            z-index: 100;
+        }
+        
+        .speed-label {
+            font-size: 0.75rem;
+            color: #8b5cf6;
+            font-weight: 700;
+            letter-spacing: 1px;
+        }
+        
+        .speed-value {
+            font-size: 1.8rem;
+            color: #fff;
+            font-weight: 900;
+            margin-top: 4px;
+        }
+        
+        /* Crash multiplier */
+        .crash-multiplier {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            font-weight: 900;
+            color: var(--success);
+            text-shadow: 0 0 30px rgba(16, 185, 129, 0.8);
+            z-index: 5;
+            pointer-events: none;
+        }
+        
+        /* Explosion */
+        .explosion {
+            position: absolute;
+            font-size: 15rem;
+            z-index: 20;
+            animation: explosionBurst 1s ease-out forwards;
+            filter: drop-shadow(0 0 40px rgba(255, 100, 0, 1));
+        }
+        
+        @keyframes explosionBurst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                transform: scale(0.3) rotate(20deg);
+                opacity: 1;
+            }
+            30% {
+                transform: scale(1.8) rotate(-15deg);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(3) rotate(5deg);
+                opacity: 0;
+            }
+        }
+        
+        .shockwave {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100px;
+            height: 100px;
+            border: 4px solid rgba(255, 100, 0, 0.8);
+            border-radius: 50%;
+            animation: shockwaveExpand 0.8s ease-out forwards;
+        }
+        
+        @keyframes shockwaveExpand {
+            0% {
+                transform: translate(-50%, -50%) scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(-50%, -50%) scale(5);
+                opacity: 0;
+            }
+        }
+        
+        /* Danger indicator */
+        .danger-indicator {
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(239, 68, 68, 0.95);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 8px;
+            font-weight: 900;
+            font-size: 1.25rem;
+            letter-spacing: 2px;
+            animation: dangerPulse 0.5s ease-in-out infinite;
+            border: 3px solid #fff;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
+            z-index: 100;
+        }
+        
+        @keyframes dangerPulse {
+            0%, 100% {
+                transform: translateX(-50%) scale(1);
+            }
+            50% {
+                transform: translateX(-50%) scale(1.1);
+            }
+        }
+        
+        /* Easter Eggs - repositioned for vertical flight */
+        .easter-egg {
+            position: absolute;
+            animation: easterEggFloat 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255,255,255,0.8));
+            z-index: 4;
+            transition: all 0.1s linear;
+        }
+        
+        @keyframes easterEggFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+                opacity: 0.9;
+            }
+            50% {
+                transform: translateY(-10px) scale(1.1);
+                opacity: 1;
+            }
+        }
+
+        /* Space Elements - appear at different altitudes */
+        .space-element {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 1s ease;
+            pointer-events: none;
+        }
+        
+        /* Earth atmosphere (1.5x-3x) */
+        .crash-graph.space-level-1 .clouds {
+            opacity: 0.4;
+        }
+        
+        /* Planets (3x+) */
+        .planet {
+            position: absolute;
+            border-radius: 50%;
+            animation: planetFloat 8s ease-in-out infinite;
+        }
+        
+        .planet-mars {
+            top: 15%;
+            right: 10%;
+            width: 80px;
+            height: 80px;
+            font-size: 4rem;
+            opacity: 0;
+        }
+        
+        .crash-graph.space-level-2 .planet-mars {
+            opacity: 1;
+        }
+        
+        .planet-jupiter {
+            top: 60%;
+            left: 5%;
+            font-size: 5rem;
+            opacity: 0;
+        }
+        
+        .crash-graph.space-level-3 .planet-jupiter {
+            opacity: 1;
+        }
+        
+        .planet-saturn {
+            top: 25%;
+            left: 15%;
+            font-size: 4.5rem;
+            opacity: 0;
+        }
+        
+        .crash-graph.space-level-3 .planet-saturn {
+            opacity: 1;
+        }
+        
+        @keyframes planetFloat {
+            0%, 100% {
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                transform: translateY(-20px) scale(1.05);
+            }
+        }
+        
+        /* Galaxy background (5x+) */
+        .galaxy {
+            position: absolute;
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            opacity: 0;
+            filter: blur(3px);
+            animation: galaxySpin 20s linear infinite;
+        }
+        
+        .galaxy-1 {
+            top: 10%;
+            left: 30%;
+            background: radial-gradient(circle, rgba(138, 43, 226, 0.4), transparent);
+        }
+        
+        .galaxy-2 {
+            bottom: 15%;
+            right: 20%;
+            background: radial-gradient(circle, rgba(0, 191, 255, 0.4), transparent);
+        }
+        
+        .crash-graph.space-level-3 .galaxy {
+            opacity: 1;
+        }
+        
+        @keyframes galaxySpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Nebula (7x+) */
+        .nebula {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            filter: blur(5px);
+            animation: nebulaFloat 15s ease-in-out infinite;
+        }
+        
+        .nebula-1 {
+            top: 30%;
+            right: 15%;
+            background: radial-gradient(ellipse, rgba(255, 0, 255, 0.3), transparent);
+        }
+        
+        .nebula-2 {
+            bottom: 25%;
+            left: 10%;
+            background: radial-gradient(ellipse, rgba(0, 255, 255, 0.3), transparent);
+        }
+        
+        @keyframes nebulaFloat {
+            0%, 100% {
+                transform: scale(1) rotate(0deg);
+            }
+            50% {
+                transform: scale(1.2) rotate(5deg);
+            }
+        }
+        
+        /* Milky Way (10x+) */
+        .milky-way {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            background: 
+                radial-gradient(ellipse 800px 600px at 30% 50%, rgba(255,255,255,0.1), transparent),
+                radial-gradient(ellipse 600px 400px at 70% 30%, rgba(200,200,255,0.1), transparent);
+            pointer-events: none;
+        }
+        
+        /* Asteroids (random) */
+        .asteroid {
+            position: absolute;
+            opacity: 0;
+            font-size: 1.5rem;
+            animation: asteroidDrift 5s linear infinite;
+        }
+        
+        @keyframes asteroidDrift {
+            from {
+                transform: translateX(-50px) translateY(-50px) rotate(0deg);
+            }
+            to {
+                transform: translateX(50px) translateY(50px) rotate(360deg);
+            }
+        }
+        
+        /* Shooting stars */
+        .shooting-star {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: white;
+            opacity: 0;
+            box-shadow: 0 0 4px white;
+        }
+        
+        .crash-graph.space-level-2 .shooting-star,
+        .crash-graph.space-level-3 .shooting-star {
+            animation: shootingStar 3s ease-out infinite;
+        }
+        
+        @keyframes shootingStar {
+            0% {
+                transform: translateX(0) translateY(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                transform: translateX(-300px) translateY(200px);
+                opacity: 0;
+            }
+        }
+        
+        .shooting-star-1 { top: 10%; right: 80%; animation-delay: 0s; }
+        .shooting-star-2 { top: 30%; right: 60%; animation-delay: 1.5s; }
+        .shooting-star-3 { top: 50%; right: 40%; animation-delay: 2.5s; }
     </style>
+
 </head>
 <body>
     <div class="grain"></div>
@@ -1000,49 +1388,186 @@ if ($result) {
                 <div class="balance-value" id="crashBalance"><?= number_format($balance, 2, ',', '.') ?> €</div>
             </div>
 
-            <div class="crash-graph">
+            <div class="crash-graph" id="crashGraph">
                 <div class="crash-sky">
-                    <!-- Clouds -->
-                    <div class="cloud" style="left: 10%; animation-delay: 0s;"></div>
-                    <div class="cloud" style="left: 50%; animation-delay: 3s;"></div>
-                    <div class="cloud" style="left: 80%; animation-delay: 6s;"></div>
+                    <!-- Stars background -->
+                    <div class="stars"></div>
+                    <div class="stars2"></div>
                     
-                    <!-- Airplane -->
+                    <!-- Sun (visible at start, fades in space) -->
+                    <div class="celestial-body"></div>
+                    
+                    <!-- Ground (moves down as rocket goes up) -->
+                    <div class="ground" id="ground"></div>
+                    
+                    <!-- Space Elements -->
+                    <!-- Planets -->
+                    <div class="planet planet-mars">🔴</div>
+                    <div class="planet planet-jupiter">🪐</div>
+                    <div class="planet planet-saturn">🪐</div>
+                    
+                    <!-- Galaxies -->
+                    <div class="galaxy galaxy-1"></div>
+                    <div class="galaxy galaxy-2"></div>
+                    
+                    <!-- Nebulas -->
+                    <div class="nebula nebula-1"></div>
+                    <div class="nebula nebula-2"></div>
+                    
+                    <!-- Milky Way -->
+                    <div class="milky-way" id="milkyWay"></div>
+                    
+                    <!-- Shooting stars -->
+                    <div class="shooting-star shooting-star-1"></div>
+                    <div class="shooting-star shooting-star-2"></div>
+                    <div class="shooting-star shooting-star-3"></div>
+                    
+                    <!-- Asteroids -->
+                    <div class="asteroid" id="asteroid1" style="top: 20%; left: 80%;">☄️</div>
+                    <div class="asteroid" id="asteroid2" style="top: 70%; left: 10%;">🌑</div>
+                    <div class="asteroid" id="asteroid3" style="top: 45%; right: 15%;">☄️</div>
+                    
+                    <!-- Altitude meter -->
+                    <div class="altitude-meter" id="altitudeMeter">
+                        <div class="altitude-label">ALTITUDE</div>
+                        <div class="altitude-value" id="altitudeValue">0km</div>
+                    </div>
+                    
+                    <!-- Speed meter -->
+                    <div class="speed-meter" id="speedMeter">
+                        <div class="speed-label">MULTIPLIER</div>
+                        <div class="speed-value" id="speedValue">0.00x</div>
+                    </div>
+                    
+                    <!-- ROCKET -->
                     <div class="airplane" id="crashAirplane">
-                        ✈️
-                        <!-- Smoke trail -->
-                        <div class="smoke-trail"></div>
+                        🚀
+                        <div class="rocket-flame">🔥</div>
                     </div>
                     
                     <!-- Explosion (hidden initially) -->
                     <div class="explosion" id="crashExplosion" style="display: none;">
                         💥
-                        <div class="explosion-particles"></div>
+                        <div class="shockwave"></div>
+                    </div>
+                    
+                    <!-- Easter Eggs - repositioned for vertical -->
+                    <div class="easter-egg" id="egg1" data-trigger="1.5" style="display: none; left: 20%; font-size: 2.5rem;">
+                        ☁️
+                    </div>
+                    <div class="easter-egg" id="egg2" data-trigger="2.0" style="display: none; right: 20%; font-size: 2.5rem;">
+                        🐦
+                    </div>
+                    <div class="easter-egg" id="egg3" data-trigger="3.0" style="display: none; left: 15%; font-size: 3rem;">
+                        🛩️
+                    </div>
+                    <div class="easter-egg" id="egg4" data-trigger="4.0" style="display: none; right: 15%; font-size: 3rem;">
+                        🦅
+                    </div>
+                    <div class="easter-egg" id="egg5" data-trigger="5.0" style="display: none; left: 50%; transform: translateX(-50%); font-size: 3.5rem;">
+                        ✈️
+                    </div>
+                    <div class="easter-egg" id="egg6" data-trigger="7.0" style="display: none; left: 25%; font-size: 3.5rem;">
+                        🛸
+                    </div>
+                    <div class="easter-egg" id="egg7" data-trigger="9.0" style="display: none; right: 25%; font-size: 4rem;">
+                        👽
+                    </div>
+                    <div class="easter-egg" id="egg8" data-trigger="12.0" style="display: none; left: 30%; font-size: 4.5rem;">
+                        🌟
+                    </div>
+                    <div class="easter-egg" id="egg9" data-trigger="15.0" style="display: none; left: 50%; transform: translateX(-50%); font-size: 6rem;">
+                        👑
                     </div>
                 </div>
                 <div class="crash-multiplier" id="crashMultiplier">0.00x</div>
+                
+                <!-- Warning indicator -->
+                <div class="danger-indicator" id="dangerIndicator" style="display: none;">
+                    ⚠️ DANGER ZONE ⚠️
+                </div>
             </div>
 
 
-            <div class="quick-bet-btns">
-                <button class="quick-bet-btn" onclick="setCrashBet(1)">1€</button>
-                <button class="quick-bet-btn" onclick="setCrashBet(5)">5€</button>
-                <button class="quick-bet-btn" onclick="setCrashBet(10)">10€</button>
-                <button class="quick-bet-btn" onclick="setCrashBet(25)">25€</button>
-                <button class="quick-bet-btn" onclick="setCrashBet(50)">50€</button>
-            </div>
+            <!-- Control Panel -->
+            <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1)); 
+                        border: 2px solid var(--border); 
+                        border-radius: 20px; 
+                        padding: 24px; 
+                        margin-top: 20px;
+                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 8px;">EINSATZ WÄHLEN</div>
+                    <div class="quick-bet-btns" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(1)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                            💰 1€
+                        </button>
+                        <button class="quick-bet-btn" onclick="setCrashBet(5)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                            💵 5€
+                        </button>
+                        <button class="quick-bet-btn" onclick="setCrashBet(10)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                            💸 10€
+                        </button>
+                        <button class="quick-bet-btn" onclick="setCrashBet(25)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                            💎 25€
+                        </button>
+                        <button class="quick-bet-btn" onclick="setCrashBet(50)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                            👑 50€
+                        </button>
+                    </div>
+                </div>
 
-            <div class="bet-input-group">
-                <input type="number" class="bet-input" id="crashBet" value="5" min="0.5" max="50" step="0.5">
-                <button class="bet-btn" id="crashStartBtn" onclick="startCrash()">START</button>
-                <button class="bet-btn" id="crashCashoutBtn" onclick="cashoutCrash()" style="display: none; background: var(--success);">CASHOUT</button>
+                <div class="bet-input-group" style="display: flex; gap: 12px; align-items: stretch;">
+                    <div style="flex: 1; position: relative;">
+                        <div style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.25rem; color: var(--accent); font-weight: 900;">💵</div>
+                        <input type="number" class="bet-input" id="crashBet" value="5" min="0.5" max="50" step="0.5" 
+                               style="padding-left: 48px; height: 60px; font-size: 1.5rem; font-weight: 900; text-align: center; border: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 16px;">
+                    </div>
+                    <button class="bet-btn" id="crashStartBtn" onclick="startCrash()" 
+                            style="flex: 1; height: 60px; font-size: 1.25rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); border: 3px solid #10b981; border-radius: 16px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s;">
+                        🚀 START
+                    </button>
+                    <button class="bet-btn" id="crashCashoutBtn" onclick="cashoutCrash()" 
+                            style="display: none; flex: 1; height: 60px; font-size: 1.25rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #d97706); border: 3px solid #f59e0b; border-radius: 16px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s; animation: cashoutPulse 1s ease-in-out infinite;">
+                        💰 CASHOUT
+                    </button>
+                </div>
+
+                <style>
+                    @keyframes cashoutPulse {
+                        0%, 100% {
+                            transform: scale(1);
+                            box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4);
+                        }
+                        50% {
+                            transform: scale(1.05);
+                            box-shadow: 0 8px 30px rgba(245, 158, 11, 0.8);
+                        }
+                    }
+                    .quick-bet-btn:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 6px 20px rgba(139, 92, 246, 0.5);
+                        border-color: var(--success);
+                    }
+                    #crashStartBtn:hover {
+                        transform: scale(1.05);
+                        box-shadow: 0 8px 30px rgba(16, 185, 129, 0.6);
+                    }
+                    #crashCashoutBtn:hover {
+                        transform: scale(1.08);
+                        box-shadow: 0 10px 40px rgba(245, 158, 11, 1);
+                    }
+                </style>
             </div>
 
             <div class="win-message" id="crashWin"></div>
             <div class="loss-message" id="crashLoss"></div>
 
-            <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.875rem; color: var(--text-secondary);">
-                ⚡ Der Multiplikator steigt jede Sekunde. Du kannst jederzeit aussteigen und deinen Gewinn sichern. Aber pass auf: Wenn es crasht, verlierst du alles!
+            <div style="margin-top: 24px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1)); border: 2px solid var(--border); border-radius: 16px; font-size: 0.95rem; color: var(--text-secondary); text-align: center;">
+                <div style="font-size: 1.5rem; margin-bottom: 8px;">🚀</div>
+                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Wie funktioniert's?</div>
+                Der Multiplikator steigt während die Rakete fliegt. Steige jederzeit aus und sichere deinen Gewinn! Aber Vorsicht: Wenn die Rakete crasht, ist alles weg! 💥
             </div>
         </div>
     </div>
@@ -1275,30 +1800,110 @@ if ($result) {
                 
                 console.log('🎮 Crash point:', crashPoint + 'x');
                 
-                // Reset airplane and explosion
+                // Reset rocket and explosion
                 const airplane = document.getElementById('crashAirplane');
                 const explosion = document.getElementById('crashExplosion');
+                const ground = document.getElementById('ground');
+                const crashGraph = document.getElementById('crashGraph');
+                const dangerIndicator = document.getElementById('dangerIndicator');
+                
                 airplane.classList.remove('crashed');
                 airplane.classList.add('flying');
                 airplane.style.opacity = '1';
+                airplane.style.bottom = '150px';
                 explosion.style.display = 'none';
+                dangerIndicator.style.display = 'none';
+                ground.style.transform = 'translateY(0)';
+                crashGraph.className = 'crash-graph';
+                
+                // Hide all easter eggs
+                for (let i = 1; i <= 9; i++) {
+                    const egg = document.getElementById('egg' + i);
+                    if (egg) {
+                        egg.style.display = 'none';
+                        egg.style.bottom = '200px';
+                    }
+                }
                 
                 document.getElementById('crashStartBtn').style.display = 'none';
                 document.getElementById('crashCashoutBtn').style.display = 'block';
                 document.getElementById('crashWin').classList.remove('show');
                 document.getElementById('crashLoss').classList.remove('show');
                 
-                // Animate airplane upward and multiplier
-                let altitude = 20; // Starting bottom %
+                // Animate rocket going UP
+                let altitude = 0; // km
+                let groundOffset = 0;
+                
                 crashInterval = setInterval(() => {
                     crashMultiplier += 0.01;
-                    altitude += 0.3; // Fly higher
+                    altitude = crashMultiplier * 10; // km
+                    groundOffset += 5; // Move ground down
                     
-                    airplane.style.bottom = altitude + '%';
-                    airplane.style.left = (10 + (altitude - 20) * 0.5) + '%';
+                    // Move ground down to simulate upward movement
+                    ground.style.transform = `translateY(${groundOffset}px)`;
+                    
+                    // Move easter eggs down with ground
+                    for (let i = 1; i <= 9; i++) {
+                        const egg = document.getElementById('egg' + i);
+                        if (egg && egg.style.display !== 'none') {
+                            const baseBottom = 200 + (i * 30);
+                            egg.style.bottom = (baseBottom - groundOffset/2) + 'px';
+                        }
+                    }
+                    
+                    // Update meters
+                    document.getElementById('altitudeValue').textContent = altitude.toFixed(1) + 'km';
+                    document.getElementById('speedValue').textContent = crashMultiplier.toFixed(2) + 'x';
                     
                     document.getElementById('crashMultiplier').textContent = crashMultiplier.toFixed(2) + 'x';
                     document.getElementById('crashMultiplier').style.color = crashMultiplier >= 2 ? '#10b981' : '#8b5cf6';
+                    
+                    // Change background based on altitude
+                    const milkyWay = document.getElementById('milkyWay');
+                    if (crashMultiplier >= 10) {
+                        crashGraph.className = 'crash-graph space-level-3';
+                        milkyWay.style.opacity = '1';
+                    } else if (crashMultiplier >= 5) {
+                        crashGraph.className = 'crash-graph space-level-3';
+                        milkyWay.style.opacity = '0.5';
+                    } else if (crashMultiplier >= 3) {
+                        crashGraph.className = 'crash-graph space-level-2';
+                        milkyWay.style.opacity = '0';
+                    } else if (crashMultiplier >= 1.5) {
+                        crashGraph.className = 'crash-graph space-level-1';
+                        milkyWay.style.opacity = '0';
+                    }
+                    
+                    // Show asteroids at higher levels
+                    for (let i = 1; i <= 3; i++) {
+                        const asteroid = document.getElementById('asteroid' + i);
+                        if (asteroid) {
+                            asteroid.style.opacity = crashMultiplier >= (3 + i) ? '1' : '0';
+                        }
+                    }
+                    
+                    // Show nebulas
+                    const nebulas = document.querySelectorAll('.nebula');
+                    nebulas.forEach(n => {
+                        n.style.opacity = crashMultiplier >= 7 ? '1' : '0';
+                    });
+                    
+                    // Show easter eggs at specific multipliers
+                    for (let i = 1; i <= 9; i++) {
+                        const egg = document.getElementById('egg' + i);
+                        if (egg) {
+                            const trigger = parseFloat(egg.getAttribute('data-trigger'));
+                            if (crashMultiplier >= trigger && egg.style.display === 'none') {
+                                egg.style.display = 'block';
+                                egg.style.bottom = (200 + (i * 30) - groundOffset/2) + 'px';
+                            }
+                        }
+                    }
+                    
+                    // Show danger indicator when close to crash
+                    if (crashMultiplier >= crashPoint * 0.8) {
+                        dangerIndicator.style.display = 'block';
+                    }
                     
                     if (crashMultiplier >= crashPoint) {
                         crashGame();
@@ -1344,8 +1949,8 @@ if ($result) {
                 
                 // Reset after 3 seconds
                 setTimeout(() => {
-                    airplane.style.bottom = '20%';
-                    airplane.style.left = '10%';
+                    airplane.style.bottom = "150px";
+                    // Rocket stays centered
                     document.getElementById('crashStartBtn').style.display = 'block';
                     document.getElementById('crashCashoutBtn').style.display = 'none';
                     document.getElementById('crashMultiplier').textContent = '0.00x';
@@ -1364,16 +1969,23 @@ if ($result) {
         const bet = parseFloat(document.getElementById('crashBet').value);
         const airplane = document.getElementById('crashAirplane');
         const explosion = document.getElementById('crashExplosion');
+        const debris = document.getElementById('debris');
+        const dangerIndicator = document.getElementById('dangerIndicator');
+        
+        // Hide danger indicator
+        dangerIndicator.style.display = 'none';
         
         // Crash animation
         airplane.classList.remove('flying');
         airplane.classList.add('crashed');
         
-        // Show explosion
+        // Show explosion and debris
         setTimeout(() => {
             explosion.style.display = 'block';
             explosion.style.left = airplane.style.left;
             explosion.style.top = (100 - parseFloat(airplane.style.bottom)) + '%';
+            
+            debris.style.display = 'block';
         }, 400);
         
         document.getElementById('crashMultiplier').textContent = 'CRASHED!';
@@ -1384,10 +1996,15 @@ if ($result) {
         // Reset after 3 seconds
         setTimeout(() => {
             airplane.classList.remove('crashed');
-            airplane.style.bottom = '20%';
-            airplane.style.left = '10%';
+            airplane.style.bottom = "150px";
+            // Rocket stays centered
             airplane.style.opacity = '1';
             explosion.style.display = 'none';
+            debris.style.display = 'none';
+            
+            // Reset meters
+            document.getElementById('altitudeValue').textContent = '0m';
+            document.getElementById('speedValue').textContent = '0 km/h';
             
             document.getElementById('crashMultiplier').textContent = '0.00x';
             document.getElementById('crashMultiplier').style.color = 'var(--success)';

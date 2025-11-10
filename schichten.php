@@ -4,434 +4,282 @@ require_once __DIR__ . '/includes/db.php';
 secure_session_start();
 require_login();
 
+$user_id = get_current_user_id();
 $is_admin = is_admin();
+
+// Aktuelles Datum und Woche
+$current_date = new DateTime();
+$week_offset = isset($_GET['week']) ? intval($_GET['week']) : 0;
+$current_date->modify("$week_offset week");
+
+// Start der Woche (Montag)
+$week_start = clone $current_date;
+$week_start->modify('monday this week');
+
+// Hole alle aktiven Mitglieder
+$members_query = "SELECT id, name FROM users WHERE status = 'active' ORDER BY name ASC";
+$members_result = $conn->query($members_query);
+$members = [];
+while ($row = $members_result->fetch_assoc()) {
+    $members[] = $row;
+}
+
+// Hole Schichten für diese Woche
+$week_end = clone $week_start;
+$week_end->modify('+6 days');
+
+$shifts_query = "
+    SELECT s.*, u.name as user_name
+    FROM shifts s
+    JOIN users u ON u.id = s.user_id
+    WHERE s.date BETWEEN ? AND ?
+    AND u.status = 'active'
+    ORDER BY s.date ASC, s.start_time ASC
+";
+$stmt = $conn->prepare($shifts_query);
+$start_str = $week_start->format('Y-m-d');
+$end_str = $week_end->format('Y-m-d');
+$stmt->bind_param('ss', $start_str, $end_str);
+$stmt->execute();
+$shifts_result = $stmt->get_result();
+
+// Organisiere Schichten nach User und Datum
+$shifts_by_user = [];
+while ($shift = $shifts_result->fetch_assoc()) {
+    $user_id_key = $shift['user_id'];
+    $date_key = $shift['date'];
+    if (!isset($shifts_by_user[$user_id_key])) {
+        $shifts_by_user[$user_id_key] = [];
+    }
+    if (!isset($shifts_by_user[$user_id_key][$date_key])) {
+        $shifts_by_user[$user_id_key][$date_key] = [];
+    }
+    $shifts_by_user[$user_id_key][$date_key][] = $shift;
+}
+$stmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Schichtplan-Übersicht – PUSHING P</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📅 Schichtplan – PUSHING P</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
-        .shift-overview {
-            margin-top: 24px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
+        body {
+            background: var(--bg-primary);
+            overflow-x: hidden;
         }
         
-        .shift-row {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 12px;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 20px;
-            min-width: fit-content;
+        .schicht-header {
+            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+            padding: 32px 24px;
+            margin-bottom: 32px;
+            border-radius: 0 0 24px 24px;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
         }
         
-        .shift-row:hover {
-            border-color: var(--accent);
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-        
-        .member-name {
-            font-size: 1.1rem;
-            font-weight: 700;
-            color: var(--accent);
-            min-width: 100px;
-            max-width: 100px;
-            text-align: right;
-            padding-right: 20px;
-            border-right: 2px solid var(--border);
-            flex-shrink: 0;
-        }
-        
-        .week-grid {
-            display: grid;
-            grid-template-columns: repeat(14, 1fr);
-            gap: 3px;
-            flex: 1;
-            min-width: fit-content;
-        }
-        
-        /* Mobile Responsive Styles */
-        @media (max-width: 768px) {
-            .shift-row {
-                padding: 12px;
-                gap: 12px;
-            }
-            
-            .member-name {
-                min-width: 70px;
-                max-width: 70px;
-                font-size: 0.9rem;
-                padding-right: 12px;
-            }
-            
-            .week-grid {
-                gap: 2px;
-            }
-            
-            .schichtplan-logo {
-                flex-direction: column;
-                gap: 12px;
-                padding: 12px;
-            }
-            
-            .logo-svg {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .logo-text h1 {
-                font-size: 1.8rem;
-            }
-            
-            .nav-buttons {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .nav-btn {
-                padding: 10px 16px;
-                font-size: 0.875rem;
-                width: 100%;
-            }
-            
-            .week-label {
-                font-size: 1rem;
-            }
-            
-            .legend {
-                gap: 8px;
-                padding: 8px;
-            }
-            
-            .legend-item {
-                font-size: 0.75rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .member-name {
-                min-width: 60px;
-                max-width: 60px;
-                font-size: 0.8rem;
-            }
-            
-            .shift-row {
-                padding: 8px;
-                gap: 8px;
-            }
-            
-            .logo-text h1 {
-                font-size: 1.5rem;
-            }
-            
-            .btn {
-                font-size: 0.8rem;
-                padding: 8px 12px;
-            }
-        }
-        
-        .day-cell {
+        .schicht-header h1 {
+            color: white;
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 0 0 8px 0;
             text-align: center;
-            position: relative;
-            min-height: 20px;
-            min-width: 55px;
         }
         
-        .day-cell.no-header {
-            min-height: 0;
+        .week-nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+            margin-top: 24px;
+        }
+        
+        .week-nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s;
+            backdrop-filter: blur(10px);
+        }
+        
+        .week-nav-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.05);
+        }
+        
+        .current-week {
+            color: white;
+            font-size: 1.25rem;
+            font-weight: 700;
+            min-width: 250px;
+            text-align: center;
+        }
+        
+        .calendar-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 16px 32px;
+        }
+        
+        .calendar-grid {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 24px rgba(0,0,0,0.1);
+        }
+        
+        .calendar-header {
+            display: grid;
+            grid-template-columns: 150px repeat(7, 1fr);
+            background: var(--bg-tertiary);
+            border-bottom: 2px solid var(--border);
+            gap: 1px;
         }
         
         .day-header {
-            font-size: 0.7rem;
+            padding: 16px 8px;
+            text-align: center;
             font-weight: 700;
-            margin-bottom: 6px;
             color: var(--text-secondary);
+            font-size: 0.875rem;
         }
         
-        .day-date {
-            font-size: 0.65rem;
-            color: var(--text-secondary);
-            margin-bottom: 3px;
-        }
-        
-        @media (max-width: 768px) {
-            .day-cell {
-                min-width: 45px;
-            }
-            
-            .day-header {
-                font-size: 0.6rem;
-                margin-bottom: 4px;
-            }
-            
-            .day-date {
-                font-size: 0.55rem;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .day-cell {
-                min-width: 40px;
-            }
-            
-            .day-header {
-                font-size: 0.55rem;
-            }
-            
-            .day-date {
-                font-size: 0.5rem;
-            }
-        }
-        
-        .holiday-name {
-            font-size: 0.55rem;
-            color: #d32f2f;
-            font-weight: 700;
-            margin-bottom: 2px;
-            line-height: 1.1;
-            padding: 1px 3px;
-            background: rgba(211, 47, 47, 0.1);
-            border-radius: 3px;
-        }
-        
-        .vacation-name {
-            font-size: 0.55rem;
-            color: #f57c00;
-            font-weight: 700;
-            margin-bottom: 2px;
-            line-height: 1.1;
-            padding: 1px 3px;
-            background: rgba(255, 193, 7, 0.2);
-            border-radius: 3px;
-        }
-        
-        /* Feiertage & Ferienzeiten */
-        .day-cell.holiday .day-header {
-            background: linear-gradient(135deg, #d32f2f, #f44336);
+        .day-header.today {
+            background: var(--accent);
             color: white;
-            padding: 4px;
-            border-radius: 4px;
-            font-weight: 800;
-            position: relative;
+            border-radius: 8px;
+            margin: 4px;
         }
         
-        .day-cell.holiday .day-header::before {
-            content: '🎉';
-            margin-right: 4px;
+        .day-header .day-name {
+            display: block;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         
-        .day-cell.vacation-period {
-            background: linear-gradient(135deg, rgba(255, 193, 7, 0.1), rgba(255, 235, 59, 0.1));
+        .day-header .day-date {
+            display: block;
+            font-size: 1.25rem;
+            margin-top: 4px;
         }
         
-        .day-cell.vacation-period .day-cell {
-            border: 1px dashed #ffc107;
-        }
-        
-        .holiday-label {
-            font-size: 0.65rem;
-            color: #d32f2f;
+        .member-header {
+            padding: 16px;
             font-weight: 700;
-            margin-top: 2px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            color: var(--text-secondary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .vacation-indicator {
-            position: absolute;
-            top: 0;
+        .calendar-row {
+            display: grid;
+            grid-template-columns: 150px repeat(7, 1fr);
+            border-bottom: 1px solid var(--border);
+            min-height: 80px;
+            gap: 1px;
+            background: var(--border);
+        }
+        
+        .calendar-row:hover {
+            background: rgba(139, 92, 246, 0.1);
+        }
+        
+        .member-cell {
+            padding: 16px;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 700;
+            color: var(--text-primary);
+            position: sticky;
             left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, #ffc107, #ffeb3b);
-            border-radius: 4px 4px 0 0;
+            z-index: 10;
+        }
+        
+        .member-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), #ec4899);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 800;
+            font-size: 0.875rem;
         }
         
         .shift-cell {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            padding: 6px 2px;
-            min-height: 55px;
-            height: 55px;
-            min-width: 45px;
-            transition: all 0.3s;
-            cursor: pointer;
+            padding: 8px;
+            background: var(--bg-secondary);
             display: flex;
             flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.65rem;
-            box-sizing: border-box;
+            gap: 4px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
         .shift-cell:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px var(--accent-glow);
+            background: var(--bg-tertiary);
         }
         
-        @media (max-width: 768px) {
-            .shift-cell {
-                min-height: 45px;
-                height: 45px;
-                min-width: 40px;
-                padding: 4px 1px;
-                font-size: 0.6rem;
-                border-radius: 4px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .shift-cell {
-                min-height: 38px;
-                height: 38px;
-                min-width: 35px;
-                padding: 3px 1px;
-                font-size: 0.55rem;
-            }
-        }
-        
-        .shift-cell.has-shift {
-            font-weight: 700;
-        }
-        
-        .shift-cell.today {
-            border: 2px solid #fff !important;
-            padding: 5px 1px !important;
-            box-shadow: 0 0 20px rgba(16, 65, 134, 0.8), 0 0 40px rgba(16, 65, 134, 0.4) !important;
-            position: relative;
-            animation: pulse-today 2s ease-in-out infinite;
-        }
-        
-        .shift-cell.today::before {
-            content: '●';
-            position: absolute;
-            top: 1px;
-            right: 1px;
-            color: #fff;
-            font-size: 0.5rem;
-            text-shadow: 0 0 8px var(--accent);
-            animation: blink 1.5s ease-in-out infinite;
-        }
-        
-        .day-cell.today .day-header {
-            background: var(--accent);
+        .shift-item {
+            background: linear-gradient(135deg, #10b981, #059669);
+            padding: 8px;
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 600;
             color: white;
-            padding: 4px;
-            border-radius: 4px;
-            font-weight: 800;
-        }
-        
-        @keyframes pulse-today {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.03);
-            }
-        }
-        
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.3; }
-        }
-        
-        .shift-early { 
-            background: linear-gradient(135deg, #ffd700, #ffed4e);
-            border-color: #ccac00;
-            color: #000;
-        }
-        .shift-late { 
-            background: linear-gradient(135deg, #ff8c00, #ffa500);
-            border-color: #cc7000;
-            color: #fff;
-        }
-        .shift-night { 
-            background: linear-gradient(135deg, #4a148c, #6a1b9a);
-            border-color: #311B92;
-            color: #fff;
-        }
-        .shift-free { 
-            background: linear-gradient(135deg, #4caf50, #66bb6a);
-            border-color: #388e3c;
-            color: #fff;
-        }
-        .shift-vacation { 
-            background: linear-gradient(135deg, #f44336, #ef5350);
-            border-color: #d32f2f;
-            color: #fff;
-        }
-        
-        .nav-buttons {
             display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin-bottom: 24px;
+            align-items: center;
+            gap: 4px;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s;
         }
         
-        .nav-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
+        .shift-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
         }
         
-        .nav-btn:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
+        .shift-item.free {
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
         }
         
-        .week-label {
-            font-size: 1.25rem;
-            font-weight: 700;
+        .shift-item.morning {
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+        }
+        
+        .shift-time {
+            font-size: 0.7rem;
+            opacity: 0.9;
+        }
+        
+        .empty-cell {
+            color: var(--text-tertiary);
+            font-size: 0.75rem;
             text-align: center;
-            margin-bottom: 24px;
-        }
-        
-        .month-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .month-btn:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-        
-        .month-label {
-            font-weight: 700;
-            font-size: 1.125rem;
+            padding: 16px 8px;
         }
         
         .legend {
             display: flex;
-            gap: 16px;
+            justify-content: center;
+            gap: 24px;
+            margin: 24px 0;
             flex-wrap: wrap;
-            margin-top: 20px;
-            padding: 12px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
         }
         
         .legend-item {
@@ -441,187 +289,96 @@ $is_admin = is_admin();
             font-size: 0.875rem;
         }
         
-        .legend-box {
-            width: 20px;
-            height: 20px;
-            border-radius: 4px;
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 6px;
         }
         
-        .tooltip {
+        .fab {
             position: fixed;
-            background: var(--bg-primary);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            padding: 12px;
-            font-size: 0.875rem;
-            pointer-events: none;
-            z-index: 1000;
-            display: none;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.6);
+            bottom: 24px;
+            right: 24px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--accent);
+            color: white;
+            border: none;
+            font-size: 2rem;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            transition: all 0.3s;
+            z-index: 100;
         }
         
-        .schichtplan-logo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 30px;
-            padding: 20px;
+        .fab:hover {
+            transform: scale(1.1) rotate(90deg);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.6);
         }
         
-        .logo-svg {
-            width: 80px;
-            height: 80px;
-            filter: drop-shadow(0 4px 12px var(--accent-glow));
-        }
-        
-        .logo-text h1 {
-            margin: 0;
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, var(--accent), #1a5bb8);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            letter-spacing: -1px;
-        }
-        
-        .logo-text p {
-            margin: 5px 0 0 0;
-            font-size: 0.875rem;
-            opacity: 0.7;
-        }
-        
-        .clock-icon {
-            animation: pulse 2s ease-in-out infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-        }
-        
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .gear-rotate {
-            animation: rotate 8s linear infinite;
-            transform-origin: center;
-        }
-        
-        /* Logo Animations */
-        .calendar-body {
-            animation: float-calendar 3s ease-in-out infinite;
-        }
-        
-        .clock-circle {
-            animation: pulse-clock 2s ease-in-out infinite;
-        }
-        
-        .clock-hand-hour {
-            transform-origin: 40px 40px;
-            animation: rotate-hour 12s linear infinite;
-        }
-        
-        .clock-hand-minute {
-            transform-origin: 40px 40px;
-            animation: rotate-minute 4s linear infinite;
-        }
-        
-        .user-icon.user-1 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0s;
-        }
-        
-        .user-body.user-1 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0s;
-        }
-        
-        .user-icon.user-2 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0.3s;
-        }
-        
-        .user-body.user-2 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0.3s;
-        }
-        
-        .user-icon.user-3 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0.6s;
-        }
-        
-        .user-body.user-3 {
-            animation: bounce-user 2s ease-in-out infinite;
-            animation-delay: 0.6s;
-        }
-        
-        .calendar-ring {
-            animation: wiggle 1.5s ease-in-out infinite;
-        }
-        
-        @keyframes float-calendar {
-            0%, 100% {
-                transform: translateY(0px);
+        /* Mobile Optimierung */
+        @media (max-width: 768px) {
+            .schicht-header h1 {
+                font-size: 1.5rem;
             }
-            50% {
-                transform: translateY(-5px);
+            
+            .week-nav {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .current-week {
+                font-size: 1rem;
+                min-width: auto;
+            }
+            
+            .calendar-header,
+            .calendar-row {
+                grid-template-columns: 100px repeat(7, 80px);
+            }
+            
+            .member-cell {
+                padding: 12px 8px;
+            }
+            
+            .member-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.75rem;
+            }
+            
+            .day-header {
+                padding: 12px 4px;
+                font-size: 0.7rem;
+            }
+            
+            .day-header .day-date {
+                font-size: 1rem;
+            }
+            
+            .shift-item {
+                padding: 6px;
+                font-size: 0.65rem;
+            }
+            
+            .shift-time {
+                display: none;
             }
         }
         
-        @keyframes pulse-clock {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 1;
+        @media (max-width: 480px) {
+            .calendar-header,
+            .calendar-row {
+                grid-template-columns: 80px repeat(7, 60px);
             }
-            50% {
-                transform: scale(1.05);
-                opacity: 0.9;
+            
+            .member-cell span {
+                font-size: 0.75rem;
             }
-        }
-        
-        @keyframes rotate-hour {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        @keyframes rotate-minute {
-            from {
-                transform: rotate(0deg);
-            }
-            to {
-                transform: rotate(360deg);
-            }
-        }
-        
-        @keyframes bounce-user {
-            0%, 100% {
-                transform: scale(1);
-                opacity: 0.6;
-            }
-            50% {
-                transform: scale(1.5);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes wiggle {
-            0%, 100% {
-                transform: rotate(0deg);
-            }
-            25% {
-                transform: rotate(-3deg);
-            }
-            75% {
-                transform: rotate(3deg);
+            
+            .day-header .day-name {
+                font-size: 0.6rem;
             }
         }
     </style>
@@ -631,306 +388,128 @@ $is_admin = is_admin();
     
     <div class="header">
         <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
+            <div class="logo">PUSHING P</div>
             <nav class="nav">
-                <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="events.php" class="nav-item">Events</a>
-                <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="chat.php" class="nav-item">Chat</a>
+                <a href="dashboard.php" class="nav-item">Dashboard</a>
+                <a href="schichten.php" class="nav-item active">Schichten</a>
                 <?php if ($is_admin): ?>
-                    <a href="admin.php" class="nav-item">Admin</a>
+                <a href="admin.php" class="nav-item">Admin</a>
                 <?php endif; ?>
-                <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>
         </div>
     </div>
 
-    <div class="container">
-        <div class="welcome">
-            <div class="schichtplan-logo">
-                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
-                    <!-- Outer Circle with Gradient -->
-                    <defs>
-                        <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                            <stop offset="0%" style="stop-color:#104186;stop-opacity:1" />
-                            <stop offset="100%" style="stop-color:#1a5bb8;stop-opacity:1" />
-                        </linearGradient>
-                        <filter id="glow">
-                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
-                            <feMerge>
-                                <feMergeNode in="coloredBlur"/>
-                                <feMergeNode in="SourceGraphic"/>
-                            </feMerge>
-                        </filter>
-                    </defs>
-                    
-                    <!-- Rotating outer ring -->
-                    <circle cx="40" cy="40" r="35" fill="none" stroke="url(#circleGradient)" stroke-width="3" opacity="0.3" class="gear-rotate"/>
-                    
-                    <!-- Clock face -->
-                    <circle cx="40" cy="40" r="28" fill="url(#circleGradient)" opacity="0.2" class="clock-circle"/>
-                    <circle cx="40" cy="40" r="28" fill="none" stroke="url(#circleGradient)" stroke-width="3" filter="url(#glow)"/>
-                    
-                    <!-- Hour markers -->
-                    <line x1="40" y1="15" x2="40" y2="20" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="65" y1="40" x2="60" y2="40" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="40" y1="65" x2="40" y2="60" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
-                    <line x1="15" y1="40" x2="20" y2="40" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
-                    
-                    <!-- Clock hands -->
-                    <line x1="40" y1="40" x2="40" y2="25" stroke="#104186" stroke-width="3" stroke-linecap="round" class="clock-hand-hour"/>
-                    <line x1="40" y1="40" x2="52" y2="40" stroke="#104186" stroke-width="2" stroke-linecap="round" class="clock-hand-minute"/>
-                    
-                    <!-- Center dot -->
-                    <circle cx="40" cy="40" r="3" fill="#104186"/>
-                    
-                    <!-- Animated dots around -->
-                    <circle cx="40" cy="8" r="2" fill="#104186" opacity="0.6" class="user-icon user-1"/>
-                    <circle cx="56" cy="56" r="2" fill="#104186" opacity="0.6" class="user-icon user-2"/>
-                    <circle cx="24" cy="56" r="2" fill="#104186" opacity="0.6" class="user-icon user-3"/>
-                </svg>
-                <div class="logo-text">
-                    <h1>Schichtplan</h1>
-                </div>
+    <div class="schicht-header">
+        <h1>📅 Schichtplan</h1>
+        <div class="week-nav">
+            <a href="?week=<?= $week_offset - 1 ?>" class="week-nav-btn">‹ Vorherige</a>
+            <div class="current-week">
+                <?= $week_start->format('d.m.Y') ?> - <?= $week_end->format('d.m.Y') ?>
             </div>
+            <a href="?week=<?= $week_offset + 1 ?>" class="week-nav-btn">Nächste ›</a>
         </div>
-
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
-            <a href="schichten_bearbeiten.php" class="btn">✏️ Meine Schichten bearbeiten</a>
-            <div class="week-label" id="weekLabel"></div>
-        </div>
-
-        <div class="nav-buttons">
-            <button class="nav-btn" onclick="changeWeeks(-2)">◀◀ 2 Wochen zurück</button>
-            <button class="nav-btn" onclick="changeWeeks(2)">2 Wochen weiter ▶▶</button>
-        </div>
-
-        <div class="shift-overview" id="shiftOverview"></div>
-
-        <div class="legend">
-            <div class="legend-item">
-                <div class="legend-box shift-early"></div>
-                <span>Frühschicht</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-box shift-late"></div>
-                <span>Spätschicht</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-box shift-night"></div>
-                <span>Nachtschicht</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-box shift-free"></div>
-                <span>Frei</span>
-            </div>
-            <div class="legend-item">
-                <div class="legend-box shift-vacation"></div>
-                <span>Urlaub</span>
-            </div>
+        <div style="text-align: center; margin-top: 16px;">
+            <a href="?week=0" class="week-nav-btn" style="font-size: 0.875rem;">🎯 Aktuelle Woche</a>
         </div>
     </div>
 
-    <div id="tooltip" class="tooltip"></div>
+    <div class="calendar-container">
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #10b981, #059669);"></div>
+                <span>Schicht</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
+                <span>Frühschicht</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></div>
+                <span>Frei</span>
+            </div>
+        </div>
 
-<script>
-let currentWeekStart = new Date();
-currentWeekStart.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-// Start on Monday
-const dayOfWeek = currentWeekStart.getDay();
-const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday (0), go back 6 days, else go to Monday
-currentWeekStart.setDate(currentWeekStart.getDate() + diff);
+        <div class="calendar-grid">
+            <div class="calendar-header">
+                <div class="member-header">👥 Mitglied</div>
+                <?php
+                $today = new DateTime();
+                for ($i = 0; $i < 7; $i++):
+                    $day = clone $week_start;
+                    $day->modify("+$i day");
+                    $is_today = $day->format('Y-m-d') === $today->format('Y-m-d');
+                    $day_names = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+                ?>
+                <div class="day-header <?= $is_today ? 'today' : '' ?>">
+                    <span class="day-name"><?= $day_names[$i] ?></span>
+                    <span class="day-date"><?= $day->format('d') ?></span>
+                </div>
+                <?php endfor; ?>
+            </div>
 
-let allUsers = [];
-let allShifts = [];
-let allHolidays = [];
-
-const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
-
-const shiftTypes = {
-    'early': { label: 'Früh', class: 'shift-early', emoji: '🌅' },
-    'late': { label: 'Spät', class: 'shift-late', emoji: '🌆' },
-    'night': { label: 'Nacht', class: 'shift-night', emoji: '🌙' },
-    'free': { label: 'Frei', class: 'shift-free', emoji: '✅' },
-    'vacation': { label: 'Urlaub', class: 'shift-vacation', emoji: '🏖️' }
-};
-
-async function loadData() {
-    try {
-        const [usersRes, shiftsRes, holidaysRes] = await Promise.all([
-            fetch('/api/users_list.php'),
-            fetch('/api/shifts_list.php'),
-            fetch('/api/holidays_list.php')
-        ]);
-        
-        allUsers = await usersRes.json();
-        allShifts = await shiftsRes.json();
-        allHolidays = await holidaysRes.json();
-        
-        renderShiftOverview();
-    } catch (e) {
-        console.error('Fehler:', e);
-    }
-}
-
-function changeWeeks(weeks) {
-    currentWeekStart.setDate(currentWeekStart.getDate() + (weeks * 7));
-    renderShiftOverview();
-}
-
-function renderShiftOverview() {
-    const overview = document.getElementById('shiftOverview');
-    const weekLabel = document.getElementById('weekLabel');
-    
-    if (!overview) {
-        console.error('shiftOverview element not found');
-        return;
-    }
-    
-    overview.innerHTML = '';
-    
-    // Calculate 2 weeks (14 days)
-    const weekEnd = new Date(currentWeekStart);
-    weekEnd.setDate(weekEnd.getDate() + 13);
-    
-    weekLabel.textContent = `${formatDate(currentWeekStart)} – ${formatDate(weekEnd)}`;
-    
-    // Today in local timezone
-    const todayDate = new Date();
-    todayDate.setHours(12, 0, 0, 0);
-    const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
-    
-    // Render each member as a row
-    allUsers.forEach((user, userIndex) => {
-        const row = document.createElement('div');
-        row.className = 'shift-row';
-        
-        // Member name on the left
-        const nameDiv = document.createElement('div');
-        nameDiv.className = 'member-name';
-        nameDiv.textContent = user.name || user.username;
-        row.appendChild(nameDiv);
-        
-        // Week grid (14 days)
-        const grid = document.createElement('div');
-        grid.className = 'week-grid';
-        
-        const isFirstRow = userIndex === 0; // Only show dates for first member (Alessio)
-        
-        for (let i = 0; i < 14; i++) {
-            const date = new Date(currentWeekStart);
-            date.setDate(date.getDate() + i);
-            date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
-            
-            // Fix timezone offset - use local date
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            const dateStr = `${year}-${month}-${day}`;
-            
-            const dayCell = document.createElement('div');
-            dayCell.className = 'day-cell';
-            
-            // Mark today's column
-            if (dateStr === today) {
-                dayCell.classList.add('today');
-            }
-            
-            // Check for holidays
-            const holiday = allHolidays.find(h => h.date === dateStr && h.type === 'holiday');
-            if (holiday) {
-                dayCell.classList.add('holiday');
-                dayCell.setAttribute('title', holiday.name);
-            }
-            
-            // Check if in vacation period
-            const vacationStart = allHolidays.filter(h => h.type === 'vacation_start');
-            const vacationEnd = allHolidays.filter(h => h.type === 'vacation_end');
-            
-            for (let v = 0; v < vacationStart.length; v++) {
-                const start = new Date(vacationStart[v].date);
-                const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
-                if (end && date >= start && date <= end) {
-                    dayCell.classList.add('vacation-period');
-                    break;
+            <?php foreach ($members as $member):
+                $initials = '';
+                $name_parts = explode(' ', $member['name']);
+                if (count($name_parts) >= 2) {
+                    $initials = strtoupper(substr($name_parts[0], 0, 1) . substr($name_parts[1], 0, 1));
+                } else {
+                    $initials = strtoupper(substr($member['name'], 0, 2));
                 }
-            }
-            
-            const dayName = weekdays[date.getDay() === 0 ? 6 : date.getDay() - 1];
-            const dayDate = `${date.getDate()}.${date.getMonth() + 1}.`;
-            
-            // Build header HTML - only for first row
-            let headerHTML = '';
-            let extraHTML = '';
-            
-            if (isFirstRow) {
-                headerHTML = `<div class="day-header">${dayName}</div>`;
+            ?>
+            <div class="calendar-row">
+                <div class="member-cell">
+                    <div class="member-avatar"><?= $initials ?></div>
+                    <span><?= htmlspecialchars($member['name']) ?></span>
+                </div>
                 
-                // Add holiday name
-                if (holiday) {
-                    headerHTML = `<div class="day-header">🎉 ${dayName}</div>`;
-                    const holidayShortName = holiday.name.length > 12 ? holiday.name.substring(0, 12) + '...' : holiday.name;
-                    extraHTML += `<div class="holiday-name">${holidayShortName}</div>`;
-                }
-                
-                // Add vacation period indicator and name
-                if (dayCell.classList.contains('vacation-period')) {
-                    headerHTML = `<div class="vacation-indicator"></div>` + headerHTML;
-                    
-                    // Find which vacation period we're in
-                    for (let v = 0; v < vacationStart.length; v++) {
-                        const start = new Date(vacationStart[v].date);
-                        const end = vacationEnd[v] ? new Date(vacationEnd[v].date) : null;
-                        if (end && date >= start && date <= end) {
-                            // Extract vacation name (e.g. "Sommerferien Start" -> "Sommer")
-                            let vacName = vacationStart[v].name.replace(' Start', '').replace(' Ende', '');
-                            if (vacName.includes('ferien')) {
-                                vacName = vacName.replace('ferien', '');
+                <?php for ($i = 0; $i < 7; $i++):
+                    $day = clone $week_start;
+                    $day->modify("+$i day");
+                    $date_key = $day->format('Y-m-d');
+                    $user_shifts = $shifts_by_user[$member['id']][$date_key] ?? [];
+                ?>
+                <div class="shift-cell" onclick="editShift(<?= $member['id'] ?>, '<?= $date_key ?>')">
+                    <?php if (empty($user_shifts)): ?>
+                        <div class="empty-cell">-</div>
+                    <?php else: ?>
+                        <?php foreach ($user_shifts as $shift):
+                            $shift_class = '';
+                            $shift_icon = '🕐';
+                            
+                            if ($shift['type'] === 'free') {
+                                $shift_class = 'free';
+                                $shift_icon = '🏖️';
+                            } elseif (strpos($shift['start_time'], '06:') === 0 || strpos($shift['start_time'], '07:') === 0) {
+                                $shift_class = 'morning';
+                                $shift_icon = '🌅';
                             }
-                            extraHTML += `<div class="vacation-name">${vacName}</div>`;
-                            break;
-                        }
-                    }
-                }
-                
-                dayCell.innerHTML = headerHTML + extraHTML + `<div class="day-date">${dayDate}</div>`;
-            } else {
-                // For other rows: no header, no date, no labels
-                dayCell.classList.add('no-header');
-                dayCell.innerHTML = '';
-            }
-            
-            const shift = allShifts.find(s => s.user_id == user.id && s.date === dateStr);
-            
-            const cell = document.createElement('div');
-            cell.className = 'shift-cell';
-            
-            if (dateStr === today) {
-                cell.classList.add('today');
-            }
-            
-            if (shift && shiftTypes[shift.type]) {
-                cell.classList.add('has-shift', shiftTypes[shift.type].class);
-                cell.innerHTML = shiftTypes[shift.type].emoji;
-            } else {
-                cell.innerHTML = '-';
-            }
-            
-            dayCell.appendChild(cell);
-            grid.appendChild(dayCell);
-        }
-        
-        row.appendChild(grid);
-        overview.appendChild(row);
-    });
-}
+                            
+                            $time_str = substr($shift['start_time'], 0, 5) . '-' . substr($shift['end_time'], 0, 5);
+                        ?>
+                        <div class="shift-item <?= $shift_class ?>">
+                            <span><?= $shift_icon ?></span>
+                            <span class="shift-time"><?= $time_str ?></span>
+                        </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+                <?php endfor; ?>
+            </div>
+            <?php endforeach; ?>
+        </div>
+    </div>
 
-function formatDate(date) {
-    return date.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
-}
+    <?php if ($is_admin): ?>
+    <button class="fab" onclick="window.location.href='schichten_bearbeiten.php'" title="Schichten bearbeiten">+</button>
+    <?php endif; ?>
 
-loadData();
-</script>
+    <script>
+    function editShift(userId, date) {
+        <?php if ($is_admin): ?>
+        window.location.href = 'schichten_bearbeiten.php?user=' + userId + '&date=' + date;
+        <?php endif; ?>
+    }
+    </script>
 </body>
 </html>

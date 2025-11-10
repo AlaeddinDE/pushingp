@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Raketen Richtungs-Test</title>
+    <style>
+        body { 
+            background: #1a1a2e; 
+            padding: 50px; 
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+        }
+        .test-box {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 16px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+        .emoji {
+            font-size: 8rem;
+            display: block;
+            margin: 20px auto;
+            line-height: 1;
+        }
+        .label {
+            color: white;
+            font-size: 1.2rem;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .code {
+            color: #8b5cf6;
+            font-size: 0.9rem;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>RAKETEN RICHTUNGS-TEST</h1>
+    
+    <div class="test-container">
+        <div class="test-box">
+            <div class="label">ORIGINAL</div>
+            <div class="emoji">🚀</div>
+            <div class="code">rotate(0deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">VARIANTE 1</div>
+            <div class="emoji" style="transform: rotate(-90deg);">🚀</div>
+            <div class="code">rotate(-90deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">VARIANTE 2</div>
+            <div class="emoji" style="transform: rotate(270deg);">🚀</div>
+            <div class="code">rotate(270deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">VARIANTE 3</div>
+            <div class="emoji" style="transform: rotate(-45deg);">🚀</div>
+            <div class="code">rotate(-45deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">VARIANTE 4</div>
+            <div class="emoji" style="transform: rotate(225deg);">🚀</div>
+            <div class="code">rotate(225deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">PFEIL OBEN</div>
+            <div class="emoji">⬆️</div>
+            <div class="code">Zum Vergleich</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px; padding: 30px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; border: 2px solid #10b981;">
+        <p style="color: white; font-size: 1.3rem; text-align: center; margin: 0;">
+            Welche Rakete zeigt GERADE NACH OBEN wie der Pfeil?
+        </p>
+    </div>
+</body>
+</html>
