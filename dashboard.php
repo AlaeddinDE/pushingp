@@ -470,12 +470,13 @@ if ($result && $result->num_rows > 0) {
         <!-- Kommende Events Section -->
         <?php if (!empty($next_events)): ?>
         <div class="section">
-            <div class="section-header">
-                <span>🎉</span>
-                <h2 class="section-title">Kommende Events</h2>
-            </div>
-            
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px; display: grid; gap: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div class="section-header" style="margin-bottom: 24px;">
+                    <span>🎉</span>
+                    <h2 class="section-title">Kommende Events</h2>
+                </div>
+                
+                <div style="display: grid; gap: 16px;">
                 <?php foreach ($next_events as $event): 
                     try {
                         $start_time = $event['start_time'] ?? '00:00:00';
@@ -541,19 +542,20 @@ if ($result && $result->num_rows > 0) {
                     </div>
                 </div>
                 <?php endforeach; ?>
+                </div>
             </div>
         </div>
         <?php endif; ?>
 
         <!-- Live Schichten Timeline (24h) -->
         <div class="section">
-            <div class="section-header">
-                <span>🔴</span>
-                <h2 class="section-title">Aktive Schichten (LIVE)</h2>
-                <div id="currentTime" style="color: var(--text-secondary); font-size: 0.875rem;"></div>
-            </div>
-            
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div class="section-header" style="margin-bottom: 24px;">
+                    <span>🔴</span>
+                    <h2 class="section-title">Aktive Schichten (LIVE)</h2>
+                    <div id="currentTime" style="color: var(--text-secondary); font-size: 0.875rem;"></div>
+                </div>
+                
                 <?php if (empty($next_24h_shifts)): ?>
                     <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
                         Aktuell keine aktiven Schichten
@@ -688,32 +690,30 @@ if ($result && $result->num_rows > 0) {
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    </div>
                 <?php endif; ?>
             </div>
-
         </div>
 
         <!-- Kassen-Kurs Chart (30 Tage) -->
-        <div class="section" style="margin-top: 32px;">
-            <div class="section-header">
-                <div style="display: flex; align-items: center; gap: 12px;">
-                    <span>📈</span>
-                    <div>
-                        <h2 class="section-title">Kassenkurs (30 Tage)</h2>
-                        <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">$PUSHP · PUSHING P CREW</div>
+        <div class="section">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div class="section-header" style="margin-bottom: 24px;">
+                    <div style="display: flex; align-items: center; gap: 12px;">
+                        <span>📈</span>
+                        <div>
+                            <h2 class="section-title">Kassenkurs (30 Tage)</h2>
+                            <div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">$PUSHP · PUSHING P CREW</div>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <div style="font-size: 1.75rem; font-weight: 900; color: var(--success);" id="paypalPool">€<?= number_format($stats['balance'], 2, ',', '.') ?></div>
+                        <div style="font-size: 0.875rem; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
+                            <span id="changeArrow" style="font-size: 1.2rem; font-weight: 900; color: var(--success);">▲</span>
+                            <span id="changePercent" style="color: var(--success);">+0.00%</span>
+                        </div>
                     </div>
                 </div>
-                <div style="text-align: right;">
-                    <div style="font-size: 1.75rem; font-weight: 900; color: var(--success);" id="paypalPool">€<?= number_format($stats['balance'], 2, ',', '.') ?></div>
-                    <div style="font-size: 0.875rem; font-weight: 600; display: flex; align-items: center; gap: 6px; justify-content: flex-end;">
-                        <span id="changeArrow" style="font-size: 1.2rem; font-weight: 900; color: var(--success);">▲</span>
-                        <span id="changePercent" style="color: var(--success);">+0.00%</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div style="background: var(--bg-tertiary); padding: 32px; border-radius: 12px; margin-top: 16px;">
+                
                 <div style="display: flex; justify-content: center; gap: 8px; margin-bottom: 24px;">
                     <button class="timeframe-btn" data-days="1" style="padding: 8px 16px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">1T</button>
                     <button class="timeframe-btn" data-days="5" style="padding: 8px 16px; background: var(--bg-secondary); color: var(--text-secondary); border: 1px solid var(--border); border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s;">5T</button>
@@ -906,13 +906,13 @@ if ($result && $result->num_rows > 0) {
 
         <!-- Crew Members Section -->
         <div id="crew-members" class="section">
-            <div class="section-header">
-                <span>👥</span>
-                <h2 class="section-title">Aktive Crew Members</h2>
-                <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
-            </div>
-            
-            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; margin-top: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div class="section-header" style="margin-bottom: 24px;">
+                    <span>👥</span>
+                    <h2 class="section-title">Aktive Crew Members</h2>
+                    <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
+                </div>
+                
                 <div class="crew-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(350px, 1fr)); gap: 16px;">
                 <?php 
                 $colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6', '#f97316'];
