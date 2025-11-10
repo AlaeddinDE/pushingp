@@ -469,13 +469,14 @@ if ($result && $result->num_rows > 0) {
 
         <!-- Kommende Events Section -->
         <?php if (!empty($next_events)): ?>
-        <div class="section" style="margin-bottom: 32px;">
+        <div class="section">
             <div class="section-header">
                 <span>🎉</span>
                 <h2 class="section-title">Kommende Events</h2>
             </div>
             
-            <div style="display: grid; gap: 16px;">
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div style="display: grid; gap: 16px;">
                 <?php foreach ($next_events as $event): 
                     try {
                         $start_time = $event['start_time'] ?? '00:00:00';
@@ -504,7 +505,7 @@ if ($result && $result->num_rows > 0) {
                     
                     if (!$event_date) continue;
                 ?>
-                <div class="event-card-mobile" style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px; transition: all 0.3s; position: relative;"
+                <div class="event-card-mobile" style="background: var(--bg-secondary); padding: 24px; border-radius: 12px; transition: all 0.3s; position: relative; border: 1px solid var(--border);"
                      onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';" 
                      onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
                     
@@ -541,12 +542,13 @@ if ($result && $result->num_rows > 0) {
                     </div>
                 </div>
                 <?php endforeach; ?>
+                </div>
             </div>
         </div>
         <?php endif; ?>
 
         <!-- Live Schichten Timeline (24h) -->
-        <div class="section" style="margin-bottom: 32px;">
+        <div class="section">
             <div class="section-header">
                 <span>🔴</span>
                 <h2 class="section-title">Aktive Schichten (LIVE)</h2>
@@ -905,7 +907,7 @@ if ($result && $result->num_rows > 0) {
         </script>
 
         <!-- Crew Members Section -->
-        <div id="crew-members" class="section" style="margin-top: 32px;">
+        <div id="crew-members" class="section">
             <div class="section-header">
                 <span>👥</span>
                 <h2 class="section-title">Aktive Crew Members</h2>
