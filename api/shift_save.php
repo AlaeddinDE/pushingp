@@ -4,12 +4,14 @@ require_once '../includes/db.php';
 require_once '../includes/functions.php';
 secure_session_start();
 
-if (!is_admin()) {
-    echo json_encode(['ok' => false, 'error' => 'Admin only']);
+$current_user_id = get_current_user_id();
+$user_id = intval($_POST['user_id'] ?? 0);
+
+// Users can edit their own shifts, admins can edit all shifts
+if (!is_admin() && $user_id != $current_user_id) {
+    echo json_encode(['ok' => false, 'error' => 'Unauthorized']);
     exit;
 }
-
-$user_id = intval($_POST['user_id'] ?? 0);
 $date = $_POST['date'] ?? '';
 $type = $_POST['type'] ?? '';
 $start_time = $_POST['start_time'] ?? '00:00';

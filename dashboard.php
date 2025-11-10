@@ -9,19 +9,18 @@ $username = $_SESSION['username'] ?? 'User';
 $name = $_SESSION['name'] ?? $username;
 $is_admin_user = is_admin();
 
-// Alle AKTIVEN Schichten (egal wann gestartet)
+// Schichten in den nächsten 24h
 $next_24h_shifts = [];
 $result = $conn->query("
     SELECT 
-        s.mitglied_id,
-        s.startzeit,
-        s.aktiv,
-        u.name,
-        u.id
-    FROM schichten s
-    JOIN users u ON u.id = s.mitglied_id
-    WHERE s.aktiv = 1
-    ORDER BY u.name ASC
+        s.date, s.type, s.start_time, s.end_time, u.name
+    FROM shifts s
+    JOIN users u ON u.id = s.user_id
+    WHERE CONCAT(s.date, ' ', s.start_time) >= NOW()
+    AND CONCAT(s.date, ' ', s.start_time) <= DATE_ADD(NOW(), INTERVAL 24 HOUR)
+    AND s.type != 'free'
+    AND u.status = 'active'
+    ORDER BY s.date ASC, s.start_time ASC
 ");
 if ($result) {
     while ($row = $result->fetch_assoc()) {
@@ -30,9 +29,13 @@ if ($result) {
 }
 
 $stats = [];
-$result = $conn->query("SELECT kassenstand_verfuegbar FROM v_kasse_position");
-if ($result && $row = $result->fetch_assoc()) $stats['balance'] = floatval($row['kassenstand_verfuegbar']);
-$result = $conn->query("SELECT COUNT(*) as cnt FROM events WHERE event_status = 'active' AND start_time >= NOW()");
+$result = $conn->query("SELECT pool_balance FROM paypal_pool_status ORDER BY last_updated DESC LIMIT 1");
+if ($result && $row = $result->fetch_assoc()) {
+    $stats['balance'] = floatval($row['pool_balance']);
+} else {
+    $stats['balance'] = 0.00;
+}
+$result = $conn->query("SELECT COUNT(*) as cnt FROM events WHERE event_status = 'active' AND datum >= CURDATE()");
 if ($result && $row = $result->fetch_assoc()) $stats['events'] = intval($row['cnt']);
 $result = $conn->query("SELECT COUNT(*) as cnt FROM users WHERE status = 'active'");
 if ($result && $row = $result->fetch_assoc()) $stats['members'] = intval($row['cnt']);
@@ -46,7 +49,7 @@ while ($stmt->fetch()) $my_shifts[] = ['date' => $shift_date, 'type' => $shift_t
 $stmt->close();
 
 $next_events = [];
-$result = $conn->query("SELECT id, title, start_time, location, cost FROM events WHERE event_status = 'active' AND start_time >= NOW() ORDER BY start_time ASC LIMIT 5");
+$result = $conn->query("SELECT id, title, datum, start_time, location, cost FROM events WHERE event_status = 'active' AND datum >= CURDATE() ORDER BY datum ASC, start_time ASC LIMIT 5");
 if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
 ?>
 <!DOCTYPE html>
@@ -164,50 +167,132 @@ if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
                         Aktuell keine aktiven Schichten
                     </div>
                 <?php else: ?>
-                    <!-- Aktive Schichten als Karten -->
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
-                        <?php 
-                        $colors = ['#10b981', '#3b82f6', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
-                        $color_index = 0;
-                        foreach($next_24h_shifts as $shift): 
-                            $shift_color = $colors[$color_index % count($colors)];
-                            $color_index++;
-                            $shift_start = new DateTime($shift['startzeit']);
+                    <!-- Timeline mit Stunden-Markierungen -->
+                    <div style="position: relative; padding: 40px 0 20px 0;">
+                        <!-- Zeitachse (horizontale Linie) -->
+                        <div style="position: relative; height: 2px; background: linear-gradient(90deg, #ef4444 0%, rgba(139,92,246,0.3) 5%, rgba(139,92,246,0.3) 95%, rgba(139,92,246,0.1) 100%); margin: 40px 0;">
+                            
+                            <!-- Stunden-Marker (alle 3h) -->
+                            <?php
                             $now = new DateTime();
-                            $diff = $now->diff($shift_start);
+                            $timeline_start = clone $now;
+                            for ($h = 0; $h <= 24; $h += 3):
+                                $marker_time = (clone $timeline_start)->modify("+{$h} hours");
+                                $left_pos = ($h / 24) * 100;
+                            ?>
+                            <div style="position: absolute; left: <?= $left_pos ?>%; top: -8px; width: 2px; height: 18px; background: <?= $h == 0 ? '#ef4444' : 'rgba(139,92,246,0.4)' ?>;">
+                                <div style="position: absolute; top: 24px; left: 50%; transform: translateX(-50%); font-size: 0.7rem; color: var(--text-secondary); white-space: nowrap; font-weight: <?= $h == 0 ? '700' : '400' ?>; color: <?= $h == 0 ? '#ef4444' : 'var(--text-secondary)' ?>;">
+                                    <?= $marker_time->format('H:i') ?>
+                                </div>
+                            </div>
+                            <?php endfor; ?>
                             
-                            if ($shift_start > $now) {
-                                $duration_text = "startet in " . ($diff->days * 24 + $diff->h) . "h " . $diff->i . "min";
-                            } else {
-                                $duration_text = "seit " . ($diff->days * 24 + $diff->h) . "h " . $diff->i . "min";
-                            }
-                        ?>
-                        <div style="background: <?= $shift_color ?>; padding: 20px; border-radius: 12px; text-align: center; box-shadow: 0 4px 12px rgba(0,0,0,0.2); position: relative; overflow: hidden;">
-                            <!-- Pulse Animation -->
-                            <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(255,255,255,0.1); animation: pulse 2s infinite;"></div>
+                            <!-- JETZT-Marker (pulsierend) -->
+                            <div style="position: absolute; left: 0; top: -12px; width: 4px; height: 26px; background: #ef4444; z-index: 20; animation: pulse-marker 2s infinite; border-radius: 2px;">
+                                <div style="position: absolute; top: -28px; left: 50%; transform: translateX(-50%); background: #ef4444; color: white; padding: 4px 10px; border-radius: 6px; font-size: 0.7rem; font-weight: 700; white-space: nowrap; box-shadow: 0 2px 8px rgba(239,68,68,0.4);">
+                                    ● JETZT
+                                </div>
+                            </div>
                             
-                            <div style="position: relative; z-index: 1;">
-                                <div style="font-size: 2rem; margin-bottom: 8px;">🔴</div>
-                                <div style="color: white; font-weight: 700; font-size: 1.25rem; margin-bottom: 4px;">
+                            <!-- Schichten als Balken über der Timeline -->
+                            <?php
+                            $row_heights = []; // Track which rows are occupied
+                            foreach($next_24h_shifts as $shift):
+                                $shift_start = new DateTime($shift['date'] . ' ' . $shift['start_time']);
+                                $shift_end = new DateTime($shift['date'] . ' ' . $shift['end_time']);
+                                
+                                // Berechne Position und Breite in %
+                                $offset_minutes = ($shift_start->getTimestamp() - $timeline_start->getTimestamp()) / 60;
+                                $duration_minutes = ($shift_end->getTimestamp() - $shift_start->getTimestamp()) / 60;
+                                
+                                $left_percent = max(0, ($offset_minutes / 1440) * 100);
+                                $width_percent = ($duration_minutes / 1440) * 100;
+                                
+                                // Finde freie Reihe (vermeide Überlappungen)
+                                $row = 0;
+                                $shift_end_pos = $left_percent + $width_percent;
+                                while (isset($row_heights[$row]) && $row_heights[$row] > $left_percent) {
+                                    $row++;
+                                }
+                                $row_heights[$row] = $shift_end_pos;
+                                
+                                $top_offset = -80 - ($row * 55);
+                                
+                                // Farbe je nach Schichttyp
+                                $bg_color = $shift['type'] === 'early' ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' : 'linear-gradient(135deg, #8b5cf6, #7c3aed)';
+                                $type_label = $shift['type'] === 'early' ? '🌅 Früh' : '🌙 Spät';
+                            ?>
+                            <div style="position: absolute; 
+                                        left: <?= $left_percent ?>%; 
+                                        width: <?= max(8, $width_percent) ?>%; 
+                                        top: <?= $top_offset ?>px;
+                                        height: 48px;
+                                        background: <?= $bg_color ?>; 
+                                        border-radius: 8px; 
+                                        padding: 8px 12px; 
+                                        color: white; 
+                                        font-weight: 700; 
+                                        font-size: 0.8rem; 
+                                        display: flex; 
+                                        flex-direction: column; 
+                                        justify-content: center; 
+                                        box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                                        transition: all 0.3s;
+                                        cursor: pointer;
+                                        z-index: 5;"
+                                 onmouseover="this.style.transform='translateY(-4px) scale(1.02)'; this.style.zIndex='15';"
+                                 onmouseout="this.style.transform='translateY(0) scale(1)'; this.style.zIndex='5';"
+                                 title="<?= htmlspecialchars($shift['name']) ?> · <?= $type_label ?> · <?= $shift_start->format('H:i') ?>-<?= $shift_end->format('H:i') ?>">
+                                <div style="font-size: 0.85rem; line-height: 1.2; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                     <?= htmlspecialchars($shift['name']) ?>
                                 </div>
-                                <div style="color: rgba(255,255,255,0.9); font-size: 0.875rem; margin-bottom: 8px;">
-                                    seit <?= $shift_start->format('d.m.Y H:i') ?> Uhr
+                                <div style="font-size: 0.7rem; opacity: 0.95; margin-top: 2px;">
+                                    <?= $type_label ?> · <?= $shift_start->format('H:i') ?>-<?= $shift_end->format('H:i') ?>
                                 </div>
-                                <div style="background: rgba(0,0,0,0.2); color: white; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; display: inline-block;">
-                                    <?= $duration_text ?>
+                                
+                                <!-- Verbindungslinie zur Timeline -->
+                                <div style="position: absolute; bottom: -<?= abs($top_offset) - 48 ?>px; left: 12px; width: 2px; height: <?= abs($top_offset) - 48 ?>px; background: linear-gradient(180deg, rgba(255,255,255,0.5), transparent); opacity: 0.4;"></div>
+                            </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </div>
+                    
+                    <style>
+                    @keyframes pulse-marker {
+                        0%, 100% { 
+                            opacity: 1; 
+                            box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
+                        }
+                        50% { 
+                            opacity: 1; 
+                            box-shadow: 0 0 0 8px rgba(239, 68, 68, 0);
+                        }
+                    }
+                    </style>
+                    
+                    <!-- Schichten-Liste darunter -->
+                    <div style="display: grid; gap: 12px; margin-top: 40px;">
+                        <?php foreach($next_24h_shifts as $shift): 
+                            $shift_start = new DateTime($shift['date'] . ' ' . $shift['start_time']);
+                            $shift_end = new DateTime($shift['date'] . ' ' . $shift['end_time']);
+                            $type_label = $shift['type'] === 'early' ? '🌅 Frühschicht' : '🌙 Spätschicht';
+                        ?>
+                        <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center; border-left: 4px solid <?= $shift['type'] === 'early' ? '#f59e0b' : '#8b5cf6' ?>;">
+                            <div>
+                                <div style="font-weight: 700; font-size: 1.125rem;">
+                                    <?= htmlspecialchars($shift['name']) ?>
                                 </div>
+                                <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 4px;">
+                                    <?= $type_label ?> · <?= $shift_start->format('H:i') ?> - <?= $shift_end->format('H:i') ?> Uhr
+                                </div>
+                            </div>
+                            <div style="text-align: right; color: var(--text-secondary); font-size: 0.875rem;">
+                                <?= $shift_start->format('d.m.Y') ?>
                             </div>
                         </div>
                         <?php endforeach; ?>
                     </div>
-                    
-                    <style>
-                    @keyframes pulse {
-                        0%, 100% { opacity: 0.3; }
-                        50% { opacity: 0.6; }
-                    }
-                    </style>
+                    </div>
                 <?php endif; ?>
             </div>
         </div>

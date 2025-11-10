@@ -322,6 +322,171 @@ $is_admin = is_admin();
             display: none;
             box-shadow: 0 8px 24px rgba(0,0,0,0.6);
         }
+        
+        .schichtplan-logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            margin-bottom: 30px;
+            padding: 20px;
+        }
+        
+        .logo-svg {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 4px 12px var(--accent-glow));
+        }
+        
+        .logo-text h1 {
+            margin: 0;
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent), #1a5bb8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            letter-spacing: -1px;
+        }
+        
+        .logo-text p {
+            margin: 5px 0 0 0;
+            font-size: 0.875rem;
+            opacity: 0.7;
+        }
+        
+        .clock-icon {
+            animation: pulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+        
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        
+        .gear-rotate {
+            animation: rotate 8s linear infinite;
+            transform-origin: center;
+        }
+        
+        /* Logo Animations */
+        .calendar-body {
+            animation: float-calendar 3s ease-in-out infinite;
+        }
+        
+        .clock-circle {
+            animation: pulse-clock 2s ease-in-out infinite;
+        }
+        
+        .clock-hand-hour {
+            transform-origin: 40px 40px;
+            animation: rotate-hour 12s linear infinite;
+        }
+        
+        .clock-hand-minute {
+            transform-origin: 40px 40px;
+            animation: rotate-minute 4s linear infinite;
+        }
+        
+        .user-icon.user-1 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+        
+        .user-body.user-1 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0s;
+        }
+        
+        .user-icon.user-2 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0.3s;
+        }
+        
+        .user-body.user-2 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0.3s;
+        }
+        
+        .user-icon.user-3 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0.6s;
+        }
+        
+        .user-body.user-3 {
+            animation: bounce-user 2s ease-in-out infinite;
+            animation-delay: 0.6s;
+        }
+        
+        .calendar-ring {
+            animation: wiggle 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes float-calendar {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-5px);
+            }
+        }
+        
+        @keyframes pulse-clock {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% {
+                transform: scale(1.05);
+                opacity: 0.9;
+            }
+        }
+        
+        @keyframes rotate-hour {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes rotate-minute {
+            from {
+                transform: rotate(0deg);
+            }
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        @keyframes bounce-user {
+            0%, 100% {
+                transform: scale(1);
+                opacity: 0.6;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes wiggle {
+            0%, 100% {
+                transform: rotate(0deg);
+            }
+            25% {
+                transform: rotate(-3deg);
+            }
+            75% {
+                transform: rotate(3deg);
+            }
+        }
     </style>
 </head>
 <body>
@@ -346,8 +511,52 @@ $is_admin = is_admin();
 
     <div class="container">
         <div class="welcome">
-            <h1>📅 Schichtplan-Übersicht</h1>
-            <p class="text-secondary">Jahresübersicht aller Arbeitsschichten</p>
+            <div class="schichtplan-logo">
+                <svg viewBox="0 0 80 80" xmlns="http://www.w3.org/2000/svg" class="logo-svg">
+                    <!-- Outer Circle with Gradient -->
+                    <defs>
+                        <linearGradient id="circleGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" style="stop-color:#104186;stop-opacity:1" />
+                            <stop offset="100%" style="stop-color:#1a5bb8;stop-opacity:1" />
+                        </linearGradient>
+                        <filter id="glow">
+                            <feGaussianBlur stdDeviation="2" result="coloredBlur"/>
+                            <feMerge>
+                                <feMergeNode in="coloredBlur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+                    
+                    <!-- Rotating outer ring -->
+                    <circle cx="40" cy="40" r="35" fill="none" stroke="url(#circleGradient)" stroke-width="3" opacity="0.3" class="gear-rotate"/>
+                    
+                    <!-- Clock face -->
+                    <circle cx="40" cy="40" r="28" fill="url(#circleGradient)" opacity="0.2" class="clock-circle"/>
+                    <circle cx="40" cy="40" r="28" fill="none" stroke="url(#circleGradient)" stroke-width="3" filter="url(#glow)"/>
+                    
+                    <!-- Hour markers -->
+                    <line x1="40" y1="15" x2="40" y2="20" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="65" y1="40" x2="60" y2="40" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="40" y1="65" x2="40" y2="60" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
+                    <line x1="15" y1="40" x2="20" y2="40" stroke="#104186" stroke-width="2.5" stroke-linecap="round"/>
+                    
+                    <!-- Clock hands -->
+                    <line x1="40" y1="40" x2="40" y2="25" stroke="#104186" stroke-width="3" stroke-linecap="round" class="clock-hand-hour"/>
+                    <line x1="40" y1="40" x2="52" y2="40" stroke="#104186" stroke-width="2" stroke-linecap="round" class="clock-hand-minute"/>
+                    
+                    <!-- Center dot -->
+                    <circle cx="40" cy="40" r="3" fill="#104186"/>
+                    
+                    <!-- Animated dots around -->
+                    <circle cx="40" cy="8" r="2" fill="#104186" opacity="0.6" class="user-icon user-1"/>
+                    <circle cx="56" cy="56" r="2" fill="#104186" opacity="0.6" class="user-icon user-2"/>
+                    <circle cx="24" cy="56" r="2" fill="#104186" opacity="0.6" class="user-icon user-3"/>
+                </svg>
+                <div class="logo-text">
+                    <h1>Schichtplan</h1>
+                </div>
+            </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
@@ -390,8 +599,11 @@ $is_admin = is_admin();
 
 <script>
 let currentWeekStart = new Date();
+currentWeekStart.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
 // Start on Monday
-currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay() + 1);
+const dayOfWeek = currentWeekStart.getDay();
+const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // If Sunday (0), go back 6 days, else go to Monday
+currentWeekStart.setDate(currentWeekStart.getDate() + diff);
 
 let allUsers = [];
 let allShifts = [];
@@ -449,6 +661,7 @@ function renderShiftOverview() {
     
     // Today in local timezone
     const todayDate = new Date();
+    todayDate.setHours(12, 0, 0, 0);
     const today = `${todayDate.getFullYear()}-${String(todayDate.getMonth() + 1).padStart(2, '0')}-${String(todayDate.getDate()).padStart(2, '0')}`;
     
     // Render each member as a row
@@ -471,6 +684,7 @@ function renderShiftOverview() {
         for (let i = 0; i < 14; i++) {
             const date = new Date(currentWeekStart);
             date.setDate(date.getDate() + i);
+            date.setHours(12, 0, 0, 0); // Set to noon to avoid timezone issues
             
             // Fix timezone offset - use local date
             const year = date.getFullYear();

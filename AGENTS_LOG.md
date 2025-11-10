@@ -929,3 +929,31 @@ Jede Transaktion kann komplett bearbeitet werden:
 
 **Du hast jetzt VOLLSTÄNDIGE Kontrolle über alle Transaktionen!** 🎯
 
+
+## [2025-11-10] User Management & Shift Data Import
+
+### Änderungen:
+1. **Passwörter zurückgesetzt**
+   - Alessio: Passwort auf `0000` gesetzt
+   - Alaeddin: Passwort auf `0000` gesetzt
+
+2. **Shift-Einstellungen aktiviert**
+   - ayyub: `shift_enabled = 1`, `shift_sort_order = 2`
+   - adis: `shift_enabled = 1`, `shift_sort_order = 3`
+   - alessio: `shift_sort_order = 1` (bereits enabled)
+
+3. **API-Berechtigungen angepasst**
+   - `/api/shift_save.php`: User können nun ihre eigenen Schichten bearbeiten
+   - Admins können weiterhin alle Schichten bearbeiten
+
+4. **Schichtplan für Alessio 2026 importiert**
+   - 365 Schichten für das gesamte Jahr 2026 eingetragen
+   - Migration: `/migrations/auto/20261109_alessio_shifts_2026.sql`
+   - Schichttypen: Früh (05:45-14:00), Spät (13:45-22:00), Nacht (21:45-06:00), Frei, Urlaub
+
+### Technische Details:
+- Alle Änderungen in `users` Tabelle durchgeführt
+- Schichten in `shifts` Tabelle mit korrekten Zeitangaben
+- Daten beginnen exakt am 01.01.2026 (keine Offset-Probleme)
+- Verwendete Schichttypen: `early`, `late`, `night`, `free`, `vacation`
+
