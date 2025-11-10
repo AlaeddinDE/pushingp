@@ -72,49 +72,35 @@ $stmt->close();
             overflow-x: hidden;
         }
         
-        .schicht-header {
-            background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
-            padding: 32px 24px;
-            margin-bottom: 32px;
-            border-radius: 0 0 24px 24px;
-            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
-        }
-        
-        .schicht-header h1 {
-            color: white;
-            font-size: 2rem;
-            font-weight: 900;
-            margin: 0 0 8px 0;
-            text-align: center;
-        }
-        
         .week-nav {
             display: flex;
             justify-content: center;
             align-items: center;
             gap: 16px;
-            margin-top: 24px;
+            margin: 32px 0 24px;
         }
         
         .week-nav-btn {
-            background: rgba(255,255,255,0.2);
-            border: 2px solid rgba(255,255,255,0.3);
-            color: white;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            color: var(--text-primary);
             padding: 12px 24px;
             border-radius: 12px;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.3s;
-            backdrop-filter: blur(10px);
+            text-decoration: none;
+            display: inline-block;
         }
         
         .week-nav-btn:hover {
-            background: rgba(255,255,255,0.3);
+            background: var(--bg-secondary);
+            border-color: var(--accent);
             transform: scale(1.05);
         }
         
         .current-week {
-            color: white;
+            color: var(--text-primary);
             font-size: 1.25rem;
             font-weight: 700;
             min-width: 250px;
@@ -124,7 +110,7 @@ $stmt->close();
         .calendar-container {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 0 16px 32px;
+            padding: 0 0 32px;
         }
         
         .calendar-grid {
@@ -410,8 +396,12 @@ $stmt->close();
         </div>
     </div>
 
-    <div class="schicht-header">
-        <h1>📅 Schichtplan</h1>
+    <div class="container">
+        <div class="welcome">
+            <h1>📅 Schichtplan</h1>
+            <p class="text-secondary">Wochenübersicht aller Schichten</p>
+        </div>
+
         <div class="week-nav">
             <a href="?week=<?= $week_offset - 1 ?>" class="week-nav-btn">‹ Vorherige</a>
             <div class="current-week">
@@ -419,12 +409,9 @@ $stmt->close();
             </div>
             <a href="?week=<?= $week_offset + 1 ?>" class="week-nav-btn">Nächste ›</a>
         </div>
-        <div style="text-align: center; margin-top: 16px;">
+        <div style="text-align: center; margin-bottom: 24px;">
             <a href="?week=0" class="week-nav-btn" style="font-size: 0.875rem;">🎯 Aktuelle Woche</a>
         </div>
-    </div>
-
-    <div class="calendar-container">
         <div class="legend">
             <div class="legend-item">
                 <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
