@@ -20,7 +20,23 @@ $win_amount = $bet * $multiplier;
 $conn->begin_transaction();
 
 try {
-    // Deduct bet (was already deducted at start_crash, so we add winnings only)
+    // Verify crash point from active game
+    $stmt = $conn->prepare("SELECT crash_point FROM casino_active_games WHERE user_id = ? AND game_type = 'crash'");
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $stmt->bind_result($server_crash_point);
+    $stmt->fetch();
+    $stmt->close();
+    
+    if ($server_crash_point === null) {
+        throw new Exception('Kein aktives Spiel gefunden');
+    }
+    
+    // Prevent cashout if multiplier exceeds server crash point
+    if ($multiplier > $server_crash_point) {
+        throw new Exception('Ungültiger Multiplikator');
+    }
+    
     // Add winnings
     $stmt = $conn->prepare("
         INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
@@ -47,6 +63,12 @@ try {
         VALUES (?, 'crash', ?, ?, ?, ?)
     ");
     $stmt->bind_param('iddds', $user_id, $bet, $win_amount, $multiplier, $result_json);
+    $stmt->execute();
+    $stmt->close();
+    
+    // Remove from active games
+    $stmt = $conn->prepare("DELETE FROM casino_active_games WHERE user_id = ? AND game_type = 'crash'");
+    $stmt->bind_param('i', $user_id);
     $stmt->execute();
     $stmt->close();
     

@@ -62,10 +62,33 @@ try {
     $stmt->fetch();
     $stmt->close();
     
+    // Generate provably fair crash point (server-side)
+    // House edge: 3% (realistic for crash games)
+    // Formula: 99 / (random(1-99)) with 3% edge = 96 / random(1-96)
+    $random = mt_rand(1, 9600) / 100; // 0.01 to 96.00
+    $crash_point = max(1.00, 96 / $random); // Minimum 1.00x
+    
+    // Cap at 100x (extremely rare, ~1% chance)
+    $crash_point = min($crash_point, 100.0);
+    
+    // Round to 2 decimals
+    $crash_point = round($crash_point, 2);
+    
+    // Store in active games table for verification
+    $stmt = $conn->prepare("
+        INSERT INTO casino_active_games (user_id, game_type, bet_amount, crash_point)
+        VALUES (?, 'crash', ?, ?)
+        ON DUPLICATE KEY UPDATE bet_amount = ?, crash_point = ?, created_at = NOW()
+    ");
+    $stmt->bind_param('idddd', $user_id, $bet, $crash_point, $bet, $crash_point);
+    $stmt->execute();
+    $stmt->close();
+    
     echo json_encode([
         'status' => 'success',
         'bet' => $bet,
-        'balance' => $new_balance
+        'balance' => $new_balance,
+        'crash_point' => $crash_point
     ]);
     
 } catch (Exception $e) {

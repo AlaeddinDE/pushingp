@@ -508,7 +508,6 @@ if ($result) {
                 transform: translateX(-50%) translateY(-5px);
             }
         }
-        }
         
         /* Crash Specific */
         .crash-graph {
@@ -694,6 +693,64 @@ if ($result) {
                 width: 80px;
                 height: 80px;
                 font-size: 3rem;
+            }
+        }
+        
+        /* Crash Game Sky Animation */
+        .crash-graph {
+            position: relative;
+            height: 400px;
+            background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
+            border-radius: 16px;
+            margin-bottom: 24px;
+            overflow: hidden;
+            box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+        }
+        
+        .crash-sky {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+        
+        .cloud {
+            position: absolute;
+            top: 20%;
+            width: 80px;
+            height: 40px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50px;
+            animation: cloudFloat 20s linear infinite;
+        }
+        
+        .cloud::before,
+        .cloud::after {
+            content: '';
+            position: absolute;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+        }
+        
+        .cloud::before {
+            width: 50px;
+            height: 50px;
+            top: -25px;
+            left: 10px;
+        }
+        
+        .cloud::after {
+            width: 40px;
+            height: 40px;
+            top: -20px;
+            right: 10px;
+        }
+        
+        @keyframes cloudFloat {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-100vw);
             }
         }
     </style>
@@ -966,276 +1023,6 @@ if ($result) {
                 <div class="crash-multiplier" id="crashMultiplier">0.00x</div>
             </div>
 
-            <style>
-                .crash-graph {
-                    position: relative;
-                    height: 400px;
-                    background: linear-gradient(180deg, #1a1a2e 0%, #0f3460 100%);
-                    border-radius: 16px;
-                    margin-bottom: 24px;
-                    overflow: hidden;
-                    box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
-                }
-                
-                .crash-sky {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                }
-                
-                .cloud {
-                    position: absolute;
-                    top: 20%;
-                    width: 80px;
-                    height: 40px;
-                    background: rgba(255,255,255,0.1);
-                    border-radius: 50px;
-                    animation: cloudFloat 20s linear infinite;
-                }
-                
-                .cloud::before,
-                .cloud::after {
-                    content: '';
-                    position: absolute;
-                    background: rgba(255,255,255,0.1);
-                    border-radius: 50%;
-                }
-                
-                .cloud::before {
-                    width: 50px;
-                    height: 50px;
-                    top: -25px;
-                    left: 10px;
-                }
-                
-                .cloud::after {
-                    width: 40px;
-                    height: 40px;
-                    top: -20px;
-                    right: 10px;
-                }
-                
-                @keyframes cloudFloat {
-                    0% {
-                        transform: translateX(0);
-                    }
-                    100% {
-                        transform: translateX(-100vw);
-                    }
-                }
-                
-                .airplane {
-                    position: absolute;
-                    left: 10%;
-                    bottom: 20%;
-                    font-size: 4rem;
-                    filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.6));
-                    transition: all 0.15s ease-out;
-                    z-index: 10;
-                    transform-origin: center center;
-                }
-                
-                .airplane.flying {
-                    animation: airplaneFly 0.3s ease-in-out infinite, airplaneGlow 1s ease-in-out infinite;
-                }
-                
-                .airplane.crashed {
-                    animation: airplaneCrash 1.2s cubic-bezier(0.68, -0.55, 0.265, 1.55) forwards;
-                }
-                
-                @keyframes airplaneFly {
-                    0%, 100% {
-                        transform: translateY(0) rotate(-20deg) scale(1);
-                    }
-                    25% {
-                        transform: translateY(-8px) rotate(-15deg) scale(1.05);
-                    }
-                    50% {
-                        transform: translateY(-4px) rotate(-18deg) scale(1.02);
-                    }
-                    75% {
-                        transform: translateY(-6px) rotate(-22deg) scale(1.04);
-                    }
-                }
-                
-                @keyframes airplaneGlow {
-                    0%, 100% {
-                        filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)) drop-shadow(0 0 40px rgba(139, 92, 246, 0.6));
-                    }
-                    50% {
-                        filter: drop-shadow(0 0 30px rgba(255,255,255,1)) drop-shadow(0 0 60px rgba(139, 92, 246, 1));
-                    }
-                }
-                
-                @keyframes airplaneCrash {
-                    0% {
-                        transform: translateY(0) rotate(-20deg) scale(1);
-                        opacity: 1;
-                        filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
-                    }
-                    10% {
-                        transform: translateY(-40px) rotate(-30deg) scale(1.15);
-                        filter: drop-shadow(0 0 30px rgba(255, 100, 100, 0.8));
-                    }
-                    20% {
-                        transform: translateY(-20px) rotate(-60deg) scale(1.2);
-                    }
-                    35% {
-                        transform: translateY(20px) rotate(-120deg) scale(1.1);
-                        filter: drop-shadow(0 0 40px rgba(255, 0, 0, 1));
-                    }
-                    50% {
-                        transform: translateY(80px) rotate(-200deg) scale(0.95);
-                    }
-                    65% {
-                        transform: translateY(150px) rotate(-280deg) scale(0.7);
-                    }
-                    80% {
-                        transform: translateY(220px) rotate(-340deg) scale(0.5);
-                        filter: drop-shadow(0 0 50px rgba(255, 100, 0, 1));
-                    }
-                    100% {
-                        transform: translateY(350px) rotate(-450deg) scale(0.2);
-                        opacity: 0;
-                        filter: drop-shadow(0 0 0px transparent);
-                    }
-                }
-                
-                .smoke-trail {
-                    position: absolute;
-                    right: 100%;
-                    top: 50%;
-                    width: 250px;
-                    height: 30px;
-                    background: linear-gradient(90deg, 
-                        rgba(255,255,255,0.8) 0%,
-                        rgba(200,200,255,0.6) 30%,
-                        rgba(150,150,255,0.4) 60%,
-                        transparent 100%
-                    );
-                    border-radius: 15px;
-                    filter: blur(12px);
-                    opacity: 0;
-                }
-                
-                .airplane.flying .smoke-trail {
-                    opacity: 1;
-                    animation: smokeTrail 0.4s ease-out infinite;
-                }
-                
-                .airplane.crashed .smoke-trail {
-                    animation: smokeTrailCrash 0.6s ease-out infinite;
-                    background: linear-gradient(90deg, 
-                        rgba(255,100,0,0.9) 0%,
-                        rgba(255,50,0,0.6) 40%,
-                        rgba(100,100,100,0.4) 70%,
-                        transparent 100%
-                    );
-                }
-                
-                @keyframes smokeTrail {
-                    0% {
-                        transform: scaleX(1) translateY(0);
-                        opacity: 0.8;
-                    }
-                    100% {
-                        transform: scaleX(2) translateY(-5px);
-                        opacity: 0;
-                    }
-                }
-                
-                @keyframes smokeTrailCrash {
-                    0% {
-                        transform: scaleX(1) translateY(0) rotate(0deg);
-                        opacity: 1;
-                    }
-                    100% {
-                        transform: scaleX(3) translateY(20px) rotate(10deg);
-                        opacity: 0;
-                    }
-                }
-                
-                .explosion {
-                    position: absolute;
-                    left: 50%;
-                    top: 50%;
-                    transform: translate(-50%, -50%);
-                    font-size: 12rem;
-                    z-index: 20;
-                    animation: explosionBurst 1s ease-out forwards;
-                    filter: drop-shadow(0 0 40px rgba(255, 100, 0, 1));
-                }
-                
-                @keyframes explosionBurst {
-                    0% {
-                        transform: translate(-50%, -50%) scale(0) rotate(0deg);
-                        opacity: 0;
-                    }
-                    10% {
-                        transform: translate(-50%, -50%) scale(0.3) rotate(20deg);
-                        opacity: 1;
-                    }
-                    30% {
-                        transform: translate(-50%, -50%) scale(1.8) rotate(-15deg);
-                        opacity: 1;
-                    }
-                    60% {
-                        transform: translate(-50%, -50%) scale(2.5) rotate(10deg);
-                        opacity: 0.8;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) scale(3.5) rotate(-5deg);
-                        opacity: 0;
-                    }
-                }
-                
-                .explosion-particles {
-                    position: absolute;
-                    width: 200%;
-                    height: 200%;
-                    top: -50%;
-                    left: -50%;
-                }
-                
-                .explosion-particles::before,
-                .explosion-particles::after {
-                    content: '🔥';
-                    position: absolute;
-                    font-size: 4rem;
-                    animation: particleSpread 1s ease-out forwards;
-                }
-                
-                .explosion-particles::before {
-                    top: 20%;
-                    left: 10%;
-                    --x: -100px;
-                    --y: -80px;
-                    animation-delay: 0.05s;
-                }
-                
-                .explosion-particles::after {
-                    top: 20%;
-                    right: 10%;
-                    --x: 100px;
-                    --y: -80px;
-                    animation-delay: 0.1s;
-                }
-                
-                @keyframes particleSpread {
-                    0% {
-                        transform: translate(0, 0) scale(1) rotate(0deg);
-                        opacity: 1;
-                    }
-                    50% {
-                        transform: translate(calc(var(--x) * 0.6), calc(var(--y) * 0.6)) scale(1.5) rotate(180deg);
-                        opacity: 0.8;
-                    }
-                    100% {
-                        transform: translate(var(--x), var(--y)) scale(0.2) rotate(360deg);
-                        opacity: 0;
-                    }
-                }
-            </style>
 
             <div class="quick-bet-btns">
                 <button class="quick-bet-btn" onclick="setCrashBet(1)">1€</button>
@@ -1369,13 +1156,6 @@ if ($result) {
                     slotsSpinning = false;
                     document.getElementById('slotsSpin').disabled = false;
                 }, 2700); // After all reels stopped (1500 + 400*3 = 2700ms)
-                        document.getElementById('slotsLoss').textContent = `😢 Verloren: ${bet.toFixed(2)}€`;
-                        document.getElementById('slotsLoss').classList.add('show');
-                    }
-                    
-                    slotsSpinning = false;
-                    document.getElementById('slotsSpin').disabled = false;
-                }, 2000);
             } else {
                 alert('Fehler: ' + data.error);
                 slotsSpinning = false;
@@ -1490,8 +1270,10 @@ if ($result) {
             
             if (data.status === 'success') {
                 crashRunning = true;
-                crashPoint = (Math.random() * 5 + 1.5).toFixed(2); // Random crash point 1.5x - 6.5x
+                crashPoint = parseFloat(data.crash_point); // Server-generated crash point
                 crashMultiplier = 0.00;
+                
+                console.log('🎮 Crash point:', crashPoint + 'x');
                 
                 // Reset airplane and explosion
                 const airplane = document.getElementById('crashAirplane');

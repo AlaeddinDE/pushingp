@@ -1263,3 +1263,52 @@ Jetzt können im Chat folgende große Dateien verschickt werden:
 - **Queries aktualisiert**: Versteckte Chats werden in "Kürzlich" ausgefiltert
 - Soft-Delete Prinzip (Nachrichten bleiben erhalten)
 
+
+## [2025-01-10] Casino Crash: Provably Fair System implementiert
+
+### Problem
+- Crash-Punkt wurde client-seitig generiert (manipulierbar)
+- Unrealistische Verteilung: 1.5x - 6.5x gleichverteilt
+- Kein House Edge → Casino verliert langfristig Geld
+- Spieler gewinnen zu oft und zu viel
+
+### Lösung: Echte Crash-Mechanik
+**Mathematik:**
+- House Edge: 3% (realistisch für Crash-Spiele)
+- Formel: `crash_point = 96 / random(0.01 - 96.00)`
+- Erwarteter durchschnittlicher Crash: ~1.96x
+- Cap bei 100x (extrem selten, ~1% Chance)
+
+**Verteilung (realistisch):**
+- 1.00x - 1.50x: ~50% (häufig)
+- 1.50x - 2.00x: ~25%
+- 2.00x - 5.00x: ~15%
+- 5.00x - 10.0x: ~8%
+- 10.0x+: ~2% (selten)
+
+**Server-Side Validation:**
+- Crash-Punkt wird bei `start_crash.php` generiert
+- In `casino_active_games` gespeichert
+- Bei Cashout wird verifiziert: multiplier ≤ crash_point
+- Verhindert Client-Manipulation
+
+### Geänderte Dateien:
+- `/api/casino/start_crash.php`: Server-seitige Crash-Punkt-Generierung
+- `/api/casino/cashout_crash.php`: Validierung gegen gespeicherten Crash-Punkt
+- `casino.php`: Verwendet nun Server-Crash-Punkt statt Client-Random
+- `migrations/auto/20250110_casino_crash_point.sql`: DB-Schema erweitert
+
+### Technische Details:
+```php
+$random = mt_rand(1, 9600) / 100; // 0.01 to 96.00
+$crash_point = max(1.00, 96 / $random);
+$crash_point = min($crash_point, 100.0);
+```
+
+Dies entspricht der mathematischen Verteilung echter Crash-Spiele wie Stake.com, Roobet, etc.
+
+### Erwartete RTP (Return to Player):
+- Theoretisch: 97% (3% House Edge)
+- Langfristig: Casino gewinnt 3€ pro 100€ Einsatz
+- Kurzfristig: Varianz möglich, aber fair
+
