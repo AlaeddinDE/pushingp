@@ -4,434 +4,254 @@ require_once __DIR__ . '/includes/db.php';
 secure_session_start();
 require_login();
 
-$user_id = get_current_user_id();
 $is_admin = is_admin();
-
-// Aktueller Monat oder aus GET
-$current_month = isset($_GET['month']) ? intval($_GET['month']) : date('n');
-$current_year = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
-
-// Events holen
-$events_query = "
-    SELECT e.*, 
-           COUNT(DISTINCT ep.mitglied_id) as teilnehmer_count,
-           SUM(CASE WHEN ep.status = 'zugesagt' THEN 1 ELSE 0 END) as zugesagt_count,
-           SUM(CASE WHEN ep.status = 'abgesagt' THEN 1 ELSE 0 END) as abgesagt_count,
-           (SELECT status FROM event_participants WHERE event_id = e.id AND mitglied_id = ?) as my_status
-    FROM events e
-    LEFT JOIN event_participants ep ON ep.event_id = e.id
-    WHERE e.event_status = 'active'
-    AND YEAR(e.datum) = ?
-    AND MONTH(e.datum) = ?
-    GROUP BY e.id
-    ORDER BY e.datum ASC, e.start_time ASC
-";
-
-$stmt = $conn->prepare($events_query);
-$stmt->bind_param('iii', $user_id, $current_year, $current_month);
-$stmt->execute();
-$events_result = $stmt->get_result();
-$events = [];
-while ($row = $events_result->fetch_assoc()) {
-    $events[] = $row;
-}
-$stmt->close();
-
-// Alle kommenden Events (nächste 6 Monate)
-$upcoming_query = "
-    SELECT e.*, 
-           COUNT(DISTINCT ep.mitglied_id) as teilnehmer_count,
-           SUM(CASE WHEN ep.status = 'zugesagt' THEN 1 ELSE 0 END) as zugesagt_count,
-           (SELECT status FROM event_participants WHERE event_id = e.id AND mitglied_id = ?) as my_status
-    FROM events e
-    LEFT JOIN event_participants ep ON ep.event_id = e.id
-    WHERE e.event_status = 'active'
-    AND e.datum >= CURDATE()
-    GROUP BY e.id
-    ORDER BY e.datum ASC, e.start_time ASC
-    LIMIT 20
-";
-
-$stmt = $conn->prepare($upcoming_query);
-$stmt->bind_param('i', $user_id);
-$stmt->execute();
-$upcoming_result = $stmt->get_result();
-$upcoming_events = [];
-while ($row = $upcoming_result->fetch_assoc()) {
-    $upcoming_events[] = $row;
-}
-$stmt->close();
 ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎉 Events – PUSHING P</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Events – PUSHING P</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
-        .events-container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        
-        .view-toggle {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin: 24px 0;
-        }
-        
-        .toggle-btn {
-            background: var(--bg-tertiary);
-            border: 2px solid var(--border);
-            color: var(--text-secondary);
-            padding: 12px 32px;
-            border-radius: 12px;
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-        
-        .toggle-btn.active {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-            box-shadow: 0 4px 12px rgba(139, 92, 246, 0.4);
-        }
-        
-        .toggle-btn:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-        
-        /* Timeline View */
-        .timeline-view {
-            display: none;
-            position: relative;
-            padding: 0 32px;
-        }
-        
-        .timeline-view.active {
-            display: block;
-        }
-        
-        .timeline-line {
-            position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: linear-gradient(180deg, var(--accent), transparent);
-        }
-        
-        .timeline-item {
+        .events-grid {
             display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            gap: 32px;
-            margin-bottom: 48px;
-            position: relative;
-        }
-        
-        .timeline-item.left .event-card {
-            grid-column: 1;
-        }
-        
-        .timeline-item.left .timeline-date {
-            grid-column: 2;
-        }
-        
-        .timeline-item.right .event-card {
-            grid-column: 3;
-        }
-        
-        .timeline-item.right .timeline-date {
-            grid-column: 2;
-        }
-        
-        .timeline-date {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            min-width: 120px;
-            position: relative;
-            z-index: 10;
-        }
-        
-        .timeline-dot {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: var(--accent);
-            border: 4px solid var(--bg-primary);
-            box-shadow: 0 0 0 4px var(--accent-glow);
-            animation: pulse 2s infinite;
-        }
-        
-        .timeline-month {
-            margin-top: 12px;
-            font-size: 0.875rem;
-            font-weight: 700;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-        
-        @keyframes pulse {
-            0%, 100% {
-                box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7);
-            }
-            50% {
-                box-shadow: 0 0 0 8px rgba(139, 92, 246, 0);
-            }
-        }
-        
-        /* Grid View */
-        .grid-view {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            grid-template-columns: 2fr 1fr;
             gap: 24px;
+            margin-top: 24px;
         }
         
-        .grid-view.active {
+        @media (max-width: 968px) {
+            .events-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .calendar {
+                gap: 4px;
+            }
+            
+            .day-box {
+                min-height: 60px;
+                padding: 4px;
+                font-size: 0.75rem;
+            }
+            
+            .weekday-header {
+                font-size: 0.65rem;
+                padding: 4px;
+            }
+            
+            .calendar-header {
+                flex-direction: column;
+                gap: 12px;
+            }
+            
+            .calendar-nav-btn {
+                width: 100%;
+            }
+            
+            .event-card {
+                padding: 12px;
+            }
+            
+            .event-actions {
+                flex-direction: column;
+            }
+            
+            .btn-join, .btn-leave {
+                width: 100%;
+            }
+        }
+        
+        .calendar {
             display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 8px;
         }
         
-        /* Event Cards */
-        .event-card {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 16px;
-            padding: 24px;
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+        }
+        
+        .calendar-nav-btn {
+            background: var(--accent);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
             transition: all 0.3s;
-            position: relative;
-            overflow: hidden;
         }
         
-        .event-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent), #ec4899);
-            transform: scaleX(0);
-            transition: transform 0.3s;
+        .calendar-nav-btn:hover {
+            background: var(--accent-hover);
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px var(--accent-glow);
         }
         
-        .event-card:hover::before {
-            transform: scaleX(1);
+        .calendar-month {
+            font-weight: 700;
+            font-size: 1.125rem;
+        }
+        
+        .weekday-header {
+            text-align: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            padding: 8px;
+            text-transform: uppercase;
+        }
+        
+        .event-card {
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            margin-bottom: 12px;
+            transition: all 0.3s ease;
         }
         
         .event-card:hover {
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.2);
-        }
-        
-        .event-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
+            background: var(--bg-tertiary);
+            border-color: var(--border-hover);
+            transform: translateY(-2px);
         }
         
         .event-title {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--text-primary);
+            font-weight: 600;
             margin-bottom: 8px;
         }
         
-        .event-status-badge {
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.75rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-        
-        .status-zugesagt {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-        }
-        
-        .status-abgesagt {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-        }
-        
-        .status-offen {
-            background: var(--bg-tertiary);
-            color: var(--text-secondary);
-            border: 2px solid var(--border);
-        }
-        
         .event-meta {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-        
-        .meta-item {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            color: var(--text-secondary);
             font-size: 0.875rem;
-        }
-        
-        .meta-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 8px;
-            background: var(--bg-tertiary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1rem;
-        }
-        
-        .event-stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-            margin: 20px 0;
-            padding: 16px;
-            background: var(--bg-tertiary);
-            border-radius: 12px;
-        }
-        
-        .stat-item {
-            text-align: center;
-        }
-        
-        .stat-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--accent);
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
             color: var(--text-secondary);
-            text-transform: uppercase;
-            margin-top: 4px;
+            margin-bottom: 8px;
         }
         
         .event-actions {
             display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        
-        .btn-event {
-            flex: 1;
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 700;
-            border: none;
-            cursor: pointer;
-            transition: all 0.3s;
-            text-align: center;
-        }
-        
-        .btn-join {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-        
-        .btn-join:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
-        }
-        
-        .btn-leave {
-            background: linear-gradient(135deg, #ef4444, #dc2626);
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-        
-        .btn-leave:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 16px rgba(239, 68, 68, 0.4);
-        }
-        
-        .btn-details {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 2px solid var(--border);
-        }
-        
-        .btn-details:hover {
-            border-color: var(--accent);
-            transform: translateY(-2px);
-        }
-        
-        .time-until {
-            display: inline-block;
-            padding: 8px 16px;
-            background: rgba(139, 92, 246, 0.1);
-            border: 2px solid rgba(139, 92, 246, 0.3);
-            border-radius: 8px;
-            color: var(--accent);
-            font-weight: 700;
-            font-size: 0.875rem;
+            gap: 8px;
             margin-top: 12px;
         }
         
-        .no-events {
-            text-align: center;
-            padding: 80px 20px;
+        .btn-join {
+            padding: 8px 16px;
+            background: var(--success);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-join:hover {
+            background: #2d8a4d;
+            transform: scale(1.05);
+        }
+        
+        .btn-leave {
+            padding: 8px 16px;
+            background: var(--error);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-leave:hover {
+            background: #c23538;
+            transform: scale(1.05);
+        }
+        
+        .participants {
+            font-size: 0.813rem;
+            color: var(--text-tertiary);
+            margin-top: 8px;
+        }
+        
+        .day-box {
+            min-height: 80px;
+            padding: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            position: relative;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .day-box:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--accent);
+            transform: translateY(-4px);
+            box-shadow: 0 8px 20px var(--accent-glow);
+        }
+        
+        .day-box.today {
+            border: 2px solid var(--accent);
+            background: var(--bg-tertiary);
+            box-shadow: 0 0 20px var(--accent-glow);
+        }
+        
+        .day-box.selected {
+            background: var(--accent);
+            border-color: var(--accent);
+            transform: scale(1.05);
+        }
+        
+        .day-box.selected .day-number {
+            color: white;
+            font-weight: 800;
+        }
+        
+        .day-box.has-event {
+            border-color: var(--accent);
+        }
+        
+        .day-number {
+            position: absolute;
+            top: 6px;
+            right: 8px;
+            font-size: 0.875rem;
             color: var(--text-secondary);
+            font-weight: 600;
         }
         
-        .no-events-icon {
-            font-size: 4rem;
-            margin-bottom: 16px;
-            opacity: 0.5;
+        .event-pill {
+            margin-top: 20px;
+            background: var(--accent);
+            color: white;
+            border-radius: 6px;
+            padding: 4px 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            animation: scaleIn 0.3s ease;
         }
         
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .timeline-view {
-                padding: 0;
-            }
-            
-            .timeline-item {
-                grid-template-columns: auto 1fr;
-                gap: 16px;
-            }
-            
-            .timeline-item.left .event-card,
-            .timeline-item.right .event-card {
-                grid-column: 2;
-            }
-            
-            .timeline-date {
-                min-width: 80px;
-            }
-            
-            .timeline-line {
-                left: 40px;
-            }
-            
-            .grid-view {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
-            
-            .event-card {
-                padding: 20px;
-            }
-            
-            .event-stats {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .date-picker-info {
+            margin-top: 16px;
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--accent);
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.875rem;
+            animation: fadeIn 0.3s ease;
         }
     </style>
 </head>
@@ -440,13 +260,16 @@ $stmt->close();
     
     <div class="header">
         <div class="header-content">
-            <div class="logo">PUSHING P</div>
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
             <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
-                <a href="events.php" class="nav-item active">Events</a>
+                <a href="kasse.php" class="nav-item">Kasse</a>
+                <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
+                <a href="chat.php" class="nav-item">Chat</a>
                 <?php if ($is_admin): ?>
-                <a href="admin.php" class="nav-item">Admin</a>
+                    <a href="admin.php" class="nav-item">Admin</a>
                 <?php endif; ?>
+                <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>
         </div>
@@ -455,262 +278,285 @@ $stmt->close();
     <div class="container">
         <div class="welcome">
             <h1>🎉 Events</h1>
-            <p class="text-secondary">Alle kommenden Events und Termine</p>
+            <p class="text-secondary">Gruppenevents planen und verwalten</p>
         </div>
 
-        <div class="view-toggle">
-            <button class="toggle-btn active" onclick="switchView('timeline')">📅 Timeline</button>
-            <button class="toggle-btn" onclick="switchView('grid')">🔲 Kacheln</button>
-        </div>
-
-        <div class="events-container">
-            <!-- Timeline View -->
-            <div class="timeline-view active" id="timelineView">
-                <div class="timeline-line"></div>
-                
-                <?php if (empty($upcoming_events)): ?>
-                <div class="no-events">
-                    <div class="no-events-icon">📅</div>
-                    <h3>Keine kommenden Events</h3>
-                    <p style="margin-top: 8px;">Es sind aktuell keine Events geplant.</p>
-                </div>
-                <?php else: ?>
-                    <?php 
-                    $side = 'left';
-                    foreach ($upcoming_events as $event): 
-                        $event_date = new DateTime($event['datum'] . ' ' . ($event['start_time'] ?? '00:00:00'));
-                        $now = new DateTime();
-                        $diff = $now->diff($event_date);
-                        
-                        if ($diff->days == 0 && $diff->h < 24) {
-                            $time_until = '🔥 Heute!';
-                        } elseif ($diff->days == 1) {
-                            $time_until = '⚡ Morgen';
-                        } elseif ($diff->days <= 7) {
-                            $time_until = 'In ' . $diff->days . ' Tagen';
-                        } else {
-                            $time_until = $event_date->format('d.m.Y');
-                        }
-                    ?>
-                    <div class="timeline-item <?= $side ?>">
-                        <div class="timeline-date">
-                            <div class="timeline-dot"></div>
-                            <div class="timeline-month">
-                                <?= $event_date->format('M Y') ?>
-                            </div>
-                        </div>
-                        
-                        <div class="event-card">
-                            <div class="event-header">
-                                <div>
-                                    <div class="event-title"><?= htmlspecialchars($event['title']) ?></div>
-                                    <?php if ($event['my_status']): ?>
-                                        <span class="event-status-badge status-<?= $event['my_status'] ?>">
-                                            <?= $event['my_status'] === 'zugesagt' ? '✓ Zugesagt' : '✗ Abgesagt' ?>
-                                        </span>
-                                    <?php else: ?>
-                                        <span class="event-status-badge status-offen">⏱ Offen</span>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            
-                            <div class="event-meta">
-                                <div class="meta-item">
-                                    <div class="meta-icon">📅</div>
-                                    <span><?= $event_date->format('d.m.Y') ?></span>
-                                </div>
-                                <div class="meta-item">
-                                    <div class="meta-icon">🕐</div>
-                                    <span><?= $event_date->format('H:i') ?> Uhr</span>
-                                </div>
-                                <?php if ($event['location']): ?>
-                                <div class="meta-item">
-                                    <div class="meta-icon">📍</div>
-                                    <span><?= htmlspecialchars($event['location']) ?></span>
-                                </div>
-                                <?php endif; ?>
-                                <?php if ($event['cost'] > 0): ?>
-                                <div class="meta-item">
-                                    <div class="meta-icon">💰</div>
-                                    <span><?= number_format($event['cost'], 2, ',', '.') ?> €</span>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                            
-                            <div class="time-until"><?= $time_until ?></div>
-                            
-                            <div class="event-stats">
-                                <div class="stat-item">
-                                    <div class="stat-value"><?= $event['zugesagt_count'] ?></div>
-                                    <div class="stat-label">Zugesagt</div>
-                                </div>
-                                <div class="stat-item">
-                                    <div class="stat-value"><?= $event['teilnehmer_count'] ?></div>
-                                    <div class="stat-label">Gesamt</div>
-                                </div>
-                            </div>
-                            
-                            <div class="event-actions">
-                                <?php if ($event['my_status'] !== 'zugesagt'): ?>
-                                <button class="btn-event btn-join" onclick="respondEvent(<?= $event['id'] ?>, 'zugesagt')">
-                                    ✓ Zusagen
-                                </button>
-                                <?php endif; ?>
-                                
-                                <?php if ($event['my_status'] !== 'abgesagt'): ?>
-                                <button class="btn-event btn-leave" onclick="respondEvent(<?= $event['id'] ?>, 'abgesagt')">
-                                    ✗ Absagen
-                                </button>
-                                <?php endif; ?>
-                                
-                                <button class="btn-event btn-details" onclick="window.open('/event.php?id=<?= $event['id'] ?>', '_blank')">
-                                    👁️ Details
-                                </button>
-                            </div>
-                        </div>
+        <div class="events-grid">
+            <div>
+                <div class="section">
+                    <div class="section-header">
+                        <span>📆</span>
+                        <h2 class="section-title">Event-Kalender</h2>
                     </div>
-                    <?php 
-                        $side = ($side === 'left') ? 'right' : 'left';
-                    endforeach; 
-                    ?>
-                <?php endif; ?>
+                    <div class="calendar-header">
+                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀ Zurück</button>
+                        <div class="calendar-month" id="monthLabel"></div>
+                        <button class="calendar-nav-btn" onclick="changeMonth(1)">Weiter ▶</button>
+                    </div>
+                    <div id="calendar" class="calendar"></div>
+                    <div id="selectedInfo"></div>
+                </div>
             </div>
-
-            <!-- Grid View -->
-            <div class="grid-view" id="gridView">
-                <?php if (empty($upcoming_events)): ?>
-                <div class="no-events">
-                    <div class="no-events-icon">📅</div>
-                    <h3>Keine kommenden Events</h3>
-                    <p style="margin-top: 8px;">Es sind aktuell keine Events geplant.</p>
-                </div>
-                <?php else: ?>
-                    <?php foreach ($upcoming_events as $event): 
-                        $event_date = new DateTime($event['datum'] . ' ' . ($event['start_time'] ?? '00:00:00'));
-                        $now = new DateTime();
-                        $diff = $now->diff($event_date);
-                        
-                        if ($diff->days == 0 && $diff->h < 24) {
-                            $time_until = '🔥 Heute!';
-                        } elseif ($diff->days == 1) {
-                            $time_until = '⚡ Morgen';
-                        } elseif ($diff->days <= 7) {
-                            $time_until = 'In ' . $diff->days . ' Tagen';
-                        } else {
-                            $time_until = $event_date->format('d.m.Y');
-                        }
-                    ?>
-                    <div class="event-card">
-                        <div class="event-header">
-                            <div>
-                                <div class="event-title"><?= htmlspecialchars($event['title']) ?></div>
-                                <?php if ($event['my_status']): ?>
-                                    <span class="event-status-badge status-<?= $event['my_status'] ?>">
-                                        <?= $event['my_status'] === 'zugesagt' ? '✓ Zugesagt' : '✗ Abgesagt' ?>
-                                    </span>
-                                <?php else: ?>
-                                    <span class="event-status-badge status-offen">⏱ Offen</span>
-                                <?php endif; ?>
-                            </div>
-                        </div>
-                        
-                        <div class="event-meta">
-                            <div class="meta-item">
-                                <div class="meta-icon">📅</div>
-                                <span><?= $event_date->format('d.m.Y') ?></span>
-                            </div>
-                            <div class="meta-item">
-                                <div class="meta-icon">🕐</div>
-                                <span><?= $event_date->format('H:i') ?> Uhr</span>
-                            </div>
-                            <?php if ($event['location']): ?>
-                            <div class="meta-item">
-                                <div class="meta-icon">📍</div>
-                                <span><?= htmlspecialchars($event['location']) ?></span>
-                            </div>
-                            <?php endif; ?>
-                            <?php if ($event['cost'] > 0): ?>
-                            <div class="meta-item">
-                                <div class="meta-icon">💰</div>
-                                <span><?= number_format($event['cost'], 2, ',', '.') ?> €</span>
-                            </div>
-                            <?php endif; ?>
-                        </div>
-                        
-                        <div class="time-until"><?= $time_until ?></div>
-                        
-                        <div class="event-stats">
-                            <div class="stat-item">
-                                <div class="stat-value"><?= $event['zugesagt_count'] ?></div>
-                                <div class="stat-label">Zugesagt</div>
-                            </div>
-                            <div class="stat-item">
-                                <div class="stat-value"><?= $event['teilnehmer_count'] ?></div>
-                                <div class="stat-label">Gesamt</div>
-                            </div>
-                        </div>
-                        
-                        <div class="event-actions">
-                            <?php if ($event['my_status'] !== 'zugesagt'): ?>
-                            <button class="btn-event btn-join" onclick="respondEvent(<?= $event['id'] ?>, 'zugesagt')">
-                                ✓ Zusagen
-                            </button>
-                            <?php endif; ?>
-                            
-                            <?php if ($event['my_status'] !== 'abgesagt'): ?>
-                            <button class="btn-event btn-leave" onclick="respondEvent(<?= $event['id'] ?>, 'abgesagt')">
-                                ✗ Absagen
-                            </button>
-                            <?php endif; ?>
-                            
-                            <button class="btn-event btn-details" onclick="window.open('/event.php?id=<?= $event['id'] ?>', '_blank')">
-                                👁️ Details
-                            </button>
-                        </div>
+            
+            <div>
+                <div class="section">
+                    <div class="section-header">
+                        <span>📋</span>
+                        <h2 class="section-title">Kommende Events</h2>
                     </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    <div id="upcomingList" class="upcoming-events-list"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+                </div>
             </div>
         </div>
     </div>
 
-    <script>
-    function switchView(view) {
-        const timelineView = document.getElementById('timelineView');
-        const gridView = document.getElementById('gridView');
-        const buttons = document.querySelectorAll('.toggle-btn');
-        
-        buttons.forEach(btn => btn.classList.remove('active'));
-        
-        if (view === 'timeline') {
-            timelineView.classList.add('active');
-            gridView.classList.remove('active');
-            buttons[0].classList.add('active');
+<script>
+const cal = document.getElementById('calendar');
+const upcomingList = document.getElementById('upcomingList');
+const monthLabel = document.getElementById('monthLabel');
+const selectedInfo = document.getElementById('selectedInfo');
+
+let currentYear = new Date().getFullYear();
+let currentMonth = new Date().getMonth();
+let selectedDate = null;
+let allEvents = [];
+
+const isAdmin = <?php echo $is_admin ? 'true' : 'false'; ?>;
+const today = new Date();
+const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+
+const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
+                    'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
+const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+
+async function loadEvents() {
+  try {
+    const r = await fetch('/api/events_list.php');
+    allEvents = await r.json();
+    renderUpcomingEvents(allEvents);
+    renderCalendar();
+  } catch (e) {
+    console.error('Fehler:', e);
+  }
+}
+
+// Monat wechseln
+function changeMonth(delta) {
+    currentMonth += delta;
+    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
+    else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
+    renderCalendar();
+}
+
+// --- 2️⃣ Kommende Events anzeigen ---
+function renderUpcomingEvents(events) {
+  upcomingList.innerHTML = '';
+  const upcoming = events.filter(e => new Date(e.datum) >= new Date().setHours(0,0,0,0))
+                         .sort((a, b) => new Date(a.datum) - new Date(b.datum));
+  
+  if (upcoming.length === 0) {
+    upcomingList.innerHTML = '<div class="empty-state">Keine kommenden Events</div>';
+    return;
+  }
+  
+  upcoming.forEach(e => {
+    const card = document.createElement('div');
+    card.className = 'event-card';
+    
+    // Payment badge
+    let paymentBadge = '';
+    if (e.cost > 0) {
+        if (e.paid_by === 'pool') {
+            paymentBadge = `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💰 ${e.cost}€ aus Kasse</span>`;
+        } else if (e.paid_by === 'anteilig') {
+            paymentBadge = `<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">🔀 ${e.cost}€ anteilig</span>`;
         } else {
-            gridView.classList.add('active');
-            timelineView.classList.remove('active');
-            buttons[1].classList.add('active');
+            paymentBadge = `<span style="background: var(--text-tertiary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💳 ${e.cost}€ privat</span>`;
         }
     }
     
-    async function respondEvent(eventId, status) {
-        try {
-            const response = await fetch('/api/event_respond.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ event_id: eventId, status: status })
-            });
-            
-            const result = await response.json();
-            if (result.status === 'success') {
-                location.reload();
-            } else {
-                alert('Fehler: ' + (result.error || 'Unbekannter Fehler'));
-            }
-        } catch (error) {
-            alert('Verbindungsfehler: ' + error.message);
-        }
+    // Cost per person badge
+    let costPerPersonBadge = '';
+    if (e.cost_per_person > 0) {
+        costPerPersonBadge = `<span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">👤 ~${e.cost_per_person}€/Person</span>`;
     }
-    </script>
+    
+    card.innerHTML = `
+      <div class="event-title">${e.title} ${paymentBadge} ${costPerPersonBadge}</div>
+      <div class="event-meta">
+        📅 ${new Date(e.datum).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
+        ${e.start_time ? '⏰ ' + e.start_time : ''} ${e.end_time ? '– ' + e.end_time : ''}<br>
+        ${e.location ? '📍 ' + e.location : ''}
+      </div>
+      <div id="p-${e.id}" class="participants"></div>
+      <div class="event-actions">
+        <button onclick="join(${e.id})" class="btn-join">✓ Ich komme</button>
+        <button onclick="leave(${e.id})" class="btn-leave">✗ Absagen</button>
+        ${isAdmin ? '<button onclick="deleteEvent(' + e.id + ')" class="btn-leave" style="background: var(--error);">🗑️</button>' : ''}
+      </div>
+    `;
+    upcomingList.appendChild(card);
+    loadParticipants(e.id);
+  });
+}
+
+// --- 3️⃣ Interaktiver Kalender ---
+function renderCalendar() {
+  cal.innerHTML = '';
+  monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+  
+  // Wochentage-Header
+  weekdays.forEach(day => {
+    const header = document.createElement('div');
+    header.className = 'weekday-header';
+    header.textContent = day;
+    cal.appendChild(header);
+  });
+  
+  const start = new Date(currentYear, currentMonth, 1);
+  const startDay = start.getDay() === 0 ? 6 : start.getDay() - 1;
+  const days = new Date(currentYear, currentMonth + 1, 0).getDate();
+  
+  const todayStr = today.toISOString().slice(0, 10);
+
+  for (let i = 0; i < startDay; i++) {
+    cal.appendChild(document.createElement('div'));
+  }
+
+  for (let d = 1; d <= days; d++) {
+    const box = document.createElement('div');
+    box.className = 'day-box';
+    
+    const iso = new Date(currentYear, currentMonth, d).toISOString().slice(0, 10);
+    const dateObj = new Date(currentYear, currentMonth, d);
+    const dayEvents = allEvents.filter(e => e.datum === iso);
+    
+    if (iso === todayStr) box.classList.add('today');
+    if (selectedDate === iso) box.classList.add('selected');
+    if (dayEvents.length > 0) box.classList.add('has-event');
+    
+    box.innerHTML = `<div class="day-number">${d}</div>`;
+    
+    dayEvents.forEach(e => {
+      const pill = document.createElement('div');
+      pill.className = 'event-pill';
+      pill.textContent = e.title;
+      box.appendChild(pill);
+    });
+    
+    box.addEventListener('click', () => selectDate(iso, dayEvents, dateObj));
+    
+    cal.appendChild(box);
+  }
+}
+
+// Datum auswählen
+function selectDate(dateStr, events, dateObj) {
+    selectedDate = dateStr;
+    renderCalendar();
+    
+    const canCreate = isAdmin && dateObj >= today && dateObj <= maxDate;
+    
+    selectedInfo.innerHTML = `
+        <div class="date-picker-info">
+            <strong>📅 ${new Date(dateStr).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong><br>
+            ${events.length > 0 ? '<span style="color: var(--accent);">✓ ' + events.length + ' Event(s)</span>' : '<span style="color: var(--text-secondary);">Keine Events</span>'}
+        </div>
+    `;
+    
+    if (canCreate) {
+        selectedInfo.innerHTML += `
+            <div class="event-form-inline">
+                <h3 style="margin-bottom: 12px; font-size: 1rem;">➕ Event erstellen</h3>
+                <form id="quickEventForm" onsubmit="createQuickEvent(event, '${dateStr}')">
+                    <input type="text" name="title" placeholder="Event-Titel" required>
+                    <input type="time" name="start_time" placeholder="Startzeit">
+                    <input type="time" name="end_time" placeholder="Endzeit">
+                    <input type="text" name="location" placeholder="Ort">
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
+                        <input type="number" name="cost" step="0.01" placeholder="Gesamtkosten (€)" min="0">
+                        <input type="number" name="cost_per_person" step="0.01" placeholder="Kosten/Person (€)" min="0">
+                    </div>
+                    
+                    <select name="paid_by" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); margin-top: 8px;">
+                        <option value="private">Jeder zahlt selbst</option>
+                        <option value="pool">Aus Kasse (Pool)</option>
+                        <option value="anteilig">Anteilig aufteilen</option>
+                    </select>
+                    
+                    <button type="submit" class="btn" style="width: 100%; margin-top: 8px;">Event erstellen</button>
+                    <div id="quickEventMsg" style="margin-top: 8px; font-size: 0.875rem;"></div>
+                </form>
+            </div>
+        `;
+    } else if (isAdmin && dateObj > maxDate) {
+        selectedInfo.innerHTML += '<div class="date-picker-info" style="margin-top: 12px; border-color: var(--warning); color: var(--warning);">⚠️ Events nur 1 Monat im Voraus</div>';
+    } else if (isAdmin && dateObj < today) {
+        selectedInfo.innerHTML += '<div class="date-picker-info" style="margin-top: 12px; border-color: var(--text-tertiary);">Vergangenes Datum</div>';
+    }
+}
+
+async function createQuickEvent(e, dateStr) {
+    e.preventDefault();
+    const form = e.target;
+    const fd = new FormData(form);
+    fd.set('datum', dateStr);
+    
+    const resp = await fetch('/api/events_create.php', { method: 'POST', body: fd });
+    const res = await resp.json();
+    
+    const msg = document.getElementById('quickEventMsg');
+    if (res.ok) {
+        msg.textContent = '✔ Event erstellt!';
+        msg.style.color = 'var(--success)';
+        form.reset();
+        loadEvents();
+    } else {
+        msg.textContent = '✖ Fehler';
+        msg.style.color = 'var(--error)';
+    }
+}
+
+// --- 4️⃣ Teilnehmerliste dynamisch laden ---
+async function loadParticipants(eventId) {
+  try {
+    const r = await fetch(`/api/event_participants.php?event_id=${eventId}`);
+    const data = await r.json();
+    const names = data.filter(p => p.status === 'coming').map(p => p.name);
+    const div = document.getElementById(`p-${eventId}`);
+    div.textContent = names.length ? `👥 Dabei: ${names.join(', ')}` : '👤 Noch keine Zusagen';
+  } catch { }
+}
+
+async function join(id) {
+  const fd = new FormData();
+  fd.set('event_id', id);
+  await fetch('/api/event_join.php', { method: 'POST', body: fd });
+  loadEvents();
+}
+
+async function leave(id) {
+  const fd = new FormData();
+  fd.set('event_id', id);
+  await fetch('/api/event_leave.php', { method: 'POST', body: fd });
+  loadEvents();
+}
+
+async function deleteEvent(id) {
+    if (!confirm('Event wirklich löschen?')) return;
+    const fd = new FormData();
+    fd.set('event_id', id);
+    await fetch('/api/events_delete.php', { method: 'POST', body: fd });
+    loadEvents();
+}
+
+loadEvents();
+renderCalendar(); // Kalender sofort rendern, nicht erst nach Events laden
+</script>
 </body>
 </html>

@@ -740,21 +740,6 @@ if ($result) {
         }
         
         /* Rocket flame */
-        .rocket-flame {
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%) rotate(-45deg);
-            font-size: 3rem;
-            opacity: 0;
-        }
-        
-        .airplane.flying .rocket-flame {
-            opacity: 1;
-            animation: flameFlicker 0.1s ease-in-out infinite;
-        }
-        
-        @keyframes flameFlicker {
             0%, 100% { 
                 transform: translateX(-50%) rotate(-45deg) scaleY(1);
                 filter: brightness(1);
@@ -1487,7 +1472,6 @@ if ($result) {
                     <!-- ROCKET -->
                     <div class="airplane" id="crashAirplane">
                         🚀
-                        <div class="rocket-flame">🔥</div>
                     </div>
                     
                     <!-- Explosion (hidden initially) -->
