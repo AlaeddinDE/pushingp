@@ -424,10 +424,6 @@ $stmt->close();
                 <div class="legend-color" style="background: linear-gradient(135deg, #f59e0b, #d97706);"></div>
                 <span>Frühschicht</span>
             </div>
-            <div class="legend-item">
-                <div class="legend-color" style="background: linear-gradient(135deg, #ef4444, #dc2626);"></div>
-                <span>Frei</span>
-            </div>
         </div>
 
         <div class="calendar-grid">
@@ -474,13 +470,15 @@ $stmt->close();
                         <div class="empty-cell">-</div>
                     <?php else: ?>
                         <?php foreach ($user_shifts as $shift):
+                            // Skip "free" shifts - sie werden nicht angezeigt
+                            if ($shift['type'] === 'free') {
+                                continue;
+                            }
+                            
                             $shift_class = '';
                             $shift_icon = '🕐';
                             
-                            if ($shift['type'] === 'free') {
-                                $shift_class = 'free';
-                                $shift_icon = '🏖️';
-                            } elseif (strpos($shift['start_time'], '06:') === 0 || strpos($shift['start_time'], '07:') === 0) {
+                            if (strpos($shift['start_time'], '06:') === 0 || strpos($shift['start_time'], '07:') === 0) {
                                 $shift_class = 'morning';
                                 $shift_icon = '🌅';
                             }
