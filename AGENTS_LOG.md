@@ -978,3 +978,43 @@ Jede Transaktion kann komplett bearbeitet werden:
   - 🎂 Geburtstage für automatische Benachrichtigungen
   - 🌍 Standortinformationen für lokale Organisation
   - 🔔 Granulare Benachrichtigungseinstellungen
+
+## [2025-11-10] Settings-Seite erweitert mit neuen Features
+
+**Änderungen:**
+- ✅ Discord Tag → Discord ID umbenannt (Label + Beschreibung)
+- ✅ "Aktivitätszeitraum" Sektion entfernt
+- ✅ "Sprache" Option entfernt
+- ✅ "Profil für andere sichtbar" Option entfernt
+- ✅ "Theme" Option entfernt
+
+**Neue Einstellungen hinzugefügt:**
+
+### Benachrichtigungen & Präferenzen
+- 📧 Team-Newsletter erhalten
+- 📅 Kalender-Synchronisation (Google/Outlook)
+- 🚫 Auto-Ablehnung bei Event-Konflikten
+- 👁️ Sichtbarkeitsstatus (Online, Abwesend, Beschäftigt, Unsichtbar)
+
+### Sicherheit & Datenschutz
+- 🔐 Zwei-Faktor-Authentifizierung (2FA)
+- ✓ E-Mail-Verifizierungsstatus (Anzeige)
+
+**Datenbank:**
+- Neue Spalten in `users`:
+  - `two_factor_enabled` (TINYINT)
+  - `email_verified` (TINYINT)
+  - `receive_newsletter` (TINYINT)
+  - `calendar_sync` (TINYINT)
+  - `visibility_status` (VARCHAR)
+  - `auto_decline_events` (TINYINT)
+
+**Migration:**
+- `/migrations/auto/20251110_settings_erweitert.sql`
+
+**Testing:**
+- ✅ PHP Syntax Check erfolgreich
+- ✅ Commit & Push erfolgreich
+- ⏳ Automatisches Deployment läuft
+
+---
