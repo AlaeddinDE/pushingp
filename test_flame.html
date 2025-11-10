@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Flammen Richtungs-Test</title>
+    <style>
+        body { 
+            background: #1a1a2e; 
+            padding: 50px; 
+            font-family: Arial, sans-serif;
+        }
+        .test-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            max-width: 1200px;
+        }
+        .test-box {
+            text-align: center;
+            background: rgba(255,255,255,0.05);
+            padding: 30px;
+            border-radius: 16px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+        }
+        .rocket-container {
+            position: relative;
+            display: inline-block;
+            margin: 30px;
+        }
+        .rocket {
+            font-size: 6rem;
+            display: block;
+            transform: rotate(-45deg);
+        }
+        .flame {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            font-size: 3rem;
+        }
+        .label {
+            color: white;
+            font-size: 1rem;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .code {
+            color: #8b5cf6;
+            font-size: 0.8rem;
+            font-family: monospace;
+            margin-top: 10px;
+        }
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+    </style>
+</head>
+<body>
+    <h1>FLAMMEN RICHTUNGS-TEST FÜR RAKETE</h1>
+    <p style="color: white; text-align: center;">Die Rakete ist mit -45deg gedreht (zeigt nach oben)</p>
+    
+    <div class="test-container">
+        <div class="test-box">
+            <div class="label">FLAMME 0deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(0deg);">🔥</div>
+            </div>
+            <div class="code">rotate(0deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME -45deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(-45deg);">🔥</div>
+            </div>
+            <div class="code">rotate(-45deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME 45deg</div>
+            <div class="rocket-container">
+                <div class="rocket">��</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(45deg);">🔥</div>
+            </div>
+            <div class="code">rotate(45deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME 90deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(90deg);">🔥</div>
+            </div>
+            <div class="code">rotate(90deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME 135deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(135deg);">🔥</div>
+            </div>
+            <div class="code">rotate(135deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME 180deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(180deg);">🔥</div>
+            </div>
+            <div class="code">rotate(180deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME 225deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(225deg);">🔥</div>
+            </div>
+            <div class="code">rotate(225deg)</div>
+        </div>
+        
+        <div class="test-box">
+            <div class="label">FLAMME -90deg</div>
+            <div class="rocket-container">
+                <div class="rocket">🚀</div>
+                <div class="flame" style="transform: translateX(-50%) rotate(-90deg);">🔥</div>
+            </div>
+            <div class="code">rotate(-90deg)</div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 40px; padding: 30px; background: rgba(16, 185, 129, 0.1); border-radius: 16px; border: 2px solid #10b981;">
+        <p style="color: white; font-size: 1.3rem; text-align: center; margin: 0;">
+            Welche Flamme zeigt nach UNTEN aus der Rakete?
+        </p>
+    </div>
+</body>
+</html>

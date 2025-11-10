@@ -173,12 +173,51 @@ if ($result) {
         .game-modal-content {
             background: var(--bg-tertiary);
             border-radius: 24px;
-            padding: 40px;
-            max-width: 800px;
-            width: 100%;
-            max-height: 90vh;
+            padding: 32px;
+            max-width: 900px;
+            width: 95%;
+            max-height: 95vh;
             overflow-y: auto;
             position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .game-modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        
+        .game-modal-content::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+            border-radius: 4px;
+        }
+        
+        .game-modal-content::-webkit-scrollbar-thumb {
+            background: var(--accent);
+            border-radius: 4px;
+        }
+        
+        .game-modal-content::-webkit-scrollbar-thumb:hover {
+            background: var(--success);
+        }
+        
+        /* Crash Game specific adjustments */
+        #crashModal .game-modal-content {
+            max-height: 98vh;
+            padding: 24px;
+        }
+        
+        #crashModal .crash-graph {
+            height: 400px;
+            min-height: 400px;
+        }
+        
+        #crashModal h2 {
+            margin-bottom: 12px;
+        }
+        
+        #crashModal p {
+            margin-bottom: 12px;
         }
         
         .modal-close {
@@ -644,7 +683,7 @@ if ($result) {
             position: absolute;
             left: 50%;
             bottom: 150px;
-            transform: translateX(-50%) rotate(270deg);
+            transform: translateX(-50%) rotate(-45deg);
             font-size: 5rem;
             filter: drop-shadow(0 0 20px rgba(255,100,0,0.8)) 
                     drop-shadow(0 0 40px rgba(255,200,0,0.6));
@@ -661,9 +700,9 @@ if ($result) {
         }
         
         @keyframes rocketShake {
-            0%, 100% { transform: translateX(-50%) rotate(270deg); }
-            25% { transform: translateX(-48%) rotate(268deg); }
-            75% { transform: translateX(-52%) rotate(272deg); }
+            0%, 100% { transform: translateX(-50%) rotate(-45deg); }
+            25% { transform: translateX(-48%) rotate(-47deg); }
+            75% { transform: translateX(-52%) rotate(-43deg); }
         }
         
         @keyframes rocketGlow {
@@ -692,7 +731,7 @@ if ($result) {
                 transform: translateX(-50%) rotate(-60deg) scale(0.9);
             }
             80% {
-                transform: translateX(-30%) rotate(270deg) scale(0.6);
+                transform: translateX(-30%) rotate(-45deg) scale(0.6);
             }
             100% {
                 transform: translateX(-50%) rotate(180deg) scale(0.2);
@@ -705,7 +744,7 @@ if ($result) {
             position: absolute;
             bottom: -40px;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translateX(-50%) rotate(-45deg);
             font-size: 3rem;
             opacity: 0;
         }
@@ -717,11 +756,11 @@ if ($result) {
         
         @keyframes flameFlicker {
             0%, 100% { 
-                transform: translateX(-50%) scaleY(1);
+                transform: translateX(-50%) rotate(-45deg) scaleY(1);
                 filter: brightness(1);
             }
             50% { 
-                transform: translateX(-50%) scaleY(1.3);
+                transform: translateX(-50%) rotate(-45deg) scaleY(1.3);
                 filter: brightness(1.5);
             }
         }
@@ -1378,15 +1417,21 @@ if ($result) {
 
     <!-- CRASH MODAL -->
     <div class="game-modal" id="crashModal">
-        <div class="game-modal-content">
+        <div class="game-modal-content" style="max-width: 1000px; padding: 20px;">
             <button class="modal-close" onclick="closeGame('crash')">×</button>
-            <h2 style="font-size: 2rem; margin-bottom: 8px;">🚀 Crash</h2>
-            <p style="color: var(--text-secondary); margin-bottom: 24px;">Cashout bevor es crasht!</p>
-            
-            <div class="balance-display">
-                <div class="balance-label">Dein Guthaben</div>
-                <div class="balance-value" id="crashBalance"><?= number_format($balance, 2, ',', '.') ?> €</div>
-            </div>
+            <div style="display: grid; grid-template-columns: 1fr; gap: 16px;">
+                
+                <!-- Header kompakt -->
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <h2 style="font-size: 1.75rem; margin: 0;">🚀 Crash</h2>
+                        <p style="color: var(--text-secondary); margin: 4px 0 0 0; font-size: 0.875rem;">Cashout bevor es crasht!</p>
+                    </div>
+                    <div class="balance-display" style="margin: 0;">
+                        <div class="balance-label" style="font-size: 0.75rem;">Guthaben</div>
+                        <div class="balance-value" id="crashBalance" style="font-size: 1.5rem;"><?= number_format($balance, 2, ',', '.') ?> €</div>
+                    </div>
+                </div>
 
             <div class="crash-graph" id="crashGraph">
                 <div class="crash-sky">
@@ -1489,30 +1534,27 @@ if ($result) {
             </div>
 
 
-            <!-- Control Panel -->
+            <!-- Control Panel - Kompakt -->
             <div style="background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1)); 
                         border: 2px solid var(--border); 
-                        border-radius: 20px; 
-                        padding: 24px; 
-                        margin-top: 20px;
-                        box-shadow: 0 10px 40px rgba(0,0,0,0.3);">
+                        border-radius: 16px; 
+                        padding: 16px;">
                 
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 8px;">EINSATZ WÄHLEN</div>
-                    <div class="quick-bet-btns" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;">
-                        <button class="quick-bet-btn" onclick="setCrashBet(1)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
+                    <div class="quick-bet-btns" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(1)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #8b5cf6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);">
                             💰 1€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(5)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(5)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #10b981; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
                             💵 5€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(10)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(10)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #f59e0b; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">
                             💸 10€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(25)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(25)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #3b82f6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
                             💎 25€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(50)" style="min-width: 70px; background: linear-gradient(135deg, var(--bg-tertiary), var(--bg-secondary)); border: 2px solid var(--accent); transition: all 0.3s;">
+                        <button class="quick-bet-btn" onclick="setCrashBet(50)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #ef4444; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);">
                             👑 50€
                         </button>
                     </div>
@@ -1520,16 +1562,16 @@ if ($result) {
 
                 <div class="bet-input-group" style="display: flex; gap: 12px; align-items: stretch;">
                     <div style="flex: 1; position: relative;">
-                        <div style="position: absolute; left: 16px; top: 50%; transform: translateY(-50%); font-size: 1.25rem; color: var(--accent); font-weight: 900;">💵</div>
+                        <div style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--accent); font-weight: 900;">💵</div>
                         <input type="number" class="bet-input" id="crashBet" value="5" min="0.5" max="50" step="0.5" 
-                               style="padding-left: 48px; height: 60px; font-size: 1.5rem; font-weight: 900; text-align: center; border: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 16px;">
+                               style="padding-left: 38px; height: 50px; font-size: 1.25rem; font-weight: 900; text-align: center; border: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 12px;">
                     </div>
                     <button class="bet-btn" id="crashStartBtn" onclick="startCrash()" 
-                            style="flex: 1; height: 60px; font-size: 1.25rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); border: 3px solid #10b981; border-radius: 16px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s;">
+                            style="flex: 1; height: 50px; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, #10b981, #059669); border: 3px solid #10b981; border-radius: 12px; box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s;">
                         🚀 START
                     </button>
                     <button class="bet-btn" id="crashCashoutBtn" onclick="cashoutCrash()" 
-                            style="display: none; flex: 1; height: 60px; font-size: 1.25rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #d97706); border: 3px solid #f59e0b; border-radius: 16px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s; animation: cashoutPulse 1s ease-in-out infinite;">
+                            style="display: none; flex: 1; height: 50px; font-size: 1.1rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #d97706); border: 3px solid #f59e0b; border-radius: 12px; box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s; animation: cashoutPulse 1s ease-in-out infinite;">
                         💰 CASHOUT
                     </button>
                 </div>
@@ -1561,14 +1603,10 @@ if ($result) {
                 </style>
             </div>
 
-            <div class="win-message" id="crashWin"></div>
-            <div class="loss-message" id="crashLoss"></div>
-
-            <div style="margin-top: 24px; padding: 20px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(16, 185, 129, 0.1)); border: 2px solid var(--border); border-radius: 16px; font-size: 0.95rem; color: var(--text-secondary); text-align: center;">
-                <div style="font-size: 1.5rem; margin-bottom: 8px;">🚀</div>
-                <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">Wie funktioniert's?</div>
-                Der Multiplikator steigt während die Rakete fliegt. Steige jederzeit aus und sichere deinen Gewinn! Aber Vorsicht: Wenn die Rakete crasht, ist alles weg! 💥
-            </div>
+            <div class="win-message" id="crashWin" style="margin-top: 12px;"></div>
+            <div class="loss-message" id="crashLoss" style="margin-top: 12px;"></div>
+            
+            </div><!-- Close grid -->
         </div>
     </div>
 
