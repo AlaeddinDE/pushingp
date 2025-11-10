@@ -957,3 +957,24 @@ Jede Transaktion kann komplett bearbeitet werden:
 - Daten beginnen exakt am 01.01.2026 (keine Offset-Probleme)
 - Verwendete Schichttypen: `early`, `late`, `night`, `free`, `vacation`
 
+
+## [2025-11-10] Extended Settings with useful options
+- **Migration:** `/migrations/auto/20251110_add_user_settings_fields.sql`
+- **Added Database Fields:**
+  - `phone` (VARCHAR 20) - Telefonnummer für Notfälle
+  - `birthday` (DATE) - Geburtstag für Team-Events
+  - `team_role` (VARCHAR 100) - Rolle im Team (Event-Manager, Kassenwart, etc.)
+  - `city` (VARCHAR 100) - Stadt/Standort
+  - `event_notifications` (TINYINT 1) - Event-Benachrichtigungen
+  - `shift_notifications` (TINYINT 1) - Schicht-Erinnerungen
+- **Settings Page Updates:**
+  - Removed: Theme selector, Sprache, "Profil für andere sichtbar"
+  - Added: Telefonnummer, Geburtstag, Rolle im Team, Stadt/Standort
+  - Reorganized: Separate "Benachrichtigungen" section with granular controls
+  - New notification options: Allgemein, Event-Erinnerungen, Schicht-Erinnerungen
+- **Features:**
+  - 🎯 Team-Rollen: Event-Manager, Kassenwart, Schichtkoordinator, Social Media, Technik, Member
+  - 📱 Kontaktinformationen für bessere Teamkommunikation
+  - 🎂 Geburtstage für automatische Benachrichtigungen
+  - 🌍 Standortinformationen für lokale Organisation
+  - 🔔 Granulare Benachrichtigungseinstellungen

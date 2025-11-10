@@ -51,6 +51,11 @@ $stmt->close();
 $next_events = [];
 $result = $conn->query("SELECT id, title, datum, start_time, location, cost FROM events WHERE event_status = 'active' AND datum >= CURDATE() ORDER BY datum ASC, start_time ASC LIMIT 5");
 if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
+
+// Aktive Crew Members
+$crew_members = [];
+$result = $conn->query("SELECT id, name, username, created_at FROM users WHERE status = 'active' ORDER BY name ASC");
+if ($result) while ($row = $result->fetch_assoc()) $crew_members[] = $row;
 ?>
 <!DOCTYPE html>
 <html lang="de">
@@ -152,6 +157,71 @@ if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
                 <div class="stat-label">Crew Members</div>
             </div>
         </div>
+
+        <!-- Kommende Events Section -->
+        <?php if (!empty($next_events)): ?>
+        <div class="section" style="margin-bottom: 32px;">
+            <div class="section-header">
+                <span>🎉</span>
+                <h2 class="section-title">Kommende Events</h2>
+            </div>
+            
+            <div style="display: grid; gap: 16px;">
+                <?php foreach ($next_events as $event): 
+                    try {
+                        $start_time = $event['start_time'] ?? '00:00:00';
+                        $event_date = new DateTime($event['datum'] . ' ' . $start_time);
+                        $now = new DateTime();
+                        $diff = $now->diff($event_date);
+                        
+                        if ($diff->invert == 0 && $diff->days == 0) {
+                            $time_info = '🔥 Heute';
+                        } elseif ($diff->invert == 0 && $diff->days == 1) {
+                            $time_info = '⚡ Morgen';
+                        } elseif ($diff->invert == 0 && $diff->days <= 7) {
+                            $time_info = 'In ' . $diff->days . ' Tagen';
+                        } else {
+                            $time_info = $event_date->format('d.m.Y');
+                        }
+                    } catch (Exception $e) {
+                        $event_date = null;
+                        $time_info = '📅 Bald';
+                    }
+                    
+                    if (!$event_date) continue;
+                ?>
+                <div style="background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%); padding: 24px; border-radius: 12px; border-left: 4px solid var(--accent); transition: all 0.3s; cursor: pointer;" 
+                     onmouseover="this.style.transform='translateX(8px)'; this.style.boxShadow='0 8px 24px rgba(139,92,246,0.3)';" 
+                     onmouseout="this.style.transform='translateX(0)'; this.style.boxShadow='none';">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div>
+                            <div style="font-size: 1.5rem; font-weight: 800; margin-bottom: 8px;">
+                                <?= htmlspecialchars($event['title']) ?>
+                            </div>
+                            <div style="display: flex; gap: 16px; color: var(--text-secondary); font-size: 0.875rem;">
+                                <span>📅 <?= $event_date->format('d.m.Y') ?></span>
+                                <span>🕐 <?= $event_date->format('H:i') ?> Uhr</span>
+                                <?php if ($event['location']): ?>
+                                    <span>📍 <?= htmlspecialchars($event['location']) ?></span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="padding: 8px 16px; background: var(--accent); color: white; border-radius: 8px; font-weight: 700; font-size: 0.875rem; margin-bottom: 8px;">
+                                <?= $time_info ?>
+                            </div>
+                            <?php if ($event['cost'] > 0): ?>
+                                <div style="font-size: 1.25rem; font-weight: 700; color: #10b981;">
+                                    <?= number_format($event['cost'], 2, ',', '.') ?> €
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Live Schichten Timeline (24h) -->
         <div class="section" style="margin-bottom: 32px;">
@@ -313,84 +383,73 @@ if ($result) while ($row = $result->fetch_assoc()) $next_events[] = $row;
         setInterval(() => location.reload(), 30000);
         </script>
 
-        <div class="grid">
-            <!-- Schichten der nächsten 24 Stunden -->
-            <div class="section" style="grid-column: 1 / -1;">
-                <div class="section-header">
-                    <span>🕐</span>
-                    <h2 class="section-title">Schichten nächste 24 Stunden</h2>
-                </div>
-                <?php if (empty($next_24h_shifts)): ?>
-                    <div class="empty-state">Keine Schichten in den nächsten 24 Stunden</div>
-                <?php else: ?>
-                    <div style="display: grid; gap: 12px;">
-                        <?php foreach($next_24h_shifts as $shift): ?>
-                        <div style="padding: 16px; background: var(--bg-tertiary); border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <div style="font-weight: 600; font-size: 1.125rem;">
-                                    <?= htmlspecialchars($shift['name']) ?>
-                                </div>
-                                <div style="color: var(--text-secondary); font-size: 0.875rem; margin-top: 4px;">
-                                    📅 <?= date('d.m.Y H:i', strtotime($shift['startzeit'])) ?> Uhr
-                                </div>
-                            </div>
-                            <div style="padding: 8px 16px; background: var(--accent); color: white; border-radius: 6px; font-weight: 600;">
-                                🔴 Live
-                            </div>
-                        </div>
-                        <?php endforeach; ?>
+        <!-- Crew Members Section -->
+        <div class="section" style="margin-top: 32px;">
+            <div class="section-header">
+                <span>👥</span>
+                <h2 class="section-title">Aktive Crew Members</h2>
+                <span style="color: var(--text-secondary); font-size: 0.875rem;"><?= count($crew_members) ?> Mitglieder</span>
+            </div>
+            
+            <div style="background: var(--bg-tertiary); padding: 24px; border-radius: 12px;">
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px;">
+                <?php 
+                $colors = ['#8b5cf6', '#ec4899', '#f59e0b', '#10b981', '#3b82f6', '#ef4444', '#14b8a6', '#f97316'];
+                $color_index = 0;
+                foreach ($crew_members as $member): 
+                    $member_color = $colors[$color_index % count($colors)];
+                    $color_index++;
+                    
+                    // Avatar-Initialen
+                    $name_parts = explode(' ', $member['name']);
+                    $initials = '';
+                    if (count($name_parts) >= 2) {
+                        $initials = strtoupper(substr($name_parts[0], 0, 1) . substr($name_parts[1], 0, 1));
+                    } else {
+                        $initials = strtoupper(substr($member['name'], 0, 2));
+                    }
+                    
+                    // Member seit
+                    $joined = new DateTime($member['created_at']);
+                    $now = new DateTime();
+                    $member_diff = $joined->diff($now);
+                    if ($member_diff->y > 0) {
+                        $member_since = $member_diff->y . ' Jahr' . ($member_diff->y > 1 ? 'e' : '');
+                    } elseif ($member_diff->m > 0) {
+                        $member_since = $member_diff->m . ' Monat' . ($member_diff->m > 1 ? 'e' : '');
+                    } else {
+                        $member_since = 'Neu';
+                    }
+                ?>
+                <div style="background: var(--bg-secondary); padding: 20px; border-radius: 12px; display: flex; align-items: center; gap: 16px; transition: all 0.3s; cursor: pointer; position: relative; overflow: hidden;"
+                     onmouseover="this.style.transform='translateY(-4px)'; this.style.boxShadow='0 8px 24px rgba(0,0,0,0.2)';"
+                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
+                    
+                    <!-- Gradient Overlay -->
+                    <div style="position: absolute; top: 0; right: 0; width: 100px; height: 100%; background: linear-gradient(90deg, transparent, <?= $member_color ?>15); pointer-events: none;"></div>
+                    
+                    <!-- Avatar -->
+                    <div style="width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, <?= $member_color ?>, <?= $member_color ?>CC); display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1.25rem; color: white; flex-shrink: 0; box-shadow: 0 4px 12px <?= $member_color ?>40;">
+                        <?= $initials ?>
                     </div>
-                <?php endif; ?>
-            </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <span>📅</span>
-                    <h2 class="section-title">Deine Schichten</h2>
-                </div>
-                <?php if (empty($my_shifts)): ?>
-                    <div class="empty-state">Keine Schichten geplant</div>
-                <?php else: ?>
-                    <?php foreach ($my_shifts as $shift): ?>
-                        <div class="list-item">
-                            <div>
-                                <div class="list-item-title"><?= date('d.m.Y', strtotime($shift['date'])) ?></div>
-                                <div class="list-item-meta"><?= $shift['start'] ?> – <?= $shift['end'] ?></div>
-                            </div>
-                            <span><?php
-                                $types = ['early' => '🌅 Früh', 'late' => '🌆 Spät', 'night' => '🌙 Nacht', 'day' => '☀️ Tag'];
-                                echo $types[$shift['type']] ?? $shift['type'];
-                            ?></span>
+                    
+                    <!-- Info -->
+                    <div style="flex: 1; min-width: 0;">
+                        <div style="font-weight: 700; font-size: 1.125rem; margin-bottom: 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                            <?= htmlspecialchars($member['name']) ?>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
-            </div>
-
-            <div class="section">
-                <div class="section-header">
-                    <span>🎉</span>
-                    <h2 class="section-title">Nächste Events</h2>
-                </div>
-                <?php if (empty($next_events)): ?>
-                    <div class="empty-state">Keine Events geplant</div>
-                <?php else: ?>
-                    <?php foreach ($next_events as $event): ?>
-                        <div class="list-item">
-                            <div>
-                                <div class="list-item-title"><?= escape($event['title']) ?></div>
-                                <div class="list-item-meta">
-                                    <?= date('d.m.Y H:i', strtotime($event['start_time'])) ?>
-                                    <?php if ($event['location']): ?>
-                                        • <?= escape($event['location']) ?>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                            <?php if ($event['cost'] > 0): ?>
-                                <span class="text-success" style="font-weight: 600;"><?= number_format($event['cost'], 2) ?> €</span>
-                            <?php endif; ?>
+                        <div style="color: var(--text-secondary); font-size: 0.875rem; display: flex; align-items: center; gap: 8px;">
+                            <span>@<?= htmlspecialchars($member['username']) ?></span>
+                            <span style="color: <?= $member_color ?>;">•</span>
+                            <span><?= $member_since ?></span>
                         </div>
-                    <?php endforeach; ?>
-                <?php endif; ?>
+                    </div>
+                    
+                    <!-- Active Badge -->
+                    <div style="width: 8px; height: 8px; border-radius: 50%; background: #10b981; box-shadow: 0 0 0 3px #10b98133; flex-shrink: 0;"></div>
+                </div>
+                <?php endforeach; ?>
+            </div>
             </div>
         </div>
     </div>

@@ -8,10 +8,10 @@ $user_id = get_current_user_id();
 $is_admin = is_admin();
 
 // Load user data
-$stmt = $conn->prepare("SELECT username, name, email, avatar, shift_enabled, bio, discord_tag, aktiv_ab, inaktiv_ab, notifications_enabled, theme, language, profile_visible FROM users WHERE id = ?");
+$stmt = $conn->prepare("SELECT username, name, email, avatar, shift_enabled, bio, discord_tag, notifications_enabled, event_notifications, shift_notifications, phone, birthday, team_role, city, two_factor_enabled, email_verified, receive_newsletter, calendar_sync, visibility_status, auto_decline_events FROM users WHERE id = ?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
-$stmt->bind_result($username, $name, $email, $avatar, $shift_enabled, $bio, $discord_tag, $aktiv_ab, $inaktiv_ab, $notifications_enabled, $theme, $language, $profile_visible);
+$stmt->bind_result($username, $name, $email, $avatar, $shift_enabled, $bio, $discord_tag, $notifications_enabled, $event_notifications, $shift_notifications, $phone, $birthday, $team_role, $city, $two_factor_enabled, $email_verified, $receive_newsletter, $calendar_sync, $visibility_status, $auto_decline_events);
 $stmt->fetch();
 $stmt->close();
 
@@ -28,9 +28,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $shift_enabled_new = isset($_POST['shift_enabled']) ? 1 : 0;
         $bio_new = trim($_POST['bio'] ?? '');
         $discord_tag_new = trim($_POST['discord_tag'] ?? '');
+        $phone_new = trim($_POST['phone'] ?? '');
+        $birthday_new = trim($_POST['birthday'] ?? '');
+        $team_role_new = trim($_POST['team_role'] ?? '');
+        $city_new = trim($_POST['city'] ?? '');
         
-        $stmt = $conn->prepare("UPDATE users SET name=?, email=?, avatar=?, shift_enabled=?, bio=?, discord_tag=? WHERE id=?");
-        $stmt->bind_param('sssissi', $name_new, $email_new, $avatar_new, $shift_enabled_new, $bio_new, $discord_tag_new, $user_id);
+        if (empty($birthday_new)) $birthday_new = null;
+        
+        $stmt = $conn->prepare("UPDATE users SET name=?, email=?, avatar=?, shift_enabled=?, bio=?, discord_tag=?, phone=?, birthday=?, team_role=?, city=? WHERE id=?");
+        $stmt->bind_param('ssssssssssi', $name_new, $email_new, $avatar_new, $shift_enabled_new, $bio_new, $discord_tag_new, $phone_new, $birthday_new, $team_role_new, $city_new, $user_id);
         $stmt->execute();
         $stmt->close();
         $success = 'Profil gespeichert!';
@@ -42,12 +48,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     
     if ($action === 'preferences') {
         $notifications_enabled_new = isset($_POST['notifications_enabled']) ? 1 : 0;
-        $theme_new = $_POST['theme'] ?? 'dark';
-        $language_new = $_POST['language'] ?? 'de';
-        $profile_visible_new = isset($_POST['profile_visible']) ? 1 : 0;
+        $event_notifications_new = isset($_POST['event_notifications']) ? 1 : 0;
+        $shift_notifications_new = isset($_POST['shift_notifications']) ? 1 : 0;
+        $receive_newsletter_new = isset($_POST['receive_newsletter']) ? 1 : 0;
+        $calendar_sync_new = isset($_POST['calendar_sync']) ? 1 : 0;
+        $auto_decline_events_new = isset($_POST['auto_decline_events']) ? 1 : 0;
+        $visibility_status_new = $_POST['visibility_status'] ?? 'online';
         
-        $stmt = $conn->prepare("UPDATE users SET notifications_enabled=?, theme=?, language=?, profile_visible=? WHERE id=?");
-        $stmt->bind_param('issii', $notifications_enabled_new, $theme_new, $language_new, $profile_visible_new, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET notifications_enabled=?, event_notifications=?, shift_notifications=?, receive_newsletter=?, calendar_sync=?, auto_decline_events=?, visibility_status=? WHERE id=?");
+        $stmt->bind_param('iiiiiisi', $notifications_enabled_new, $event_notifications_new, $shift_notifications_new, $receive_newsletter_new, $calendar_sync_new, $auto_decline_events_new, $visibility_status_new, $user_id);
         $stmt->execute();
         $stmt->close();
         $success = 'Einstellungen gespeichert!';
@@ -56,18 +65,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         exit;
     }
     
-    if ($action === 'activity') {
-        $aktiv_ab_new = $_POST['aktiv_ab'] ?? null;
-        $inaktiv_ab_new = $_POST['inaktiv_ab'] ?? null;
+    if ($action === 'security') {
+        $two_factor_enabled_new = isset($_POST['two_factor_enabled']) ? 1 : 0;
         
-        if (empty($aktiv_ab_new)) $aktiv_ab_new = null;
-        if (empty($inaktiv_ab_new)) $inaktiv_ab_new = null;
-        
-        $stmt = $conn->prepare("UPDATE users SET aktiv_ab=?, inaktiv_ab=? WHERE id=?");
-        $stmt->bind_param('ssi', $aktiv_ab_new, $inaktiv_ab_new, $user_id);
+        $stmt = $conn->prepare("UPDATE users SET two_factor_enabled=? WHERE id=?");
+        $stmt->bind_param('ii', $two_factor_enabled_new, $user_id);
         $stmt->execute();
         $stmt->close();
-        $success = 'Aktivitätszeitraum gespeichert!';
+        $success = 'Sicherheitseinstellungen gespeichert!';
         
         header('Location: settings.php?saved=1');
         exit;
@@ -255,8 +260,39 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
                     </div>
                     
                     <div class="form-group">
-                        <label>Discord Tag</label>
-                        <input type="text" name="discord_tag" value="<?= escape($discord_tag) ?>" placeholder="username#1234">
+                        <label>💬 Discord ID</label>
+                        <input type="text" name="discord_tag" value="<?= escape($discord_tag) ?>" placeholder="123456789012345678">
+                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Deine Discord User-ID für Verknüpfungen</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>📱 Telefonnummer</label>
+                        <input type="tel" name="phone" value="<?= escape($phone) ?>" placeholder="+49 123 456789">
+                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Für Notfälle & direkte Erreichbarkeit</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🎂 Geburtstag</label>
+                        <input type="date" name="birthday" value="<?= escape($birthday) ?>">
+                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Für Geburtstagswünsche & Team-Events</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🎯 Rolle im Team</label>
+                        <select name="team_role" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; width: 100%;">
+                            <option value="">-- Keine Rolle --</option>
+                            <option value="Event-Manager" <?= $team_role === 'Event-Manager' ? 'selected' : '' ?>>🎉 Event-Manager</option>
+                            <option value="Kassenwart" <?= $team_role === 'Kassenwart' ? 'selected' : '' ?>>💰 Kassenwart</option>
+                            <option value="Schichtkoordinator" <?= $team_role === 'Schichtkoordinator' ? 'selected' : '' ?>>📅 Schichtkoordinator</option>
+                            <option value="Social Media" <?= $team_role === 'Social Media' ? 'selected' : '' ?>>📱 Social Media</option>
+                            <option value="Technik" <?= $team_role === 'Technik' ? 'selected' : '' ?>>🔧 Technik</option>
+                            <option value="Member" <?= $team_role === 'Member' ? 'selected' : '' ?>>👤 Member</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>🌍 Stadt/Standort</label>
+                        <input type="text" name="city" value="<?= escape($city) ?>" placeholder="z.B. München">
                     </div>
                     
                     <div class="form-group">
@@ -306,87 +342,137 @@ if (isset($_GET['saved'])) $success = 'Änderungen gespeichert!';
             <div class="section">
                 <div class="section-header">
                     <span>⚙️</span>
-                    <h2 class="section-title">Einstellungen</h2>
+                    <h2 class="section-title">Benachrichtigungen & Präferenzen</h2>
                 </div>
                 <form method="POST">
                     <input type="hidden" name="action" value="preferences">
-                    
-                    <div class="form-group">
-                        <label>Theme</label>
-                        <div style="display: flex; gap: 12px;">
-                            <label style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s ease; <?= $theme === 'dark' ? 'border-color: #104186; background: rgba(16, 65, 134, 0.1);' : '' ?>">
-                                <input type="radio" name="theme" value="dark" <?= $theme === 'dark' ? 'checked' : '' ?> style="display: none;">
-                                <span style="<?= $theme === 'dark' ? 'color: #104186; font-weight: 600;' : '' ?>">🌙 Dark</span>
-                            </label>
-                            <label style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s ease; <?= $theme === 'light' ? 'border-color: #104186; background: rgba(16, 65, 134, 0.1);' : '' ?>">
-                                <input type="radio" name="theme" value="light" <?= $theme === 'light' ? 'checked' : '' ?> style="display: none;">
-                                <span style="<?= $theme === 'light' ? 'color: #104186; font-weight: 600;' : '' ?>">☀️ Light</span>
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Sprache</label>
-                        <div style="display: flex; gap: 12px;">
-                            <label style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s ease; <?= $language === 'de' ? 'border-color: #104186; background: rgba(16, 65, 134, 0.1);' : '' ?>">
-                                <input type="radio" name="language" value="de" <?= $language === 'de' ? 'checked' : '' ?> style="display: none;">
-                                <span style="<?= $language === 'de' ? 'color: #104186; font-weight: 600;' : '' ?>">🇩🇪 Deutsch</span>
-                            </label>
-                            <label style="flex: 1; padding: 12px; border: 2px solid var(--border); border-radius: 8px; cursor: pointer; text-align: center; transition: all 0.3s ease; <?= $language === 'en' ? 'border-color: #104186; background: rgba(16, 65, 134, 0.1);' : '' ?>">
-                                <input type="radio" name="language" value="en" <?= $language === 'en' ? 'checked' : '' ?> style="display: none;">
-                                <span style="<?= $language === 'en' ? 'color: #104186; font-weight: 600;' : '' ?>">🇬🇧 English</span>
-                            </label>
-                        </div>
-                    </div>
                     
                     <div class="form-group">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
                             <input type="checkbox" name="notifications_enabled" value="1" <?= $notifications_enabled ? 'checked' : '' ?> style="width: auto; margin: 0;">
                             <span>🔔 Benachrichtigungen aktivieren</span>
                         </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Allgemeine Benachrichtigungen für alle Aktivitäten</small>
                     </div>
                     
                     <div class="form-group">
                         <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
-                            <input type="checkbox" name="profile_visible" value="1" <?= $profile_visible ? 'checked' : '' ?> style="width: auto; margin: 0;">
-                            <span>👁️ Profil für andere sichtbar</span>
+                            <input type="checkbox" name="event_notifications" value="1" <?= $event_notifications ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>🎉 Event-Erinnerungen</span>
                         </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Benachrichtigungen für anstehende Events</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="shift_notifications" value="1" <?= $shift_notifications ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>⏰ Schicht-Erinnerungen</span>
+                        </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Erinnerung vor Schichtbeginn</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="receive_newsletter" value="1" <?= $receive_newsletter ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>📧 Team-Newsletter erhalten</span>
+                        </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Regelmäßige Updates über Team-Aktivitäten</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="calendar_sync" value="1" <?= $calendar_sync ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>📅 Kalender-Synchronisation</span>
+                        </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Synchronisiere Events mit deinem Kalender (Google/Outlook)</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="auto_decline_events" value="1" <?= $auto_decline_events ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>🚫 Auto-Ablehnung bei Konflikten</span>
+                        </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Lehne Events automatisch ab, wenn du Schicht hast</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>👁️ Sichtbarkeitsstatus</label>
+                        <select name="visibility_status" style="padding: 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--bg-secondary); color: var(--text-primary); font-size: 1rem; width: 100%;">
+                            <option value="online" <?= $visibility_status === 'online' ? 'selected' : '' ?>>🟢 Online - Für alle sichtbar</option>
+                            <option value="away" <?= $visibility_status === 'away' ? 'selected' : '' ?>>🟡 Abwesend - Eingeschränkt verfügbar</option>
+                            <option value="busy" <?= $visibility_status === 'busy' ? 'selected' : '' ?>>🔴 Beschäftigt - Bitte nicht stören</option>
+                            <option value="invisible" <?= $visibility_status === 'invisible' ? 'selected' : '' ?>>⚫ Unsichtbar - Offline erscheinen</option>
+                        </select>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Wie möchtest du für andere Mitglieder erscheinen?</small>
                     </div>
                     
                     <button type="submit" class="btn">Einstellungen speichern</button>
                 </form>
+                
+                <div style="margin-top: 24px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                    <p class="text-secondary" style="font-size: 0.875rem;">
+                        💡 Du kannst einzelne Benachrichtigungen gezielt aktivieren oder deaktivieren.
+                    </p>
+                </div>
             </div>
             
             <div class="section">
                 <div class="section-header">
-                    <span>📅</span>
-                    <h2 class="section-title">Aktivitätszeitraum</h2>
+                    <span>🔒</span>
+                    <h2 class="section-title">Sicherheit & Datenschutz</h2>
                 </div>
                 <form method="POST">
-                    <input type="hidden" name="action" value="activity">
+                    <input type="hidden" name="action" value="security">
                     
                     <div class="form-group">
-                        <label>Aktiv ab</label>
-                        <input type="date" name="aktiv_ab" value="<?= escape($aktiv_ab) ?>">
-                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Ab wann bist du im Team aktiv?</small>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; text-transform: none;">
+                            <input type="checkbox" name="two_factor_enabled" value="1" <?= $two_factor_enabled ? 'checked' : '' ?> style="width: auto; margin: 0;">
+                            <span>🔐 Zwei-Faktor-Authentifizierung (2FA)</span>
+                        </label>
+                        <small style="color: var(--text-secondary); font-size: 0.875rem; margin-left: 28px;">Zusätzliche Sicherheitsebene beim Login</small>
                     </div>
                     
-                    <div class="form-group">
-                        <label>Inaktiv ab</label>
-                        <input type="date" name="inaktiv_ab" value="<?= escape($inaktiv_ab) ?>">
-                        <small style="color: var(--text-secondary); font-size: 0.875rem;">Optionales Austrittsdatum</small>
-                    </div>
-                    
-                    <button type="submit" class="btn">Zeitraum speichern</button>
+                    <button type="submit" class="btn">Sicherheit speichern</button>
                 </form>
                 
                 <div style="margin-top: 24px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
+                    <div style="display: flex; align-items: start; gap: 12px;">
+                        <?php if ($email_verified): ?>
+                            <span style="color: #10b981; font-size: 1.5rem;">✓</span>
+                            <div>
+                                <div style="font-weight: 600; color: #10b981; margin-bottom: 4px;">E-Mail verifiziert</div>
+                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">Deine E-Mail-Adresse wurde bestätigt</p>
+                            </div>
+                        <?php else: ?>
+                            <span style="color: #f59e0b; font-size: 1.5rem;">⚠️</span>
+                            <div>
+                                <div style="font-weight: 600; color: #f59e0b; margin-bottom: 4px;">E-Mail nicht verifiziert</div>
+                                <p class="text-secondary" style="font-size: 0.875rem; margin: 0;">Bitte bestätige deine E-Mail-Adresse</p>
+                            </div>
+                        <?php endif; ?>
+                    </div>
+                </div>
+                
+                <div style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
                     <p class="text-secondary" style="font-size: 0.875rem;">
-                        💡 Diese Daten helfen bei der Verwaltung und Statistiken.
+                        💡 2FA erhöht die Sicherheit deines Accounts erheblich. Wir empfehlen die Aktivierung.
                     </p>
                 </div>
             </div>
         </div>
     </div>
+    
+    <script>
+        // Smooth animations on form groups
+        document.querySelectorAll('.form-group').forEach((group, index) => {
+            group.style.opacity = '0';
+            group.style.transform = 'translateY(10px)';
+            setTimeout(() => {
+                group.style.transition = 'all 0.5s ease';
+                group.style.opacity = '1';
+                group.style.transform = 'translateY(0)';
+            }, index * 50);
+        });
+    </script>
 </body>
 </html>
