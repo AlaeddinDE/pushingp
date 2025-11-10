@@ -26,6 +26,7 @@ $query = "
     FROM transaktionen t
     WHERE t.status = 'gebucht'
     AND t.datum >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
+    AND (t.beschreibung IS NULL OR t.beschreibung NOT LIKE '%Casino%')
     GROUP BY DATE(t.datum)
     ORDER BY tag ASC
 ";
@@ -51,6 +52,7 @@ $start_balance_query = "
     FROM transaktionen t
     WHERE t.status = 'gebucht'
     AND t.datum < DATE_SUB(CURDATE(), INTERVAL ? DAY)
+    AND (t.beschreibung IS NULL OR t.beschreibung NOT LIKE '%Casino%')
 ";
 
 $stmt = $conn->prepare($start_balance_query);
