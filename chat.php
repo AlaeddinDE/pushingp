@@ -1682,11 +1682,11 @@ while ($row = $groups_result->fetch_assoc()) {
                         align-items: center;
                         gap: 12px;
                         padding: 12px 16px;
-                        background: ${msg.sender_id === currentUserId ? 'rgba(139, 92, 246, 0.1)' : 'var(--bg-secondary)'};
+                        background: ${isOwn ? 'rgba(139, 92, 246, 0.1)' : 'var(--bg-secondary)'};
                         border-radius: 24px;
                         max-width: 280px;
                         position: relative;
-                        border: 1px solid ${msg.sender_id === currentUserId ? 'rgba(139, 92, 246, 0.2)' : 'var(--border)'};
+                        border: 1px solid ${isOwn ? 'rgba(139, 92, 246, 0.2)' : 'var(--border)'};
                     ">
                         <audio id="${audioId}" style="display: none;">
                             <source src="${msg.file_path}" type="audio/${ext}">
@@ -1723,7 +1723,7 @@ while ($row = $groups_result->fetch_assoc()) {
                                 return `<div class="wave-bar" style="
                                     width: 3px;
                                     height: ${20 + height * 0.4}%;
-                                    background: ${msg.sender_id === currentUserId ? 'var(--accent)' : 'var(--text-tertiary)'};
+                                    background: ${isOwn ? 'var(--accent)' : 'var(--text-tertiary)'};
                                     border-radius: 2px;
                                     transition: all 0.3s;
                                     opacity: 0.6;
