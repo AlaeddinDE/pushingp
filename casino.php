@@ -2079,7 +2079,25 @@ if ($result) {
                     </div>
                     
                     <!-- Hidden input for bet value -->
-                    <input type="hidden" id="slotsBet" value="1.00">
+                    <!-- Bet Input -->
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700; color: white; text-align: center;">💰 EINSATZ</label>
+                        <input type="number" id="slotsBet" value="1.00" min="0.01" max="10.00" step="0.01" 
+                               style="width: 100%; padding: 12px; background: rgba(0,0,0,0.3); border: 2px solid #a78bfa; 
+                                      border-radius: 12px; color: white; font-size: 1.125rem; font-weight: 700; text-align: center;">
+                        
+                        <!-- Quick Bet Buttons -->
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px;">
+                            <button class="quick-bet-btn" onclick="setSlotsQuickBet(0.50)" style="padding: 8px; background: rgba(139, 92, 246, 0.2); border: 2px solid #8b5cf6; border-radius: 8px; color: white; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">0.50€</button>
+                            <button class="quick-bet-btn" onclick="setSlotsQuickBet(1.00)" style="padding: 8px; background: rgba(16, 185, 129, 0.2); border: 2px solid #10b981; border-radius: 8px; color: white; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">1€</button>
+                            <button class="quick-bet-btn" onclick="setSlotsQuickBet(2.00)" style="padding: 8px; background: rgba(245, 158, 11, 0.2); border: 2px solid #f59e0b; border-radius: 8px; color: white; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">2€</button>
+                            <button class="quick-bet-btn" onclick="setSlotsQuickBet(5.00)" style="padding: 8px; background: rgba(59, 130, 246, 0.2); border: 2px solid #3b82f6; border-radius: 8px; color: white; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">5€</button>
+                            <button class="quick-bet-btn" onclick="setSlotsQuickBet(10.00)" style="padding: 8px; background: rgba(239, 68, 68, 0.2); border: 2px solid #ef4444; border-radius: 8px; color: white; font-weight: 700; font-size: 0.875rem; cursor: pointer; transition: all 0.2s;">10€</button>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.75rem; color: rgba(255,255,255,0.6); text-align: center;">
+                            Min: 0.01€ • Max: 10.00€
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Slot Machine Main Area -->
@@ -2390,7 +2408,24 @@ if ($result) {
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(25)">25€</button>
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(50)">50€</button>
                         </div>
-                        <input type="number" id="plinkoBet" value="1.00" min="0.01" max="10.00" step="0.01" readonly style="display: none;">
+                        <div style="margin: 16px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-primary);">💰 EINSATZ PRO BALL</label>
+                        <input type="number" id="plinkoBet" value="1.00" min="0.01" max="10.00" step="0.01" 
+                               style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); 
+                                      border-radius: 12px; color: var(--text-primary); font-size: 1.125rem; font-weight: 700; text-align: center;">
+                        
+                        <!-- Quick Bet Buttons -->
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px;">
+                            <button class="quick-bet-btn" onclick="setPlinkoQuickBet(0.50)">0.50€</button>
+                            <button class="quick-bet-btn" onclick="setPlinkoQuickBet(1.00)">1€</button>
+                            <button class="quick-bet-btn" onclick="setPlinkoQuickBet(2.00)">2€</button>
+                            <button class="quick-bet-btn" onclick="setPlinkoQuickBet(5.00)">5€</button>
+                            <button class="quick-bet-btn" onclick="setPlinkoQuickBet(10.00)">10€</button>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); text-align: center;">
+                            Min: 0.01€ • Max: 10.00€
+                        </div>
+                    </div>
                     </div>
                     
                     <!-- Multi-Ball Selection -->
@@ -2535,7 +2570,25 @@ if ($result) {
                         <button class="blackjack-bet-btn" onclick="setBlackjackBet(25)">25€</button>
                         <button class="blackjack-bet-btn" onclick="setBlackjackBet(50)">50€</button>
                     </div>
-                    <input type="hidden" id="blackjackBet" value="1.00">
+                    <!-- Bet Input -->
+                    <div style="margin: 20px 0;">
+                        <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-primary); text-align: center;">💰 EINSATZ</label>
+                        <input type="number" id="blackjackBet" value="1.00" min="0.01" max="10.00" step="0.01" 
+                               style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); 
+                                      border-radius: 12px; color: var(--text-primary); font-size: 1.125rem; font-weight: 700; text-align: center;">
+                        
+                        <!-- Quick Bet Buttons -->
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 12px;">
+                            <button class="quick-bet-btn" onclick="setBlackjackQuickBet(0.50)">0.50€</button>
+                            <button class="quick-bet-btn" onclick="setBlackjackQuickBet(1.00)">1€</button>
+                            <button class="quick-bet-btn" onclick="setBlackjackQuickBet(2.00)">2€</button>
+                            <button class="quick-bet-btn" onclick="setBlackjackQuickBet(5.00)">5€</button>
+                            <button class="quick-bet-btn" onclick="setBlackjackQuickBet(10.00)">10€</button>
+                        </div>
+                        <div style="margin-top: 8px; font-size: 0.75rem; color: var(--text-secondary); text-align: center;">
+                            Min: 0.01€ • Max: 10.00€
+                        </div>
+                    </div>
                 </div>
                 
                 <!-- Action Buttons -->
@@ -4219,6 +4272,10 @@ if ($result) {
             }
         });
     }
+    function setPlinkoQuickBet(amount) {
+        document.getElementById('plinkoBet').value = amount.toFixed(2);
+    }
+    
     
     function setPlinkoBet(amount) {
         if (plinkoDropping) return;
@@ -5106,6 +5163,10 @@ if ($result) {
         });
         event.target.closest('.blackjack-bet-btn').classList.add('active');
     }
+    function setBlackjackQuickBet(amount) {
+        document.getElementById('blackjackBet').value = amount.toFixed(2);
+    }
+    
     
     async function startBlackjack() {
         const bet = parseFloat(document.getElementById('blackjackBet').value);
