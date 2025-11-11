@@ -1366,11 +1366,322 @@ if ($result) {
     </div>
 
     <div class="container">
-        <div class="welcome">
-            <h1>🎰 PUSHING P CASINO</h1>
-            <p class="text-secondary">Setze dein Guthaben ein und gewinne groß!</p>
+        
+        <!-- KRASSES ANIMIERTES CASINO LOGO -->
+        <div class="casino-logo-container">
+            <div class="casino-logo-wrapper">
+                <div class="logo-glow"></div>
+                <div class="logo-text-main">
+                    <span class="logo-letter" style="--i:0">C</span>
+                    <span class="logo-letter" style="--i:1">A</span>
+                    <span class="logo-letter" style="--i:2">S</span>
+                    <span class="logo-letter" style="--i:3">I</span>
+                    <span class="logo-letter" style="--i:4">N</span>
+                    <span class="logo-letter" style="--i:5">O</span>
+                </div>
+                <div class="logo-coins">
+                    <div class="coin coin-1">💰</div>
+                    <div class="coin coin-2">🎰</div>
+                    <div class="coin coin-3">💎</div>
+                    <div class="coin coin-4">🎲</div>
+                </div>
+                <div class="logo-sparks">
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                    <div class="spark"></div>
+                </div>
+            </div>
+            <div class="logo-subtitle">
+                <span class="subtitle-text">PUSHING P</span>
+                <span class="subtitle-separator">•</span>
+                <span class="subtitle-tagline">BIG WINS AWAIT</span>
+            </div>
         </div>
-
+        
+        <style>
+            .casino-logo-container {
+                text-align: center;
+                margin: 40px 0 60px 0;
+                position: relative;
+            }
+            
+            .casino-logo-wrapper {
+                position: relative;
+                display: inline-block;
+                padding: 40px 60px;
+            }
+            
+            /* Animated Glow Background */
+            .logo-glow {
+                position: absolute;
+                inset: 0;
+                background: radial-gradient(circle at 50% 50%, 
+                    rgba(245, 158, 11, 0.3) 0%, 
+                    rgba(236, 72, 153, 0.2) 50%, 
+                    transparent 100%);
+                border-radius: 50%;
+                animation: logoGlowPulse 3s ease-in-out infinite;
+                filter: blur(40px);
+                z-index: 0;
+            }
+            
+            @keyframes logoGlowPulse {
+                0%, 100% { 
+                    transform: scale(1);
+                    opacity: 0.6;
+                }
+                50% { 
+                    transform: scale(1.3);
+                    opacity: 0.9;
+                }
+            }
+            
+            /* Main CASINO Text */
+            .logo-text-main {
+                position: relative;
+                font-size: 6rem;
+                font-weight: 900;
+                letter-spacing: 0.1em;
+                z-index: 2;
+                display: flex;
+                gap: 0.1em;
+                text-shadow: 
+                    0 0 10px rgba(255, 215, 0, 0.8),
+                    0 0 20px rgba(255, 165, 0, 0.6),
+                    0 0 30px rgba(255, 100, 0, 0.4),
+                    0 10px 40px rgba(0, 0, 0, 0.5);
+            }
+            
+            .logo-letter {
+                display: inline-block;
+                background: linear-gradient(
+                    180deg, 
+                    #FFD700 0%, 
+                    #FFA500 30%, 
+                    #FF8C00 60%, 
+                    #FF6347 100%
+                );
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+                animation: 
+                    logoLetterBounce 2s ease-in-out infinite,
+                    logoLetterShine 3s linear infinite;
+                animation-delay: calc(var(--i) * 0.1s);
+                position: relative;
+            }
+            
+            @keyframes logoLetterBounce {
+                0%, 100% { transform: translateY(0) rotateZ(0deg); }
+                25% { transform: translateY(-10px) rotateZ(-2deg); }
+                75% { transform: translateY(-5px) rotateZ(2deg); }
+            }
+            
+            @keyframes logoLetterShine {
+                0% { filter: brightness(1) hue-rotate(0deg); }
+                50% { filter: brightness(1.3) hue-rotate(10deg); }
+                100% { filter: brightness(1) hue-rotate(0deg); }
+            }
+            
+            /* Floating Coins */
+            .logo-coins {
+                position: absolute;
+                inset: 0;
+                z-index: 1;
+            }
+            
+            .coin {
+                position: absolute;
+                font-size: 2.5rem;
+                animation: coinFloat 4s ease-in-out infinite;
+                filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.6));
+            }
+            
+            .coin-1 {
+                top: 10%;
+                left: 5%;
+                animation-delay: 0s;
+            }
+            
+            .coin-2 {
+                top: 15%;
+                right: 5%;
+                animation-delay: 1s;
+            }
+            
+            .coin-3 {
+                bottom: 15%;
+                left: 10%;
+                animation-delay: 2s;
+            }
+            
+            .coin-4 {
+                bottom: 10%;
+                right: 10%;
+                animation-delay: 1.5s;
+            }
+            
+            @keyframes coinFloat {
+                0%, 100% {
+                    transform: translateY(0) rotate(0deg) scale(1);
+                }
+                25% {
+                    transform: translateY(-20px) rotate(90deg) scale(1.1);
+                }
+                50% {
+                    transform: translateY(-10px) rotate(180deg) scale(1);
+                }
+                75% {
+                    transform: translateY(-25px) rotate(270deg) scale(1.15);
+                }
+            }
+            
+            /* Sparkling Stars */
+            .logo-sparks {
+                position: absolute;
+                inset: 0;
+                z-index: 3;
+                pointer-events: none;
+            }
+            
+            .spark {
+                position: absolute;
+                width: 4px;
+                height: 4px;
+                background: #FFD700;
+                border-radius: 50%;
+                box-shadow: 
+                    0 0 10px #FFD700,
+                    0 0 20px #FFA500,
+                    0 0 30px #FF6347;
+                animation: sparkTwinkle 2s ease-in-out infinite;
+            }
+            
+            .spark:nth-child(1) {
+                top: 20%;
+                left: 20%;
+                animation-delay: 0s;
+            }
+            
+            .spark:nth-child(2) {
+                top: 30%;
+                right: 15%;
+                animation-delay: 0.5s;
+            }
+            
+            .spark:nth-child(3) {
+                bottom: 25%;
+                left: 15%;
+                animation-delay: 1s;
+            }
+            
+            .spark:nth-child(4) {
+                bottom: 30%;
+                right: 20%;
+                animation-delay: 1.5s;
+            }
+            
+            .spark:nth-child(5) {
+                top: 50%;
+                left: 5%;
+                animation-delay: 0.7s;
+            }
+            
+            .spark:nth-child(6) {
+                top: 50%;
+                right: 5%;
+                animation-delay: 1.2s;
+            }
+            
+            @keyframes sparkTwinkle {
+                0%, 100% {
+                    opacity: 0;
+                    transform: scale(0);
+                }
+                50% {
+                    opacity: 1;
+                    transform: scale(1.5);
+                }
+            }
+            
+            /* Subtitle */
+            .logo-subtitle {
+                position: relative;
+                z-index: 2;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                gap: 15px;
+                margin-top: -20px;
+                font-size: 1.2rem;
+                font-weight: 700;
+                letter-spacing: 0.3em;
+                color: #fff;
+                text-shadow: 
+                    0 0 10px rgba(139, 92, 246, 0.8),
+                    0 0 20px rgba(236, 72, 153, 0.6),
+                    0 3px 10px rgba(0, 0, 0, 0.5);
+                animation: subtitleGlow 2s ease-in-out infinite;
+            }
+            
+            @keyframes subtitleGlow {
+                0%, 100% {
+                    text-shadow: 
+                        0 0 10px rgba(139, 92, 246, 0.8),
+                        0 0 20px rgba(236, 72, 153, 0.6),
+                        0 3px 10px rgba(0, 0, 0, 0.5);
+                }
+                50% {
+                    text-shadow: 
+                        0 0 20px rgba(139, 92, 246, 1),
+                        0 0 40px rgba(236, 72, 153, 1),
+                        0 3px 15px rgba(0, 0, 0, 0.7);
+                }
+            }
+            
+            .subtitle-text {
+                background: linear-gradient(135deg, #8b5cf6, #ec4899);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            .subtitle-separator {
+                color: #f59e0b;
+                animation: separatorPulse 1.5s ease-in-out infinite;
+            }
+            
+            @keyframes separatorPulse {
+                0%, 100% { transform: scale(1); opacity: 0.7; }
+                50% { transform: scale(1.3); opacity: 1; }
+            }
+            
+            .subtitle-tagline {
+                background: linear-gradient(135deg, #f59e0b, #ef4444);
+                -webkit-background-clip: text;
+                -webkit-text-fill-color: transparent;
+                background-clip: text;
+            }
+            
+            /* Responsive */
+            @media (max-width: 768px) {
+                .logo-text-main {
+                    font-size: 3.5rem;
+                }
+                
+                .coin {
+                    font-size: 1.5rem;
+                }
+                
+                .logo-subtitle {
+                    font-size: 0.9rem;
+                }
+            }
+        </style>
+        
         <?php if ($casino_locked): ?>
             <div style="padding: 32px; background: linear-gradient(135deg, var(--error), #b91c1c); border-radius: 16px; text-align: center; margin: 32px 0;">
                 <div style="font-size: 3rem; margin-bottom: 16px;">🔒</div>
@@ -1456,6 +1767,80 @@ if ($result) {
                         <div class="game-stat-label">Max Win</div>
                         <div class="game-stat-value">∞</div>
                     </div>
+                </div>
+            </div>
+
+            <!-- BLACKJACK -->
+            <div class="game-card" id="openBlackjackBtn">
+                <span class="game-icon">🃏</span>
+                <div class="game-title">Blackjack</div>
+                <div class="game-desc">Klassisches Kartenspiel! Schlag den Dealer!</div>
+                <div class="game-stats">
+                    <div class="game-stat">
+                        <div class="game-stat-label">House Edge</div>
+                        <div class="game-stat-value">1%</div>
+                    </div>
+                    <div class="game-stat">
+                        <div class="game-stat-label">Blackjack</div>
+                        <div class="game-stat-value">2.5x</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- CHICKEN -->
+            <div class="game-card" id="openChickenBtn">
+                <span class="game-icon">🐔</span>
+                <div class="game-title">Chicken</div>
+                <div class="game-desc">Überquere die Straßen von links nach rechts! M = (1-h) / P(k)
+                <div class="game-stats">
+                    <div class="game-stat">
+                        <div class="game-stat-label">House Edge</div>
+                        <div class="game-stat-value">5%</div>
+                    </div>
+                    <div class="game-stat">
+                        <div class="game-stat-label">Max Win</div>
+                        <div class="game-stat-value">∞</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Multiplayer Lobby Section -->
+        <div style="margin-top: 48px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(239, 68, 68, 0.05)); 
+                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow: hidden;">
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+                <div style="display: flex; align-items: center; gap: 16px;">
+                    <div style="font-size: 3rem; animation: bounce 2s ease-in-out infinite;">🎲</div>
+                    <div>
+                        <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #f59e0b, #ef4444); 
+                                    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                            Multiplayer Lobby
+                        </h2>
+                        <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.875rem;">Spiele mit anderen Mitgliedern!</p>
+                    </div>
+                </div>
+                
+                <button onclick="showCreateTableModal()" style="
+                    padding: 12px 24px;
+                    background: linear-gradient(135deg, #f59e0b, #ef4444);
+                    border: none;
+                    border-radius: 12px;
+                    color: white;
+                    font-weight: 800;
+                    font-size: 1rem;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                    ➕ Tisch erstellen
+                </button>
+            </div>
+            
+            <!-- Active Tables Grid -->
+            <div id="multiplayerTablesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; min-height: 100px;">
+                <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1 / -1;">
+                    Lade Tische...
                 </div>
             </div>
         </div>
@@ -1975,7 +2360,7 @@ if ($result) {
 
     <!-- PLINKO MODAL -->
     <div class="game-modal" id="plinkoModal">
-        <div class="game-modal-content" style="max-width: 1100px; max-height: 95vh; overflow: hidden; padding: 20px;">
+        <div class="game-modal-content" style="max-width: 1400px; max-height: 98vh; overflow-y: auto; padding: 20px;">
             <button class="modal-close" onclick="closeGame('plinko')">×</button>
             
             <h2 style="font-size: 1.5rem; margin: 0 0 12px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
@@ -2010,21 +2395,23 @@ if ($result) {
                     <!-- Multi-Ball Selection -->
                     <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 2px solid rgba(16,185,129,0.3);">
                         <div style="font-size: 0.7rem; color: #10b981; font-weight: 700; margin-bottom: 5px; text-align: center; letter-spacing: 1px;">🎯 ANZAHL BÄLLE</div>
-                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 5px;">
                             <button class="plinko-balls-btn plinko-balls-active" onclick="setPlinkoBalls(1)">1</button>
                             <button class="plinko-balls-btn" onclick="setPlinkoBalls(5)">5</button>
                             <button class="plinko-balls-btn" onclick="setPlinkoBalls(10)">10</button>
                             <button class="plinko-balls-btn" onclick="setPlinkoBalls(25)">25</button>
-                            <button class="plinko-balls-btn" onclick="setPlinkoBalls(50)">50</button>
                         </div>
-                        <input type="number" id="plinkoBallCount" value="1" min="1" max="50" readonly style="display: none;">
+                        <input type="number" id="plinkoBallCount" value="1" min="1" max="25" readonly style="display: none;">
                     </div>
                 </div>
                 
                 <!-- Plinko Board -->
                 <div style="position: relative;">
-                    <canvas id="plinkoCanvas" width="1000" height="600" 
-                            style="width: 100%; max-width: 1000px; height: auto; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
+                    <div id="plinkoInstructions" style="display: none; position: absolute; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(139,92,246,0.95); padding: 12px 24px; border-radius: 12px; border: 2px solid #a78bfa; z-index: 10; text-align: center; font-weight: 700; color: #fff; box-shadow: 0 8px 30px rgba(139,92,246,0.8); pointer-events: none;">
+                        👆 Klicke oben auf das Spielfeld, um den Ball zu starten!
+                    </div>
+                    <canvas id="plinkoCanvas" width="1200" height="700" 
+                            style="width: 100%; max-width: 1200px; height: auto; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8); cursor: crosshair;"></canvas>
                 </div>
                 
                 <!-- Result Display -->
@@ -2033,7 +2420,8 @@ if ($result) {
                 <!-- Drop Button -->
                 <button id="plinkoDropBtn" onclick="dropBalls()" 
                         style="width: 100%; padding: 14px; font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 3px solid #a78bfa; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(139,92,246,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff;">
-                    🎯 BALL DROPPEN 🎯
+                    🎯 BÄLLE VORBEREITEN 🎯<br>
+                    <span style="font-size: 0.8rem; font-weight: 600; opacity: 0.9;">Bei 10+ Bällen: Klicke wo du willst, mehrfach möglich!</span>
                 </button>
                 
             </div>
@@ -2087,6 +2475,168 @@ if ($result) {
             opacity: 0.6;
             cursor: not-allowed;
             transform: scale(1);
+        }
+    </style>
+
+    <!-- BLACKJACK MODAL -->
+    <div class="game-modal" id="blackjackModal">
+        <div class="game-modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto; background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 4px solid #10b981;">
+            <button class="modal-close" onclick="closeGame('blackjack')">×</button>
+            
+            <div style="padding: 20px;"
+                <!-- Header -->
+                <div style="text-align: center; margin-bottom: 24px;">
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #fbbf24; text-shadow: 0 0 20px #fbbf24;">
+                        🃏 BLACKJACK 🃏
+                    </div>
+                    <div style="color: var(--text-secondary); margin-top: 8px;">Schlag den Dealer!</div>
+                </div>
+                
+                <!-- Balance Display -->
+                <div style="background: var(--bg-secondary); padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 20px; border: 2px solid #10b981;">
+                    <div style="font-size: 0.875rem; color: #10b981; font-weight: 700;">Verfügbares Guthaben</div>
+                    <div style="font-size: 2rem; font-weight: 900; color: #10b981;" id="blackjackBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
+                </div>
+                
+                <!-- Dealer Hand -->
+                <div style="margin-bottom: 32px;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">🎩 Dealer</div>
+                        <div style="font-size: 2rem; font-weight: 900; color: #8b5cf6;" id="blackjackDealerValue">?</div>
+                    </div>
+                    <div id="blackjackDealerCards" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 140px; align-items: center;">
+                        <!-- Dealer cards rendered here -->
+                    </div>
+                </div>
+                
+                <!-- Player Hand -->
+                <div style="margin-bottom: 24px;">
+                    <div style="text-align: center; margin-bottom: 12px;">
+                        <div style="font-size: 1.25rem; font-weight: 700; color: var(--text-primary);">👤 Du</div>
+                        <div style="font-size: 2rem; font-weight: 900; color: #10b981;" id="blackjackPlayerValue">0</div>
+                    </div>
+                    <div id="blackjackPlayerCards" style="display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; min-height: 140px; align-items: center;">
+                        <!-- Player cards rendered here -->
+                    </div>
+                </div>
+                
+                <!-- Result Display -->
+                <div id="blackjackResult" style="text-align: center; min-height: 80px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
+                </div>
+                
+                <!-- Bet Selection -->
+                <div style="margin-bottom: 20px;">
+                    <div style="text-align: center; margin-bottom: 12px; font-weight: 700; color: var(--text-secondary);">Einsatz wählen:</div>
+                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
+                        <button class="blackjack-bet-btn active" onclick="setBlackjackBet(1)">1€</button>
+                        <button class="blackjack-bet-btn" onclick="setBlackjackBet(5)">5€</button>
+                        <button class="blackjack-bet-btn" onclick="setBlackjackBet(10)">10€</button>
+                        <button class="blackjack-bet-btn" onclick="setBlackjackBet(25)">25€</button>
+                        <button class="blackjack-bet-btn" onclick="setBlackjackBet(50)">50€</button>
+                    </div>
+                    <input type="hidden" id="blackjackBet" value="1">
+                </div>
+                
+                <!-- Action Buttons -->
+                <div id="blackjackStart" style="display: block;">
+                    <button onclick="startBlackjack()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: white; font-weight: 800; font-size: 1.25rem; cursor: pointer; transition: all 0.2s;">
+                        🎲 Spiel starten
+                    </button>
+                </div>
+                
+                <div id="blackjackActions" style="display: none; gap: 12px;">
+                    <button onclick="blackjackHit()" style="flex: 1; padding: 14px; background: var(--accent); border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer;">
+                        👆 Hit
+                    </button>
+                    <button onclick="blackjackStand()" style="flex: 1; padding: 14px; background: #10b981; border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer;">
+                        ✋ Stand
+                    </button>
+                    <button onclick="blackjackDouble()" style="flex: 1; padding: 14px; background: #f59e0b; border: none; border-radius: 12px; color: white; font-weight: 700; cursor: pointer;">
+                        ⬆️ Double
+                    </button>
+                </div>
+                
+                <!-- Rules -->
+                <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.875rem; color: var(--text-secondary);">
+                    <div style="font-weight: 700; color: var(--text-primary); margin-bottom: 8px;">📋 Regeln:</div>
+                    <ul style="margin: 0; padding-left: 20px;">
+                        <li>Ziel: Komme näher an 21 als der Dealer, ohne zu überschreiten</li>
+                        <li>Bildkarten = 10, Ass = 1 oder 11, andere = Nennwert</li>
+                        <li>Blackjack (21 mit 2 Karten) zahlt 2.5x</li>
+                        <li>Dealer zieht bis 16, steht ab 17</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .bj-card {
+            width: 100px;
+            height: 140px;
+            background: white;
+            border-radius: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            transition: transform 0.2s;
+            animation: cardDeal 0.4s ease-out;
+        }
+        
+        .bj-card:hover {
+            transform: translateY(-4px);
+        }
+        
+        .bj-card-rank {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #000;
+        }
+        
+        .bj-card-suit {
+            font-size: 2.5rem;
+            margin-top: 4px;
+        }
+        
+        .bj-card-back {
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            color: white;
+            font-size: 4rem;
+        }
+        
+        .blackjack-bet-btn {
+            padding: 12px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .blackjack-bet-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+        
+        .blackjack-bet-btn.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        @keyframes cardDeal {
+            from {
+                transform: translateY(-100px) rotate(-10deg);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
         }
     </style>
 
@@ -2287,6 +2837,205 @@ if ($result) {
         </div>
     </div>
 
+    <!-- CHICKEN MODAL -->
+    <div class="game-modal" id="chickenModal">
+        <div class="game-modal-content" style="max-width: 900px;">
+            <button class="modal-close" onclick="closeGame('chicken')">×</button>
+            
+            <!-- Header -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <div>
+                    <h2 style="font-size: 2rem; margin: 0;">🐔 Chicken</h2>
+                    <p style="color: var(--text-secondary); margin: 4px 0 0 0;">Überquere die Straße ohne erwischt zu werden!</p>
+                </div>
+                <div class="balance-display" style="margin: 0;">
+                    <div class="balance-label">Guthaben</div>
+                    <div class="balance-value" id="chickenBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
+                </div>
+            </div>
+
+            <!-- Game Board - 10 VERTICAL STREETS -->
+            <div id="chickenBoard" style="background: #2a2a2a; 
+                                          border: 4px solid var(--border); 
+                                          border-radius: 20px; 
+                                          padding: 20px; 
+                                          height: 700px;
+                                          position: relative;
+                                          overflow: hidden;
+                                          box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                
+                <!-- Start Zone (Left Side) -->
+                <div style="position: absolute; 
+                            left: 0; 
+                            top: 0; 
+                            width: 80px; 
+                            height: 100%; 
+                            background: linear-gradient(135deg, #6B8E23, #556B2F);
+                            border-right: 4px dashed #FFD700;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-direction: column;
+                            z-index: 10;
+                            box-shadow: inset -5px 0 15px rgba(0,0,0,0.3);">
+                    <div style="font-size: 3rem; margin-bottom: 10px; animation: pulse 2s ease-in-out infinite;">🏁</div>
+                    <div style="font-size: 0.8rem; font-weight: 900; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 2px;">START</div>
+                </div>
+
+                <!-- 10 Vertical Streets Container -->
+                <div id="chickenRoads" style="position: absolute; 
+                                              left: 80px; 
+                                              top: 0; 
+                                              right: 80px;
+                                              height: 100%; 
+                                              display: flex;
+                                              gap: 6px;">
+                    <!-- 10 streets will be created here -->
+                </div>
+
+                <!-- Goal Zone (Right Side) -->
+                <div style="position: absolute; 
+                            right: 0; 
+                            top: 0; 
+                            width: 80px; 
+                            height: 100%; 
+                            background: linear-gradient(135deg, #FFD700, #FFA500);
+                            border-left: 4px dashed #6B8E23;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            flex-direction: column;
+                            z-index: 10;
+                            box-shadow: inset 5px 0 15px rgba(0,0,0,0.2),
+                                        0 0 30px rgba(255, 215, 0, 0.5);
+                            animation: goalGlow 2s ease-in-out infinite;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; animation: bounce 1s ease-in-out infinite;">🏆</div>
+                    <div style="font-size: 0.8rem; font-weight: 900; color: #333; text-shadow: 0 2px 4px rgba(255,255,255,0.5); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 2px;">ZIEL</div>
+                </div>
+                
+                <!-- Chicken (starts left, moves right across streets) -->
+                <div id="chickenPlayer" style="position: absolute; 
+                                               left: 40px; 
+                                               top: 50%; 
+                                               transform: translate(0, -50%); 
+                                               font-size: 4rem; 
+                                               transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+                                               filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));
+                                               z-index: 100;">
+                    🐔
+                </div>
+
+                <!-- Multiplier Display -->
+                <div id="chickenMultiplier" style="position: absolute; 
+                                                    top: 15px; 
+                                                    right: 90px; 
+                                                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
+                                                    padding: 16px 28px; 
+                                                    border-radius: 16px; 
+                                                    border: 3px solid #10b981;
+                                                    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.6),
+                                                                inset 0 2px 8px rgba(255,255,255,0.2);
+                                                    z-index: 200;
+                                                    transform-style: preserve-3d;">
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-bottom: 6px; font-weight: 700; text-align: center; letter-spacing: 1px;">AKTUELL</div>
+                    <div id="chickenMultiplierValue" style="font-size: 2.25rem; font-weight: 900; color: white; text-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; font-family: 'Arial Black', sans-serif;">1.00x</div>
+                    <div id="chickenCurrentWin" style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; margin-top: 4px;">0.00€</div>
+                </div>
+
+                <!-- Street Counter -->
+                <div id="chickenStreets" style="position: absolute; 
+                                                top: 15px; 
+                                                left: 90px; 
+                                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(124, 58, 237, 0.95));
+                                                padding: 16px 28px; 
+                                                border-radius: 16px; 
+                                                border: 3px solid #8b5cf6;
+                                                box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6),
+                                                            inset 0 2px 8px rgba(255,255,255,0.2);
+                                                z-index: 200;
+                                                transform-style: preserve-3d;">
+                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-bottom: 6px; font-weight: 700; text-align: center; letter-spacing: 1px;">STRASSE</div>
+                    <div id="chickenStreetCount" style="font-size: 2.25rem; font-weight: 900; color: white; text-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; font-family: 'Arial Black', sans-serif;">0 / 10</div>
+                </div>
+                
+                <style>
+                    @keyframes pulse {
+                        0%, 100% { transform: scale(1); opacity: 1; }
+                        50% { transform: scale(1.1); opacity: 0.8; }
+                    }
+                    @keyframes bounce {
+                        0%, 100% { transform: translateY(0); }
+                        50% { transform: translateY(-10px); }
+                    }
+                    @keyframes goalGlow {
+                        0%, 100% { box-shadow: inset 5px 0 15px rgba(0,0,0,0.2), 0 0 30px rgba(255, 215, 0, 0.5); }
+                        50% { box-shadow: inset 5px 0 15px rgba(0,0,0,0.2), 0 0 50px rgba(255, 215, 0, 0.8); }
+                    }
+                </style>
+            </div>
+
+            <!-- Controls -->
+            <div style="margin-top: 24px; background: var(--bg-secondary); padding: 20px; border-radius: 16px; border: 2px solid var(--border);">
+                <!-- Bet Amount -->
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary);">Einsatz</label>
+                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
+                        <button class="quick-bet-btn" onclick="setChickenBet(1)">💰 1€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(5)">💵 5€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(10)">💸 10€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(25)">💎 25€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(50)">👑 50€</button>
+                    </div>
+                    <input type="number" id="chickenBet" value="5" min="0.5" max="50" step="0.5" 
+                           style="width: 100%; padding: 14px; font-size: 1.25rem; font-weight: 700; 
+                                  background: var(--bg-primary); border: 2px solid var(--border); 
+                                  border-radius: 12px; color: var(--text-primary); text-align: center;">
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px;">
+                    <button id="chickenStartBtn" onclick="startChicken()" 
+                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
+                                   background: linear-gradient(135deg, #10b981, #059669); 
+                                   color: white; border: none; border-radius: 12px; cursor: pointer;
+                                   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s;">
+                        🎮 START
+                    </button>
+                    <button id="chickenCrossBtn" onclick="crossStreet()" disabled
+                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
+                                   background: linear-gradient(135deg, #f59e0b, #d97706); 
+                                   color: white; border: none; border-radius: 12px; cursor: pointer;
+                                   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s;
+                                   opacity: 0.5;">
+                        🚶 ÜBERQUEREN
+                    </button>
+                    <button id="chickenCashoutBtn" onclick="cashoutChicken()" disabled
+                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
+                                   background: linear-gradient(135deg, #8b5cf6, #7c3aed); 
+                                   color: white; border: none; border-radius: 12px; cursor: pointer;
+                                   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); transition: all 0.3s;
+                                   opacity: 0.5;">
+                        💰 CASHOUT
+                    </button>
+                </div>
+
+                <!-- Game Info -->
+                <div style="margin-top: 16px; padding: 16px; background: var(--bg-tertiary); border-radius: 12px; border-left: 4px solid var(--accent);">
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); line-height: 1.6;">
+                        <strong>🎮 Spielprinzip:</strong> 10 Straßen nebeneinander - dunkel bis betreten!<br>
+                        <strong>🚧 Baustelle (80%):</strong> Straße leer = SAFE! Grün wird angezeigt.<br>
+                        <strong>🚗 Verkehr (20%):</strong> Autos = ÜBERFAHREN! Rot + Game Over.<br>
+                        <strong>📊 Multiplier:</strong> M = (1 - 0.05) / 0.8^k - Exponentiell!<br>
+                        <strong>🏆 Ziel:</strong> Alle 10 Straßen überqueren = Mega-Win!
+                    </div>
+                </div>
+            </div>
+
+            <div id="chickenWin" style="margin-top: 12px;"></div>
+            <div id="chickenLoss" style="margin-top: 12px;"></div>
+        </div>
+    </div>
+
     <script>
     let userBalance = parseFloat(<?= $casino_available_balance ?>) || 0; // Already minus 10€ reserve
     const RESERVE_AMOUNT = 10.00; // 10€ Reserve
@@ -2342,12 +3091,676 @@ if ($result) {
         const crashBalanceEl = document.getElementById('crashBalance');
         const slotsBalanceEl = document.getElementById('slotsBalance');
         const plinkoBalanceEl = document.getElementById('plinkoBalance');
+        const chickenBalanceEl = document.getElementById('chickenBalance');
         
         if (crashBalanceEl) crashBalanceEl.textContent = formattedBalance;
         if (slotsBalanceEl) slotsBalanceEl.textContent = formattedBalance;
         if (plinkoBalanceEl) plinkoBalanceEl.textContent = formattedBalance;
+        if (chickenBalanceEl) chickenBalanceEl.textContent = formattedBalance;
     }
-    
+
+    // ============================================
+    // CHICKEN GAME
+    // ============================================
+    const CHICKEN_CONFIG = {
+        survivalRate: 0.8,      // 80% Überlebensrate (20% Absturz)
+        houseEdge: 0.05,        // 5% Hausvorteil
+        numStreets: 10          // 10 Straßen
+    };
+
+    let chickenGame = {
+        active: false,
+        bet: 0,
+        currentStreet: 0,
+        streetStates: []  // Array: true = befahren (gefährlich), false = Baustelle (safe)
+    };
+
+    function setChickenBet(amount) {
+        document.getElementById('chickenBet').value = amount;
+        document.querySelectorAll('#chickenModal .quick-bet-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+    }
+
+    function calculateChickenMultiplier(street) {
+        // Wahrscheinlichkeit bis Straße k: P(k) = 0.8^k
+        const probability = Math.pow(CHICKEN_CONFIG.survivalRate, street);
+        
+        // Fairer Multiplier mit Hausvorteil: M = (1 - h) / P(k)
+        const multiplier = (1 - CHICKEN_CONFIG.houseEdge) / probability;
+        
+        return multiplier;
+    }
+
+    function createAllStreets() {
+        const roadsContainer = document.getElementById('chickenRoads');
+        roadsContainer.innerHTML = '';
+        
+        for (let i = 0; i < CHICKEN_CONFIG.numStreets; i++) {
+            const street = document.createElement('div');
+            street.id = `street-${i}`;
+            street.className = 'chicken-street';
+            street.style.cssText = `
+                flex: 1;
+                background: linear-gradient(to bottom, 
+                    rgba(40, 40, 40, 0.6) 0%, 
+                    rgba(50, 50, 50, 0.6) 10%, 
+                    rgba(60, 60, 60, 0.6) 45%, 
+                    rgba(100, 100, 100, 0.4) 48%, 
+                    rgba(100, 100, 100, 0.4) 52%, 
+                    rgba(60, 60, 60, 0.6) 55%, 
+                    rgba(50, 50, 50, 0.6) 90%, 
+                    rgba(40, 40, 40, 0.6) 100%
+                );
+                position: relative;
+                border-left: 2px solid rgba(255, 215, 0, 0.3);
+                border-right: 2px solid rgba(255, 215, 0, 0.3);
+                transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+                overflow: hidden;
+                box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+            `;
+            
+            // Street number
+            const streetNum = document.createElement('div');
+            streetNum.textContent = (i + 1);
+            streetNum.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                font-size: 4rem;
+                font-weight: 900;
+                color: rgba(255, 255, 255, 0.15);
+                z-index: 1;
+                text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                font-family: 'Arial Black', sans-serif;
+            `;
+            street.appendChild(streetNum);
+            
+            // Potential win label (only on NEXT street, not all)
+            const winLabel = document.createElement('div');
+            winLabel.id = `street-win-${i}`;
+            winLabel.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: linear-gradient(135deg, rgba(245, 158, 11, 0.98), rgba(217, 119, 6, 0.98));
+                padding: 12px 20px;
+                border-radius: 16px;
+                border: 3px solid #f59e0b;
+                font-size: 1.5rem;
+                font-weight: 900;
+                color: white;
+                text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+                white-space: nowrap;
+                display: none;
+                z-index: 10;
+                box-shadow: 0 8px 24px rgba(245, 158, 11, 0.8);
+                pointer-events: none;
+            `;
+            street.appendChild(winLabel);
+            
+            roadsContainer.appendChild(street);
+        }
+        
+        // Update win labels for all streets
+        updateAllStreetWinLabels();
+        
+        // Add chicken animation styles
+        if (!document.getElementById('chickenJumpAnim')) {
+            const style = document.createElement('style');
+            style.id = 'chickenJumpAnim';
+            style.textContent = `
+                @keyframes chickenJump {
+                    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+                    20% { transform: translate(-50%, -70%) scale(1.3) rotate(-10deg); }
+                    40% { transform: translate(-50%, -90%) scale(1.2) rotate(5deg); }
+                    60% { transform: translate(-50%, -70%) scale(1.3) rotate(-5deg); }
+                    80% { transform: translate(-50%, -55%) scale(1.1) rotate(2deg); }
+                    100% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+                }
+                @keyframes streetReveal {
+                    0% { transform: scaleX(0.8); opacity: 0.5; }
+                    50% { transform: scaleX(1.05); }
+                    100% { transform: scaleX(1); opacity: 1; }
+                }
+                @keyframes explode {
+                    0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
+                    25% { transform: translate(-50%, -60%) scale(1.5) rotate(180deg); }
+                    50% { transform: translate(-50%, -40%) scale(2) rotate(360deg); opacity: 1; }
+                    75% { transform: translate(-50%, -30%) scale(2.5) rotate(540deg); opacity: 0.5; }
+                    100% { transform: translate(-50%, -20%) scale(3) rotate(720deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    function updateAllStreetWinLabels() {
+        if (!chickenGame.active) return;
+        
+        // Only show on NEXT street
+        const nextStreetIndex = chickenGame.currentStreet;
+        
+        for (let i = 0; i < CHICKEN_CONFIG.numStreets; i++) {
+            const winLabel = document.getElementById(`street-win-${i}`);
+            if (!winLabel) continue;
+            
+            // Only show on the very next street
+            if (i === nextStreetIndex && nextStreetIndex < CHICKEN_CONFIG.numStreets) {
+                const multiplier = calculateChickenMultiplier(i + 1);
+                const winAmount = chickenGame.bet * multiplier;
+                
+                winLabel.textContent = `${winAmount.toFixed(2)}€`;
+                winLabel.style.display = 'block';
+            } else {
+                winLabel.style.display = 'none';
+            }
+        }
+    }
+
+    async function startChicken() {
+        const bet = parseFloat(document.getElementById('chickenBet').value);
+        
+        if (bet < 0.5 || bet > 50) {
+            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            return;
+        }
+        
+        if (bet > userBalance) {
+            showNotification('Nicht genug Guthaben! Verfügbar: ' + userBalance.toFixed(2) + '€', 'error');
+            return;
+        }
+
+        // Deduct bet
+        try {
+            const response = await fetch('/api/casino/deduct_balance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: bet })
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP Error: ' + response.status);
+            }
+
+            const data = await response.json();
+            if (data.status !== 'success') {
+                showNotification(data.error || 'Fehler beim Abbuchen des Einsatzes', 'error');
+                return;
+            }
+
+            updateAllBalances(data.balance);
+        } catch (err) {
+            console.error('Deduct Balance Error:', err);
+            showNotification('Netzwerkfehler: ' + err.message, 'error');
+            return;
+        }
+
+        // Initialize game
+        chickenGame = {
+            active: true,
+            bet: bet,
+            currentStreet: 0,
+            streetStates: []
+        };
+
+        // UI Updates
+        document.getElementById('chickenStartBtn').disabled = true;
+        document.getElementById('chickenCrossBtn').disabled = false;
+        document.getElementById('chickenCashoutBtn').disabled = false;
+        document.getElementById('chickenBet').disabled = true;
+        document.getElementById('chickenWin').innerHTML = '';
+        document.getElementById('chickenLoss').innerHTML = '';
+        
+        // Create all 10 streets
+        createAllStreets();
+        
+        document.getElementById('chickenStreetCount').textContent = '0 / 10';
+        document.getElementById('chickenMultiplierValue').textContent = '1.00x';
+        
+        // Show win label on next street
+        updateAllStreetWinLabels();
+        
+        // Reset chicken position
+        const chicken = document.getElementById('chickenPlayer');
+        chicken.style.left = '40px';
+        chicken.style.top = '50%';
+        chicken.style.transform = 'translate(0, -50%)';
+        chicken.textContent = '🐔';
+        
+        showNotification('🎮 Spiel gestartet! Überquere 10 Straßen! Einsatz: ' + bet.toFixed(2) + '€', 'info');
+    }
+
+    function updatePotentialWin() {
+        // REMOVED - not needed anymore
+    }
+
+    async function crossStreet() {
+        if (!chickenGame.active) return;
+        
+        if (chickenGame.currentStreet >= CHICKEN_CONFIG.numStreets) {
+            showNotification('🏆 Alle Straßen überquert!', 'success');
+            await cashoutChicken();
+            return;
+        }
+
+        // Disable buttons during animation
+        document.getElementById('chickenCrossBtn').disabled = true;
+        document.getElementById('chickenCashoutBtn').disabled = true;
+
+        // Server determines if street has traffic or is construction site
+        try {
+            const response = await fetch('/api/casino/chicken_cross.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    street: chickenGame.currentStreet + 1,
+                    survival_rate: CHICKEN_CONFIG.survivalRate
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP Error: ' + response.status);
+            }
+
+            const data = await response.json();
+            
+            if (data.status !== 'success') {
+                showNotification(data.error || 'Fehler beim Überqueren', 'error');
+                document.getElementById('chickenCrossBtn').disabled = false;
+                document.getElementById('chickenCashoutBtn').disabled = false;
+                return;
+            }
+
+            const survived = data.survived;
+            
+            // Increment street FIRST
+            chickenGame.currentStreet++;
+            
+            // Validate street index before accessing DOM
+            const streetIndex = chickenGame.currentStreet - 1; // Array index is 0-based
+            if (streetIndex < 0 || streetIndex >= CHICKEN_CONFIG.numStreets) {
+                console.error('Invalid street index:', streetIndex, 'currentStreet:', chickenGame.currentStreet);
+                showNotification('Fehler: Ungültiger Straßenindex', 'error');
+                document.getElementById('chickenCrossBtn').disabled = false;
+                document.getElementById('chickenCashoutBtn').disabled = false;
+                return;
+            }
+            
+            // Get current street element (now incremented)
+            const streetEl = document.getElementById(`street-${streetIndex}`);
+            
+            if (!streetEl) {
+                console.error('Street element not found:', streetIndex);
+                console.error('Available streets:', document.querySelectorAll('[id^="street-"]').length);
+                showNotification('Fehler: Straße nicht gefunden', 'error');
+                document.getElementById('chickenCrossBtn').disabled = false;
+                document.getElementById('chickenCashoutBtn').disabled = false;
+                return;
+            }
+            
+            // Calculate chicken position - perfectly centered on street
+            const roadsContainer = document.getElementById('chickenRoads');
+            const containerRect = roadsContainer.getBoundingClientRect();
+            const streetRect = streetEl.getBoundingClientRect();
+            
+            // Calculate exact center of the street
+            const streetCenterX = streetRect.left + (streetRect.width / 2);
+            const containerLeft = containerRect.left;
+            const relativeLeft = streetCenterX - containerLeft;
+            
+            // Account for the start zone offset (80px)
+            const newLeft = 80 + relativeLeft;
+            
+            const chicken = document.getElementById('chickenPlayer');
+            
+            // Add jumping animation class
+            chicken.style.animation = 'chickenJump 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)';
+            
+            // Animate chicken to street center
+            chicken.style.left = newLeft + 'px';
+            
+            // Wait for chicken to reach street
+            await new Promise(resolve => setTimeout(resolve, 800));
+            
+            // NOW reveal what happens (street already incremented above)
+            
+            if (!survived) {
+                // TRAFFIC! Chicken gets hit
+                streetEl.style.background = `
+                    linear-gradient(to bottom, 
+                        rgba(239, 68, 68, 0.95) 0%, 
+                        rgba(220, 38, 38, 0.95) 10%, 
+                        rgba(185, 28, 28, 0.95) 45%, 
+                        rgba(255, 215, 0, 0.6) 48%, 
+                        rgba(255, 215, 0, 0.6) 52%, 
+                        rgba(185, 28, 28, 0.95) 55%, 
+                        rgba(220, 38, 38, 0.95) 90%, 
+                        rgba(239, 68, 68, 0.95) 100%
+                    )
+                `;
+                streetEl.style.animation = 'streetReveal 0.5s ease-out';
+                streetEl.style.boxShadow = '0 0 40px rgba(239, 68, 68, 0.8), inset 0 0 40px rgba(0,0,0,0.5)';
+                
+                // Add cars
+                addCarsToStreet(streetEl);
+                
+                // Chicken MEGA explosion
+                chicken.style.animation = 'explode 1s cubic-bezier(0.34, 1.56, 0.64, 1)';
+                chicken.textContent = '💥';
+                
+                // Screen shake effect
+                document.getElementById('chickenBoard').style.animation = 'shake 0.5s';
+                
+                setTimeout(() => {
+                    document.getElementById('chickenBoard').style.animation = '';
+                }, 500);
+                
+                // Show loss
+                document.getElementById('chickenLoss').innerHTML = `
+                    <div style="background: linear-gradient(135deg, #ef4444, #dc2626); 
+                                padding: 20px; 
+                                border-radius: 12px; 
+                                text-align: center;
+                                border: 3px solid #f87171;
+                                box-shadow: 0 8px 32px rgba(239, 68, 68, 0.4);">
+                        <div style="font-size: 3rem; margin-bottom: 12px;">💥🚗</div>
+                        <div style="font-size: 1.5rem; font-weight: 900; color: white; margin-bottom: 8px;">
+                            ÜBERFAHREN! Straße ${chickenGame.currentStreet}
+                        </div>
+                        <div style="font-size: 1.25rem; color: rgba(255,255,255,0.9);">
+                            Verloren: ${chickenGame.bet.toFixed(2)}€
+                        </div>
+                    </div>
+                `;
+
+                await saveCasinoHistory('chicken', chickenGame.bet, 0);
+                endChickenGame();
+                showNotification('💥 Überfahren auf Straße ' + chickenGame.currentStreet + '!', 'error');
+                return;
+            }
+            
+            // SAFE! Construction site (Baustelle)
+            streetEl.style.background = `
+                linear-gradient(to bottom, 
+                    rgba(16, 185, 129, 0.95) 0%, 
+                    rgba(5, 150, 105, 0.95) 10%, 
+                    rgba(4, 120, 87, 0.95) 45%, 
+                    rgba(255, 215, 0, 0.6) 48%, 
+                    rgba(255, 215, 0, 0.6) 52%, 
+                    rgba(4, 120, 87, 0.95) 55%, 
+                    rgba(5, 150, 105, 0.95) 90%, 
+                    rgba(16, 185, 129, 0.95) 100%
+                )
+            `;
+            streetEl.style.animation = 'streetReveal 0.5s ease-out';
+            streetEl.style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.8), inset 0 0 40px rgba(0,0,0,0.3)';
+            
+            // Add construction signs
+            addConstructionSigns(streetEl);
+            
+            // Update multiplier with animation
+            const multiplier = calculateChickenMultiplier(chickenGame.currentStreet);
+            const multiplierEl = document.getElementById('chickenMultiplierValue');
+            multiplierEl.textContent = multiplier.toFixed(2) + 'x';
+            multiplierEl.style.animation = 'pulse 0.5s ease-out';
+            setTimeout(() => multiplierEl.style.animation = '', 500);
+            
+            // Update current win amount
+            const currentWin = chickenGame.bet * multiplier;
+            document.getElementById('chickenCurrentWin').textContent = currentWin.toFixed(2) + '€';
+            
+            document.getElementById('chickenStreetCount').textContent = `${chickenGame.currentStreet} / 10`;
+
+            // Update win label for next street only
+            updateAllStreetWinLabels();
+
+            // Celebration - chicken victory dance
+            chicken.style.animation = '';
+            chicken.textContent = chickenGame.currentStreet === 10 ? '🐔👑' : '🐔✨';
+            
+            // Confetti effect
+            if (chickenGame.currentStreet === 10) {
+                createConfetti();
+            }
+
+            const potentialWin = chickenGame.bet * multiplier;
+            showNotification(`✅ Safe! Baustelle auf Straße ${chickenGame.currentStreet}! ${multiplier.toFixed(2)}x = ${potentialWin.toFixed(2)}€`, 'success');
+
+            // Check if all streets crossed
+            if (chickenGame.currentStreet >= CHICKEN_CONFIG.numStreets) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                showNotification('🏆 Alle 10 Straßen geschafft! Auto-Cashout!', 'success');
+                await cashoutChicken();
+                return;
+            }
+
+            // Re-enable buttons
+            document.getElementById('chickenCrossBtn').disabled = false;
+            document.getElementById('chickenCashoutBtn').disabled = false;
+
+        } catch (err) {
+            console.error('Chicken Cross Error:', err);
+            showNotification('Netzwerkfehler: ' + err.message, 'error');
+            document.getElementById('chickenCrossBtn').disabled = false;
+            document.getElementById('chickenCashoutBtn').disabled = false;
+        }
+    }
+
+    function addCarsToStreet(streetEl) {
+        const carEmojis = ['🚗', '🚙', '🚕', '🚌', '🚐', '🚓', '🚑'];
+        const numCars = 4;
+        
+        for (let i = 0; i < numCars; i++) {
+            const car = document.createElement('div');
+            car.textContent = carEmojis[Math.floor(Math.random() * carEmojis.length)];
+            car.style.cssText = `
+                position: absolute;
+                top: ${15 + (i * 22)}%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 2.5rem;
+                animation: carCrash 0.4s ease-in-out infinite;
+                filter: drop-shadow(0 4px 12px rgba(0,0,0,0.9));
+            `;
+            streetEl.appendChild(car);
+        }
+        
+        if (!document.getElementById('carCrashAnim')) {
+            const style = document.createElement('style');
+            style.id = 'carCrashAnim';
+            style.textContent = `
+                @keyframes carCrash {
+                    0%, 100% { transform: translateX(-50%) translateY(0) rotate(0deg); }
+                    25% { transform: translateX(-55%) translateY(-5px) rotate(-5deg); }
+                    75% { transform: translateX(-45%) translateY(5px) rotate(5deg); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    function addConstructionSigns(streetEl) {
+        const signs = ['🚧', '⚠️', '🏗️'];
+        
+        for (let i = 0; i < 3; i++) {
+            const sign = document.createElement('div');
+            sign.textContent = signs[i];
+            sign.style.cssText = `
+                position: absolute;
+                top: ${15 + (i * 35)}%;
+                left: 50%;
+                transform: translateX(-50%);
+                font-size: 2.5rem;
+                filter: drop-shadow(0 4px 8px rgba(0,0,0,0.8));
+                animation: signBounce ${0.5 + (i * 0.2)}s ease-in-out infinite;
+            `;
+            streetEl.appendChild(sign);
+        }
+        
+        if (!document.getElementById('signBounceAnim')) {
+            const style = document.createElement('style');
+            style.id = 'signBounceAnim';
+            style.textContent = `
+                @keyframes signBounce {
+                    0%, 100% { transform: translateX(-50%) translateY(0); }
+                    50% { transform: translateX(-50%) translateY(-8px); }
+                }
+                @keyframes shake {
+                    0%, 100% { transform: translateX(0); }
+                    25% { transform: translateX(-10px); }
+                    75% { transform: translateX(10px); }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    function createConfetti() {
+        const board = document.getElementById('chickenBoard');
+        const colors = ['#FFD700', '#FFA500', '#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4'];
+        
+        for (let i = 0; i < 50; i++) {
+            const confetti = document.createElement('div');
+            confetti.textContent = ['🎉', '✨', '⭐', '💫', '🌟'][Math.floor(Math.random() * 5)];
+            confetti.style.cssText = `
+                position: absolute;
+                left: ${Math.random() * 100}%;
+                top: ${Math.random() * 100}%;
+                font-size: ${1 + Math.random() * 2}rem;
+                animation: confettiFall ${2 + Math.random() * 2}s linear;
+                pointer-events: none;
+                z-index: 1000;
+            `;
+            board.appendChild(confetti);
+            
+            setTimeout(() => confetti.remove(), 4000);
+        }
+        
+        if (!document.getElementById('confettiAnim')) {
+            const style = document.createElement('style');
+            style.id = 'confettiAnim';
+            style.textContent = `
+                @keyframes confettiFall {
+                    0% { transform: translateY(-100%) rotate(0deg); opacity: 1; }
+                    100% { transform: translateY(600%) rotate(720deg); opacity: 0; }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    async function cashoutChicken() {
+        if (!chickenGame.active || chickenGame.currentStreet === 0) {
+            showNotification('Du musst mindestens eine Straße überqueren!', 'error');
+            return;
+        }
+
+        const multiplier = calculateChickenMultiplier(chickenGame.currentStreet);
+        const winAmount = chickenGame.bet * multiplier;
+
+        // Credit win
+        try {
+            const response = await fetch('/api/casino/add_balance.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: winAmount })
+            });
+
+            if (!response.ok) {
+                throw new Error('HTTP Error: ' + response.status);
+            }
+
+            const data = await response.json();
+            if (data.status !== 'success') {
+                showNotification(data.error || 'Fehler beim Auszahlen', 'error');
+                return;
+            }
+
+            updateAllBalances(data.balance);
+
+            // Show win
+            const profit = winAmount - chickenGame.bet;
+            document.getElementById('chickenWin').innerHTML = `
+                <div style="background: linear-gradient(135deg, #10b981, #059669); 
+                            padding: 24px; 
+                            border-radius: 12px; 
+                            text-align: center;
+                            border: 3px solid #34d399;
+                            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.5);">
+                    <div style="font-size: 3rem; margin-bottom: 12px;">🏆</div>
+                    <div style="font-size: 1.5rem; font-weight: 900; color: white; margin-bottom: 8px;">
+                        CASHOUT! ${chickenGame.currentStreet} Straßen
+                    </div>
+                    <div style="font-size: 1.75rem; font-weight: 900; color: #a7f3d0;">
+                        Gewinn: ${winAmount.toFixed(2)}€ (${multiplier.toFixed(2)}x)
+                    </div>
+                    <div style="font-size: 1rem; color: rgba(255,255,255,0.8); margin-top: 8px;">
+                        Profit: +${profit.toFixed(2)}€
+                    </div>
+                </div>
+            `;
+
+            // Save to history
+            await saveCasinoHistory('chicken', chickenGame.bet, winAmount);
+
+            showNotification('💰 Cashout erfolgreich! +' + profit.toFixed(2) + '€', 'success');
+            
+            // Celebration animation
+            const chicken = document.getElementById('chickenPlayer');
+            chicken.textContent = '🎉';
+
+        } catch (err) {
+            console.error('Cashout Error:', err);
+            showNotification('Netzwerkfehler beim Cashout: ' + err.message, 'error');
+            return;
+        }
+
+        endChickenGame();
+    }
+
+    function endChickenGame() {
+        chickenGame.active = false;
+        
+        document.getElementById('chickenStartBtn').disabled = false;
+        document.getElementById('chickenCrossBtn').disabled = true;
+        document.getElementById('chickenCashoutBtn').disabled = true;
+        document.getElementById('chickenBet').disabled = false;
+
+        // Reset chicken after delay
+        setTimeout(() => {
+            const chicken = document.getElementById('chickenPlayer');
+            chicken.style.left = '40px';
+            chicken.style.top = '50%';
+            chicken.style.transform = 'translate(0, -50%)';
+            chicken.textContent = '🐔';
+            chicken.style.animation = '';
+            document.getElementById('chickenRoads').innerHTML = '';
+            document.getElementById('chickenStreetCount').textContent = '0 / 10';
+            document.getElementById('chickenMultiplierValue').textContent = '1.00x';
+            document.getElementById('chickenCurrentWin').textContent = '0.00€';
+        }, 3000);
+    }
+
+    async function saveCasinoHistory(game, bet, win) {
+        try {
+            await fetch('/api/casino/save_history.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                    game: game,
+                    bet_amount: bet,
+                    win_amount: win
+                })
+            });
+        } catch (err) {
+            console.error('Error saving history:', err);
+        }
+    }
+
     function openGame(game) {
         // Update balance when opening any game
         fetch('/api/casino/get_balance.php')
@@ -2593,23 +4006,29 @@ if ($result) {
     let plinkoAnimationId = null;
     let totalWin = 0;
     let ballsDropped = 0;
+    let ballsToDropCount = 0;
+    let currentDropX = null;
     
     // Plinko configuration (GRÖSSERES SPIELFELD)
-    const ROWS = 12;  // Mehr Reihen für mehr Spannung
-    const SLOTS = 9;
-    const PIN_RADIUS = 8;
-    const BALL_RADIUS = 14;
+    const ROWS = 16;
+    const SLOTS = 13;  // 1.0x Slots entfernt für mehr Spannung
+    const PIN_RADIUS = 6;
+    const BALL_RADIUS = 10;
     
     const slotMultipliers = [
-        { multiplier: 5.0, color: '#f59e0b' },
-        { multiplier: 2.0, color: '#10b981' },
-        { multiplier: 1.5, color: '#0e7490' },
-        { multiplier: 1.0, color: '#eab308' },
-        { multiplier: 0.5, color: '#ef4444' },
-        { multiplier: 1.0, color: '#eab308' },
-        { multiplier: 1.5, color: '#0e7490' },
-        { multiplier: 2.0, color: '#10b981' },
-        { multiplier: 5.0, color: '#f59e0b' }
+        { multiplier: 10.0, color: '#f59e0b' },  // 0 - Links außen - Mega Jackpot
+        { multiplier: 0.3, color: '#ef4444' },   // 1 - Großer Verlust
+        { multiplier: 1.5, color: '#0e7490' },   // 2 - Gut
+        { multiplier: 0.5, color: '#dc2626' },   // 3 - Verlust
+        { multiplier: 2.0, color: '#10b981' },   // 4 - Gewinn
+        { multiplier: 0.7, color: '#f87171' },   // 5 - Kleiner Verlust
+        { multiplier: 5.0, color: '#8b5cf6' },   // 6 - Mitte - Großer Jackpot
+        { multiplier: 0.7, color: '#f87171' },   // 7 - Kleiner Verlust
+        { multiplier: 2.0, color: '#10b981' },   // 8 - Gewinn
+        { multiplier: 0.5, color: '#dc2626' },   // 9 - Verlust
+        { multiplier: 1.5, color: '#0e7490' },   // 10 - Gut
+        { multiplier: 0.3, color: '#ef4444' },   // 11 - Großer Verlust
+        { multiplier: 10.0, color: '#f59e0b' }   // 12 - Rechts außen - Mega Jackpot
     ];
     
     function initPlinko() {
@@ -2626,6 +4045,9 @@ if ($result) {
             return false;
         }
         
+        // Add click listener for manual ball drop
+        plinkoCanvas.addEventListener('click', handleCanvasClick);
+        
         console.log('✅ Plinko canvas found:', plinkoCanvas.width, 'x', plinkoCanvas.height);
         console.log('✅ Plinko context ready');
         
@@ -2636,19 +4058,59 @@ if ($result) {
         return true;
     }
     
+    function handleCanvasClick(event) {
+        if (ballsToDropCount <= 0) {
+            return;
+        }
+        
+        // Bei 10+ Bällen: Erlaube schnelles Klicken (nicht auf plinkoDropping warten)
+        const ballCount = parseInt(document.getElementById('plinkoBallCount').value);
+        if (ballCount < 10 && plinkoDropping) {
+            return;
+        }
+        
+        const rect = plinkoCanvas.getBoundingClientRect();
+        const scaleX = plinkoCanvas.width / rect.width;
+        const scaleY = plinkoCanvas.height / rect.height;
+        
+        const x = (event.clientX - rect.left) * scaleX;
+        const y = (event.clientY - rect.top) * scaleY;
+        
+        // Only allow clicks in the top area (y < 120)
+        if (y < 120) {
+            // Beschränke Drop-Position auf sichere Mitte (verhindert direkte 5x Drops)
+            const centerX = 600; // Canvas Mitte
+            const maxOffset = 350; // Max 350px von der Mitte entfernt
+            let dropX = Math.max(50, Math.min(1150, x));
+            
+            // Wenn zu weit außen, ziehe zur Mitte
+            const distanceFromCenter = Math.abs(dropX - centerX);
+            if (distanceFromCenter > maxOffset) {
+                dropX = centerX + (dropX > centerX ? maxOffset : -maxOffset);
+            }
+            
+            // Zusätzliche Randomisierung für Fairness (±30px)
+            dropX += (Math.random() - 0.5) * 60;
+            dropX = Math.max(250, Math.min(950, dropX)); // Verhindere extreme Ränder
+            
+            currentDropX = dropX;
+            dropSingleBallManual();
+        }
+    }
+    
     function drawPlinkoBoard() {
         if (!plinkoCanvas || !plinkoCtx) {
             return;
         }
         
-        const width = 1000;
-        const height = 600;
+        const width = 1200;
+        const height = 700;
         
         plinkoCtx.clearRect(0, 0, width, height);
         
         // Draw pins
-        const startY = 80;
-        const endY = 450;
+        const startY = 100;
+        const endY = 550;
         const rowSpacing = (endY - startY) / (ROWS - 1);
         
         for (let row = 0; row < ROWS; row++) {
@@ -2678,9 +4140,9 @@ if ($result) {
         }
         
         // Draw slots
-        const slotY = 500;
+        const slotY = 600;
         const slotWidth = width / SLOTS;
-        const slotHeight = 70;
+        const slotHeight = 80;
         
         for (let i = 0; i < SLOTS; i++) {
             const x = i * slotWidth;
@@ -2712,17 +4174,17 @@ if ($result) {
         // Draw all balls
         balls.forEach(ball => {
             if (ball && typeof ball.x === 'number' && typeof ball.y === 'number') {
-                // Outer glow
+                // Outer glow - LILA
                 const glowGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 3);
-                glowGradient.addColorStop(0, 'rgba(251, 191, 36, 1)');
-                glowGradient.addColorStop(0.4, 'rgba(245, 158, 11, 0.8)');
-                glowGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                glowGradient.addColorStop(0, 'rgba(167, 139, 250, 1)');
+                glowGradient.addColorStop(0.4, 'rgba(139, 92, 246, 0.8)');
+                glowGradient.addColorStop(1, 'rgba(139, 92, 246, 0)');
                 plinkoCtx.fillStyle = glowGradient;
                 plinkoCtx.beginPath();
                 plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS * 3, 0, Math.PI * 2);
                 plinkoCtx.fill();
                 
-                // Main ball body
+                // Main ball body - LILA
                 const ballGradient = plinkoCtx.createRadialGradient(
                     ball.x - BALL_RADIUS * 0.3, 
                     ball.y - BALL_RADIUS * 0.3, 
@@ -2732,9 +4194,9 @@ if ($result) {
                     BALL_RADIUS
                 );
                 ballGradient.addColorStop(0, '#ffffff');
-                ballGradient.addColorStop(0.2, '#fef3c7');
-                ballGradient.addColorStop(0.5, '#fbbf24');
-                ballGradient.addColorStop(1, '#f59e0b');
+                ballGradient.addColorStop(0.2, '#ddd6fe');
+                ballGradient.addColorStop(0.5, '#a78bfa');
+                ballGradient.addColorStop(1, '#8b5cf6');
                 
                 plinkoCtx.fillStyle = ballGradient;
                 plinkoCtx.beginPath();
@@ -2801,7 +4263,7 @@ if ($result) {
         const ballCount = parseInt(document.getElementById('plinkoBallCount').value);
         const totalBet = bet * ballCount;
         
-        console.log(`🎯 Dropping ${ballCount} balls - Bet per ball: ${bet}€, Total: ${totalBet}€`);
+        console.log(`🎯 Preparing ${ballCount} balls - Bet per ball: ${bet}€, Total: ${totalBet}€`);
         
         if (bet < 0.5 || bet > 50) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
@@ -2813,7 +4275,8 @@ if ($result) {
             return;
         }
         
-        plinkoDropping = true;
+        // Set balls to drop count
+        ballsToDropCount = ballCount;
         totalWin = 0;
         ballsDropped = 0;
         
@@ -2826,17 +4289,40 @@ if ($result) {
             btn.style.cursor = 'not-allowed';
         });
         
-        document.getElementById('plinkoResult').innerHTML = `<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1.1rem; font-weight: 700;">🎯 ${ballCount} Bälle fallen... (${totalBet.toFixed(2)}€ Einsatz)</div>`;
-        
-        // Drop balls with delay
-        for (let i = 0; i < ballCount; i++) {
-            setTimeout(async () => {
-                await dropSingleBall(bet, i, ballCount);
-            }, i * 300); // 300ms delay between each ball
+        // Show instructions
+        const instructionsDiv = document.getElementById('plinkoInstructions');
+        if (instructionsDiv) {
+            instructionsDiv.style.display = 'block';
+            if (ballCount >= 10) {
+                instructionsDiv.innerHTML = `👆 Klicke oben auf das Spielfeld! Du kannst mehrfach klicken für mehrere Bälle gleichzeitig! (${ballsToDropCount} übrig)`;
+            } else {
+                instructionsDiv.innerHTML = `👆 Klicke oben auf das Spielfeld, um ${ballCount > 1 ? 'die Bälle zu starten' : 'den Ball zu starten'}! (${ballsToDropCount} übrig)`;
+            }
         }
+        
+        document.getElementById('plinkoResult').innerHTML = `<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1.1rem; font-weight: 700;">🎯 Bereit! Klicke auf das Spielfeld zum Starten (${ballCount} Bälle, ${totalBet.toFixed(2)}€ Einsatz)</div>`;
     }
     
-    async function dropSingleBall(bet, index, totalBalls) {
+    async function dropSingleBallManual() {
+        if (ballsToDropCount <= 0 || currentDropX === null) {
+            return;
+        }
+        
+        const ballCount = parseInt(document.getElementById('plinkoBallCount').value);
+        
+        // Bei 10+ Bällen: Erlaube mehrere Bälle gleichzeitig
+        if (ballCount < 10 && plinkoDropping) {
+            return;
+        }
+        
+        // Setze plinkoDropping nur wenn weniger als 10 Bälle
+        if (ballCount < 10) {
+            plinkoDropping = true;
+        }
+        
+        const bet = parseFloat(document.getElementById('plinkoBet').value);
+        const totalBalls = ballCount;
+        
         try {
             const response = await fetch('/api/casino/play_plinko.php', {
                 method: 'POST',
@@ -2851,22 +4337,47 @@ if ($result) {
             const data = await response.json();
             
             if (data.status === 'success') {
-                // Create and animate ball
-                const ball = createBall();
+                // Create ball at clicked position
+                const ball = createBallAt(currentDropX);
                 balls.push(ball);
                 
-                await animateSingleBall(ball, data.slot);
-                
-                // Remove ball after landing
-                setTimeout(() => {
-                    const idx = balls.indexOf(ball);
-                    if (idx > -1) balls.splice(idx, 1);
-                    drawPlinkoBoard();
-                }, 1500);
+                // Im 10+ Ball-Modus sofort für nächsten Ball bereit machen
+                if (ballCount >= 10) {
+                    // Animation läuft asynchron weiter
+                    animateSingleBall(ball, data.slot).then(() => {
+                        setTimeout(() => {
+                            const idx = balls.indexOf(ball);
+                            if (idx > -1) balls.splice(idx, 1);
+                            drawPlinkoBoard();
+                        }, 1500);
+                    });
+                } else {
+                    await animateSingleBall(ball, data.slot);
+                    
+                    // Remove ball after landing
+                    setTimeout(() => {
+                        const idx = balls.indexOf(ball);
+                        if (idx > -1) balls.splice(idx, 1);
+                        drawPlinkoBoard();
+                    }, 1500);
+                }
                 
                 // Accumulate winnings
                 totalWin += data.win;
                 ballsDropped++;
+                ballsToDropCount--;
+                
+                // Update instructions
+                const instructionsDiv = document.getElementById('plinkoInstructions');
+                if (instructionsDiv && ballsToDropCount > 0) {
+                    if (ballCount >= 10) {
+                        instructionsDiv.innerHTML = `👆 Weiter klicken! Mehrere Bälle gleichzeitig möglich! (${ballsToDropCount} Bälle übrig)`;
+                    } else {
+                        instructionsDiv.innerHTML = `👆 Klicke erneut zum Starten! (${ballsToDropCount} Bälle übrig)`;
+                    }
+                } else if (instructionsDiv) {
+                    instructionsDiv.style.display = 'none';
+                }
                 
                 // Update result display
                 const profitLoss = totalWin - (bet * ballsDropped);
@@ -2883,23 +4394,33 @@ if ($result) {
                 `;
                 
                 // Final ball - show final result and re-enable
-                if (ballsDropped === totalBalls) {
+                if (ballsToDropCount === 0) {
+                    // Warte bis alle Bälle gelandet sind (wichtig bei Multi-Ball!)
+                    const waitForAllBalls = setInterval(() => {
+                        if (balls.length === 0) {
+                            clearInterval(waitForAllBalls);
+                            
+                            updateAllBalances(data.new_balance);
+                            
+                            // Re-enable buttons
+                            enablePlinkoButtons();
+                            
+                            drawPlinkoBoard();
+                        }
+                    }, 100);
+                    
+                    // Fallback: Nach max 10 Sekunden zwangsweise aufräumen
                     setTimeout(() => {
-                        updateAllBalances(data.new_balance);
-                        plinkoDropping = false;
-                        
-                        // Re-enable buttons
-                        document.getElementById('plinkoDropBtn').disabled = false;
-                        document.getElementById('plinkoDropBtn').style.opacity = '1';
-                        document.querySelectorAll('.plinko-bet-btn, .plinko-balls-btn').forEach(btn => {
-                            btn.disabled = false;
-                            btn.style.opacity = '1';
-                            btn.style.cursor = 'pointer';
-                        });
-                        
-                        balls = [];
-                        drawPlinkoBoard();
-                    }, 2000);
+                        clearInterval(waitForAllBalls);
+                        if (ballsToDropCount === 0) {
+                            balls = [];
+                            enablePlinkoButtons();
+                            drawPlinkoBoard();
+                        }
+                    }, 10000);
+                } else {
+                    // Not final ball - re-enable for next drop
+                    plinkoDropping = false;
                 }
                 
             } else {
@@ -2908,13 +4429,18 @@ if ($result) {
         } catch (error) {
             console.error('❌ Plinko error:', error);
             showNotification('Fehler: ' + error.message, 'error');
+            ballsToDropCount = 0;
             plinkoDropping = false;
             enablePlinkoButtons();
         }
     }
-    }
+    
     
     function enablePlinkoButtons() {
+        plinkoDropping = false; // Reset dropping state
+        ballsToDropCount = 0;   // Reset counter
+        currentDropX = null;    // Reset drop position
+        
         document.getElementById('plinkoDropBtn').disabled = false;
         document.getElementById('plinkoDropBtn').style.opacity = '1';
         document.querySelectorAll('.plinko-bet-btn, .plinko-balls-btn').forEach(btn => {
@@ -2922,12 +4448,27 @@ if ($result) {
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
         });
+        
+        const instructionsDiv = document.getElementById('plinkoInstructions');
+        if (instructionsDiv) {
+            instructionsDiv.style.display = 'none';
+        }
     }
     
     function createBall() {
         return {
-            x: 500, // Canvas center (1000 / 2)
-            y: 20,
+            x: 600, // Canvas center (1200 / 2)
+            y: 30,
+            vx: 0,
+            vy: 0,
+            active: true
+        };
+    }
+    
+    function createBallAt(x) {
+        return {
+            x: x,
+            y: 30,
             vx: 0,
             vy: 0,
             active: true
@@ -2936,20 +4477,40 @@ if ($result) {
     
     function animateSingleBall(ball, finalSlot) {
         return new Promise((resolve) => {
-            const width = 1000;
-            const startY = 80;
-            const endY = 450;
-            const slotY = 500;
+            const width = 1200;
+            const startY = 100;
+            const endY = 550;
+            const slotY = 600;
             const slotWidth = width / SLOTS;
             const rowSpacing = (endY - startY) / (ROWS - 1);
             
-            // PHYSIK-KONSTANTEN (langsam und realistisch)
-            const GRAVITY = 0.15;  // Sanfte Gravitation
-            const BOUNCE = 0.75;   // Bounce-Faktor
-            const FRICTION = 0.99; // Wenig Reibung
-            const MAX_SPEED = 4;   // Langsame max Geschwindigkeit
+            // PHYSIK-KONSTANTEN (Balance: Spannung aber kein Stuck)
+            const GRAVITY = 0.10;  // Mittelweg (war 0.12, original 0.08)
+            const BOUNCE = 0.62;   // Mittelweg (war 0.6, original 0.65)
+            const FRICTION = 0.99; // Bleibt (weniger Reibung)
+            const MAX_SPEED = 2.5; // Reduziert (war 3.0, original 2.2)
+            const CENTER_PULL = 0.015; // Bleibt
+            const MIN_VY = 0.3; // Reduziert (war 0.5) - sanfter
             
             let finished = false;
+            let frameCount = 0;
+            let lastY = ball.y;
+            let stuckCounter = 0;
+            
+            // KÜRZERES Timeout: 5 Sekunden statt 8
+            const forceFinishTimeout = setTimeout(() => {
+                if (!finished) {
+                    console.warn('🚨 FORCE FINISH after 5s - Ball to slot', finalSlot);
+                    finished = true;
+                    const serverSlot = finalSlot;
+                    ball.x = serverSlot * slotWidth + slotWidth / 2;
+                    ball.y = slotY + 35;
+                    ball.vx = 0;
+                    ball.vy = 0;
+                    drawPlinkoBoard();
+                    resolve();
+                }
+            }, 5000); // 5 Sekunden statt 8
             
             // Get all pin positions
             const pins = [];
@@ -2966,12 +4527,50 @@ if ($result) {
             
             const animate = () => {
                 if (finished || !ball.active) {
+                    clearTimeout(forceFinishTimeout);
                     resolve();
                     return;
                 }
                 
+                frameCount++;
+                
+                // SANFTE Stuck-Detection aber zuverlässig
+                if (frameCount % 25 === 0) { // Etwas seltener (25 statt 20)
+                    if (Math.abs(ball.y - lastY) < 2.0) {
+                        stuckCounter++;
+                        console.warn('🔴 Ball stuck - frame:', frameCount, 'counter:', stuckCounter);
+                        
+                        // Moderater Schub (nicht zu aggressiv)
+                        ball.vy += 1.5; // Reduziert von 3.0
+                        ball.vx += (Math.random() - 0.5) * 1.5;
+                        ball.y += 3; // Reduziert von 5
+                        
+                        if (stuckCounter > 2) {
+                            console.warn('🔴🔴 Ball severely stuck - teleport');
+                            ball.y += 80; // Reduziert von 100
+                            ball.vy = 2.0; // Reduziert von 3.0
+                            ball.vx = (Math.random() - 0.5) * 1.5;
+                        }
+                    } else {
+                        stuckCounter = 0;
+                    }
+                    lastY = ball.y;
+                }
+                
                 // Apply gravity
                 ball.vy += GRAVITY;
+                
+                // GARANTIERE minimale vertikale Geschwindigkeit
+                if (ball.y > startY + 20) {
+                    if (Math.abs(ball.vy) < MIN_VY) {
+                        ball.vy += MIN_VY * 2; // Zwinge Ball nach unten
+                    }
+                }
+                
+                // Leichte zentrale Anziehung (macht äußere Slots schwerer erreichbar)
+                const centerX = width / 2;
+                const distanceFromCenter = ball.x - centerX;
+                ball.vx -= distanceFromCenter * CENTER_PULL / width;
                 
                 // Limit max speed
                 const currentSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
@@ -2987,7 +4586,7 @@ if ($result) {
                     const dx = ball.x - pin.x;
                     const dy = ball.y - pin.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    const minDistance = BALL_RADIUS + PIN_RADIUS + 3;
+                    const minDistance = BALL_RADIUS + PIN_RADIUS + 4; // Bleibt bei 4
                     
                     if (distance < minDistance && !collided) {
                         collided = true;
@@ -2996,9 +4595,9 @@ if ($result) {
                         const angle = Math.atan2(dy, dx);
                         const overlap = minDistance - distance;
                         
-                        // Push ball away from pin
-                        ball.x += Math.cos(angle) * (overlap + 1);
-                        ball.y += Math.sin(angle) * (overlap + 1);
+                        // Moderater Push (Balance)
+                        ball.x += Math.cos(angle) * (overlap + 5); // 5 statt 6
+                        ball.y += Math.sin(angle) * (overlap + 5);
                         
                         // Calculate bounce
                         const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
@@ -3007,10 +4606,50 @@ if ($result) {
                         ball.vx = Math.cos(angle) * bounceSpeed;
                         ball.vy = Math.sin(angle) * bounceSpeed;
                         
-                        // Random horizontal impulse
-                        ball.vx += (Math.random() - 0.5) * 1.5;
+                        // Moderater random impulse
+                        ball.vx += (Math.random() - 0.5) * 1.5; // Reduziert von 2.0
+                        
+                        // Anti-Verkant aber nicht zu stark
+                        if (Math.abs(ball.vy) < 0.8) {
+                            ball.vy += 1.5; // Reduziert von 2.0
+                        }
+                        if (Math.abs(ball.vx) < 0.5) {
+                            ball.vx += (Math.random() - 0.5) * 1.5;
+                        }
+                        
+                        // Sanfter Push nach unten
+                        ball.y += 1; // Reduziert von 2
                     }
                 });
+                
+                // Zusätzlicher Check: Falls Ball langsam wird
+                if (ball.y > startY + 40) {
+                    const totalSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                    if (totalSpeed < 0.8) { // Reduziert von 1.0
+                        ball.vy += 1.5; // Reduziert von 3.0
+                        ball.vx += (Math.random() - 0.5) * 1.0;
+                        ball.y += 5; // Reduziert von 10
+                        console.warn('🟡 Ball slow - gentle boost');
+                    }
+                }
+                
+                // Emergency: Falls Ball zu lange braucht (aber sanfter)
+                if (frameCount > 350) { // Später (350 statt 300)
+                    ball.vy += 0.5; // Sanfter (0.5 statt 1.0)
+                    ball.y += 3; // Sanfter (3 statt 5)
+                    if (frameCount % 50 === 0) { // Nur alle 50 Frames loggen
+                        console.warn('🟠 Ball taking long - frame:', frameCount);
+                    }
+                }
+                
+                // Nur im Notfall: Ball muss landen
+                if (frameCount > 450) { // Später (450 statt 400)
+                    ball.vy += 1.0; // Reduziert von 2.0
+                    ball.y += 5; // Reduziert von 10
+                    if (frameCount % 50 === 0) {
+                        console.warn('🔴 Forcing ball down - frame:', frameCount);
+                    }
+                }
                 
                 // Apply velocity
                 ball.x += ball.vx;
@@ -3031,11 +4670,14 @@ if ($result) {
                 
                 // Check if ball reached slot
                 if (ball.y >= slotY - 10) {
-                    // Determine actual slot
-                    const actualSlot = Math.max(0, Math.min(SLOTS - 1, Math.floor(ball.x / slotWidth)));
+                    clearTimeout(forceFinishTimeout); // Clear timeout wenn Ball normal landet
                     
-                    // Snap to center of slot
-                    ball.x = actualSlot * slotWidth + slotWidth / 2;
+                    // USE SERVER-DETERMINED SLOT (nicht die physikalische Position!)
+                    // Dies garantiert, dass der Ball im korrekten Slot landet
+                    const serverSlot = finalSlot;
+                    
+                    // Snap to center of SERVER slot
+                    ball.x = serverSlot * slotWidth + slotWidth / 2;
                     ball.y = slotY + 35;
                     ball.vx = 0;
                     ball.vy = 0;
@@ -3044,6 +4686,13 @@ if ($result) {
                     drawPlinkoBoard();
                     setTimeout(() => resolve(), 300);
                     return;
+                }
+                
+                // Gradually steer ball towards final slot as it gets closer to bottom
+                if (ball.y > endY - 100) {
+                    const targetX = finalSlot * slotWidth + slotWidth / 2;
+                    const diff = targetX - ball.x;
+                    ball.vx += diff * 0.003; // Sanfte Lenkung zum Zielslot
                 }
                 
                 // Draw current frame
@@ -3446,6 +5095,201 @@ if ($result) {
         }, 2000);
     }
     
+    // ========== BLACKJACK GAME ==========
+    let blackjackGame = null;
+    
+    function setBlackjackBet(amount) {
+        document.getElementById('blackjackBet').value = amount;
+        document.querySelectorAll('.blackjack-bet-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.closest('.blackjack-bet-btn').classList.add('active');
+    }
+    
+    async function startBlackjack() {
+        const bet = parseFloat(document.getElementById('blackjackBet').value);
+        if (bet < 0.5 || bet > 50) {
+            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            return;
+        }
+        
+        if (bet > userBalance) {
+            showNotification('Nicht genug Guthaben!', 'error');
+            return;
+        }
+        
+        try {
+            const response = await fetch('/api/casino/play_blackjack.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'start', bet: bet })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                blackjackGame = data;
+                
+                // Render hands based on whether dealer cards are visible
+                if (data.gameOver) {
+                    renderBlackjackHands(data.playerHand, data.dealerHand, data.playerValue, data.dealerValue);
+                } else {
+                    renderBlackjackHands(data.playerHand, data.dealerHand, data.playerValue, null);
+                }
+                
+                // Check for immediate result (Blackjack)
+                if (data.gameOver) {
+                    // Game ended immediately
+                    handleBlackjackResult(data);
+                } else {
+                    // Show action buttons for normal play
+                    document.getElementById('blackjackActions').style.display = 'flex';
+                    document.getElementById('blackjackStart').style.display = 'none';
+                }
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
+    async function blackjackHit() {
+        try {
+            const response = await fetch('/api/casino/play_blackjack.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'hit' })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                renderBlackjackHands(data.playerHand, blackjackGame.dealerHand, data.playerValue, null);
+                
+                if (data.result === 'bust') {
+                    setTimeout(() => blackjackStand(), 1000);
+                }
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
+    async function blackjackStand() {
+        try {
+            const response = await fetch('/api/casino/play_blackjack.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'stand' })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                renderBlackjackHands(data.playerHand, data.dealerHand, data.playerValue, data.dealerValue);
+                handleBlackjackResult(data);
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
+    async function blackjackDouble() {
+        try {
+            const response = await fetch('/api/casino/play_blackjack.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'double' })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                renderBlackjackHands(data.playerHand, data.dealerHand, data.playerValue, data.dealerValue);
+                handleBlackjackResult(data);
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
+    function renderBlackjackHands(playerHand, dealerHand, playerValue, dealerValue) {
+        const playerCardsEl = document.getElementById('blackjackPlayerCards');
+        const dealerCardsEl = document.getElementById('blackjackDealerCards');
+        const playerValueEl = document.getElementById('blackjackPlayerValue');
+        const dealerValueEl = document.getElementById('blackjackDealerValue');
+        
+        playerCardsEl.innerHTML = playerHand.map(card => `
+            <div class="bj-card">
+                <div class="bj-card-rank">${card.rank}</div>
+                <div class="bj-card-suit" style="color: ${card.suit === '♥' || card.suit === '♦' ? '#ef4444' : '#000'};">${card.suit}</div>
+            </div>
+        `).join('');
+        
+        dealerCardsEl.innerHTML = dealerHand.map((card, i) => {
+            if (dealerValue === null && i > 0) {
+                return '<div class="bj-card bj-card-back">🂠</div>';
+            }
+            return `
+                <div class="bj-card">
+                    <div class="bj-card-rank">${card.rank}</div>
+                    <div class="bj-card-suit" style="color: ${card.suit === '♥' || card.suit === '♦' ? '#ef4444' : '#000'};">${card.suit}</div>
+                </div>
+            `;
+        }).join('');
+        
+        playerValueEl.textContent = playerValue;
+        dealerValueEl.textContent = dealerValue !== null ? dealerValue : '?';
+    }
+    
+    function handleBlackjackResult(data) {
+        const resultEl = document.getElementById('blackjackResult');
+        
+        let resultText = '';
+        let resultColor = '';
+        let profitText = '';
+        
+        // Calculate actual profit/loss for display
+        const actualProfit = data.profit - (data.result === 'push' ? 0 : 0);
+        
+        if (data.result === 'blackjack') {
+            resultText = '🎉 BLACKJACK! 🎉';
+            resultColor = '#f59e0b';
+            profitText = `Gewinn: +${(data.winAmount).toFixed(2)}€ (Auszahlung: ${data.winAmount.toFixed(2)}€)`;
+        } else if (data.result === 'win' || data.result === 'dealer_bust') {
+            resultText = data.result === 'dealer_bust' ? '✅ DEALER BUST!' : '✅ GEWONNEN!';
+            resultColor = '#10b981';
+            profitText = `Gewinn: +${(data.winAmount).toFixed(2)}€`;
+        } else if (data.result === 'push') {
+            resultText = '🤝 UNENTSCHIEDEN';
+            resultColor = '#fbbf24';
+            profitText = 'Einsatz zurück';
+        } else if (data.result === 'bust' || data.result === 'lose' || data.result === 'dealer_blackjack') {
+            resultText = data.result === 'bust' ? '💥 ÜBERKAUFT!' : (data.result === 'dealer_blackjack' ? '🃏 DEALER BLACKJACK' : '❌ VERLOREN');
+            resultColor = '#ef4444';
+            profitText = `Verlust: -${(data.winAmount || 0).toFixed(2)}€`;
+        }
+        
+        resultEl.innerHTML = `
+            <div style="font-size: 2.5rem; font-weight: 900; color: ${resultColor}; text-shadow: 0 0 20px ${resultColor}; animation: winPulse 0.5s ease-in-out 3;">
+                ${resultText}
+                <div style="font-size: 1.25rem; margin-top: 12px; opacity: 0.9;">${profitText}</div>
+            </div>
+        `;
+        
+        updateAllBalances(data.newBalance);
+        
+        // Hide action buttons, show start button
+        document.getElementById('blackjackActions').style.display = 'none';
+        document.getElementById('blackjackStart').style.display = 'block';
+        
+        // Clear result after 5 seconds
+        setTimeout(() => {
+            resultEl.innerHTML = '';
+        }, 5000);
+    }
+    
     // Close modals on ESC
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
@@ -3456,14 +5300,229 @@ if ($result) {
         }
     });
     
+    // ========== MULTIPLAYER LOBBY ==========
+    let multiplayerRefreshInterval = null;
+    
+    async function loadMultiplayerTables() {
+        try {
+            const response = await fetch('/api/casino/get_multiplayer_tables.php');
+            const data = await response.json();
+            
+            const grid = document.getElementById('multiplayerTablesGrid');
+            
+            if (data.status === 'success' && data.tables.length > 0) {
+                grid.innerHTML = data.tables.map(table => `
+                    <div class="multiplayer-table-card" style="
+                        background: var(--bg-secondary);
+                        border: 2px solid var(--border);
+                        border-radius: 16px;
+                        padding: 20px;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.transform='translateY(-4px)'; this.style.borderColor='var(--accent)'" 
+                       onmouseout="this.style.transform='translateY(0)'; this.style.borderColor='var(--border)'">
+                        <div style="display: flex; justify-content: between; align-items: start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <div style="font-size: 1.25rem; font-weight: 800; color: var(--text-primary); margin-bottom: 4px;">
+                                    ${table.table_name}
+                                </div>
+                                <div style="font-size: 0.875rem; color: var(--text-secondary);">
+                                    Host: ${table.host_name}
+                                </div>
+                            </div>
+                            <div style="background: linear-gradient(135deg, #f59e0b, #ef4444); color: white; padding: 4px 12px; border-radius: 8px; font-weight: 700; font-size: 0.875rem;">
+                                ${table.game_type.toUpperCase()}
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 16px 0;">
+                            <div style="background: var(--bg-primary); padding: 8px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Min/Max</div>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: var(--accent);">${table.min_bet}€ - ${table.max_bet}€</div>
+                            </div>
+                            <div style="background: var(--bg-primary); padding: 8px; border-radius: 8px; text-align: center;">
+                                <div style="font-size: 0.75rem; color: var(--text-secondary);">Spieler</div>
+                                <div style="font-size: 0.95rem; font-weight: 700; color: #10b981;">${table.current_players}/${table.max_players}</div>
+                            </div>
+                        </div>
+                        
+                        <button onclick="joinMultiplayerTable(${table.id}, ${table.min_bet}, ${table.max_bet})" style="
+                            width: 100%;
+                            padding: 12px;
+                            background: linear-gradient(135deg, #10b981, #059669);
+                            border: none;
+                            border-radius: 12px;
+                            color: white;
+                            font-weight: 800;
+                            cursor: pointer;
+                            transition: all 0.2s;
+                        " onmouseover="this.style.transform='scale(1.02)'" onmouseout="this.style.transform='scale(1)'">
+                            🎮 Beitreten
+                        </button>
+                    </div>
+                `).join('');
+            } else {
+                grid.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1 / -1;">
+                        <div style="font-size: 3rem; margin-bottom: 16px; opacity: 0.5;">🎲</div>
+                        <div style="font-size: 1.125rem; font-weight: 600;">Keine aktiven Tische</div>
+                        <div style="font-size: 0.875rem; margin-top: 8px;">Erstelle einen neuen Tisch und lade andere ein!</div>
+                    </div>
+                `;
+            }
+        } catch (error) {
+            console.error('Failed to load tables:', error);
+        }
+    }
+    
+    function showCreateTableModal() {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: flex; align-items: center; justify-content: center;';
+        
+        modal.innerHTML = `
+            <div style="background: var(--bg-primary); padding: 40px; border-radius: 20px; max-width: 500px; width: 90%;">
+                <h2 style="font-size: 2rem; font-weight: 900; margin-bottom: 24px; text-align: center;">🎲 Tisch erstellen</h2>
+                
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Tischname</label>
+                    <input type="text" id="tableName" value="${'<?= $name ?>'}'s Tisch" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1rem;">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Min. Einsatz</label>
+                        <input type="number" id="minBet" value="1" min="0.5" max="50" step="0.5" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                    </div>
+                    <div>
+                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Max. Einsatz</label>
+                        <input type="number" id="maxBet" value="50" min="1" max="100" step="1" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Max. Spieler</label>
+                    <input type="number" id="maxPlayers" value="4" min="2" max="6" step="1" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="padding: 14px; background: var(--bg-secondary); border: none; border-radius: 12px; color: var(--text-secondary); font-weight: 600; cursor: pointer;">
+                        Abbrechen
+                    </button>
+                    <button onclick="createMultiplayerTable()" style="padding: 14px; background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer;">
+                        Erstellen
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    async function createMultiplayerTable() {
+        const tableName = document.getElementById('tableName').value;
+        const minBet = parseFloat(document.getElementById('minBet').value);
+        const maxBet = parseFloat(document.getElementById('maxBet').value);
+        const maxPlayers = parseInt(document.getElementById('maxPlayers').value);
+        
+        try {
+            const response = await fetch('/api/casino/create_multiplayer_table.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table_name: tableName,
+                    min_bet: minBet,
+                    max_bet: maxBet,
+                    max_players: maxPlayers,
+                    game_type: 'blackjack'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                showNotification('Tisch erstellt! Warte auf Spieler...', 'success');
+                document.querySelector('[style*="fixed"]').remove();
+                loadMultiplayerTables();
+                // TODO: Open waiting room
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
+    function joinMultiplayerTable(tableId, minBet, maxBet) {
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: flex; align-items: center; justify-content: center;';
+        
+        modal.innerHTML = `
+            <div style="background: var(--bg-primary); padding: 40px; border-radius: 20px; max-width: 400px; width: 90%;">
+                <h2 style="font-size: 1.75rem; font-weight: 900; margin-bottom: 24px; text-align: center;">💰 Einsatz wählen</h2>
+                
+                <div style="text-align: center; margin-bottom: 20px; padding: 16px; background: var(--bg-secondary); border-radius: 12px;">
+                    <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Erlaubter Bereich</div>
+                    <div style="font-size: 1.25rem; font-weight: 800; color: var(--accent);">${minBet}€ - ${maxBet}€</div>
+                </div>
+                
+                <div style="margin-bottom: 24px;">
+                    <input type="number" id="joinBet" value="${minBet}" min="${minBet}" max="${maxBet}" step="0.5" style="width: 100%; padding: 16px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1.25rem; text-align: center; font-weight: 700;">
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                    <button onclick="this.closest('[style*=fixed]').remove()" style="padding: 14px; background: var(--bg-secondary); border: none; border-radius: 12px; color: var(--text-secondary); font-weight: 600; cursor: pointer;">
+                        Abbrechen
+                    </button>
+                    <button onclick="confirmJoinTable(${tableId})" style="padding: 14px; background: linear-gradient(135deg, #10b981, #059669); border: none; border-radius: 12px; color: white; font-weight: 800; cursor: pointer;">
+                        Beitreten
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(modal);
+    }
+    
+    async function confirmJoinTable(tableId) {
+        const bet = parseFloat(document.getElementById('joinBet').value);
+        
+        try {
+            const response = await fetch('/api/casino/join_multiplayer_table.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    table_id: tableId,
+                    bet_amount: bet
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                showNotification('Erfolgreich beigetreten!', 'success');
+                document.querySelector('[style*="fixed"]').remove();
+                loadMultiplayerTables();
+                // TODO: Open game table
+            } else {
+                showNotification(data.error, 'error');
+            }
+        } catch (error) {
+            showNotification('Fehler: ' + error.message, 'error');
+        }
+    }
+    
     // Initialize wheel on page load
     window.addEventListener('DOMContentLoaded', () => {
         initPlinko();
+        
+        // Load multiplayer tables
+        loadMultiplayerTables();
+        multiplayerRefreshInterval = setInterval(loadMultiplayerTables, 5000);
         
         // Setup game card click handlers
         const openSlotsBtn = document.getElementById('openSlotsBtn');
         const openPlinkoBtn = document.getElementById('openPlinkoBtn');
         const openCrashBtn = document.getElementById('openCrashBtn');
+        const openBlackjackBtn = document.getElementById('openBlackjackBtn');
         
         if (openSlotsBtn) {
             openSlotsBtn.addEventListener('click', () => openGame('slots'));
@@ -3473,6 +5532,14 @@ if ($result) {
         }
         if (openCrashBtn) {
             openCrashBtn.addEventListener('click', () => openGame('crash'));
+        }
+        if (openBlackjackBtn) {
+            openBlackjackBtn.addEventListener('click', () => openGame('blackjack'));
+        }
+        
+        const openChickenBtn = document.getElementById('openChickenBtn');
+        if (openChickenBtn) {
+            openChickenBtn.addEventListener('click', () => openGame('chicken'));
         }
     });
     </script>
