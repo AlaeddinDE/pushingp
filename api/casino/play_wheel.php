@@ -32,22 +32,23 @@ if ($balance - $bet < 10) {
 }
 
 $multipliers = [
-    ['value' => 0.5, 'weight' => 40, 'rotation' => 36],
-    ['value' => 1.0, 'weight' => 30, 'rotation' => 108],
-    ['value' => 2.0, 'weight' => 20, 'rotation' => 180],
-    ['value' => 5.0, 'weight' => 8, 'rotation' => 252],
-    ['value' => 10.0, 'weight' => 1.8, 'rotation' => 315],
-    ['value' => 50.0, 'weight' => 0.2, 'rotation' => 350]
+    ['value' => 0, 'weight' => 51, 'rotation' => 26],
+    ['value' => 0.5, 'weight' => 21, 'rotation' => 67],
+    ['value' => 1.0, 'weight' => 15, 'rotation' => 115],
+    ['value' => 2.0, 'weight' => 9, 'rotation' => 165],
+    ['value' => 5.0, 'weight' => 2.5, 'rotation' => 225],
+    ['value' => 10.0, 'weight' => 1, 'rotation' => 290],
+    ['value' => 50.0, 'weight' => 0.5, 'rotation' => 350]
 ];
 
 $total = array_sum(array_column($multipliers, 'weight'));
-$rand = mt_rand(1, $total * 100) / 100;
+$rand = (mt_rand() / mt_getrandmax()) * $total;  // 0.0 to $total
 $sum = 0;
 $result = $multipliers[0];
 
 foreach ($multipliers as $mult) {
     $sum += $mult['weight'];
-    if ($rand <= $sum) {
+    if ($rand < $sum) {  // Changed from <= to <
         $result = $mult;
         break;
     }

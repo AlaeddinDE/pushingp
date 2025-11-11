@@ -1312,3 +1312,9 @@ Dies entspricht der mathematischen Verteilung echter Crash-Spiele wie Stake.com,
 - Langfristig: Casino gewinnt 3€ pro 100€ Einsatz
 - Kurzfristig: Varianz möglich, aber fair
 
+
+## [2025-11-11] Casino.php JavaScript Fixes
+- ✅ Fixed duplicate `wheelSpinning` declaration
+- ✅ Fixed `openGame is not defined` error by converting onclick attributes to event listeners
+- Changed game cards from inline onclick to ID-based event listeners
+- All game open functions now properly attached in DOMContentLoaded
