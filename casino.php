@@ -85,7 +85,7 @@ if ($result) {
             transition: all 0.3s;
             border: 2px solid transparent;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
         }
         
         .game-card::before {
@@ -177,7 +177,7 @@ if ($result) {
             padding: 32px;
             max-width: 900px;
             width: 95%;
-            max-height: 95vh;
+            max-height: 80vh;
             overflow-y: auto;
             position: relative;
             display: flex;
@@ -204,7 +204,7 @@ if ($result) {
         
         /* Crash Game specific adjustments */
         #crashModal .game-modal-content {
-            max-height: 98vh;
+            max-height: 80vh;
             padding: 24px;
         }
         
@@ -319,7 +319,7 @@ if ($result) {
             background-origin: border-box;
             background-clip: padding-box, border-box;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             box-shadow: 
                 inset 0 0 40px rgba(0,0,0,0.7),
                 0 15px 40px rgba(0,0,0,0.6),
@@ -561,7 +561,7 @@ if ($result) {
             background: var(--bg-secondary);
             border-radius: 12px;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             margin: 24px 0;
         }
         
@@ -631,7 +631,7 @@ if ($result) {
             );
             border-radius: 16px;
             margin-bottom: 24px;
-            overflow: hidden;
+            overflow-y: auto;
             box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
             transition: background 0.5s ease;
         }
@@ -1341,6 +1341,79 @@ if ($result) {
         .pulse-1 { top: 35%; left: 75%; animation-delay: 0s; }
         .pulse-2 { top: 55%; right: 20%; animation-delay: 1s; }
         .pulse-3 { top: 75%; left: 15%; animation-delay: 2s; }
+    
+    
+    /* 📱 MOBILE RESPONSIVE */
+    @media (max-width: 768px) {
+        .game-modal-content {
+            max-width: 95vw !important;
+            max-height: 85vh !important;
+            overflow-y: auto !important;
+            padding: 15px !important;
+        }
+        
+        .game-card {
+            min-width: 280px !important;
+        }
+        
+        .quick-bet-btn, .slot-bet-btn {
+            font-size: 0.75rem !important;
+            padding: 8px 4px !important;
+            min-height: 44px;
+        }
+        
+        .game-modal h2 {
+            font-size: 1.5rem !important;
+        }
+        
+        .balance-display .balance-value {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Slots spezifisch */
+        .slots-reels-mega {
+            gap: 8px !important;
+        }
+        
+        .slot-reel-mega {
+            width: 80px !important;
+            height: 100px !important;
+        }
+        
+        /* Plinko Canvas */
+        #plinkoCanvas {
+            max-width: 100% !important;
+            height: auto !important;
+        }
+        
+        /* Crash Graph */
+        .crash-graph {
+            height: 300px !important;
+        }
+        
+        /* Chicken Board */
+        #chickenBoard {
+            height: 500px !important;
+        }
+    }
+    
+    @media (max-width: 480px) {
+        .casino-grid {
+            grid-template-columns: 1fr !important;
+        }
+        
+        .stats {
+            grid-template-columns: repeat(2, 1fr) !important;
+        }
+        
+        .quick-bet-btns, .quick-bet-grid {
+            grid-template-columns: repeat(3, 1fr) !important;
+        }
+        
+        .game-modal-content {
+            max-height: 80vh !important;
+        }
+    }
     </style>
 
 </head>
@@ -1808,7 +1881,7 @@ if ($result) {
 
         <!-- Multiplayer Lobby Section -->
         <div style="margin-top: 48px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(239, 68, 68, 0.05)); 
-                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow: hidden;">
+                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow-y: auto;">
             
             <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
                 <div style="display: flex; align-items: center; gap: 16px;">
@@ -1849,7 +1922,7 @@ if ($result) {
         <!-- Recent Big Wins -->
         <?php if (count($recent_wins) > 0): ?>
         <div style="margin-top: 48px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(16, 185, 129, 0.05)); 
-                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow: hidden;">
+                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow-y: auto;">
             
             <!-- Decorative gradient -->
             <div style="position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; 
@@ -1884,7 +1957,7 @@ if ($result) {
                     align-items: center;
                     transition: all 0.3s ease;
                     position: relative;
-                    overflow: hidden;
+                    overflow-y: auto;
                 }
                 
                 .win-card::before {
@@ -2021,7 +2094,7 @@ if ($result) {
     <?php if (!$casino_locked): ?>
     <!-- SLOTS MODAL - VEGAS STYLE -->
     <div class="game-modal" id="slotsModal">
-        <div class="game-modal-content" style="background: #000; max-width: 1100px; max-height: 90vh; overflow: hidden; border: 4px solid #f59e0b; box-shadow: 0 0 100px rgba(245, 158, 11, 0.8), inset 0 0 200px rgba(255, 215, 0, 0.1); position: relative;">
+        <div class="game-modal-content" style="background: #000; max-width: 1100px; max-height: 80vh; overflow-y: auto; border: 4px solid #f59e0b; box-shadow: 0 0 100px rgba(245, 158, 11, 0.8), inset 0 0 200px rgba(255, 215, 0, 0.1); position: relative;">
             
             <!-- Vegas Lights Border Animation -->
             <div class="vegas-lights-top"></div>
@@ -2048,35 +2121,7 @@ if ($result) {
                         <div style="font-size: 2.5rem; font-weight: 900; color: #10b981; text-shadow: 0 0 30px rgba(16, 185, 129, 1), 0 0 60px rgba(16, 185, 129, 0.5); margin-top: 4px;" id="slotsBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
                     </div>
                     
-                    <!-- Current Bet Display -->
-                    <div style="background: linear-gradient(135deg, #1a0033, #2d0052); padding: 12px 20px; border-radius: 12px; text-align: center; border: 3px solid #8b5cf6; box-shadow: 0 0 30px rgba(139, 92, 246, 0.5);">
-                        <div style="font-size: 0.75rem; color: #a78bfa; font-weight: 700; letter-spacing: 1px;">🎯 AKTUELLER EINSATZ</div>
-                        <div style="font-size: 2rem; font-weight: 900; color: #f59e0b; text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);" id="currentSlotBet">5 €</div>
-                    </div>
                     
-                    <!-- Bet Selection Buttons -->
-                    <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;">
-                        <button class="slot-bet-btn" onclick="setSlotsBet(1)" data-amount="1">
-                            <div style="font-size: 1.5rem; margin-bottom: 4px;">💵</div>
-                            <div style="font-size: 1rem; font-weight: 900;">1€</div>
-                        </button>
-                        <button class="slot-bet-btn slot-bet-active" onclick="setSlotsBet(5)" data-amount="5">
-                            <div style="font-size: 1.5rem; margin-bottom: 4px;">💵</div>
-                            <div style="font-size: 1rem; font-weight: 900;">5€</div>
-                        </button>
-                        <button class="slot-bet-btn" onclick="setSlotsBet(10)" data-amount="10">
-                            <div style="font-size: 1.5rem; margin-bottom: 4px;">💸</div>
-                            <div style="font-size: 1rem; font-weight: 900;">10€</div>
-                        </button>
-                        <button class="slot-bet-btn" onclick="setSlotsBet(25)" data-amount="25">
-                            <div style="font-size: 1.5rem; margin-bottom: 4px;">💎</div>
-                            <div style="font-size: 1rem; font-weight: 900;">25€</div>
-                        </button>
-                        <button class="slot-bet-btn" onclick="setSlotsBet(50)" data-amount="50">
-                            <div style="font-size: 1.5rem; margin-bottom: 4px;">👑</div>
-                            <div style="font-size: 1rem; font-weight: 900;">50€</div>
-                        </button>
-                    </div>
                     
                     <!-- Hidden input for bet value -->
                     <!-- Bet Input -->
@@ -2104,7 +2149,7 @@ if ($result) {
                 <div style="position: relative; display: flex; flex-direction: column; gap: 16px; max-height: 500px;">
                     
                     <!-- Slot Reels -->
-                    <div style="position: relative; background: linear-gradient(180deg, #1a0033 0%, #0a0015 50%, #1a0033 100%); border: 6px solid #f59e0b; border-radius: 24px; padding: 30px 20px; box-shadow: inset 0 0 100px rgba(245, 158, 11, 0.4), 0 0 80px rgba(245, 158, 11, 0.7); overflow: hidden;">
+                    <div style="position: relative; background: linear-gradient(180deg, #1a0033 0%, #0a0015 50%, #1a0033 100%); border: 6px solid #f59e0b; border-radius: 24px; padding: 30px 20px; box-shadow: inset 0 0 100px rgba(245, 158, 11, 0.4), 0 0 80px rgba(245, 158, 11, 0.7); overflow-y: auto;">
                         
                         <!-- Animated Neon Glow -->
                         <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(245, 158, 11, 0.3), transparent 70%); pointer-events: none; animation: neonPulse 2s ease-in-out infinite;"></div>
@@ -2133,7 +2178,7 @@ if ($result) {
                     </div>
                     
                     <!-- Spin Button -->
-                    <button id="slotsSpin" onclick="spinSlots()" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 5px solid #fbbf24; color: #fff; padding: 18px; border-radius: 20px; font-size: 1.8rem; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 5px; box-shadow: 0 10px 50px rgba(245, 158, 11, 1), inset 0 -5px 20px rgba(0,0,0,0.5); transition: all 0.3s; animation: slotSpinPulse 1.5s ease-in-out infinite; background-size: 200% 100%; position: relative; overflow: hidden;">
+                    <button id="slotsSpin" onclick="spinSlots()" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 5px solid #fbbf24; color: #fff; padding: 18px; border-radius: 20px; font-size: 1.8rem; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 5px; box-shadow: 0 10px 50px rgba(245, 158, 11, 1), inset 0 -5px 20px rgba(0,0,0,0.5); transition: all 0.3s; animation: slotSpinPulse 1.5s ease-in-out infinite; background-size: 200% 100%; position: relative; overflow-y: auto;">
                         <span style="position: relative; z-index: 2;">🎰 MEGA SPIN 🎰</span>
                         <div style="position: absolute; top: 0; left: -100%; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent); animation: shimmer 2s linear infinite;"></div>
                     </button>
@@ -2218,7 +2263,7 @@ if ($result) {
             transition: all 0.3s;
             box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
         }
         
         .slot-bet-btn::before {
@@ -2294,7 +2339,7 @@ if ($result) {
             justify-content: center;
             font-size: 5rem;
             position: relative;
-            overflow: hidden;
+            overflow-y: auto;
             box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.4), 0 0 40px rgba(245, 158, 11, 0.6);
         }
         
@@ -2379,7 +2424,7 @@ if ($result) {
 
     <!-- PLINKO MODAL -->
     <div class="game-modal" id="plinkoModal">
-        <div class="game-modal-content" style="max-width: 1400px; max-height: 98vh; overflow-y: auto; padding: 20px;">
+        <div class="game-modal-content" style="max-width: 1400px; max-height: 80vh; overflow-y: auto; padding: 20px;">
             <button class="modal-close" onclick="closeGame('plinko')">×</button>
             
             <h2 style="font-size: 1.5rem; margin: 0 0 12px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
@@ -2516,7 +2561,7 @@ if ($result) {
 
     <!-- BLACKJACK MODAL -->
     <div class="game-modal" id="blackjackModal">
-        <div class="game-modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto; background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 4px solid #10b981;">
+        <div class="game-modal-content" style="max-width: 900px; max-height: 80vh; overflow-y: auto; background: linear-gradient(135deg, #0f172a, #1e1b4b); border: 4px solid #10b981;">
             <button class="modal-close" onclick="closeGame('blackjack')">×</button>
             
             <div style="padding: 20px;"
@@ -2915,7 +2960,7 @@ if ($result) {
                                           padding: 20px; 
                                           height: 700px;
                                           position: relative;
-                                          overflow: hidden;
+                                          overflow-y: auto;
                                           box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
                 
                 <!-- Start Zone (Left Side) -->
@@ -3211,7 +3256,7 @@ if ($result) {
                 border-left: 2px solid rgba(255, 215, 0, 0.3);
                 border-right: 2px solid rgba(255, 215, 0, 0.3);
                 transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-                overflow: hidden;
+                overflow-y: auto;
                 box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
             `;
             
@@ -3319,7 +3364,7 @@ if ($result) {
         const bet = parseFloat(document.getElementById('chickenBet').value);
         
         if (bet < 0.01 || bet > 10.00) {
-            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            showNotification('Einsatz muss zwischen 0,01€ und 10,00€ liegen!', 'error');
             return;
         }
         
@@ -3844,17 +3889,8 @@ if ($result) {
     const slotSymbols = ['🍒', '🍋', '⭐', '7️⃣', '💎'];
     let slotsSpinning = false;
     
-    function setSlotsBet(amount) {
-        document.getElementById('slotsBet').value = amount;
-        document.getElementById('currentSlotBet').textContent = amount + ' €';
-        
-        // Remove active class from all buttons
-        document.querySelectorAll('.slot-bet-btn').forEach(btn => {
-            btn.classList.remove('slot-bet-active');
-        });
-        
-        // Add active class to clicked button
-        event.target.closest('.slot-bet-btn').classList.add('slot-bet-active');
+    function setSlotsQuickBet(amount) {
+        document.getElementById('slotsBet').value = amount.toFixed(2);
     }
     
     async function spinSlots() {
@@ -3862,7 +3898,7 @@ if ($result) {
         
         const bet = parseFloat(document.getElementById('slotsBet').value);
         if (bet < 0.01 || bet > 10.00) {
-            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            showNotification('Einsatz muss zwischen 0,01€ und 10,00€ liegen!', 'error');
             return;
         }
         
@@ -4324,7 +4360,7 @@ if ($result) {
         console.log(`🎯 Preparing ${ballCount} balls - Bet per ball: ${bet}€, Total: ${totalBet}€`);
         
         if (bet < 0.01 || bet > 10.00) {
-            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            showNotification('Einsatz muss zwischen 0,01€ und 10,00€ liegen!', 'error');
             return;
         }
         
@@ -4861,7 +4897,7 @@ if ($result) {
         
         const bet = parseFloat(document.getElementById('crashBet').value);
         if (bet < 0.01 || bet > 10.00) {
-            alert('Einsatz muss zwischen 0.50€ und 50€ liegen!');
+            alert('Einsatz muss zwischen 0,01€ und 10,00€ liegen!');
             return;
         }
         
@@ -5171,7 +5207,7 @@ if ($result) {
     async function startBlackjack() {
         const bet = parseFloat(document.getElementById('blackjackBet').value);
         if (bet < 0.01 || bet > 10.00) {
-            showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
+            showNotification('Einsatz muss zwischen 0,01€ und 10,00€ liegen!', 'error');
             return;
         }
         
