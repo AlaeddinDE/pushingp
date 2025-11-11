@@ -568,3 +568,68 @@ $_SESSION['mines_game'] = [
 - **Variable:** `$page_title` definiert den Seitentitel (z.B. "Dashboard", "Chat", etc.)
 - **Variable:** `$is_admin_user` für Admin-Badge im Header
 - **User-Daten:** `$user_id`, `$username`, `$name` müssen vor Header-Include definiert sein
+
+### [2025-11-11] Alte Header-Duplikate entfernt
+- Alle doppelten `<!DOCTYPE>`, `<head>`, `<body>` und Navigation-Blöcke entfernt
+- Seiten nutzen nun ausschließlich `/includes/header.php`
+- **Betroffene Dateien:** dashboard.php, chat.php, events.php, kasse.php, schichten.php, casino.php, leaderboard.php, settings.php
+- **Ergebnis:** Keine Header-Duplikate mehr, 100% zentralisiert
+- **Syntax-Check:** Alle Dateien fehlerfrei ✅
+
+## [2025-11-11 20:00] Casino Games Refactoring - Separate Files
+
+### 🎮 ALLE SPIELE ALS SEPARATE DATEIEN
+
+**Problem:** Spiele waren als Modals in casino.php → schwer zu debuggen, Modal-Chaos
+
+**Lösung:** Jedes Spiel in eigener Datei unter `/games/`
+
+**Erstellt:**
+- ✅ `/games/slots.php` (8.1 KB) - Slot Machine
+- ✅ `/games/plinko.php` (6.8 KB) - Plinko Ball Drop
+- ✅ `/games/crash.php` (9.7 KB) - Rocket Crash Game
+- ✅ `/games/blackjack.php` (9.2 KB) - Blackjack vs Dealer
+- ✅ `/games/chicken.php` (13 KB) - Chicken Cross Road
+- ✅ `/games/mines.php` (23 KB) - Mines/Minesweeper
+
+**Features jeder Datei:**
+- ✓ Login-Schutz (`require_login()`)
+- ✓ Balance mit 10€ Reserve
+- ✓ Zurück-Button zu /casino.php
+- ✓ API-Integration (existing APIs)
+- ✓ Responsive Design
+- ✓ Animationen & Effekte
+- ✓ Eigene URL (bookmarkbar)
+
+**Casino.php Updates:**
+- Alle Game Cards: `id="openXBtn"` → `onclick="window.location.href='/games/X.php'"`
+- Kein Modal-Code mehr nötig für Games
+- Deutlich schlanker & übersichtlicher
+
+**Vorteile:**
+1. **Debugging:** Jedes Spiel isoliert testbar
+2. **Performance:** Kein schweres Modal-System
+3. **Wartung:** Code-Änderungen nur in betroffener Datei
+4. **URLs:** Jedes Spiel direkt verlinkbar
+5. **Clean:** Separation of Concerns
+
+**Testing:** Alle Spiele getestet, Apache reloaded ✓
+
+---
+
+## [2025-11-11] Mobile-optimierter Header
+- **Responsive Design:** Header jetzt vollständig mobile-optimiert
+- **Hamburger-Menü:** Sliding Navigation für Mobile (< 968px)
+- **Features:**
+  - Sticky Header (bleibt oben beim Scrollen)
+  - Backdrop Blur Effect
+  - Smooth Slide-in Animation
+  - Icons für bessere Übersicht
+  - Auto-Close bei Link-Klick
+  - Gradient Logo
+  - Kompakte Admin-Badge
+- **Breakpoints:**
+  - Desktop: Volle Navbar
+  - Tablet (< 968px): Slide-out Menü
+  - Mobile (< 430px): Full-Width Menü
+- **Performance:** Keine zusätzlichen Dependencies, Pure CSS + Vanilla JS

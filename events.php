@@ -11,268 +11,254 @@ $is_admin = is_admin();
 $is_admin_user = $is_admin;
 $page_title = 'Events';
 
-require_once __DIR__ . '/includes/header.php';
+// Custom page styles
+ob_start();
 ?>
-    <style>
+<style>
+    .events-grid {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 24px;
+        margin-top: 24px;
+    }
+    
+    @media (max-width: 968px) {
         .events-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-top: 24px;
-        }
-        
-        @media (max-width: 968px) {
-            .events-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .calendar {
-                gap: 4px;
-            }
-            
-            .day-box {
-                min-height: 60px;
-                padding: 4px;
-                font-size: 0.75rem;
-            }
-            
-            .weekday-header {
-                font-size: 0.65rem;
-                padding: 4px;
-            }
-            
-            .calendar-header {
-                flex-direction: column;
-                gap: 12px;
-            }
-            
-            .calendar-nav-btn {
-                width: 100%;
-            }
-            
-            .event-card {
-                padding: 12px;
-            }
-            
-            .event-actions {
-                flex-direction: column;
-            }
-            
-            .btn-join, .btn-leave {
-                width: 100%;
-            }
+            grid-template-columns: 1fr;
         }
         
         .calendar {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
-        }
-        
-        .calendar-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-            padding: 12px;
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-        }
-        
-        .calendar-nav-btn {
-            background: var(--accent);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s;
-        }
-        
-        .calendar-nav-btn:hover {
-            background: var(--accent-hover);
-            transform: scale(1.05);
-            box-shadow: 0 4px 12px var(--accent-glow);
-        }
-        
-        .calendar-month {
-            font-weight: 700;
-            font-size: 1.125rem;
-        }
-        
-        .weekday-header {
-            text-align: center;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-secondary);
-            padding: 8px;
-            text-transform: uppercase;
-        }
-        
-        .event-card {
-            padding: 16px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            margin-bottom: 12px;
-            transition: all 0.3s ease;
-        }
-        
-        .event-card:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--border-hover);
-            transform: translateY(-2px);
-        }
-        
-        .event-title {
-            font-weight: 600;
-            margin-bottom: 8px;
-        }
-        
-        .event-meta {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-        }
-        
-        .event-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-        }
-        
-        .btn-join {
-            padding: 8px 16px;
-            background: var(--success);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-join:hover {
-            background: #2d8a4d;
-            transform: scale(1.05);
-        }
-        
-        .btn-leave {
-            padding: 8px 16px;
-            background: var(--error);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-leave:hover {
-            background: #c23538;
-            transform: scale(1.05);
-        }
-        
-        .participants {
-            font-size: 0.813rem;
-            color: var(--text-tertiary);
-            margin-top: 8px;
+            gap: 4px;
         }
         
         .day-box {
-            min-height: 80px;
-            padding: 8px;
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            min-height: 60px;
+            padding: 4px;
+            font-size: 0.75rem;
         }
         
-        .day-box:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--accent);
-            transform: translateY(-4px);
-            box-shadow: 0 8px 20px var(--accent-glow);
+        .weekday-header {
+            font-size: 0.65rem;
+            padding: 4px;
         }
         
-        .day-box.today {
-            border: 2px solid var(--accent);
-            background: var(--bg-tertiary);
-            box-shadow: 0 0 20px var(--accent-glow);
+        .calendar-header {
+            flex-direction: column;
+            gap: 12px;
         }
         
-        .day-box.selected {
-            background: var(--accent);
-            border-color: var(--accent);
-            transform: scale(1.05);
+        .calendar-nav-btn {
+            width: 100%;
         }
         
-        .day-box.selected .day-number {
-            color: white;
-            font-weight: 800;
-        }
-        
-        .day-box.has-event {
-            border-color: var(--accent);
-        }
-        
-        .day-number {
-            position: absolute;
-            top: 6px;
-            right: 8px;
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 600;
-        }
-        
-        .event-pill {
-            margin-top: 20px;
-            background: var(--accent);
-            color: white;
-            border-radius: 6px;
-            padding: 4px 6px;
-            font-size: 0.7rem;
-            font-weight: 600;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            animation: scaleIn 0.3s ease;
-        }
-        
-        .date-picker-info {
-            margin-top: 16px;
+        .event-card {
             padding: 12px;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--accent);
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.875rem;
-            animation: fadeIn 0.3s ease;
         }
-    </style>
-</head>
-<body>
-    <div class="grain"></div>
+        
+        .event-actions {
+            flex-direction: column;
+        }
+        
+        .btn-join, .btn-leave {
+            width: 100%;
+        }
+    }
     
-    <div class="header">
-        <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
-            <nav class="nav">
-                <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="events.php" class="nav-item">Events</a>
-                <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="chat.php" class="nav-item">Chat</a>
-                <?php if ($is_admin): ?>
-                    <a href="admin.php" class="nav-item">Admin</a>
-                <?php endif; ?>
-                <a href="settings.php" class="nav-item">Settings</a>
-                <a href="logout.php" class="nav-item">Logout</a>
-            </nav>
-        </div>
-    </div>
+    .calendar {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 8px;
+    }
+    
+    .calendar-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 16px;
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+    }
+    
+    .calendar-nav-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.3s;
+    }
+    
+    .calendar-nav-btn:hover {
+        background: var(--accent-hover);
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px var(--accent-glow);
+    }
+    
+    .calendar-month {
+        font-weight: 700;
+        font-size: 1.125rem;
+    }
+    
+    .weekday-header {
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        padding: 8px;
+        text-transform: uppercase;
+    }
+    
+    .event-card {
+        padding: 16px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        margin-bottom: 12px;
+        transition: all 0.3s ease;
+    }
+    
+    .event-card:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--border-hover);
+        transform: translateY(-2px);
+    }
+    
+    .event-title {
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    .event-meta {
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .event-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+    
+    .btn-join {
+        padding: 8px 16px;
+        background: var(--success);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-join:hover {
+        background: #2d8a4d;
+        transform: scale(1.05);
+    }
+    
+    .btn-leave {
+        padding: 8px 16px;
+        background: var(--error);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-leave:hover {
+        background: #c23538;
+        transform: scale(1.05);
+    }
+    
+    .participants {
+        font-size: 0.813rem;
+        color: var(--text-tertiary);
+        margin-top: 8px;
+    }
+    
+    .day-box {
+        min-height: 80px;
+        padding: 8px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        position: relative;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .day-box:hover {
+        background: var(--bg-tertiary);
+        border-color: var(--accent);
+        transform: translateY(-4px);
+        box-shadow: 0 8px 20px var(--accent-glow);
+    }
+    
+    .day-box.today {
+        border: 2px solid var(--accent);
+        background: var(--bg-tertiary);
+        box-shadow: 0 0 20px var(--accent-glow);
+    }
+    
+    .day-box.selected {
+        background: var(--accent);
+        border-color: var(--accent);
+        transform: scale(1.05);
+    }
+    
+    .day-box.selected .day-number {
+        color: white;
+        font-weight: 800;
+    }
+    
+    .day-box.has-event {
+        border-color: var(--accent);
+    }
+    
+    .day-number {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+    }
+    
+    .event-pill {
+        margin-top: 20px;
+        background: var(--accent);
+        color: white;
+        border-radius: 6px;
+        padding: 4px 6px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        animation: scaleIn 0.3s ease;
+    }
+    
+    .date-picker-info {
+        margin-top: 16px;
+        padding: 12px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--accent);
+        border-radius: 8px;
+        text-align: center;
+        font-size: 0.875rem;
+        animation: fadeIn 0.3s ease;
+    }
+</style>
+<?php
+$page_styles = ob_get_clean();
+
+require_once __DIR__ . '/includes/header.php';
+?>
 
     <div class="container">
         <div class="welcome">

@@ -184,32 +184,6 @@ require_once __DIR__ . '/includes/header.php';
             color: var(--accent);
         }
     </style>
-</head>
-<body>
-    <div class="grain"></div>
-    
-    <div class="header">
-        <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
-                PUSHING P
-                <?php if ($is_admin_user): ?>
-                    <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(127, 16, 16, 0.3);">Admin</span>
-                <?php endif; ?>
-            </a>
-            <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
-                <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="events.php" class="nav-item">Events</a>
-                <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="chat.php" class="nav-item">Chat</a>
-                <?php if ($is_admin_user): ?>
-                    <a href="admin.php" class="nav-item">Admin</a>
-                <?php endif; ?>
-                <a href="settings.php" class="nav-item">Settings</a>
-                <a href="logout.php" class="nav-item">Logout</a>
-            </nav>
-        </div>
-    </div>
 
     <div class="container leaderboard-container">
         <div class="welcome">

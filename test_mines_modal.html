@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Mines Modal</title>
+    <style>
+        .game-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 9999; }
+        .game-modal.active { display: flex; align-items: center; justify-content: center; }
+    </style>
+</head>
+<body>
+    <button onclick="testOpen()">Open Mines Modal</button>
+    
+    <div class="game-modal" id="minesModal">
+        <div style="background: white; padding: 40px; border-radius: 20px;">
+            <h2>Mines Modal Test</h2>
+            <button onclick="closeModal()">Close</button>
+        </div>
+    </div>
+    
+    <script>
+        function testOpen() {
+            console.log('Opening modal...');
+            const modal = document.getElementById('minesModal');
+            console.log('Modal element:', modal);
+            if (modal) {
+                modal.classList.add('active');
+                console.log('Modal classes:', modal.className);
+            } else {
+                console.error('Modal not found!');
+            }
+        }
+        
+        function closeModal() {
+            document.getElementById('minesModal').classList.remove('active');
+        }
+    </script>
+</body>
+</html>

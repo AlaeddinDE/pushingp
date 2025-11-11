@@ -376,23 +376,6 @@ require_once __DIR__ . '/includes/header.php';
             }
         }
     </style>
-</head>
-<body>
-    <div class="grain"></div>
-    
-    <div class="header">
-        <div class="header-content">
-            <div class="logo">PUSHING P</div>
-            <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
-                <a href="schichten.php" class="nav-item active">Schichten</a>
-                <?php if ($is_admin): ?>
-                <a href="admin.php" class="nav-item">Admin</a>
-                <?php endif; ?>
-                <a href="logout.php" class="nav-item">Logout</a>
-            </nav>
-        </div>
-    </div>
 
     <div class="container">
         <div class="welcome">

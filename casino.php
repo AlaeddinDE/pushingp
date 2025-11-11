@@ -1588,29 +1588,6 @@ require_once __DIR__ . '/includes/header.php';
     }
     </style>
 
-</head>
-<body>
-    <div class="grain"></div>
-    
-    <div class="header">
-        <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
-            <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
-                <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="events.php" class="nav-item">Events</a>
-                <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="chat.php" class="nav-item">Chat</a>
-                <a href="casino.php" class="nav-item" style="border-bottom: 2px solid var(--accent);">🎰 Casino</a>
-                <?php if ($is_admin_user): ?>
-                    <a href="admin.php" class="nav-item">Admin</a>
-                <?php endif; ?>
-                <a href="settings.php" class="nav-item">Settings</a>
-                <a href="logout.php" class="nav-item">Logout</a>
-            </nav>
-        </div>
-    </div>
-
     <div class="container">
         
         <!-- KRASSES ANIMIERTES CASINO LOGO -->
@@ -1966,7 +1943,7 @@ require_once __DIR__ . '/includes/header.php';
         <!-- Games Grid -->
         <div class="casino-grid">
             <!-- SLOTS -->
-            <div class="game-card" id="openSlotsBtn">
+            <div class="game-card" onclick="window.location.href='/games/slots.php'" style="cursor:pointer;">
                 <span class="game-icon">🎰</span>
                 <div class="game-title">Slot Machine</div>
                 <div class="game-desc">Drei gleiche Symbole = Gewinn! Jackpot bei 3x 💎</div>
@@ -1983,7 +1960,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- PLINKO -->
-            <div class="game-card" id="openPlinkoBtn">
+            <div class="game-card" onclick="window.location.href='/games/plinko.php'" style="cursor:pointer;">
                 <span class="game-icon">🎯</span>
                 <div class="game-title">Plinko</div>
                 <div class="game-desc">Ball fällt durch Pins! Bis zu 5x Multiplikator!</div>
@@ -2000,7 +1977,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- CRASH -->
-            <div class="game-card" id="openCrashBtn">
+            <div class="game-card" onclick="window.location.href='/games/crash.php'" style="cursor:pointer;">
                 <span class="game-icon">🚀</span>
                 <div class="game-title">Crash</div>
                 <div class="game-desc">Multiplier steigt! Cashout bevor es crasht!</div>
@@ -2017,7 +1994,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- BLACKJACK -->
-            <div class="game-card" id="openBlackjackBtn">
+            <div class="game-card" onclick="window.location.href='/games/blackjack.php'" style="cursor:pointer;">
                 <span class="game-icon">🃏</span>
                 <div class="game-title">Blackjack</div>
                 <div class="game-desc">Klassisches Kartenspiel! Schlag den Dealer!</div>
@@ -2034,7 +2011,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- CHICKEN -->
-            <div class="game-card" id="openChickenBtn">
+            <div class="game-card" onclick="window.location.href='/games/chicken.php'" style="cursor:pointer;">
                 <span class="game-icon">🐔</span>
                 <div class="game-title">Chicken</div>
                 <div class="game-desc">Überquere die Straßen von links nach rechts! M = (1-h) / P(k)
@@ -2051,7 +2028,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- MINES -->
-            <div class="game-card" id="openMinesBtn">
+            <div class="game-card" onclick="window.location.href='/games/mines.php'">
                 <span class="game-icon">💎</span>
                 <div class="game-title">Mines</div>
                 <div class="game-desc">Finde Diamanten, vermeide Minen! Mathematisch faire Quoten!</div>

@@ -1,0 +1,9 @@
+
+<!-- DEBUG INFO for Mines -->
+<script>
+console.log('=== MINES DEBUG ===');
+console.log('Mines Modal exists:', !!document.getElementById('minesModal'));
+console.log('Mines Button exists:', !!document.getElementById('openMinesBtn'));
+console.log('createMinesGrid function:', typeof createMinesGrid);
+console.log('startMines function:', typeof startMines);
+</script>
