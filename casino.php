@@ -2927,7 +2927,8 @@ if ($result) {
                     
                     updateAllBalances(data.new_balance);
                     
-                    if (data.multiplier >= 1) {
+                    // Win if multiplier > 1 (profit), Loss if multiplier <= 1
+                    if (data.multiplier > 1) {
                         const winDiv = document.getElementById('wheelWin');
                         winDiv.innerHTML = `
                             <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 16px; border: 3px solid #34d399; box-shadow: 0 0 40px rgba(16,185,129,0.9); animation: winPulse 0.6s ease-in-out infinite;">
@@ -2941,6 +2942,15 @@ if ($result) {
                         
                         // Victory sound effect
                         playVictoryEffect();
+                    } else if (data.multiplier === 1) {
+                        const winDiv = document.getElementById('wheelWin');
+                        winDiv.innerHTML = `
+                            <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 18px; border-radius: 14px; border: 2px solid #fbbf24; color: #fff;">
+                                <div style="font-size: 1.8rem; margin-bottom: 4px;">🟡 Break Even</div>
+                                <div style="font-size: 1.3rem; font-weight: 700;">1.0x = ${bet.toFixed(2)}€ zurück</div>
+                            </div>
+                        `;
+                        winDiv.classList.add('show');
                     } else {
                         const lossDiv = document.getElementById('wheelLoss');
                         const lossAmount = data.multiplier === 0 ? bet.toFixed(2) : (bet * (1 - data.multiplier)).toFixed(2);
