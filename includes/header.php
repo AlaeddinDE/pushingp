@@ -1,66 +1,150 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) session_start();
-include __DIR__ . '/db.php';
-
-// Kassensaldo
-$saldo = 0.0;
-if ($res = $conn->query("SELECT IFNULL(SUM(betrag),0) AS s FROM transaktionen")) {
-  $r = $res->fetch_assoc(); $saldo = (float)$r['s'];
-  $res->free();
-}
-
-// Live-Shift-Ticker (wer JETZT in Schicht laut Modus/Uhrzeit?)
-$now = date('H:i:s');
+// Notification Badges
+// 1. Pending Events (keine Antwort gegeben)
+$pending_events_count = 0;
 $stmt = $conn->prepare("
-SELECT id,name,shift_mode,shift_start,shift_end
-FROM users
-WHERE shift_enabled=1
+    SELECT COUNT(*) 
+    FROM events e
+    WHERE e.event_status = 'active' 
+    AND e.datum >= CURDATE()
+    AND e.id NOT IN (
+        SELECT event_id 
+        FROM event_participants 
+        WHERE mitglied_id = ?
+    )
 ");
+$stmt->bind_param('i', $user_id);
 $stmt->execute();
-$stmt->bind_result($mid,$mname,$mmode,$sstart,$send);
-$onShift=[];
-while($stmt->fetch()){
-  // einfache Logik: fixed window (custom) oder Presets
-  $st = $sstart ?: '00:00:00';
-  $en = $send  ?: '00:00:00';
-  if ($mmode==='early'){ $st='06:00:00'; $en='14:00:00';}
-  if ($mmode==='late'){  $st='14:00:00'; $en='22:00:00';}
-  if ($mmode==='night'){ $st='22:00:00'; $en='06:00:00';}
-  // Nacht über Mitternacht:
-  $isOn = false;
-  if ($st < $en) { $isOn = ($now >= $st && $now <= $en); }
-  else { $isOn = ($now >= $st || $now <= $en); }
-  if ($isOn) $onShift[] = $mname;
-}
+$stmt->bind_result($pending_events_count);
+$stmt->fetch();
 $stmt->close();
+
+// 2. Active Shift NOW
+$active_shift_count = 0;
+$stmt = $conn->prepare("
+    SELECT COUNT(*) 
+    FROM shifts 
+    WHERE user_id = ? 
+    AND date = CURDATE()
+    AND CONCAT(date, ' ', start_time) <= NOW()
+    AND CONCAT(date, ' ', end_time) >= NOW()
+    AND type != 'free'
+");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$stmt->bind_result($active_shift_count);
+$stmt->fetch();
+$stmt->close();
+
+// 3. Unread Chat Messages
+$unread_messages_count = 0;
+$result = $conn->query("SHOW TABLES LIKE 'chat_messages'");
+if ($result && $result->num_rows > 0) {
+    $stmt = $conn->prepare("
+        SELECT COUNT(*) 
+        FROM chat_messages 
+        WHERE receiver_id = ? 
+        AND is_read = 0
+    ");
+    $stmt->bind_param('i', $user_id);
+    $stmt->execute();
+    $stmt->bind_result($unread_messages_count);
+    $stmt->fetch();
+    $stmt->close();
+}
+
+// Casino Badge - nur wenn Guthaben > 10€
+$user_balance = 0;
+$stmt_bal = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+$stmt_bal->bind_param('i', $user_id);
+$stmt_bal->execute();
+$stmt_bal->bind_result($user_balance);
+$stmt_bal->fetch();
+$stmt_bal->close();
+$show_casino = $user_balance >= 10.00;
 ?>
-<header style="background:#0b0f12;color:#e9f3f7;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,.06);">
-  <nav style="display:flex;gap:14px;align-items:center;">
-    <a href="/index.php" style="color:#7ee0ff;text-decoration:none;font-weight:700;font-size:18px;">PushingP</a>
-    <a href="/kasse.php" style="color:#cfe7ee;text-decoration:none;">Kasse</a>
-    <a href="/events.php" style="color:#cfe7ee;text-decoration:none;">Events</a>
-    <a href="/leaderboard.php" style="color:#cfe7ee;text-decoration:none;">🏆 Leaderboard</a>
-    <a href="/settings.php" style="color:#cfe7ee;text-decoration:none;">Einstellungen</a>
-    <?php if(isset($_SESSION['role']) && $_SESSION['role']==='admin'): ?>
-      <a href="/admin_kasse.php" style="color:#ffe27e;text-decoration:none;">Admin</a>
-      <a href="/admin_xp.php" style="color:#ffe27e;text-decoration:none;">⚙️ XP Admin</a>
-    <?php endif; ?>
-  </nav>
-  <div style="display:flex;align-items:center;gap:14px;">
-    <div style="font-size:15px;opacity:.9;">Saldo: <b><?= number_format($saldo,2,',','.') ?> €</b></div>
-    <div style="font-size:14px;white-space:nowrap;max-width:48vw;overflow:hidden;text-overflow:ellipsis;">
-      <span style="opacity:.7;margin-right:6px;">Shift:</span>
-      <?php if(count($onShift)): ?>
-        <span><?= htmlspecialchars(implode(' • ',$onShift)) ?></span>
-      <?php else: ?>
-        <span style="opacity:.6;">keiner aktiv</span>
-      <?php endif; ?>
+
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><?= $page_title ?? 'Dashboard' ?> – PUSHING P</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        .notification-badge {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ef4444;
+            color: white;
+            font-size: 0.625rem;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
+            text-align: center;
+            line-height: 1.4;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            50% { 
+                transform: scale(1.1);
+                opacity: 0.9;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="grain"></div>
+    
+    <div class="header">
+        <div class="header-content">
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
+                PUSHING P
+                <?php if ($is_admin_user ?? false): ?>
+                    <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(127, 16, 16, 0.3);">Admin</span>
+                <?php endif; ?>
+            </a>
+            <nav class="nav">
+                <a href="kasse.php" class="nav-item">Kasse</a>
+                <a href="events.php" class="nav-item" style="position: relative;">
+                    Events
+                    <?php if ($pending_events_count > 0): ?>
+                        <span class="notification-badge"><?= $pending_events_count ?></span>
+                    <?php endif; ?>
+                </a>
+                <a href="schichten.php" class="nav-item" style="position: relative;">
+                    Schichten
+                    <?php if ($active_shift_count > 0): ?>
+                        <span class="notification-badge" style="background: #10b981;">🔴</span>
+                    <?php endif; ?>
+                </a>
+                <?php if ($show_casino): ?>
+                    <a href="casino.php" class="nav-item" style="position: relative;">
+                        🎰 Casino
+                        <span id="casinoMultiplayerBadge" class="notification-badge" style="display: none; background: #f59e0b;"></span>
+                    </a>
+                <?php endif; ?>
+                <a href="leaderboard.php" class="nav-item">Leaderboard</a>
+                <a href="chat.php" class="nav-item" style="position: relative;">
+                    Chat
+                    <?php if ($unread_messages_count > 0): ?>
+                        <span class="notification-badge"><?= $unread_messages_count ?></span>
+                    <?php endif; ?>
+                </a>
+                <?php if ($is_admin_user ?? false): ?>
+                    <a href="admin.php" class="nav-item">Admin</a>
+                <?php endif; ?>
+                <a href="settings.php" class="nav-item">Settings</a>
+                <a href="logout.php" class="nav-item">Logout</a>
+            </nav>
+        </div>
     </div>
-    <?php if(isset($_SESSION['mitglied_name'])): ?>
-      <span style="opacity:.8;">👤 <?= htmlspecialchars($_SESSION['mitglied_name']) ?></span>
-      <a href="/logout.php" style="color:#ff9aa2;text-decoration:none;">Logout</a>
-    <?php else: ?>
-      <a href="/login.php" style="color:#a2ffb1;text-decoration:none;">Login</a>
-    <?php endif; ?>
-  </div>
-</header>

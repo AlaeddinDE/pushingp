@@ -9,6 +9,7 @@ $user_id = get_current_user_id();
 $username = $_SESSION['username'] ?? 'User';
 $name = $_SESSION['name'] ?? $username;
 $is_admin_user = is_admin();
+$page_title = 'Dashboard';
 
 // Get XP info
 $xp_info = get_user_level_info($user_id);
@@ -131,44 +132,10 @@ if ($result && $result->num_rows > 0) {
     $stmt->fetch();
     $stmt->close();
 }
+
+require_once __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard – PUSHING P</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/style.css">
     <style>
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: #ef4444;
-            color: white;
-            font-size: 0.625rem;
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: 10px;
-            min-width: 18px;
-            text-align: center;
-            line-height: 1.4;
-            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.4);
-            animation: pulse 2s infinite;
-        }
-        
-        @keyframes pulse {
-            0%, 100% { 
-                transform: scale(1);
-                opacity: 1;
-            }
-            50% { 
-                transform: scale(1.1);
-                opacity: 0.9;
-            }
-        }
-        
         .stats .stat-card:nth-child(1) { animation-delay: 0.1s; }
         .stats .stat-card:nth-child(2) { animation-delay: 0.2s; }
         .stats .stat-card:nth-child(3) { animation-delay: 0.3s; }
@@ -334,63 +301,6 @@ if ($result && $result->num_rows > 0) {
             display: block;
         }
     </style>
-</head>
-<body>
-    <div class="grain"></div>
-    
-    <div class="header">
-        <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
-                PUSHING P
-                <?php if ($is_admin_user): ?>
-                    <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px; border: 1px solid rgba(127, 16, 16, 0.3);">Admin</span>
-                <?php endif; ?>
-            </a>
-            <nav class="nav">
-                <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="events.php" class="nav-item" style="position: relative;">
-                    Events
-                    <?php if ($pending_events_count > 0): ?>
-                        <span class="notification-badge"><?= $pending_events_count ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="schichten.php" class="nav-item" style="position: relative;">
-                    Schichten
-                    <?php if ($active_shift_count > 0): ?>
-                        <span class="notification-badge" style="background: #10b981;">🔴</span>
-                    <?php endif; ?>
-                </a>
-                <?php
-                // Casino nur anzeigen wenn Guthaben > 10€
-                $user_balance = 0;
-                $stmt_bal = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
-                $stmt_bal->bind_param('i', $user_id);
-                $stmt_bal->execute();
-                $stmt_bal->bind_result($user_balance);
-                $stmt_bal->fetch();
-                $stmt_bal->close();
-                if ($user_balance >= 10.00):
-                ?>
-                    <a href="casino.php" class="nav-item" style="position: relative;">
-                        🎰 Casino
-                        <span id="casinoMultiplayerBadge" class="notification-badge" style="display: none; background: #f59e0b;"></span>
-                    </a>
-                <?php endif; ?>
-                <a href="leaderboard.php" class="nav-item">Leaderboard</a>
-                <a href="chat.php" class="nav-item" style="position: relative;">
-                    Chat
-                    <?php if ($unread_messages_count > 0): ?>
-                        <span class="notification-badge"><?= $unread_messages_count ?></span>
-                    <?php endif; ?>
-                </a>
-                <?php if ($is_admin_user): ?>
-                    <a href="admin.php" class="nav-item">Admin</a>
-                <?php endif; ?>
-                <a href="settings.php" class="nav-item">Settings</a>
-                <a href="logout.php" class="nav-item">Logout</a>
-            </nav>
-        </div>
-    </div>
 
     <div class="container">
         <div class="welcome">

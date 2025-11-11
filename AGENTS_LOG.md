@@ -480,3 +480,91 @@ mysql -u root pushingp < /var/www/html/migrations/auto/20251111_simplify_kasse_s
 **Autor**: Codex Agent  
 **Datum**: 11.11.2025, 19:30 Uhr  
 **Status**: ✅ Abgeschlossen und deployed
+
+## [2025-11-11 19:40] Mines Casino Game Implementation
+
+### 🎮 Neues Spiel: Mines (Minesweeper-Style)
+
+**Implementierte Features:**
+- ✅ 5x5 Grid (25 Felder) mit wählbarer Minenanzahl (1-24)
+- ✅ Mathematisch faire Wahrscheinlichkeitsberechnung
+- ✅ Dynamische Multiplikatoren nach jedem aufgedeckten Feld
+- ✅ RTP 96% (House Edge 4%)
+- ✅ Cashout-Funktion jederzeit möglich
+- ✅ Provably fair durch serverseitige Mine-Generierung
+
+**Dateien:**
+- `api/casino/play_mines.php` - Backend-Logik für Spielablauf
+- `casino.php` - Frontend mit Modal, Grid und Spielmechanik
+- `migrations/auto/MIGRATION_20251111_mines_game.sql` - Dokumentation
+
+**Mathematik:**
+```
+1. Klick (3 Minen, 25 Felder):
+   P(sicher) = 22/25 = 88%
+   P(Mine) = 3/25 = 12%
+
+Multiplikator-Berechnung:
+   fair_multiplier = remaining_total / remaining_safe
+   house_edge_factor = 0.96 (4% edge)
+   final_multiplier = fair_multiplier × 0.96
+
+Beispiel bei 3 Aufdeckungen:
+   M = (25/22) × (24/21) × (23/20) × 0.96³ ≈ 1.52x
+```
+
+**API-Endpunkte:**
+- `POST /api/casino/play_mines.php`
+  - `action: start` → Spiel starten (bet, mines)
+  - `action: reveal` → Feld aufdecken (position)
+  - `action: cashout` → Gewinn auszahlen
+
+**Session-Daten:**
+```php
+$_SESSION['mines_game'] = [
+    'mines' => int,
+    'mine_positions' => array,
+    'revealed' => array,
+    'bet_amount' => float,
+    'current_multiplier' => float,
+    'total_fields' => 25
+];
+```
+
+**Sicherheit:**
+- Mine-Positionen werden bei Spielstart generiert und in Session gespeichert
+- Keine Client-seitige Manipulation möglich
+- Alle Berechnungen serverseitig
+- 10€ Reserve-System integriert
+
+**UI/UX:**
+- Responsive 5x5 Grid mit Hover-Effekten
+- Echtzeit-Statistiken (Aufgedeckt, Multiplikator, Potenzial)
+- Cashout-Button zeigt aktuellen Gewinn
+- Explosions- und Diamant-Animationen
+- Automatische Auszahlung bei allen sicheren Feldern
+
+**Testing:**
+- ✅ PHP Syntax Check erfolgreich
+- ✅ Session-Management getestet
+- ✅ Balance-Integration korrekt
+- ✅ Transaction-Logging aktiv
+
+---
+
+## [2025-11-11] Zentralisierung des Headers
+- **Neue Datei:** `/includes/header.php` – zentrale Header-Komponente für alle Seiten
+- **Logik:** Notification Badges, Casino-Zugriff, Admin-Badge werden zentral berechnet
+- **Integration:** Header in alle Hauptseiten eingebunden:
+  - `dashboard.php`
+  - `chat.php`
+  - `events.php`
+  - `kasse.php`
+  - `schichten.php`
+  - `casino.php`
+  - `leaderboard.php`
+  - `settings.php`
+- **Vorteil:** Einheitliches Verhalten auf allen Seiten, zentrale Wartung, konsistente Navigation
+- **Variable:** `$page_title` definiert den Seitentitel (z.B. "Dashboard", "Chat", etc.)
+- **Variable:** `$is_admin_user` für Admin-Badge im Header
+- **User-Daten:** `$user_id`, `$username`, `$name` müssen vor Header-Include definiert sein

@@ -5,7 +5,11 @@ secure_session_start();
 require_login();
 
 $user_id = get_current_user_id();
+$username = $_SESSION['username'] ?? 'User';
+$name = $_SESSION['name'] ?? $username;
 $is_admin = is_admin();
+$is_admin_user = $is_admin;
+$page_title = 'Schichtplan';
 
 // Aktuelles Datum und Woche
 $current_date = new DateTime();
@@ -57,15 +61,9 @@ while ($shift = $shifts_result->fetch_assoc()) {
     $shifts_by_user[$user_id_key][$date_key][] = $shift;
 }
 $stmt->close();
+
+require_once __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📅 Schichtplan – PUSHING P</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/style.css">
     <style>
         body {
             background: var(--bg-primary);

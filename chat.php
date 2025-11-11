@@ -8,6 +8,8 @@ $user_id = get_current_user_id();
 $username = $_SESSION['username'] ?? 'User';
 $name = $_SESSION['name'] ?? $username;
 $is_admin = is_admin();
+$is_admin_user = $is_admin;
+$page_title = 'Chat';
 
 // Alle aktiven User holen
 $users_result = $conn->query("SELECT id, name, username FROM users WHERE status = 'active' AND id != $user_id ORDER BY name ASC");
@@ -127,15 +129,9 @@ $groups = [];
 while ($row = $groups_result->fetch_assoc()) {
     $groups[] = $row;
 }
+
+require_once __DIR__ . '/includes/header.php';
 ?>
-<!DOCTYPE html>
-<html lang="de">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chat – PUSHING P</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/assets/style.css">
     <style>
         body {
             overflow: hidden;
