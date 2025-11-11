@@ -4586,23 +4586,23 @@ if ($result) {
             const slotWidth = width / SLOTS;
             const rowSpacing = (endY - startY) / (ROWS - 1);
             
-            // PHYSIK-KONSTANTEN (Balance: Spannung aber kein Stuck)
-            const GRAVITY = 0.10;  // Mittelweg (war 0.12, original 0.08)
-            const BOUNCE = 0.62;   // Mittelweg (war 0.6, original 0.65)
-            const FRICTION = 0.99; // Bleibt (weniger Reibung)
-            const MAX_SPEED = 2.5; // Reduziert (war 3.0, original 2.2)
-            const CENTER_PULL = 0.015; // Bleibt
-            const MIN_VY = 0.3; // Reduziert (war 0.5) - sanfter
+            // PHYSIK-KONSTANTEN - GEISTESKRANK EDITION! 🔥
+            const GRAVITY = 0.25;      // 2.5x STÄRKER! (war 0.10)
+            const BOUNCE = 0.75;       // MEHR Bounce! (war 0.62)
+            const FRICTION = 0.985;    // WENIGER Reibung! (war 0.99)
+            const MAX_SPEED = 4.5;     // SCHNELLER! (war 2.5)
+            const CENTER_PULL = 0.008; // WENIGER Pull! (war 0.015)
+            const MIN_VY = 0.8;        // MEHR Minimum! (war 0.3)
             
             let finished = false;
             let frameCount = 0;
             let lastY = ball.y;
             let stuckCounter = 0;
             
-            // KÜRZERES Timeout: 5 Sekunden statt 8
+            // KÜRZERES Timeout: 3 Sekunden - SCHNELLER!
             const forceFinishTimeout = setTimeout(() => {
                 if (!finished) {
-                    console.warn('🚨 FORCE FINISH after 5s - Ball to slot', finalSlot);
+                    console.warn('🚨 FORCE FINISH after 3s - Ball to slot', finalSlot);
                     finished = true;
                     const serverSlot = finalSlot;
                     ball.x = serverSlot * slotWidth + slotWidth / 2;
@@ -4612,7 +4612,7 @@ if ($result) {
                     drawPlinkoBoard();
                     resolve();
                 }
-            }, 5000); // 5 Sekunden statt 8
+            }, 3000); // 3 Sekunden statt 5!
             
             // Get all pin positions
             const pins = [];
@@ -4636,22 +4636,22 @@ if ($result) {
                 
                 frameCount++;
                 
-                // SANFTE Stuck-Detection aber zuverlässig
-                if (frameCount % 25 === 0) { // Etwas seltener (25 statt 20)
-                    if (Math.abs(ball.y - lastY) < 2.0) {
+                // AGGRESSIVE Stuck-Detection - KEIN HÄNGENBLEIBEN!
+                if (frameCount % 15 === 0) { // ÖFTER checken (15 statt 25)
+                    if (Math.abs(ball.y - lastY) < 1.5) { // EMPFINDLICHER (1.5 statt 2.0)
                         stuckCounter++;
-                        console.warn('🔴 Ball stuck - frame:', frameCount, 'counter:', stuckCounter);
+                        console.warn('🔴 Ball stuck - POWER BOOST!', frameCount, stuckCounter);
                         
-                        // Moderater Schub (nicht zu aggressiv)
-                        ball.vy += 1.5; // Reduziert von 3.0
-                        ball.vx += (Math.random() - 0.5) * 1.5;
-                        ball.y += 3; // Reduziert von 5
+                        // KRASSER Schub!
+                        ball.vy += 3.5; // VIEL MEHR! (war 1.5)
+                        ball.vx += (Math.random() - 0.5) * 3.0; // MEHR Chaos! (war 1.5)
+                        ball.y += 8; // MEHR Push! (war 3)
                         
-                        if (stuckCounter > 2) {
-                            console.warn('🔴🔴 Ball severely stuck - teleport');
-                            ball.y += 80; // Reduziert von 100
-                            ball.vy = 2.0; // Reduziert von 3.0
-                            ball.vx = (Math.random() - 0.5) * 1.5;
+                        if (stuckCounter > 1) { // SCHNELLER reagieren (1 statt 2)
+                            console.warn('🔴🔴 TELEPORT TIME!');
+                            ball.y += 150; // KRASSER Teleport! (war 80)
+                            ball.vy = 4.0; // MEHR Speed! (war 2.0)
+                            ball.vx = (Math.random() - 0.5) * 3.0; // MEHR horizontal
                         }
                     } else {
                         stuckCounter = 0;
@@ -4659,13 +4659,13 @@ if ($result) {
                     lastY = ball.y;
                 }
                 
-                // Apply gravity
+                // Apply gravity - KRASS!
                 ball.vy += GRAVITY;
                 
-                // GARANTIERE minimale vertikale Geschwindigkeit
+                // GARANTIERE STARKE vertikale Geschwindigkeit
                 if (ball.y > startY + 20) {
                     if (Math.abs(ball.vy) < MIN_VY) {
-                        ball.vy += MIN_VY * 2; // Zwinge Ball nach unten
+                        ball.vy += MIN_VY * 3; // TRIPPLE! (war 2x)
                     }
                 }
                 
@@ -4688,7 +4688,7 @@ if ($result) {
                     const dx = ball.x - pin.x;
                     const dy = ball.y - pin.y;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    const minDistance = BALL_RADIUS + PIN_RADIUS + 4; // Bleibt bei 4
+                    const minDistance = BALL_RADIUS + PIN_RADIUS + 2; // ENGER! (war 4) - Mehr Kollisionen!
                     
                     if (distance < minDistance && !collided) {
                         collided = true;
@@ -4698,58 +4698,58 @@ if ($result) {
                         const overlap = minDistance - distance;
                         
                         // Moderater Push (Balance)
-                        ball.x += Math.cos(angle) * (overlap + 5); // 5 statt 6
-                        ball.y += Math.sin(angle) * (overlap + 5);
+                        ball.x += Math.cos(angle) * (overlap + 8); // MEHR Push! (war 5)
+                        ball.y += Math.sin(angle) * (overlap + 8);
                         
-                        // Calculate bounce
+                        // Calculate bounce - HÄRTER!
                         const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
                         const bounceSpeed = speed * BOUNCE;
                         
                         ball.vx = Math.cos(angle) * bounceSpeed;
                         ball.vy = Math.sin(angle) * bounceSpeed;
                         
-                        // Moderater random impulse
-                        ball.vx += (Math.random() - 0.5) * 1.5; // Reduziert von 2.0
+                        // STARKER random impulse - CHAOS!
+                        ball.vx += (Math.random() - 0.5) * 3.5; // MEHR! (war 1.5)
                         
-                        // Anti-Verkant aber nicht zu stark
-                        if (Math.abs(ball.vy) < 0.8) {
-                            ball.vy += 1.5; // Reduziert von 2.0
+                        // Anti-Verkant - AGGRESSIV!
+                        if (Math.abs(ball.vy) < 1.2) { // Höherer Threshold
+                            ball.vy += 3.0; // KRASS! (war 1.5)
                         }
-                        if (Math.abs(ball.vx) < 0.5) {
-                            ball.vx += (Math.random() - 0.5) * 1.5;
+                        if (Math.abs(ball.vx) < 0.8) { // Höherer Threshold
+                            ball.vx += (Math.random() - 0.5) * 3.0; // MEHR! (war 1.5)
                         }
                         
-                        // Sanfter Push nach unten
-                        ball.y += 1; // Reduziert von 2
+                        // STARKER Push nach unten
+                        ball.y += 3; // MEHR! (war 1)
                     }
                 });
                 
-                // Zusätzlicher Check: Falls Ball langsam wird
+                // Zusätzlicher Check: Falls Ball langsam wird - BOOST!
                 if (ball.y > startY + 40) {
                     const totalSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
-                    if (totalSpeed < 0.8) { // Reduziert von 1.0
-                        ball.vy += 1.5; // Reduziert von 3.0
-                        ball.vx += (Math.random() - 0.5) * 1.0;
-                        ball.y += 5; // Reduziert von 10
-                        console.warn('🟡 Ball slow - gentle boost');
+                    if (totalSpeed < 1.5) { // Höherer Threshold (war 0.8)
+                        ball.vy += 3.5; // KRASSER Boost! (war 1.5)
+                        ball.vx += (Math.random() - 0.5) * 2.5; // MEHR! (war 1.0)
+                        ball.y += 10; // MEHR! (war 5)
+                        console.warn('🟡 Ball slow - POWER BOOST!');
                     }
                 }
                 
-                // Emergency: Falls Ball zu lange braucht (aber sanfter)
-                if (frameCount > 350) { // Später (350 statt 300)
-                    ball.vy += 0.5; // Sanfter (0.5 statt 1.0)
-                    ball.y += 3; // Sanfter (3 statt 5)
-                    if (frameCount % 50 === 0) { // Nur alle 50 Frames loggen
-                        console.warn('🟠 Ball taking long - frame:', frameCount);
+                // Emergency: Falls Ball zu lange braucht - AGGRESSIVE!
+                if (frameCount > 200) { // FRÜHER! (war 350)
+                    ball.vy += 2.0; // MEHR! (war 0.5)
+                    ball.y += 8; // MEHR! (war 3)
+                    if (frameCount % 30 === 0) { // Öfter loggen
+                        console.warn('🟠 Ball taking long - FORCING!', frameCount);
                     }
                 }
                 
-                // Nur im Notfall: Ball muss landen
-                if (frameCount > 450) { // Später (450 statt 400)
-                    ball.vy += 1.0; // Reduziert von 2.0
-                    ball.y += 5; // Reduziert von 10
-                    if (frameCount % 50 === 0) {
-                        console.warn('🔴 Forcing ball down - frame:', frameCount);
+                // Nur im Notfall: Ball MUSS landen - KRASS!
+                if (frameCount > 250) { // FRÜHER! (war 450)
+                    ball.vy += 4.0; // VIEL MEHR! (war 1.0)
+                    ball.y += 15; // VIEL MEHR! (war 5)
+                    if (frameCount % 20 === 0) {
+                        console.warn('🔴 FORCING LANDING - frame:', frameCount);
                     }
                 }
                 
