@@ -11,7 +11,7 @@ $is_admin = is_admin();
 $is_admin_user = $is_admin;
 $page_title = 'Kasse';
 
-// PayPal Pool Amount holen
+// PayPal Pool Amount
 $paypal_result = $conn->query("SELECT setting_value FROM system_settings WHERE setting_key = 'paypal_pool_amount'");
 $paypal_amount = 109.05;
 if ($paypal_result && $row = $paypal_result->fetch_assoc()) {
@@ -20,508 +20,452 @@ if ($paypal_result && $row = $paypal_result->fetch_assoc()) {
 
 require_once __DIR__ . '/includes/header.php';
 ?>
-    <style>
-        /* Apple-Style Design System */
-        :root {
-            --apple-blue: #007aff;
-            --apple-green: #34c759;
-            --apple-red: #ff3b30;
-            --apple-orange: #ff9500;
-            --apple-gray: #8e8e93;
-            --apple-light-gray: #f2f2f7;
-            --apple-card: rgba(255, 255, 255, 0.05);
-            --apple-border: rgba(255, 255, 255, 0.1);
-            --apple-shadow: 0 2px 16px rgba(0, 0, 0, 0.12);
-        }
-        
-        body {
-            background: linear-gradient(180deg, #000000 0%, #1a1a1a 100%);
-        }
-        
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes scaleIn {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
-        }
-        
-        .kasse-hero {
-            text-align: center;
-            padding: 40px 20px;
-            animation: slideUp 0.6s ease;
-        }
-        
-        .kasse-hero h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 8px;
-            letter-spacing: -0.02em;
-        }
-        
-        .kasse-hero p {
-            font-size: 1.125rem;
-            color: var(--apple-gray);
-            font-weight: 400;
-        }
-        
-        /* Pool Card - Hauptanzeige */
-        .pool-card {
-            background: linear-gradient(135deg, rgba(0, 122, 255, 0.1), rgba(52, 199, 89, 0.1));
-            border: 1px solid var(--apple-border);
-            border-radius: 24px;
-            padding: 32px 24px;
-            margin: 0 auto 32px;
-            max-width: 500px;
-            text-align: center;
-            animation: scaleIn 0.6s ease 0.2s backwards;
-            backdrop-filter: blur(20px);
-            box-shadow: 0 8px 32px rgba(0, 122, 255, 0.15);
-        }
-        
-        .pool-label {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--apple-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-            margin-bottom: 12px;
-        }
-        
+<style>
+    body {
+        background: #000;
+    }
+    
+    .kasse-wrapper {
+        min-height: 100vh;
+        padding: 20px;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    /* Hero mit Pool-Betrag */
+    .pool-hero {
+        text-align: center;
+        padding: 60px 20px 40px;
+        background: linear-gradient(180deg, rgba(88, 101, 242, 0.15) 0%, transparent 100%);
+        border-radius: 32px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .pool-hero::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle, rgba(88, 101, 242, 0.2) 0%, transparent 50%);
+        animation: rotate 20s linear infinite;
+    }
+    
+    @keyframes rotate {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+    }
+    
+    .pool-label {
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: #8e8e93;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 16px;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .pool-amount {
+        font-size: 5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #fff, #5865f2);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        line-height: 1;
+        margin-bottom: 32px;
+        position: relative;
+        z-index: 1;
+        font-variant-numeric: tabular-nums;
+    }
+    
+    .pool-button {
+        display: inline-block;
+        padding: 16px 48px;
+        background: linear-gradient(135deg, #5865f2, #7c89ff);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 700;
+        font-size: 1.125rem;
+        box-shadow: 0 8px 32px rgba(88, 101, 242, 0.4);
+        transition: all 0.3s ease;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .pool-button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 12px 40px rgba(88, 101, 242, 0.6);
+    }
+    
+    .pool-button:active {
+        transform: translateY(0);
+    }
+    
+    /* Quick Stats */
+    .quick-stats {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        margin-bottom: 32px;
+    }
+    
+    .stat-box {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 16px;
+        padding: 20px 16px;
+        text-align: center;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 800;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+    
+    .stat-text {
+        font-size: 0.75rem;
+        color: #8e8e93;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+    
+    /* Section Header */
+    .section-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 16px;
+    }
+    
+    .section-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #fff;
+    }
+    
+    /* Members & Transactions Cards */
+    .card-list {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        border-radius: 20px;
+        overflow: hidden;
+        margin-bottom: 32px;
+    }
+    
+    .card-item {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: background 0.2s ease;
+    }
+    
+    .card-item:last-child {
+        border-bottom: none;
+    }
+    
+    .card-item:active {
+        background: rgba(255, 255, 255, 0.05);
+    }
+    
+    /* Member Item */
+    .member-avatar {
+        width: 48px;
+        height: 48px;
+        border-radius: 50%;
+        object-fit: cover;
+        flex-shrink: 0;
+    }
+    
+    .member-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .member-name {
+        font-size: 1rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+    
+    .member-status {
+        font-size: 0.875rem;
+        color: #8e8e93;
+    }
+    
+    .member-amount {
+        font-size: 1.25rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    
+    .amount-positive { color: #34c759; }
+    .amount-negative { color: #ff3b30; }
+    
+    .status-indicator {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+    }
+    
+    .status-ok { background: #34c759; box-shadow: 0 0 8px #34c759; }
+    .status-warning { background: #ff9500; box-shadow: 0 0 8px #ff9500; }
+    .status-error { background: #ff3b30; box-shadow: 0 0 8px #ff3b30; }
+    
+    /* Transaction Item */
+    .tx-icon {
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        flex-shrink: 0;
+    }
+    
+    .tx-info {
+        flex: 1;
+        min-width: 0;
+    }
+    
+    .tx-title {
+        font-size: 0.9375rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+    }
+    
+    .tx-subtitle {
+        font-size: 0.8125rem;
+        color: #8e8e93;
+    }
+    
+    .tx-amount {
+        font-size: 1.125rem;
+        font-weight: 700;
+        flex-shrink: 0;
+    }
+    
+    /* Admin FAB */
+    .admin-fab {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #5865f2, #7c89ff);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        box-shadow: 0 8px 24px rgba(88, 101, 242, 0.5);
+        transition: all 0.3s ease;
+        z-index: 999;
+        text-decoration: none;
+    }
+    
+    .admin-fab:hover {
+        transform: scale(1.1);
+    }
+    
+    .admin-fab:active {
+        transform: scale(0.95);
+    }
+    
+    /* Mobile Anpassungen */
+    @media (max-width: 600px) {
         .pool-amount {
-            font-size: 4rem;
-            font-weight: 700;
-            color: #fff;
-            letter-spacing: -0.03em;
-            margin-bottom: 24px;
-            font-variant-numeric: tabular-nums;
+            font-size: 3.5rem;
         }
         
-        .pool-btn {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            padding: 16px 32px;
-            background: var(--apple-blue);
-            color: #fff;
-            text-decoration: none;
-            border-radius: 12px;
-            font-weight: 600;
+        .pool-button {
+            padding: 14px 36px;
             font-size: 1rem;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 16px rgba(0, 122, 255, 0.3);
         }
         
-        .pool-btn:hover {
-            background: #0051d5;
-            transform: scale(1.02);
-            box-shadow: 0 6px 24px rgba(0, 122, 255, 0.4);
+        .quick-stats {
+            grid-template-columns: 1fr;
         }
         
-        .pool-btn:active {
-            transform: scale(0.98);
-        }
-        
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 32px;
-            animation: slideUp 0.6s ease 0.3s backwards;
-        }
-        
-        .stat-card {
-            background: var(--apple-card);
-            border: 1px solid var(--apple-border);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            backdrop-filter: blur(20px);
-        }
-        
-        .stat-value {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 4px;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .stat-label {
-            font-size: 0.75rem;
-            font-weight: 500;
-            color: var(--apple-gray);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-        
-        /* Member List - iOS Style */
-        .section-title {
-            font-size: 1.5rem;
-            font-weight: 700;
-            color: #fff;
-            margin-bottom: 16px;
-            letter-spacing: -0.02em;
-        }
-        
-        .member-list {
-            display: grid;
-            gap: 1px;
-            background: var(--apple-border);
-            border-radius: 16px;
-            overflow: hidden;
-            margin-bottom: 32px;
-            animation: slideUp 0.6s ease 0.4s backwards;
-        }
-        
-        .member-item {
-            background: var(--apple-card);
-            backdrop-filter: blur(20px);
+        .stat-box {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
             padding: 16px 20px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 12px;
-            align-items: center;
-            transition: background 0.2s ease;
         }
         
-        .member-item:hover {
-            background: rgba(255, 255, 255, 0.08);
+        .stat-text {
+            font-size: 0.875rem;
+            order: -1;
         }
         
-        .member-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        
-        .member-info {
-            flex: 1;
-        }
-        
-        .member-name {
-            font-size: 1rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-        
-        .member-detail {
-            font-size: 0.8125rem;
-            color: var(--apple-gray);
-        }
-        
-        .member-badge {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-end;
-            gap: 4px;
-        }
-        
-        .konto-amount {
-            font-size: 1.125rem;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        .konto-positive { color: var(--apple-green); }
-        .konto-negative { color: var(--apple-red); }
-        
-        .status-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-        }
-        
-        .status-gedeckt { background: var(--apple-green); box-shadow: 0 0 8px var(--apple-green); }
-        .status-ueberfaellig { background: var(--apple-red); box-shadow: 0 0 8px var(--apple-red); }
-        .status-inactive { background: var(--apple-gray); }
-        
-        /* Transactions - iOS List Style */
-        .tx-list {
-            display: grid;
-            gap: 1px;
-            background: var(--apple-border);
-            border-radius: 16px;
-            overflow: hidden;
-            animation: slideUp 0.6s ease 0.5s backwards;
-        }
-        
-        .tx-item {
-            background: var(--apple-card);
-            backdrop-filter: blur(20px);
-            padding: 14px 20px;
-            display: grid;
-            grid-template-columns: auto 1fr auto;
-            gap: 12px;
-            align-items: center;
-            transition: background 0.2s ease;
-        }
-        
-        .tx-item:hover {
-            background: rgba(255, 255, 255, 0.08);
-        }
-        
-        .tx-icon {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.25rem;
-        }
-        
-        .tx-info {
-            flex: 1;
-        }
-        
-        .tx-title {
-            font-size: 0.9375rem;
-            font-weight: 600;
-            color: #fff;
-            margin-bottom: 2px;
-        }
-        
-        .tx-subtitle {
-            font-size: 0.8125rem;
-            color: var(--apple-gray);
-        }
-        
-        .tx-amount {
-            font-size: 1rem;
-            font-weight: 600;
-            font-variant-numeric: tabular-nums;
-        }
-        
-        /* Admin Button */
-        .admin-button {
-            position: fixed;
-            bottom: 24px;
-            right: 24px;
-            width: 56px;
-            height: 56px;
-            background: var(--apple-blue);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        .stat-number {
             font-size: 1.5rem;
-            color: #fff;
-            text-decoration: none;
-            box-shadow: 0 8px 24px rgba(0, 122, 255, 0.4);
-            transition: all 0.3s ease;
-            z-index: 100;
         }
         
-        .admin-button:hover {
-            transform: scale(1.1);
-            box-shadow: 0 12px 32px rgba(0, 122, 255, 0.5);
+        .admin-fab {
+            bottom: 90px;
         }
-        
-        .admin-button:active {
-            transform: scale(0.95);
-        }
-        
-        /* Mobile Optimierung */
-        @media (max-width: 768px) {
-            .kasse-hero h1 {
-                font-size: 2rem;
-            }
-            
-            .pool-amount {
-                font-size: 3rem;
-            }
-            
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .stat-card {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                text-align: left;
-            }
-            
-            .stat-value {
-                order: 2;
-                font-size: 1.5rem;
-            }
-            
-            .stat-label {
-                order: 1;
-                font-size: 0.875rem;
-            }
-            
-            .member-item {
-                grid-template-columns: auto 1fr;
-            }
-            
-            .member-badge {
-                grid-column: 2;
-                align-items: flex-end;
-            }
-            
-            .admin-button {
-                bottom: 80px;
-            }
-        }
-    </style>
+    }
+</style>
 
-    <div class="container" style="max-width: 768px;">
-        <!-- Hero -->
-        <div class="kasse-hero">
-            <h1>💰 Kasse</h1>
-            <p>Simpel. Fair. Transparent.</p>
+<div class="kasse-wrapper">
+    <!-- Pool Hero -->
+    <div class="pool-hero">
+        <div class="pool-label">PayPal Pool</div>
+        <div class="pool-amount" id="poolAmount"><?= number_format($paypal_amount, 2, ',', '.') ?>€</div>
+        <a href="https://paypal.me/pools/c/95FEcHKK8L" target="_blank" class="pool-button">
+            💳 Zum Pool
+        </a>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-box">
+            <div class="stat-number" id="aktiveStat">0</div>
+            <div class="stat-text">Aktive</div>
         </div>
-
-        <!-- Pool Card -->
-        <div class="pool-card">
-            <div class="pool-label">PayPal Pool</div>
-            <div class="pool-amount" id="poolAmount"><?= number_format($paypal_amount, 2, ',', '.') ?>€</div>
-            <a href="https://paypal.me/pools/c/95FEcHKK8L" target="_blank" class="pool-btn">
-                <span>💳</span>
-                <span>Zum Pool</span>
-            </a>
+        <div class="stat-box">
+            <div class="stat-number" id="ueberfaelligStat">0</div>
+            <div class="stat-text">Überfällig</div>
         </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Aktive</div>
-                <div class="stat-value" id="aktiveStat">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Überfällig</div>
-                <div class="stat-value" id="ueberfaelligStat">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Transaktionen</div>
-                <div class="stat-value" id="txStat">0</div>
-            </div>
+        <div class="stat-box">
+            <div class="stat-number" id="txStat">0</div>
+            <div class="stat-text">Transaktionen</div>
         </div>
+    </div>
 
-        <!-- Mitglieder -->
-        <h2 class="section-title">Mitglieder</h2>
-        <div class="member-list" id="memberList">
-            <div class="member-item">
-                <div class="member-info">
-                    <div class="member-detail">Lade Daten...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Transaktionen -->
-        <h2 class="section-title">Letzte Transaktionen</h2>
-        <div class="tx-list" id="txList">
-            <div class="tx-item">
-                <div class="tx-info">
-                    <div class="tx-subtitle">Lade Transaktionen...</div>
-                </div>
+    <!-- Mitglieder -->
+    <div class="section-header">
+        <div class="section-title">Mitglieder</div>
+    </div>
+    <div class="card-list" id="memberList">
+        <div class="card-item">
+            <div class="member-info">
+                <div class="member-status">Lade Daten...</div>
             </div>
         </div>
     </div>
 
-    <?php if($is_admin): ?>
-    <a href="admin_kasse.php" class="admin-button" title="Kassen-Admin">
-        🛠️
-    </a>
-    <?php endif; ?>
+    <!-- Transaktionen -->
+    <div class="section-header">
+        <div class="section-title">Transaktionen</div>
+    </div>
+    <div class="card-list" id="txList">
+        <div class="card-item">
+            <div class="tx-info">
+                <div class="tx-subtitle">Lade Transaktionen...</div>
+            </div>
+        </div>
+    </div>
+</div>
 
-    <script>
-    async function loadData() {
-        try {
-            // Stats
-            const dashRes = await fetch('/api/v2/get_kasse_simple.php');
-            const dashData = await dashRes.json();
+<?php if($is_admin): ?>
+<a href="admin_kasse.php" class="admin-fab" title="Admin">
+    ⚙️
+</a>
+<?php endif; ?>
+
+<script>
+async function loadData() {
+    try {
+        // Stats
+        const dashRes = await fetch('/api/v2/get_kasse_simple.php');
+        const dashData = await dashRes.json();
+        
+        if (dashData.status === 'success') {
+            document.getElementById('aktiveStat').textContent = dashData.data.aktive_mitglieder;
+            document.getElementById('ueberfaelligStat').textContent = dashData.data.ueberfaellig_count;
+            document.getElementById('txStat').textContent = dashData.data.transaktionen_monat;
             
-            if (dashData.status === 'success') {
-                document.getElementById('aktiveStat').textContent = dashData.data.aktive_mitglieder;
-                document.getElementById('ueberfaelligStat').textContent = dashData.data.ueberfaellig_count;
-                document.getElementById('txStat').textContent = dashData.data.transaktionen_monat;
-                
-                // Transaktionen
-                const txList = document.getElementById('txList');
-                if (dashData.data.recent_transactions && dashData.data.recent_transactions.length > 0) {
-                    txList.innerHTML = dashData.data.recent_transactions.slice(0, 10).map(tx => {
-                        const isPositive = tx.betrag >= 0;
-                        const amountClass = isPositive ? 'konto-positive' : 'konto-negative';
-                        const date = new Date(tx.datum);
-                        const formattedDate = date.toLocaleDateString('de-DE', { 
-                            day: '2-digit', 
-                            month: 'short' 
-                        });
-                        
-                        let icon = '💰';
-                        if (tx.typ === 'EINZAHLUNG') icon = '💸';
-                        else if (tx.typ === 'AUSZAHLUNG') icon = '💵';
-                        else if (tx.typ === 'AUSGLEICH') icon = '✨';
-                        else if (tx.typ === 'SCHADEN') icon = '⚠️';
-                        else if (tx.typ.includes('GRUPPENAKTION')) icon = '🎬';
-                        
-                        return `
-                            <div class="tx-item">
-                                <div class="tx-icon">${icon}</div>
-                                <div class="tx-info">
-                                    <div class="tx-title">${tx.typ}</div>
-                                    <div class="tx-subtitle">${formattedDate}${tx.mitglied_name ? ' • ' + tx.mitglied_name : ''}</div>
-                                </div>
-                                <div class="tx-amount ${amountClass}">
-                                    ${isPositive ? '+' : ''}${tx.betrag.toFixed(2)}€
-                                </div>
-                            </div>
-                        `;
-                    }).join('');
-                }
-            }
-            
-            // Mitglieder
-            const memberRes = await fetch('/api/v2/get_member_konto.php');
-            const memberData = await memberRes.json();
-            
-            if (memberData.status === 'success' && memberData.data && memberData.data.length > 0) {
-                const memberList = document.getElementById('memberList');
-                memberList.innerHTML = memberData.data.map(m => {
-                    const statusClass = m.zahlungsstatus === 'ueberfaellig' ? 'status-ueberfaellig' : 
-                                      m.zahlungsstatus === 'gedeckt' ? 'status-gedeckt' : 'status-inactive';
-                    const salDoClass = m.konto_saldo >= 0 ? 'konto-positive' : 'konto-negative';
-                    const statusText = m.zahlungsstatus === 'ueberfaellig' ? 'Überfällig' : 
-                                     m.zahlungsstatus === 'gedeckt' ? 'Gedeckt' : 'Inaktiv';
+            // Transaktionen
+            const txList = document.getElementById('txList');
+            if (dashData.data.recent_transactions && dashData.data.recent_transactions.length > 0) {
+                txList.innerHTML = dashData.data.recent_transactions.slice(0, 8).map(tx => {
+                    const isPositive = tx.betrag >= 0;
+                    const amountClass = isPositive ? 'amount-positive' : 'amount-negative';
+                    const date = new Date(tx.datum);
+                    const formattedDate = date.toLocaleDateString('de-DE', { 
+                        day: '2-digit', 
+                        month: 'short',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    let icon = '💰';
+                    if (tx.typ === 'EINZAHLUNG') icon = '💸';
+                    else if (tx.typ === 'AUSZAHLUNG') icon = '💵';
+                    else if (tx.typ === 'AUSGLEICH') icon = '✨';
+                    else if (tx.typ === 'SCHADEN') icon = '⚠️';
+                    else if (tx.typ.includes('GRUPPENAKTION')) icon = '🎬';
                     
                     return `
-                        <div class="member-item">
-                            <img src="${m.avatar || '/assets/default-avatar.png'}" 
-                                 class="member-avatar" 
-                                 alt="${m.name}" 
-                                 onerror="this.src='/assets/default-avatar.png'">
-                            <div class="member-info">
-                                <div class="member-name">${m.name}</div>
-                                <div class="member-detail">${m.monate_gedeckt} Monat${m.monate_gedeckt !== 1 ? 'e' : ''} gedeckt</div>
+                        <div class="card-item">
+                            <div class="tx-icon">${icon}</div>
+                            <div class="tx-info">
+                                <div class="tx-title">${tx.typ}</div>
+                                <div class="tx-subtitle">${formattedDate}${tx.mitglied_name ? ' • ' + tx.mitglied_name : ''}</div>
                             </div>
-                            <div class="member-badge">
-                                <div class="konto-amount ${salDoClass}">
-                                    ${m.konto_saldo >= 0 ? '+' : ''}${m.konto_saldo.toFixed(2)}€
-                                </div>
-                                <div class="status-dot ${statusClass}" title="${statusText}"></div>
+                            <div class="tx-amount ${amountClass}">
+                                ${isPositive ? '+' : ''}${tx.betrag.toFixed(2)}€
                             </div>
                         </div>
                     `;
                 }).join('');
             }
-            
-        } catch (error) {
-            console.error('Fehler beim Laden:', error);
         }
+        
+        // Mitglieder
+        const memberRes = await fetch('/api/v2/get_member_konto.php');
+        const memberData = await memberRes.json();
+        
+        if (memberData.status === 'success' && memberData.data && memberData.data.length > 0) {
+            const memberList = document.getElementById('memberList');
+            memberList.innerHTML = memberData.data.map(m => {
+                const statusClass = m.zahlungsstatus === 'ueberfaellig' ? 'status-error' : 
+                                  m.zahlungsstatus === 'gedeckt' ? 'status-ok' : 'status-warning';
+                const salDoClass = m.konto_saldo >= 0 ? 'amount-positive' : 'amount-negative';
+                
+                return `
+                    <div class="card-item">
+                        <img src="${m.avatar || '/assets/default-avatar.png'}" 
+                             class="member-avatar" 
+                             alt="${m.name}" 
+                             onerror="this.src='/assets/default-avatar.png'">
+                        <div class="member-info">
+                            <div class="member-name">${m.name}</div>
+                            <div class="member-status">${m.monate_gedeckt} Monat${m.monate_gedeckt !== 1 ? 'e' : ''} gedeckt</div>
+                        </div>
+                        <div class="member-amount ${salDoClass}">
+                            ${m.konto_saldo >= 0 ? '+' : ''}${m.konto_saldo.toFixed(2)}€
+                        </div>
+                        <div class="status-indicator ${statusClass}"></div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+    } catch (error) {
+        console.error('Fehler beim Laden:', error);
     }
-    
-    loadData();
-    setInterval(loadData, 30000);
-    </script>
+}
+
+loadData();
+setInterval(loadData, 30000);
+</script>
 
 <?php require_once __DIR__ . '/includes/footer.php'; ?>
