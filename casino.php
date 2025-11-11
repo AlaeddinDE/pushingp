@@ -1974,113 +1974,101 @@ if ($result) {
 
     <!-- WHEEL MODAL -->
     <div class="game-modal" id="wheelModal">
-        <div class="game-modal-content" style="max-width: 900px; max-height: 85vh; padding: 20px; overflow: hidden; display: flex; flex-direction: column;">
+        <div class="game-modal-content" style="max-width: 1000px; padding: 30px;">
             <button class="modal-close" onclick="closeGame('wheel')">×</button>
             
-            <!-- Header -->
-            <h2 style="font-size: 1.8rem; margin: 0 0 16px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 20px rgba(245,158,11,0.5));">🎡 GLÜCKSRAD 🎡</h2>
+            <h2 style="font-size: 2rem; margin: 0 0 24px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
+                🎡 GLÜCKSRAD 🎡
+            </h2>
             
-            <div style="display: grid; grid-template-columns: 420px 1fr; gap: 20px; align-items: center;">
+            <div style="display: grid; grid-template-columns: 450px 1fr; gap: 30px; align-items: start;">
                 
-                <!-- Left: Wheel -->
-                <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; height: 420px;">
-                    
-                    <div class="wheel-mega-container" style="position: relative; width: 380px; height: 380px;">
-                        <!-- Outer Glow Ring -->
-                        <div class="wheel-outer-glow" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 400px; height: 400px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.5), rgba(139,92,246,0.4), transparent); animation: wheelGlowPulse 2s ease-in-out infinite;"></div>
+                <!-- Left: Wheel Container -->
+                <div style="position: relative;">
+                    <div style="position: relative; width: 450px; height: 450px;">
+                        <!-- Glow Effect -->
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.4), transparent); filter: blur(20px); animation: glowPulse 2s ease-in-out infinite;"></div>
                         
-                        <!-- Particle Effects -->
-                        <div class="wheel-particles" id="wheelParticles" style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 5;"></div>
+                        <!-- Wheel Canvas -->
+                        <canvas id="wheelCanvas" width="450" height="450" 
+                                style="position: absolute; top: 0; left: 0; border-radius: 50%; box-shadow: 0 0 60px rgba(245,158,11,0.6), inset 0 0 30px rgba(255,255,255,0.1);"></canvas>
                         
-                        <!-- Neon Rings -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 380px; height: 380px; border-radius: 50%; border: 3px solid rgba(245,158,11,0.6); box-shadow: 0 0 20px rgba(245,158,11,0.9), inset 0 0 20px rgba(245,158,11,0.4); animation: neonPulse 1.5s ease-in-out infinite;"></div>
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 360px; height: 360px; border-radius: 50%; border: 3px solid rgba(139,92,246,0.6); box-shadow: 0 0 15px rgba(139,92,246,0.8), inset 0 0 15px rgba(139,92,246,0.3); animation: neonPulse 1.5s ease-in-out infinite 0.5s;"></div>
-                        
-                        <!-- Wheel Container with 3D effect -->
-                        <div class="wheel-3d-container" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 340px; height: 340px; perspective: 1200px;">
-                            <div class="wheel-container" style="width: 100%; height: 100%; transform-style: preserve-3d; transition: transform 5s cubic-bezier(0.17, 0.67, 0.12, 0.99);">
-                                <canvas id="wheelCanvas" width="340" height="340" style="border-radius: 50%; box-shadow: 0 10px 50px rgba(0,0,0,0.7), inset 0 0 30px rgba(255,255,255,0.15);"></canvas>
-                            </div>
-                        </div>
-                        
-                        <!-- Center Diamond -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 50px; height: 50px; background: linear-gradient(135deg, #fbbf24, #f59e0b, #ec4899); border-radius: 50%; border: 3px solid rgba(255,255,255,0.9); box-shadow: 0 0 25px rgba(245,158,11,1), inset 0 0 15px rgba(255,255,255,0.5); z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; animation: diamondSpin 3s linear infinite;">💎</div>
+                        <!-- Center Pin -->
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; border: 4px solid #fff; box-shadow: 0 0 30px rgba(245,158,11,1); z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 2rem;">💎</div>
                         
                         <!-- Pointer -->
-                        <div class="wheel-pointer" style="position: absolute; top: -30px; left: 50%; transform: translateX(-50%); z-index: 15; font-size: 3.5rem; filter: drop-shadow(0 4px 15px rgba(220,38,38,1)); animation: pointerBounce 0.8s ease-in-out infinite;">🔻</div>
-                        
-                        <!-- Light Beams -->
-                        <div class="light-beam" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(0deg); width: 320px; height: 3px; background: linear-gradient(90deg, transparent, rgba(245,158,11,0.9), transparent); animation: beamRotate 4s linear infinite;"></div>
-                        <div class="light-beam" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(60deg); width: 320px; height: 3px; background: linear-gradient(90deg, transparent, rgba(139,92,246,0.9), transparent); animation: beamRotate 4s linear infinite 1.33s;"></div>
-                        <div class="light-beam" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(120deg); width: 320px; height: 3px; background: linear-gradient(90deg, transparent, rgba(236,72,153,0.9), transparent); animation: beamRotate 4s linear infinite 2.66s;"></div>
-                        
-                        <div class="wheel-sparkles" id="wheelSparkles" style="position: absolute; width: 100%; height: 100%; pointer-events: none; z-index: 8;"></div>
+                        <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 5; font-size: 4rem; filter: drop-shadow(0 5px 15px rgba(220,38,38,1));">
+                            🔻
+                        </div>
                     </div>
                     
-                    <!-- Win/Loss Messages overlayed on wheel -->
-                    <div class="win-message" id="wheelWin" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; max-width: 320px;"></div>
-                    <div class="loss-message" id="wheelLoss" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; max-width: 320px;"></div>
+                    <!-- Result Display -->
+                    <div id="wheelResult" style="margin-top: 20px; min-height: 80px;"></div>
                 </div>
                 
                 <!-- Right: Controls -->
-                <div style="display: flex; flex-direction: column; gap: 12px; height: 100%;">
+                <div style="display: flex; flex-direction: column; gap: 16px;">
                     
-                    <!-- Balance Display -->
-                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.25), rgba(236,72,153,0.25)); padding: 14px; border-radius: 12px; border: 2px solid rgba(139,92,246,0.6); box-shadow: 0 8px 30px rgba(139,92,246,0.4);">
-                        <div style="font-size: 0.8rem; color: #c4b5fd; font-weight: 700; margin-bottom: 4px; text-align: center; letter-spacing: 1px;">💎 DEIN GUTHABEN</div>
-                        <div id="wheelBalance" style="font-size: 2rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 20px rgba(255,255,255,0.7);"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
+                    <!-- Balance -->
+                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 18px; border-radius: 14px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
+                        <div style="font-size: 0.85rem; color: #c4b5fd; font-weight: 700; margin-bottom: 6px; text-align: center; letter-spacing: 1px;">💎 DEIN GUTHABEN</div>
+                        <div id="wheelBalance" style="font-size: 2.25rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
+                            <?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €
+                        </div>
                     </div>
                     
-                    <!-- Bet Amount -->
-                    <div style="background: rgba(0,0,0,0.5); padding: 12px; border-radius: 10px; border: 2px solid rgba(245,158,11,0.4); flex: 1;">
-                        <div style="font-size: 0.8rem; color: #fbbf24; font-weight: 700; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">💰 EINSATZ WÄHLEN</div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px;">
-                            <button class="quick-bet-btn wheel-bet-btn" onclick="setWheelBet(1)" style="padding: 10px; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #10b981, #059669); border: 2px solid #10b981; border-radius: 8px; cursor: pointer; transition: all 0.3s; color: #fff; box-shadow: 0 4px 15px rgba(16,185,129,0.3);">💰 1€</button>
-                            <button class="quick-bet-btn wheel-bet-btn active" onclick="setWheelBet(5)" style="padding: 10px; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #3b82f6, #2563eb); border: 2px solid #3b82f6; border-radius: 8px; cursor: pointer; transition: all 0.3s; color: #fff; box-shadow: 0 4px 15px rgba(59,130,246,0.3);">💵 5€</button>
-                            <button class="quick-bet-btn wheel-bet-btn" onclick="setWheelBet(10)" style="padding: 10px; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border: 2px solid #8b5cf6; border-radius: 8px; cursor: pointer; transition: all 0.3s; color: #fff; box-shadow: 0 4px 15px rgba(139,92,246,0.3);">💸 10€</button>
-                            <button class="quick-bet-btn wheel-bet-btn" onclick="setWheelBet(25)" style="padding: 10px; font-size: 0.9rem; font-weight: 700; background: linear-gradient(135deg, #ec4899, #db2777); border: 2px solid #ec4899; border-radius: 8px; cursor: pointer; transition: all 0.3s; color: #fff; box-shadow: 0 4px 15px rgba(236,72,153,0.3);">💎 25€</button>
+                    <!-- Bet Selection -->
+                    <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
+                        <div style="font-size: 0.85rem; color: #fbbf24; font-weight: 700; margin-bottom: 12px; text-align: center; letter-spacing: 1px;">💰 EINSATZ WÄHLEN</div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
+                            <button class="wheel-bet-btn" onclick="setWheelBet(1)">💰 1€</button>
+                            <button class="wheel-bet-btn wheel-bet-active" onclick="setWheelBet(5)">💵 5€</button>
+                            <button class="wheel-bet-btn" onclick="setWheelBet(10)">💸 10€</button>
                         </div>
-                        <button class="quick-bet-btn wheel-bet-btn" onclick="setWheelBet(50)" style="width: 100%; margin-top: 6px; padding: 12px; font-size: 1rem; font-weight: 900; background: linear-gradient(135deg, #f59e0b, #d97706); border: 2px solid #fbbf24; border-radius: 8px; cursor: pointer; transition: all 0.3s; box-shadow: 0 6px 20px rgba(245,158,11,0.5); color: #fff;">👑 50€ VIP</button>
-                        
-                        <input type="number" class="bet-input" id="wheelBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
+                            <button class="wheel-bet-btn" onclick="setWheelBet(25)">💎 25€</button>
+                            <button class="wheel-bet-btn" onclick="setWheelBet(50)">👑 50€</button>
+                        </div>
+                        <input type="number" id="wheelBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
                     </div>
                     
                     <!-- Spin Button -->
-                    <button class="bet-btn" id="wheelSpinBtn" onclick="spinWheel()" style="width: 100%; padding: 16px; font-size: 1.5rem; font-weight: 900; letter-spacing: 3px; background: linear-gradient(135deg, #f59e0b, #dc2626); border: 4px solid #fbbf24; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(245,158,11,0.7); text-shadow: 0 3px 8px rgba(0,0,0,0.6); transition: all 0.3s; animation: spinBtnPulse 2s ease-in-out infinite; color: #fff;">
+                    <button id="wheelSpinBtn" onclick="spinWheel()" 
+                            style="width: 100%; padding: 20px; font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; background: linear-gradient(135deg, #f59e0b, #dc2626); border: 4px solid #fbbf24; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 40px rgba(245,158,11,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff; animation: spinBtnPulse 2s ease-in-out infinite;">
                         🎡 DREHEN 🎡
                     </button>
                     
                     <!-- Probabilities -->
-                    <div style="background: rgba(0,0,0,0.5); padding: 10px; border-radius: 10px; border: 2px solid rgba(255,255,255,0.15);">
-                        <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; text-align: center; color: #fbbf24; letter-spacing: 1px;">🎯 GEWINNCHANCEN</div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 5px; font-size: 0.7rem;">
-                            <div style="background: linear-gradient(135deg, rgba(127,29,29,0.5), rgba(127,29,29,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(127,29,29,0.7); text-align: center;">
-                                <div style="color: #fca5a5; font-weight: 900; font-size: 0.95rem;">0x</div>
-                                <div style="color: #ef4444; font-size: 0.65rem;">51% 💀</div>
+                    <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1);">
+                        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #fbbf24; letter-spacing: 1px;">🎯 GEWINNCHANCEN</div>
+                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.75rem;">
+                            <div style="background: #7f1d1d; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #fca5a5; font-weight: 900;">0x</div>
+                                <div style="color: #ef4444; font-size: 0.7rem;">51% 💀</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(239,68,68,0.4), rgba(220,38,38,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(239,68,68,0.6); text-align: center;">
-                                <div style="color: #f87171; font-weight: 900; font-size: 0.95rem;">0.5x</div>
-                                <div style="color: #9ca3af; font-size: 0.65rem;">21%</div>
+                            <div style="background: #991b1b; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #f87171; font-weight: 900;">0.5x</div>
+                                <div style="color: #9ca3af; font-size: 0.7rem;">21%</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(234,179,8,0.4), rgba(202,138,4,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(234,179,8,0.6); text-align: center;">
-                                <div style="color: #fbbf24; font-weight: 900; font-size: 0.95rem;">1x</div>
-                                <div style="color: #9ca3af; font-size: 0.65rem;">15%</div>
+                            <div style="background: #854d0e; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #fbbf24; font-weight: 900;">1x</div>
+                                <div style="color: #9ca3af; font-size: 0.7rem;">15%</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(16,185,129,0.4), rgba(5,150,105,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(16,185,129,0.6); text-align: center;">
-                                <div style="color: #34d399; font-weight: 900; font-size: 0.95rem;">2x</div>
-                                <div style="color: #9ca3af; font-size: 0.65rem;">9%</div>
+                            <div style="background: #065f46; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #34d399; font-weight: 900;">2x</div>
+                                <div style="color: #9ca3af; font-size: 0.7rem;">9%</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(59,130,246,0.4), rgba(37,99,235,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(59,130,246,0.6); text-align: center;">
-                                <div style="color: #60a5fa; font-weight: 900; font-size: 0.95rem;">5x</div>
-                                <div style="color: #9ca3af; font-size: 0.65rem;">2.5%</div>
+                            <div style="background: #1e3a8a; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #60a5fa; font-weight: 900;">5x</div>
+                                <div style="color: #9ca3af; font-size: 0.7rem;">2.5%</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(139,92,246,0.4), rgba(124,58,237,0.4)); padding: 5px; border-radius: 6px; border: 1px solid rgba(139,92,246,0.6); text-align: center;">
-                                <div style="color: #a78bfa; font-weight: 900; font-size: 0.95rem;">10x</div>
-                                <div style="color: #9ca3af; font-size: 0.65rem;">1%</div>
+                            <div style="background: #581c87; padding: 6px; border-radius: 6px; text-align: center;">
+                                <div style="color: #a78bfa; font-weight: 900;">10x</div>
+                                <div style="color: #9ca3af; font-size: 0.7rem;">1%</div>
                             </div>
-                            <div style="background: linear-gradient(135deg, rgba(245,158,11,0.5), rgba(217,119,6,0.5)); padding: 6px; border-radius: 6px; border: 2px solid rgba(245,158,11,0.7); text-align: center; grid-column: span 2; box-shadow: 0 0 20px rgba(245,158,11,0.4);">
-                                <div style="color: #fbbf24; font-weight: 900; font-size: 1rem;">💎 50x JACKPOT</div>
-                                <div style="color: #f59e0b; font-size: 0.7rem; font-weight: 700;">0.5% 🔥</div>
+                            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 8px; border-radius: 8px; border: 2px solid #fbbf24; text-align: center; grid-column: span 2; box-shadow: 0 0 25px rgba(245,158,11,0.5);">
+                                <div style="color: #fff; font-weight: 900; font-size: 1.1rem;">💎 50x JACKPOT</div>
+                                <div style="color: #fef3c7; font-size: 0.75rem; font-weight: 700;">0.5% 🔥</div>
                             </div>
                         </div>
                     </div>
@@ -2094,85 +2082,49 @@ if ($result) {
         @keyframes spinBtnPulse {
             0%, 100% {
                 transform: scale(1);
-                box-shadow: 0 8px 40px rgba(245,158,11,0.6);
+                box-shadow: 0 8px 40px rgba(245,158,11,0.7);
             }
             50% {
                 transform: scale(1.03);
-                box-shadow: 0 12px 60px rgba(245,158,11,0.9);
+                box-shadow: 0 12px 60px rgba(245,158,11,1);
             }
         }
         
-        @keyframes wheelGlowPulse {
+        @keyframes glowPulse {
             0%, 100% {
+                opacity: 0.4;
                 transform: translate(-50%, -50%) scale(1);
-                opacity: 0.6;
             }
             50% {
-                transform: translate(-50%, -50%) scale(1.1);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes neonPulse {
-            0%, 100% {
                 opacity: 0.7;
-                box-shadow: 0 0 20px currentColor, inset 0 0 20px currentColor;
-            }
-            50% {
-                opacity: 1;
-                box-shadow: 0 0 40px currentColor, inset 0 0 30px currentColor;
+                transform: translate(-50%, -50%) scale(1.1);
             }
         }
         
-        @keyframes diamondSpin {
-            0% { transform: translate(-50%, -50%) rotate(0deg); }
-            100% { transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        @keyframes pointerBounce {
-            0%, 100% {
-                transform: translateX(-50%) translateY(0);
-            }
-            50% {
-                transform: translateX(-50%) translateY(-8px);
-            }
-        }
-        
-        @keyframes beamRotate {
-            0% { opacity: 0.3; }
-            50% { opacity: 0.8; }
-            100% { opacity: 0.3; transform: translate(-50%, -50%) rotate(360deg); }
-        }
-        
-        .wheel-container {
-            animation: wheelIdle 3s ease-in-out infinite;
-        }
-        
-        @keyframes wheelIdle {
-            0%, 100% {
-                transform: rotateX(0deg) rotateY(0deg);
-            }
-            25% {
-                transform: rotateX(2deg) rotateY(-2deg);
-            }
-            75% {
-                transform: rotateX(-2deg) rotateY(2deg);
-            }
-        }
-        
-        .wheel-container.spinning {
-            animation: none !important;
+        .wheel-bet-btn {
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #374151, #1f2937);
+            border: 2px solid #6b7280;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
         .wheel-bet-btn:hover {
-            transform: translateY(-2px) scale(1.05);
-            box-shadow: 0 8px 30px rgba(255,255,255,0.4);
+            transform: translateY(-3px) scale(1.05);
+            box-shadow: 0 8px 30px rgba(139,92,246,0.5);
+            border-color: #8b5cf6;
         }
         
-        .wheel-bet-btn.active {
-            border-width: 3px !important;
-            box-shadow: 0 0 30px currentColor !important;
-            transform: scale(1.05) !important;
+        .wheel-bet-btn.wheel-bet-active {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            border-color: #a78bfa;
+            box-shadow: 0 0 30px rgba(139,92,246,0.8);
+            transform: scale(1.05);
         }
         
         #wheelSpinBtn:hover {
@@ -2184,58 +2136,10 @@ if ($result) {
             transform: scale(0.98);
         }
         
-        .sparkle {
-            position: absolute;
-            width: 6px;
-            height: 6px;
-            background: #fff;
-            border-radius: 50%;
-            box-shadow: 0 0 10px #fff, 0 0 20px #f59e0b;
-            animation: sparkleFloat 2s ease-in-out infinite;
-        }
-        
-        @keyframes sparkleFloat {
-            0%, 100% {
-                transform: translateY(0) scale(1);
-                opacity: 0;
-            }
-            50% {
-                transform: translateY(-50px) scale(1.5);
-                opacity: 1;
-            }
-        }
-        
-        /* Win/Loss message animations */
-        .win-message, .loss-message {
-            opacity: 0;
-            visibility: hidden;
-            transition: all 0.3s ease;
-            pointer-events: none;
-        }
-        
-        .win-message.show, .loss-message.show {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        @keyframes particleFade {
-            0% {
-                opacity: 1;
-                transform: scale(1);
-            }
-            100% {
-                opacity: 0;
-                transform: scale(0) translateY(-100px);
-            }
-        }
-        
-        @keyframes victoryPulse {
-            0%, 100% {
-                transform: scale(1);
-            }
-            50% {
-                transform: scale(1.1);
-            }
+        #wheelSpinBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: scale(1);
         }
     </style>
 
@@ -2690,81 +2594,58 @@ if ($result) {
     `;
     document.head.appendChild(style);
     
-    // WHEEL GAME
+    // WHEEL GAME - COMPLETELY REBUILT
     let wheelSpinning = false;
-    
-    function setWheelBet(amount) {
-        document.getElementById('wheelBet').value = amount;
-    }
     let wheelCanvas, wheelCtx;
-    let wheelRotation = 0;
     
-    // Wheel segments - BALANCED für 9% House Edge
+    // Wheel segments - MUST MATCH API!
     const wheelSegments = [
-        { multiplier: 0, color: '#7f1d1d', weight: 51, label: '0x' },       // 51% - VERLUST
-        { multiplier: 0.5, color: '#ef4444', weight: 21, label: '0.5x' },   // 21% - Halber Einsatz
-        { multiplier: 1, color: '#eab308', weight: 15, label: '1x' },       // 15% - Break Even
-        { multiplier: 2, color: '#10b981', weight: 9, label: '2x' },        // 9% - Doppelt
-        { multiplier: 5, color: '#3b82f6', weight: 2.5, label: '5x' },      // 2.5% - 5-fach
-        { multiplier: 10, color: '#8b5cf6', weight: 1, label: '10x' },      // 1% - 10-fach
-        { multiplier: 50, color: '#f59e0b', weight: 0.5, label: '50x' }     // 0.5% - JACKPOT
+        { multiplier: 0, color: '#7f1d1d', weight: 51, label: '0x' },       // 51%
+        { multiplier: 0.5, color: '#ef4444', weight: 21, label: '0.5x' },   // 21%
+        { multiplier: 1.0, color: '#eab308', weight: 15, label: '1x' },     // 15%
+        { multiplier: 2.0, color: '#10b981', weight: 9, label: '2x' },      // 9%
+        { multiplier: 5.0, color: '#3b82f6', weight: 2.5, label: '5x' },    // 2.5%
+        { multiplier: 10.0, color: '#8b5cf6', weight: 1, label: '10x' },    // 1%
+        { multiplier: 50.0, color: '#f59e0b', weight: 0.5, label: '50x' }   // 0.5%
     ];
     
     function initWheel() {
         wheelCanvas = document.getElementById('wheelCanvas');
+        if (!wheelCanvas) return;
+        
         wheelCtx = wheelCanvas.getContext('2d');
-        drawWheel();
-        createAmbientParticles();
+        drawWheelStatic();
     }
     
-    function createAmbientParticles() {
-        const container = document.getElementById('wheelParticles');
-        if (!container) return;
+    function drawWheelStatic(rotation = 0) {
+        if (!wheelCanvas || !wheelCtx) return;
         
-        setInterval(() => {
-            if (wheelSpinning) return;
-            
-            const particle = document.createElement('div');
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 170 + Math.random() * 15;
-            const x = 170 + Math.cos(angle) * radius;
-            const y = 170 + Math.sin(angle) * radius;
-            
-            particle.style.position = 'absolute';
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-            particle.style.width = '4px';
-            particle.style.height = '4px';
-            particle.style.borderRadius = '50%';
-            particle.style.background = ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981'][Math.floor(Math.random() * 4)];
-            particle.style.boxShadow = '0 0 10px currentColor';
-            particle.style.pointerEvents = 'none';
-            particle.style.animation = 'particleFade 2s ease-out forwards';
-            
-            container.appendChild(particle);
-            
-            setTimeout(() => particle.remove(), 2000);
-        }, 200);
-    }
-    
-    function drawWheel() {
-        const centerX = wheelCanvas.width / 2;
-        const centerY = wheelCanvas.height / 2;
-        const radius = 142; // Adjusted for 340px canvas
+        const centerX = 225;
+        const centerY = 225;
+        const radius = 200;
         
-        wheelCtx.clearRect(0, 0, wheelCanvas.width, wheelCanvas.height);
+        wheelCtx.clearRect(0, 0, 450, 450);
         wheelCtx.save();
         wheelCtx.translate(centerX, centerY);
-        wheelCtx.rotate((wheelRotation * Math.PI) / 180);
+        wheelCtx.rotate((rotation * Math.PI) / 180);
         
-        // Calculate total weight
+        // Calculate total weight and segment angles
         const totalWeight = wheelSegments.reduce((sum, seg) => sum + seg.weight, 0);
-        
         let currentAngle = 0;
         
-        // Draw segments with enhanced graphics
+        // Store segment positions for debugging
+        const segmentPositions = [];
+        
         wheelSegments.forEach((segment, index) => {
             const segmentAngle = (segment.weight / totalWeight) * 2 * Math.PI;
+            const centerAngle = currentAngle + segmentAngle / 2;
+            
+            segmentPositions.push({
+                multiplier: segment.multiplier,
+                startAngle: currentAngle * (180/Math.PI),
+                endAngle: (currentAngle + segmentAngle) * (180/Math.PI),
+                centerAngle: centerAngle * (180/Math.PI)
+            });
             
             // Draw segment
             wheelCtx.beginPath();
@@ -2774,82 +2655,52 @@ if ($result) {
             
             // Fill with gradient
             const gradient = wheelCtx.createRadialGradient(0, 0, 0, 0, 0, radius);
-            gradient.addColorStop(0, segment.color + 'ff');
+            gradient.addColorStop(0, segment.color);
             gradient.addColorStop(0.7, segment.color);
             gradient.addColorStop(1, segment.color + '80');
             wheelCtx.fillStyle = gradient;
             wheelCtx.fill();
             
-            // Glossy overlay
-            const glossGradient = wheelCtx.createRadialGradient(-50, -50, 0, 0, 0, radius);
-            glossGradient.addColorStop(0, 'rgba(255,255,255,0.3)');
-            glossGradient.addColorStop(0.5, 'rgba(255,255,255,0.1)');
-            glossGradient.addColorStop(1, 'rgba(255,255,255,0)');
-            wheelCtx.fillStyle = glossGradient;
-            wheelCtx.fill();
-            
-            // Border with glow
-            wheelCtx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-            wheelCtx.lineWidth = 3;
-            wheelCtx.shadowColor = 'rgba(255, 255, 255, 0.9)';
-            wheelCtx.shadowBlur = 5;
+            // Border
+            wheelCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+            wheelCtx.lineWidth = 2;
             wheelCtx.stroke();
-            wheelCtx.shadowBlur = 0;
             
-            // Text with better styling
+            // Text - centered in segment
             wheelCtx.save();
-            wheelCtx.rotate(currentAngle + segmentAngle / 2);
+            wheelCtx.rotate(centerAngle);
             wheelCtx.textAlign = 'center';
             wheelCtx.textBaseline = 'middle';
             wheelCtx.fillStyle = '#ffffff';
             
-            const fontSize = segment.weight > 10 ? 24 : segment.weight > 5 ? 20 : 16;
+            const fontSize = segment.weight > 10 ? 28 : segment.weight > 5 ? 24 : 20;
             wheelCtx.font = `900 ${fontSize}px Inter`;
-            
-            // Text shadow for depth
-            wheelCtx.shadowColor = 'rgba(0, 0, 0, 0.9)';
+            wheelCtx.shadowColor = 'rgba(0,0,0,0.9)';
             wheelCtx.shadowBlur = 8;
-            wheelCtx.shadowOffsetX = 2;
-            wheelCtx.shadowOffsetY = 2;
-            
-            wheelCtx.fillText(segment.label, radius * 0.7, 0);
-            
-            // Emoji/icon
+            wheelCtx.fillText(segment.label, radius * 0.65, 0);
             wheelCtx.shadowBlur = 0;
-            wheelCtx.font = `${fontSize + 6}px Arial`;
-            const icons = ['💀', '🎯', '💰', '💎', '🔥', '👑', '⭐'];
-            wheelCtx.fillText(icons[index], radius * 0.45, 0);
             
             wheelCtx.restore();
             
             currentAngle += segmentAngle;
         });
         
-        // Inner decorative circle
-        wheelCtx.beginPath();
-        wheelCtx.arc(0, 0, 45, 0, 2 * Math.PI);
-        const innerGradient = wheelCtx.createRadialGradient(0, 0, 0, 0, 0, 45);
-        innerGradient.addColorStop(0, '#fbbf24');
-        innerGradient.addColorStop(1, '#f59e0b');
-        wheelCtx.fillStyle = innerGradient;
-        wheelCtx.fill();
-        wheelCtx.strokeStyle = '#ffffff';
-        wheelCtx.lineWidth = 4;
-        wheelCtx.shadowColor = 'rgba(245,158,11,0.9)';
-        wheelCtx.shadowBlur = 15;
-        wheelCtx.stroke();
-        wheelCtx.shadowBlur = 0;
-        
         wheelCtx.restore();
+        
+        // Debug: log segment positions on first draw
+        if (rotation === 0 && window.wheelDebug === undefined) {
+            console.log('Wheel Segments:', segmentPositions);
+            window.wheelDebug = true;
+        }
     }
     
     function setWheelBet(amount) {
         document.getElementById('wheelBet').value = amount;
-        // Update active button styling
+        
         document.querySelectorAll('.wheel-bet-btn').forEach(btn => {
-            btn.classList.remove('active');
+            btn.classList.remove('wheel-bet-active');
         });
-        event.target.classList.add('active');
+        event.target.classList.add('wheel-bet-active');
     }
     
     async function spinWheel() {
@@ -2868,15 +2719,7 @@ if ($result) {
         
         wheelSpinning = true;
         document.getElementById('wheelSpinBtn').disabled = true;
-        document.getElementById('wheelWin').classList.remove('show');
-        document.getElementById('wheelLoss').classList.remove('show');
-        
-        // Add spinning class
-        const wheelContainer = document.querySelector('.wheel-container');
-        wheelContainer.classList.add('spinning');
-        
-        // Create mega sparkles
-        createWheelMegaSparkles();
+        document.getElementById('wheelResult').innerHTML = '<div style="text-align: center; padding: 20px; color: #fbbf24; font-size: 1.2rem; font-weight: 700;">🎡 Rad dreht sich...</div>';
         
         try {
             const response = await fetch('/api/casino/play_wheel.php', {
@@ -2890,177 +2733,109 @@ if ($result) {
             }
             
             const data = await response.json();
+            console.log('Server response:', data);
             
             if (data.status === 'success') {
-                // Calculate rotation to land on the result
-                const totalWeight = wheelSegments.reduce((sum, seg) => sum + seg.weight, 0);
-                let targetAngle = 0;
-                let accumulatedWeight = 0;
+                // The pointer is at the TOP (0°/360° position)
+                // Server gives us the CENTER of the winning segment
+                // We need to rotate the wheel so that segment's CENTER aligns with the pointer at top
                 
-                for (let i = 0; i < wheelSegments.length; i++) {
-                    if (wheelSegments[i].multiplier === data.multiplier) {
-                        const segmentAngle = (wheelSegments[i].weight / totalWeight) * 360;
-                        targetAngle = accumulatedWeight + (segmentAngle / 2);
-                        break;
+                const serverRotation = data.rotation; // Center of winning segment from server
+                
+                // Add 5-8 full rotations for effect
+                const fullSpins = 5 + Math.floor(Math.random() * 4); // 5-8 spins
+                const totalRotation = (360 * fullSpins) + (360 - serverRotation);
+                
+                console.log(`Target: ${data.multiplier}x, Server angle: ${serverRotation}°, Total rotation: ${totalRotation}°`);
+                
+                // Animate with requestAnimationFrame
+                const duration = 5000; // 5 seconds
+                const startTime = Date.now();
+                const startRotation = 0;
+                
+                function animate() {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Easing function (ease-out-cubic)
+                    const easeProgress = 1 - Math.pow(1 - progress, 3);
+                    const currentRotation = startRotation + (totalRotation * easeProgress);
+                    
+                    drawWheelStatic(currentRotation);
+                    
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        // Spin complete - show result
+                        setTimeout(() => {
+                            showWheelResult(data, bet);
+                            updateAllBalances(data.new_balance);
+                            
+                            wheelSpinning = false;
+                            document.getElementById('wheelSpinBtn').disabled = false;
+                        }, 500);
                     }
-                    accumulatedWeight += (wheelSegments[i].weight / totalWeight) * 360;
                 }
                 
-                // Spin animation - multiple rotations
-                const spins = 8 + Math.floor(Math.random() * 3); // 8-10 spins
-                const finalRotation = (360 * spins) + (360 - targetAngle) + (Math.random() * 10 - 5);
+                animate();
                 
-                // Smooth CSS rotation
-                const canvas = document.getElementById('wheelCanvas');
-                canvas.style.transition = 'transform 6s cubic-bezier(0.15, 0.5, 0.1, 1)';
-                canvas.style.transform = `rotate(${finalRotation}deg)`;
-                wheelRotation = finalRotation % 360;
-                
-                // Create continuous particles during spin
-                const particleInterval = setInterval(() => {
-                    createSpinParticles();
-                }, 100);
-                
-                setTimeout(() => {
-                    clearInterval(particleInterval);
-                    wheelContainer.classList.remove('spinning');
-                    
-                    updateAllBalances(data.new_balance);
-                    
-                    // Win if multiplier > 1 (profit), Loss if multiplier <= 1
-                    if (data.multiplier > 1) {
-                        const winDiv = document.getElementById('wheelWin');
-                        winDiv.innerHTML = `
-                            <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 20px; border-radius: 16px; border: 3px solid #34d399; box-shadow: 0 0 40px rgba(16,185,129,0.9); animation: winPulse 0.6s ease-in-out infinite;">
-                                <div style="font-size: 2.5rem; margin-bottom: 6px;">🎉 GEWONNEN! 🎉</div>
-                                <div style="font-size: 2rem; font-weight: 900; color: #fff;">${data.win_amount.toFixed(2)}€</div>
-                                <div style="font-size: 1.2rem; margin-top: 4px; color: #d1fae5;">${data.multiplier}x Multiplier</div>
-                            </div>
-                        `;
-                        winDiv.classList.add('show');
-                        createMegaConfetti();
-                        
-                        // Victory sound effect
-                        playVictoryEffect();
-                    } else if (data.multiplier === 1) {
-                        const winDiv = document.getElementById('wheelWin');
-                        winDiv.innerHTML = `
-                            <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 18px; border-radius: 14px; border: 2px solid #fbbf24; color: #fff;">
-                                <div style="font-size: 1.8rem; margin-bottom: 4px;">🟡 Break Even</div>
-                                <div style="font-size: 1.3rem; font-weight: 700;">1.0x = ${bet.toFixed(2)}€ zurück</div>
-                            </div>
-                        `;
-                        winDiv.classList.add('show');
-                    } else {
-                        const lossDiv = document.getElementById('wheelLoss');
-                        const lossAmount = data.multiplier === 0 ? bet.toFixed(2) : (bet * (1 - data.multiplier)).toFixed(2);
-                        lossDiv.innerHTML = `
-                            <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 18px; border-radius: 14px; border: 2px solid #f87171; color: #fff;">
-                                <div style="font-size: 1.8rem; margin-bottom: 4px;">😢 Verloren</div>
-                                <div style="font-size: 1.3rem; font-weight: 700;">${data.multiplier}x = -${lossAmount}€</div>
-                            </div>
-                        `;
-                        lossDiv.classList.add('show');
-                    }
-                    
-                    wheelSpinning = false;
-                    document.getElementById('wheelSpinBtn').disabled = false;
-                    
-                    // Reset canvas rotation for next spin
-                    setTimeout(() => {
-                        canvas.style.transition = 'none';
-                        canvas.style.transform = `rotate(0deg)`;
-                        wheelRotation = 0;
-                        setTimeout(() => {
-                            canvas.style.transition = 'transform 6s cubic-bezier(0.15, 0.5, 0.1, 1)';
-                        }, 50);
-                    }, 100);
-                }, 6000);
             } else {
                 showNotification('Fehler: ' + data.error, 'error');
                 wheelSpinning = false;
                 document.getElementById('wheelSpinBtn').disabled = false;
-                wheelContainer.classList.remove('spinning');
+                document.getElementById('wheelResult').innerHTML = '';
             }
         } catch (error) {
             showNotification('Verbindungsfehler: ' + error.message, 'error');
             wheelSpinning = false;
             document.getElementById('wheelSpinBtn').disabled = false;
-            document.querySelector('.wheel-container').classList.remove('spinning');
+            document.getElementById('wheelResult').innerHTML = '';
         }
     }
     
-    function createWheelMegaSparkles() {
-        const container = document.getElementById('wheelSparkles');
-        container.innerHTML = '';
+    function showWheelResult(data, bet) {
+        const resultDiv = document.getElementById('wheelResult');
         
-        for (let i = 0; i < 40; i++) {
-            const sparkle = document.createElement('div');
-            const angle = (Math.PI * 2 * i) / 40;
-            const radius = 175;
-            const x = 170 + Math.cos(angle) * radius;
-            const y = 170 + Math.sin(angle) * radius;
-            
-            sparkle.className = 'sparkle';
-            sparkle.style.left = x + 'px';
-            sparkle.style.top = y + 'px';
-            sparkle.style.animationDelay = (i * 0.05) + 's';
-            container.appendChild(sparkle);
+        if (data.multiplier > 1.0) {
+            // WIN
+            resultDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 24px; border-radius: 16px; border: 3px solid #34d399; box-shadow: 0 0 50px rgba(16,185,129,0.8); animation: winPulse 0.6s ease-in-out infinite;">
+                    <div style="font-size: 2.5rem; margin-bottom: 10px; text-align: center;">🎉 GEWONNEN! 🎉</div>
+                    <div style="font-size: 2.5rem; font-weight: 900; color: #fff; text-align: center;">${data.win_amount.toFixed(2)}€</div>
+                    <div style="font-size: 1.4rem; margin-top: 8px; color: #d1fae5; text-align: center;">${data.multiplier}x Multiplier</div>
+                </div>
+            `;
+            createWheelConfetti();
+        } else if (data.multiplier === 1.0) {
+            // BREAK EVEN
+            resultDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 20px; border-radius: 14px; border: 2px solid #fbbf24; color: #fff;">
+                    <div style="font-size: 2rem; margin-bottom: 8px; text-align: center;">🟡 Break Even</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; text-align: center;">1.0x = ${bet.toFixed(2)}€ zurück</div>
+                </div>
+            `;
+        } else {
+            // LOSS
+            const lossAmount = data.multiplier === 0 ? bet.toFixed(2) : (bet * (1.0 - data.multiplier)).toFixed(2);
+            resultDiv.innerHTML = `
+                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; border-radius: 14px; border: 2px solid #f87171; color: #fff;">
+                    <div style="font-size: 2rem; margin-bottom: 8px; text-align: center;">😢 Verloren</div>
+                    <div style="font-size: 1.5rem; font-weight: 700; text-align: center;">${data.multiplier}x = -${lossAmount}€</div>
+                </div>
+            `;
         }
     }
     
-    function createSpinParticles() {
-        const container = document.getElementById('wheelParticles');
-        for (let i = 0; i < 3; i++) {
-            const particle = document.createElement('div');
-            const angle = Math.random() * Math.PI * 2;
-            const radius = 175;
-            const x = 170 + Math.cos(angle) * radius;
-            const y = 170 + Math.sin(angle) * radius;
-            
-            particle.style.position = 'absolute';
-            particle.style.left = x + 'px';
-            particle.style.top = y + 'px';
-            particle.style.width = '8px';
-            particle.style.height = '8px';
-            particle.style.borderRadius = '50%';
-            particle.style.background = ['#f59e0b', '#ec4899', '#8b5cf6', '#10b981', '#fbbf24'][Math.floor(Math.random() * 5)];
-            particle.style.boxShadow = '0 0 20px currentColor';
-            particle.style.pointerEvents = 'none';
-            
-            const vx = (Math.random() - 0.5) * 10;
-            const vy = (Math.random() - 0.5) * 10;
-            
-            let px = 0, py = 0, opacity = 1;
-            const animate = () => {
-                px += vx;
-                py += vy;
-                opacity -= 0.02;
-                particle.style.transform = `translate(${px}px, ${py}px)`;
-                particle.style.opacity = opacity;
-                
-                if (opacity > 0) {
-                    requestAnimationFrame(animate);
-                } else {
-                    particle.remove();
-                }
-            };
-            
-            container.appendChild(particle);
-            requestAnimationFrame(animate);
-        }
-    }
-    
-    function createMegaConfetti() {
+    function createWheelConfetti() {
         const colors = ['#ef4444', '#eab308', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'];
         
-        for (let i = 0; i < 100; i++) {
+        for (let i = 0; i < 80; i++) {
             const confetti = document.createElement('div');
             confetti.style.position = 'fixed';
             confetti.style.left = '50%';
             confetti.style.top = '30%';
-            confetti.style.width = (8 + Math.random() * 8) + 'px';
-            confetti.style.height = (8 + Math.random() * 8) + 'px';
+            confetti.style.width = (6 + Math.random() * 8) + 'px';
+            confetti.style.height = (6 + Math.random() * 8) + 'px';
             confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
             confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '0';
             confetti.style.zIndex = '9999';
@@ -3070,23 +2845,23 @@ if ($result) {
             document.body.appendChild(confetti);
             
             const angle = Math.random() * Math.PI * 2;
-            const velocity = 5 + Math.random() * 10;
+            const velocity = 6 + Math.random() * 12;
             const vx = Math.cos(angle) * velocity;
-            const vy = Math.sin(angle) * velocity - 8;
+            const vy = Math.sin(angle) * velocity - 10;
             
             let x = 0, y = 0, vy2 = vy, rotation = 0;
-            const rotSpeed = (Math.random() - 0.5) * 20;
+            const rotSpeed = (Math.random() - 0.5) * 25;
             
             const animate = () => {
                 y += vy2;
                 x += vx;
-                vy2 += 0.4;
+                vy2 += 0.5; // gravity
                 rotation += rotSpeed;
                 
                 confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
-                confetti.style.opacity = Math.max(0, 1 - y / 400);
+                confetti.style.opacity = Math.max(0, 1 - y / 500);
                 
-                if (y < 500) {
+                if (y < 600) {
                     requestAnimationFrame(animate);
                 } else {
                     confetti.remove();
@@ -3097,11 +2872,6 @@ if ($result) {
         }
     }
     
-    function playVictoryEffect() {
-        // Visual pulse effect on wheel
-        const wheel = document.querySelector('.wheel-3d-container');
-        wheel.style.animation = 'victoryPulse 0.5s ease-in-out 3';
-    }
     
     function createWheelSparkles() {
         const sparklesContainer = document.getElementById('wheelSparkles');
