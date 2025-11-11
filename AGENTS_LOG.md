@@ -1318,3 +1318,38 @@ Dies entspricht der mathematischen Verteilung echter Crash-Spiele wie Stake.com,
 - ✅ Fixed `openGame is not defined` error by converting onclick attributes to event listeners
 - Changed game cards from inline onclick to ID-based event listeners
 - All game open functions now properly attached in DOMContentLoaded
+
+## [2025-11-11] Complete Rebuild of Casino Wheel Game
+
+### Changes Made:
+- **Completely rebuilt wheel modal** with cleaner, modern design (450px canvas)
+- **Fixed rotation logic**: Pointer at top (0°), proper angle calculation
+- **Simplified JavaScript**: Removed complex particle systems causing lag
+- **Result display**: Shows under wheel instead of overlay
+- **Bet buttons**: Fixed active state with `wheel-bet-active` class
+- **Balance**: Properly shows available balance (total - 10€ reserve)
+- **Animation**: Smooth rotation using `requestAnimationFrame`
+- **Confetti**: Only on wins (multiplier > 1.0)
+- **No scrolling**: Modal fits perfectly on screen
+
+### Technical Details:
+- Canvas size: 450x450px for better visibility
+- Rotation calculation: `(360 * spins) + (360 - serverRotation)`
+- Server provides center angle of winning segment
+- Client rotates wheel to align that segment with top pointer
+- 5-8 full spins for excitement
+- 5-second animation duration with ease-out-cubic easing
+
+### Fixed Issues:
+- ✅ Wheel landing on wrong multiplier
+- ✅ Result showing different than actual outcome
+- ✅ Complex animations causing performance issues
+- ✅ Modal requiring scrolling
+- ✅ Bet button active states not working
+
+### Files Modified:
+- `/var/www/html/casino.php` (HTML, CSS, JavaScript)
+
+### API:
+- `/api/casino/play_wheel.php` - No changes needed (already correct)
+
