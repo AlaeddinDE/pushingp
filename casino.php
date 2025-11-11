@@ -1424,19 +1424,19 @@ if ($result) {
                 </div>
             </div>
 
-            <!-- WHEEL -->
-            <div class="game-card" id="openWheelBtn">
-                <span class="game-icon">🎪</span>
-                <div class="game-title">Glücksrad</div>
-                <div class="game-desc">Drehe das Rad! Bis zu 50x Multiplikator möglich!</div>
+            <!-- PLINKO -->
+            <div class="game-card" id="openPlinkoBtn">
+                <span class="game-icon">🎯</span>
+                <div class="game-title">Plinko</div>
+                <div class="game-desc">Ball fällt durch Pins! Bis zu 5x Multiplikator!</div>
                 <div class="game-stats">
                     <div class="game-stat">
                         <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">8%</div>
+                        <div class="game-stat-value">5%</div>
                     </div>
                     <div class="game-stat">
                         <div class="game-stat-label">Max Win</div>
-                        <div class="game-stat-value">50x</div>
+                        <div class="game-stat-value">5x</div>
                     </div>
                 </div>
             </div>
@@ -1972,171 +1972,133 @@ if ($result) {
         }
     </style>
 
-    <!-- WHEEL MODAL -->
-    <div class="game-modal" id="wheelModal">
-        <div class="game-modal-content" style="max-width: 1000px; padding: 30px;">
-            <button class="modal-close" onclick="closeGame('wheel')">×</button>
+    <!-- PLINKO MODAL -->
+    <div class="game-modal" id="plinkoModal">
+        <div class="game-modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 20px;">
+            <button class="modal-close" onclick="closeGame('plinko')">×</button>
             
-            <h2 style="font-size: 2rem; margin: 0 0 24px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
-                🎡 GLÜCKSRAD 🎡
+            <h2 style="font-size: 2rem; margin: 0 0 20px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
+                🎯 PLINKO 🎯
             </h2>
             
-            <div style="display: grid; grid-template-columns: 450px 1fr; gap: 30px; align-items: start;">
+            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
                 
-                <!-- Left: Wheel Container -->
+                <!-- Plinko Board -->
                 <div style="position: relative;">
-                    <div style="position: relative; width: 450px; height: 450px;">
-                        <!-- Glow Effect -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 480px; height: 480px; border-radius: 50%; background: radial-gradient(circle, rgba(245,158,11,0.4), transparent); filter: blur(20px); animation: glowPulse 2s ease-in-out infinite;"></div>
-                        
-                        <!-- Wheel Canvas -->
-                        <canvas id="wheelCanvas" width="450" height="450" 
-                                style="position: absolute; top: 0; left: 0; border-radius: 50%; box-shadow: 0 0 60px rgba(245,158,11,0.6), inset 0 0 30px rgba(255,255,255,0.1);"></canvas>
-                        
-                        <!-- Center Pin -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 60px; height: 60px; background: linear-gradient(135deg, #fbbf24, #f59e0b); border-radius: 50%; border: 4px solid #fff; box-shadow: 0 0 30px rgba(245,158,11,1); z-index: 10; display: flex; align-items: center; justify-content: center; font-size: 2rem;">💎</div>
-                        
-                        <!-- Pointer -->
-                        <div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); z-index: 5; font-size: 4rem; filter: drop-shadow(0 5px 15px rgba(220,38,38,1));">
-                            🔻
-                        </div>
-                    </div>
+                    <canvas id="plinkoCanvas" width="700" height="550" 
+                            style="width: 100%; max-width: 700px; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
                     
                     <!-- Result Display -->
-                    <div id="wheelResult" style="margin-top: 20px; min-height: 80px;"></div>
+                    <div id="plinkoResult" style="margin-top: 16px; min-height: 60px;"></div>
                 </div>
                 
-                <!-- Right: Controls -->
-                <div style="display: flex; flex-direction: column; gap: 16px;">
+                <!-- Controls -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
                     
                     <!-- Balance -->
-                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 18px; border-radius: 14px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
-                        <div style="font-size: 0.85rem; color: #c4b5fd; font-weight: 700; margin-bottom: 6px; text-align: center; letter-spacing: 1px;">💎 DEIN GUTHABEN</div>
-                        <div id="wheelBalance" style="font-size: 2.25rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
+                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 14px; border-radius: 12px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
+                        <div style="font-size: 0.75rem; color: #c4b5fd; font-weight: 700; margin-bottom: 4px; text-align: center; letter-spacing: 1px;">💎 GUTHABEN</div>
+                        <div id="plinkoBalance" style="font-size: 1.75rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
                             <?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €
                         </div>
                     </div>
                     
                     <!-- Bet Selection -->
-                    <div style="background: rgba(0,0,0,0.4); padding: 16px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
-                        <div style="font-size: 0.85rem; color: #fbbf24; font-weight: 700; margin-bottom: 12px; text-align: center; letter-spacing: 1px;">💰 EINSATZ WÄHLEN</div>
-                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 8px;">
-                            <button class="wheel-bet-btn" onclick="setWheelBet(1)">💰 1€</button>
-                            <button class="wheel-bet-btn wheel-bet-active" onclick="setWheelBet(5)">💵 5€</button>
-                            <button class="wheel-bet-btn" onclick="setWheelBet(10)">💸 10€</button>
+                    <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
+                        <div style="font-size: 0.75rem; color: #fbbf24; font-weight: 700; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">💰 EINSATZ</div>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+                            <button class="plinko-bet-btn" onclick="setPlinkoBet(1)">1€</button>
+                            <button class="plinko-bet-btn plinko-bet-active" onclick="setPlinkoBet(5)">5€</button>
+                            <button class="plinko-bet-btn" onclick="setPlinkoBet(10)">10€</button>
+                            <button class="plinko-bet-btn" onclick="setPlinkoBet(25)">25€</button>
+                            <button class="plinko-bet-btn" onclick="setPlinkoBet(50)">50€</button>
                         </div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px;">
-                            <button class="wheel-bet-btn" onclick="setWheelBet(25)">💎 25€</button>
-                            <button class="wheel-bet-btn" onclick="setWheelBet(50)">👑 50€</button>
-                        </div>
-                        <input type="number" id="wheelBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
-                    </div>
-                    
-                    <!-- Spin Button -->
-                    <button id="wheelSpinBtn" onclick="spinWheel()" 
-                            style="width: 100%; padding: 20px; font-size: 1.6rem; font-weight: 900; letter-spacing: 3px; background: linear-gradient(135deg, #f59e0b, #dc2626); border: 4px solid #fbbf24; border-radius: 14px; cursor: pointer; box-shadow: 0 8px 40px rgba(245,158,11,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff; animation: spinBtnPulse 2s ease-in-out infinite;">
-                        🎡 DREHEN 🎡
-                    </button>
-                    
-                    <!-- Probabilities -->
-                    <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1);">
-                        <div style="font-size: 0.8rem; font-weight: 700; margin-bottom: 10px; text-align: center; color: #fbbf24; letter-spacing: 1px;">🎯 GEWINNCHANCEN</div>
-                        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 0.75rem;">
-                            <div style="background: #7f1d1d; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #fca5a5; font-weight: 900;">0x</div>
-                                <div style="color: #ef4444; font-size: 0.7rem;">51% 💀</div>
-                            </div>
-                            <div style="background: #991b1b; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #f87171; font-weight: 900;">0.5x</div>
-                                <div style="color: #9ca3af; font-size: 0.7rem;">21%</div>
-                            </div>
-                            <div style="background: #854d0e; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #fbbf24; font-weight: 900;">1x</div>
-                                <div style="color: #9ca3af; font-size: 0.7rem;">15%</div>
-                            </div>
-                            <div style="background: #065f46; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #34d399; font-weight: 900;">2x</div>
-                                <div style="color: #9ca3af; font-size: 0.7rem;">9%</div>
-                            </div>
-                            <div style="background: #1e3a8a; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #60a5fa; font-weight: 900;">5x</div>
-                                <div style="color: #9ca3af; font-size: 0.7rem;">2.5%</div>
-                            </div>
-                            <div style="background: #581c87; padding: 6px; border-radius: 6px; text-align: center;">
-                                <div style="color: #a78bfa; font-weight: 900;">10x</div>
-                                <div style="color: #9ca3af; font-size: 0.7rem;">1%</div>
-                            </div>
-                            <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 8px; border-radius: 8px; border: 2px solid #fbbf24; text-align: center; grid-column: span 2; box-shadow: 0 0 25px rgba(245,158,11,0.5);">
-                                <div style="color: #fff; font-weight: 900; font-size: 1.1rem;">💎 50x JACKPOT</div>
-                                <div style="color: #fef3c7; font-size: 0.75rem; font-weight: 700;">0.5% 🔥</div>
-                            </div>
-                        </div>
+                        <input type="number" id="plinkoBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
                     </div>
                     
                 </div>
+                
+                <!-- Drop Button -->
+                <button id="plinkoDropBtn" onclick="dropBall()" 
+                        style="width: 100%; padding: 16px; font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 3px solid #a78bfa; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(139,92,246,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff;">
+                    🎯 BALL DROPPEN 🎯
+                </button>
+                
+                <!-- Multiplier Info -->
+                <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1);">
+                    <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; text-align: center; color: #fbbf24; letter-spacing: 1px;">🎯 MULTIPLIKATOREN</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; gap: 4px;">
+                        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 6px 8px; border-radius: 6px; text-align: center; border: 2px solid #fbbf24; flex: 1;">
+                            <div style="color: #fff; font-weight: 900;">5.0x</div>
+                        </div>
+                        <div style="background: #065f46; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #34d399; font-weight: 900;">2.0x</div>
+                        </div>
+                        <div style="background: #0e7490; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #22d3ee; font-weight: 900;">1.5x</div>
+                        </div>
+                        <div style="background: #854d0e; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #fbbf24; font-weight: 900;">1.0x</div>
+                        </div>
+                        <div style="background: #991b1b; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #f87171; font-weight: 900;">0.5x</div>
+                        </div>
+                        <div style="background: #854d0e; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #fbbf24; font-weight: 900;">1.0x</div>
+                        </div>
+                        <div style="background: #0e7490; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #22d3ee; font-weight: 900;">1.5x</div>
+                        </div>
+                        <div style="background: #065f46; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
+                            <div style="color: #34d399; font-weight: 900;">2.0x</div>
+                        </div>
+                        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 6px 8px; border-radius: 6px; text-align: center; border: 2px solid #fbbf24; flex: 1;">
+                            <div style="color: #fff; font-weight: 900;">5.0x</div>
+                        </div>
+                    </div>
+                </div>
+                
             </div>
         </div>
     </div>
     
     <style>
-        @keyframes spinBtnPulse {
-            0%, 100% {
-                transform: scale(1);
-                box-shadow: 0 8px 40px rgba(245,158,11,0.7);
-            }
-            50% {
-                transform: scale(1.03);
-                box-shadow: 0 12px 60px rgba(245,158,11,1);
-            }
-        }
-        
-        @keyframes glowPulse {
-            0%, 100% {
-                opacity: 0.4;
-                transform: translate(-50%, -50%) scale(1);
-            }
-            50% {
-                opacity: 0.7;
-                transform: translate(-50%, -50%) scale(1.1);
-            }
-        }
-        
-        .wheel-bet-btn {
-            padding: 12px;
-            font-size: 1rem;
+        .plinko-bet-btn {
+            padding: 8px;
+            font-size: 0.85rem;
             font-weight: 700;
             background: linear-gradient(135deg, #374151, #1f2937);
             border: 2px solid #6b7280;
-            border-radius: 10px;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s;
             color: #fff;
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        .wheel-bet-btn:hover {
-            transform: translateY(-3px) scale(1.05);
+        .plinko-bet-btn:hover {
+            transform: translateY(-2px) scale(1.05);
             box-shadow: 0 8px 30px rgba(139,92,246,0.5);
             border-color: #8b5cf6;
         }
         
-        .wheel-bet-btn.wheel-bet-active {
+        .plinko-bet-btn.plinko-bet-active {
             background: linear-gradient(135deg, #8b5cf6, #7c3aed);
             border-color: #a78bfa;
             box-shadow: 0 0 30px rgba(139,92,246,0.8);
             transform: scale(1.05);
         }
         
-        #wheelSpinBtn:hover {
+        #plinkoDropBtn:hover {
             transform: scale(1.05);
-            box-shadow: 0 12px 60px rgba(245,158,11,0.9);
+            box-shadow: 0 12px 60px rgba(139,92,246,0.9);
         }
         
-        #wheelSpinBtn:active {
+        #plinkoDropBtn:active {
             transform: scale(0.98);
         }
         
-        #wheelSpinBtn:disabled {
+        #plinkoDropBtn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
             transform: scale(1);
@@ -2594,119 +2556,140 @@ if ($result) {
     `;
     document.head.appendChild(style);
     
-    // WHEEL GAME - COMPLETELY REBUILT
-    let wheelSpinning = false;
-    let wheelCanvas, wheelCtx;
+    // PLINKO GAME
+    let plinkoDropping = false;
+    let plinkoCanvas, plinkoCtx;
+    let ball = null;
     
-    // Wheel segments - MUST MATCH API!
-    const wheelSegments = [
-        { multiplier: 0, color: '#7f1d1d', weight: 51, label: '0x' },       // 51%
-        { multiplier: 0.5, color: '#ef4444', weight: 21, label: '0.5x' },   // 21%
-        { multiplier: 1.0, color: '#eab308', weight: 15, label: '1x' },     // 15%
-        { multiplier: 2.0, color: '#10b981', weight: 9, label: '2x' },      // 9%
-        { multiplier: 5.0, color: '#3b82f6', weight: 2.5, label: '5x' },    // 2.5%
-        { multiplier: 10.0, color: '#8b5cf6', weight: 1, label: '10x' },    // 1%
-        { multiplier: 50.0, color: '#f59e0b', weight: 0.5, label: '50x' }   // 0.5%
+    // Plinko configuration
+    const ROWS = 8;
+    const SLOTS = 9;
+    const PIN_RADIUS = 4;
+    const BALL_RADIUS = 8;
+    
+    const slotMultipliers = [
+        { multiplier: 5.0, color: '#f59e0b' },
+        { multiplier: 2.0, color: '#10b981' },
+        { multiplier: 1.5, color: '#0e7490' },
+        { multiplier: 1.0, color: '#eab308' },
+        { multiplier: 0.5, color: '#ef4444' },
+        { multiplier: 1.0, color: '#eab308' },
+        { multiplier: 1.5, color: '#0e7490' },
+        { multiplier: 2.0, color: '#10b981' },
+        { multiplier: 5.0, color: '#f59e0b' }
     ];
     
-    function initWheel() {
-        wheelCanvas = document.getElementById('wheelCanvas');
-        if (!wheelCanvas) return;
+    function initPlinko() {
+        plinkoCanvas = document.getElementById('plinkoCanvas');
+        if (!plinkoCanvas) return;
         
-        wheelCtx = wheelCanvas.getContext('2d');
-        drawWheelStatic();
+        plinkoCtx = plinkoCanvas.getContext('2d');
+        drawPlinkoBoard();
     }
     
-    function drawWheelStatic(rotation = 0) {
-        if (!wheelCanvas || !wheelCtx) return;
+    function drawPlinkoBoard() {
+        if (!plinkoCanvas || !plinkoCtx) return;
         
-        const centerX = 225;
-        const centerY = 225;
-        const radius = 200;
+        const width = 700;
+        const height = 550;
         
-        wheelCtx.clearRect(0, 0, 450, 450);
-        wheelCtx.save();
-        wheelCtx.translate(centerX, centerY);
-        wheelCtx.rotate((rotation * Math.PI) / 180);
+        plinkoCtx.clearRect(0, 0, width, height);
         
-        // Calculate total weight and segment angles
-        const totalWeight = wheelSegments.reduce((sum, seg) => sum + seg.weight, 0);
-        let currentAngle = 0;
+        // Draw pins
+        const startY = 80;
+        const endY = 420;
+        const rowSpacing = (endY - startY) / (ROWS - 1);
         
-        // Store segment positions for debugging
-        const segmentPositions = [];
+        for (let row = 0; row < ROWS; row++) {
+            const pinsInRow = row + 3;
+            const spacing = width / (pinsInRow + 1);
+            const y = startY + row * rowSpacing;
+            
+            for (let pin = 0; pin < pinsInRow; pin++) {
+                const x = spacing * (pin + 1);
+                
+                // Pin glow
+                const gradient = plinkoCtx.createRadialGradient(x, y, 0, x, y, PIN_RADIUS * 3);
+                gradient.addColorStop(0, 'rgba(139,92,246,0.6)');
+                gradient.addColorStop(1, 'rgba(139,92,246,0)');
+                plinkoCtx.fillStyle = gradient;
+                plinkoCtx.fillRect(x - PIN_RADIUS * 3, y - PIN_RADIUS * 3, PIN_RADIUS * 6, PIN_RADIUS * 6);
+                
+                // Pin
+                plinkoCtx.beginPath();
+                plinkoCtx.arc(x, y, PIN_RADIUS, 0, Math.PI * 2);
+                plinkoCtx.fillStyle = '#8b5cf6';
+                plinkoCtx.fill();
+                plinkoCtx.strokeStyle = '#a78bfa';
+                plinkoCtx.lineWidth = 2;
+                plinkoCtx.stroke();
+            }
+        }
         
-        wheelSegments.forEach((segment, index) => {
-            const segmentAngle = (segment.weight / totalWeight) * 2 * Math.PI;
-            const centerAngle = currentAngle + segmentAngle / 2;
-            
-            segmentPositions.push({
-                multiplier: segment.multiplier,
-                startAngle: currentAngle * (180/Math.PI),
-                endAngle: (currentAngle + segmentAngle) * (180/Math.PI),
-                centerAngle: centerAngle * (180/Math.PI)
-            });
-            
-            // Draw segment
-            wheelCtx.beginPath();
-            wheelCtx.moveTo(0, 0);
-            wheelCtx.arc(0, 0, radius, currentAngle, currentAngle + segmentAngle);
-            wheelCtx.closePath();
-            
-            // Fill with gradient
-            const gradient = wheelCtx.createRadialGradient(0, 0, 0, 0, 0, radius);
-            gradient.addColorStop(0, segment.color);
-            gradient.addColorStop(0.7, segment.color);
-            gradient.addColorStop(1, segment.color + '80');
-            wheelCtx.fillStyle = gradient;
-            wheelCtx.fill();
-            
-            // Border
-            wheelCtx.strokeStyle = 'rgba(255,255,255,0.3)';
-            wheelCtx.lineWidth = 2;
-            wheelCtx.stroke();
-            
-            // Text - centered in segment
-            wheelCtx.save();
-            wheelCtx.rotate(centerAngle);
-            wheelCtx.textAlign = 'center';
-            wheelCtx.textBaseline = 'middle';
-            wheelCtx.fillStyle = '#ffffff';
-            
-            const fontSize = segment.weight > 10 ? 28 : segment.weight > 5 ? 24 : 20;
-            wheelCtx.font = `900 ${fontSize}px Inter`;
-            wheelCtx.shadowColor = 'rgba(0,0,0,0.9)';
-            wheelCtx.shadowBlur = 8;
-            wheelCtx.fillText(segment.label, radius * 0.65, 0);
-            wheelCtx.shadowBlur = 0;
-            
-            wheelCtx.restore();
-            
-            currentAngle += segmentAngle;
-        });
+        // Draw slots
+        const slotY = 460;
+        const slotWidth = width / SLOTS;
+        const slotHeight = 60;
         
-        wheelCtx.restore();
+        for (let i = 0; i < SLOTS; i++) {
+            const x = i * slotWidth;
+            const slot = slotMultipliers[i];
+            
+            // Slot background
+            const gradient = plinkoCtx.createLinearGradient(x, slotY, x, slotY + slotHeight);
+            gradient.addColorStop(0, slot.color + '80');
+            gradient.addColorStop(1, slot.color);
+            plinkoCtx.fillStyle = gradient;
+            plinkoCtx.fillRect(x, slotY, slotWidth, slotHeight);
+            
+            // Slot border
+            plinkoCtx.strokeStyle = 'rgba(255,255,255,0.3)';
+            plinkoCtx.lineWidth = 2;
+            plinkoCtx.strokeRect(x, slotY, slotWidth, slotHeight);
+            
+            // Multiplier text
+            plinkoCtx.fillStyle = '#ffffff';
+            plinkoCtx.font = 'bold 18px Inter';
+            plinkoCtx.textAlign = 'center';
+            plinkoCtx.textBaseline = 'middle';
+            plinkoCtx.shadowColor = 'rgba(0,0,0,0.8)';
+            plinkoCtx.shadowBlur = 6;
+            plinkoCtx.fillText(slot.multiplier + 'x', x + slotWidth / 2, slotY + slotHeight / 2);
+            plinkoCtx.shadowBlur = 0;
+        }
         
-        // Debug: log segment positions on first draw
-        if (rotation === 0 && window.wheelDebug === undefined) {
-            console.log('Wheel Segments:', segmentPositions);
-            window.wheelDebug = true;
+        // Draw ball if exists
+        if (ball) {
+            const ballGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 2);
+            ballGradient.addColorStop(0, '#fbbf24');
+            ballGradient.addColorStop(0.5, '#f59e0b');
+            ballGradient.addColorStop(1, 'rgba(245,158,11,0)');
+            plinkoCtx.fillStyle = ballGradient;
+            plinkoCtx.fillRect(ball.x - BALL_RADIUS * 2, ball.y - BALL_RADIUS * 2, BALL_RADIUS * 4, BALL_RADIUS * 4);
+            
+            plinkoCtx.beginPath();
+            plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+            plinkoCtx.fillStyle = '#fbbf24';
+            plinkoCtx.fill();
+            plinkoCtx.strokeStyle = '#fff';
+            plinkoCtx.lineWidth = 2;
+            plinkoCtx.stroke();
         }
     }
     
-    function setWheelBet(amount) {
-        document.getElementById('wheelBet').value = amount;
+    function setPlinkoBet(amount) {
+        document.getElementById('plinkoBet').value = amount;
         
-        document.querySelectorAll('.wheel-bet-btn').forEach(btn => {
-            btn.classList.remove('wheel-bet-active');
+        document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+            btn.classList.remove('plinko-bet-active');
         });
-        event.target.classList.add('wheel-bet-active');
+        event.target.classList.add('plinko-bet-active');
     }
     
-    async function spinWheel() {
-        if (wheelSpinning) return;
+    async function dropBall() {
+        if (plinkoDropping) return;
         
-        const bet = parseFloat(document.getElementById('wheelBet').value);
+        const bet = parseFloat(document.getElementById('plinkoBet').value);
         if (bet < 0.5 || bet > 50) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
@@ -2717,12 +2700,12 @@ if ($result) {
             return;
         }
         
-        wheelSpinning = true;
-        document.getElementById('wheelSpinBtn').disabled = true;
-        document.getElementById('wheelResult').innerHTML = '<div style="text-align: center; padding: 20px; color: #fbbf24; font-size: 1.2rem; font-weight: 700;">🎡 Rad dreht sich...</div>';
+        plinkoDropping = true;
+        document.getElementById('plinkoDropBtn').disabled = true;
+        document.getElementById('plinkoResult').innerHTML = '<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1rem; font-weight: 700;">🎯 Ball fällt...</div>';
         
         try {
-            const response = await fetch('/api/casino/play_wheel.php', {
+            const response = await fetch('/api/casino/play_plinko.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ bet: bet })
@@ -2733,103 +2716,117 @@ if ($result) {
             }
             
             const data = await response.json();
-            console.log('Server response:', data);
+            console.log('Plinko response:', data);
             
             if (data.status === 'success') {
-                // The pointer is at the TOP (0°/360° position)
-                // Server gives us the CENTER of the winning segment
-                // We need to rotate the wheel so that segment's CENTER aligns with the pointer at top
+                await animateBallDrop(data.ball_path, data.slot);
                 
-                const serverRotation = data.rotation; // Center of winning segment from server
-                
-                // Add 5-8 full rotations for effect
-                const fullSpins = 5 + Math.floor(Math.random() * 4); // 5-8 spins
-                const totalRotation = (360 * fullSpins) + (360 - serverRotation);
-                
-                console.log(`Target: ${data.multiplier}x, Server angle: ${serverRotation}°, Total rotation: ${totalRotation}°`);
-                
-                // Animate with requestAnimationFrame
-                const duration = 5000; // 5 seconds
-                const startTime = Date.now();
-                const startRotation = 0;
-                
-                function animate() {
-                    const elapsed = Date.now() - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
+                setTimeout(() => {
+                    showPlinkoResult(data, bet);
+                    updateAllBalances(data.new_balance);
                     
-                    // Easing function (ease-out-cubic)
-                    const easeProgress = 1 - Math.pow(1 - progress, 3);
-                    const currentRotation = startRotation + (totalRotation * easeProgress);
-                    
-                    drawWheelStatic(currentRotation);
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(animate);
-                    } else {
-                        // Spin complete - show result
-                        setTimeout(() => {
-                            showWheelResult(data, bet);
-                            updateAllBalances(data.new_balance);
-                            
-                            wheelSpinning = false;
-                            document.getElementById('wheelSpinBtn').disabled = false;
-                        }, 500);
-                    }
-                }
-                
-                animate();
+                    plinkoDropping = false;
+                    document.getElementById('plinkoDropBtn').disabled = false;
+                    ball = null;
+                    drawPlinkoBoard();
+                }, 1000);
                 
             } else {
                 showNotification('Fehler: ' + data.error, 'error');
-                wheelSpinning = false;
-                document.getElementById('wheelSpinBtn').disabled = false;
-                document.getElementById('wheelResult').innerHTML = '';
+                plinkoDropping = false;
+                document.getElementById('plinkoDropBtn').disabled = false;
+                document.getElementById('plinkoResult').innerHTML = '';
             }
         } catch (error) {
             showNotification('Verbindungsfehler: ' + error.message, 'error');
-            wheelSpinning = false;
-            document.getElementById('wheelSpinBtn').disabled = false;
-            document.getElementById('wheelResult').innerHTML = '';
+            plinkoDropping = false;
+            document.getElementById('plinkoDropBtn').disabled = false;
+            document.getElementById('plinkoResult').innerHTML = '';
         }
     }
     
-    function showWheelResult(data, bet) {
-        const resultDiv = document.getElementById('wheelResult');
+    function animateBallDrop(path, finalSlot) {
+        return new Promise((resolve) => {
+            const width = 700;
+            const startY = 50;
+            const endY = 420;
+            const slotY = 490;
+            const slotWidth = width / SLOTS;
+            
+            ball = {
+                x: width / 2,
+                y: startY,
+                vy: 0
+            };
+            
+            let pathIndex = 0;
+            const pathSpeed = 80; // ms per step
+            
+            const dropInterval = setInterval(() => {
+                if (pathIndex < path.length - 1) {
+                    // Move through pin path
+                    const progress = pathIndex / (path.length - 1);
+                    const targetX = (path[pathIndex] / 8) * width;
+                    const targetY = startY + (endY - startY) * progress;
+                    
+                    ball.x = ball.x * 0.7 + targetX * 0.3;
+                    ball.y = targetY;
+                    
+                    pathIndex++;
+                } else {
+                    // Fall into slot
+                    const targetX = finalSlot * slotWidth + slotWidth / 2;
+                    ball.x = ball.x * 0.8 + targetX * 0.2;
+                    ball.y += 6;
+                    
+                    if (ball.y >= slotY) {
+                        clearInterval(dropInterval);
+                        resolve();
+                    }
+                }
+                
+                drawPlinkoBoard();
+            }, pathSpeed);
+        });
+    }
+    
+    function showPlinkoResult(data, bet) {
+        const resultDiv = document.getElementById('plinkoResult');
         
         if (data.multiplier > 1.0) {
             // WIN
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 24px; border-radius: 16px; border: 3px solid #34d399; box-shadow: 0 0 50px rgba(16,185,129,0.8); animation: winPulse 0.6s ease-in-out infinite;">
-                    <div style="font-size: 2.5rem; margin-bottom: 10px; text-align: center;">🎉 GEWONNEN! 🎉</div>
-                    <div style="font-size: 2.5rem; font-weight: 900; color: #fff; text-align: center;">${data.win_amount.toFixed(2)}€</div>
-                    <div style="font-size: 1.4rem; margin-top: 8px; color: #d1fae5; text-align: center;">${data.multiplier}x Multiplier</div>
+                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 16px; border-radius: 12px; border: 3px solid #34d399; box-shadow: 0 0 40px rgba(16,185,129,0.8); animation: winPulse 0.6s ease-in-out infinite;">
+                    <div style="font-size: 1.5rem; margin-bottom: 6px; text-align: center;">🎉 GEWONNEN!</div>
+                    <div style="font-size: 1.75rem; font-weight: 900; color: #fff; text-align: center;">${data.win_amount.toFixed(2)}€</div>
+                    <div style="font-size: 1rem; margin-top: 4px; color: #d1fae5; text-align: center;">${data.multiplier}x Multiplier</div>
                 </div>
             `;
-            createWheelConfetti();
+            createPlinkoConfetti();
         } else if (data.multiplier === 1.0) {
             // BREAK EVEN
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 20px; border-radius: 14px; border: 2px solid #fbbf24; color: #fff;">
-                    <div style="font-size: 2rem; margin-bottom: 8px; text-align: center;">🟡 Break Even</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; text-align: center;">1.0x = ${bet.toFixed(2)}€ zurück</div>
+                <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 14px; border-radius: 12px; border: 2px solid #fbbf24; color: #fff;">
+                    <div style="font-size: 1.25rem; margin-bottom: 6px; text-align: center;">🟡 Break Even</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; text-align: center;">1.0x = ${bet.toFixed(2)}€ zurück</div>
                 </div>
             `;
         } else {
             // LOSS
-            const lossAmount = data.multiplier === 0 ? bet.toFixed(2) : (bet * (1.0 - data.multiplier)).toFixed(2);
+            const lossAmount = (bet - data.win_amount).toFixed(2);
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 20px; border-radius: 14px; border: 2px solid #f87171; color: #fff;">
-                    <div style="font-size: 2rem; margin-bottom: 8px; text-align: center;">😢 Verloren</div>
-                    <div style="font-size: 1.5rem; font-weight: 700; text-align: center;">${data.multiplier}x = -${lossAmount}€</div>
+                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 14px; border-radius: 12px; border: 2px solid #f87171; color: #fff;">
+                    <div style="font-size: 1.25rem; margin-bottom: 6px; text-align: center;">😢 Verloren</div>
+                    <div style="font-size: 1.25rem; font-weight: 700; text-align: center;">${data.multiplier}x = -${lossAmount}€</div>
                 </div>
             `;
         }
     }
     
-    function createWheelConfetti() {
+    function createPlinkoConfetti() {
         const colors = ['#ef4444', '#eab308', '#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'];
         
-        for (let i = 0; i < 80; i++) {
+        for (let i = 0; i < 60; i++) {
             const confetti = document.createElement('div');
             confetti.style.position = 'fixed';
             confetti.style.left = '50%';
@@ -2855,7 +2852,7 @@ if ($result) {
             const animate = () => {
                 y += vy2;
                 x += vx;
-                vy2 += 0.5; // gravity
+                vy2 += 0.5;
                 rotation += rotSpeed;
                 
                 confetti.style.transform = `translate(${x}px, ${y}px) rotate(${rotation}deg)`;
@@ -2870,25 +2867,6 @@ if ($result) {
             
             requestAnimationFrame(animate);
         }
-    }
-    
-    
-    function createWheelSparkles() {
-        const sparklesContainer = document.getElementById('wheelSparkles');
-        sparklesContainer.innerHTML = '';
-        
-        for (let i = 0; i < 30; i++) {
-            const sparkle = document.createElement('div');
-            sparkle.className = 'sparkle';
-            sparkle.style.left = Math.random() * 500 + 'px';
-            sparkle.style.top = Math.random() * 500 + 'px';
-            sparkle.style.animationDelay = Math.random() * 2 + 's';
-            sparklesContainer.appendChild(sparkle);
-        }
-        
-        setTimeout(() => {
-            sparklesContainer.innerHTML = '';
-        }, 5000);
     }
     
     // CRASH GAME
@@ -3210,18 +3188,18 @@ if ($result) {
     
     // Initialize wheel on page load
     window.addEventListener('DOMContentLoaded', () => {
-        initWheel();
+        initPlinko();
         
         // Setup game card click handlers
         const openSlotsBtn = document.getElementById('openSlotsBtn');
-        const openWheelBtn = document.getElementById('openWheelBtn');
+        const openPlinkoBtn = document.getElementById('openPlinkoBtn');
         const openCrashBtn = document.getElementById('openCrashBtn');
         
         if (openSlotsBtn) {
             openSlotsBtn.addEventListener('click', () => openGame('slots'));
         }
-        if (openWheelBtn) {
-            openWheelBtn.addEventListener('click', () => openGame('wheel'));
+        if (openPlinkoBtn) {
+            openPlinkoBtn.addEventListener('click', () => openGame('plinko'));
         }
         if (openCrashBtn) {
             openCrashBtn.addEventListener('click', () => openGame('crash'));
