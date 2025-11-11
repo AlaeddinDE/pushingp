@@ -1637,7 +1637,7 @@ if ($result) {
             
             <div class="balance-display">
                 <div class="balance-label">Dein Guthaben</div>
-                <div class="balance-value" id="slotsBalance"><?= number_format($balance, 2, ',', '.') ?> €</div>
+                <div class="balance-value" id="slotsBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
             </div>
 
             <div class="slots-reels" id="slotsReels">
@@ -1682,7 +1682,7 @@ if ($result) {
             
             <div class="balance-display">
                 <div class="balance-label">Dein Guthaben</div>
-                <div class="balance-value" id="wheelBalance"><?= number_format($balance, 2, ',', '.') ?> €</div>
+                <div class="balance-value" id="wheelBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
             </div>
 
             <div class="wheel-container">
@@ -1734,7 +1734,7 @@ if ($result) {
                     </div>
                     <div class="balance-display" style="margin: 0;">
                         <div class="balance-label" style="font-size: 0.75rem;">Guthaben</div>
-                        <div class="balance-value" id="crashBalance" style="font-size: 1.5rem;"><?= number_format($balance, 2, ',', '.') ?> €</div>
+                        <div class="balance-value" id="crashBalance" style="font-size: 1.5rem;"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
                     </div>
                 </div>
 
