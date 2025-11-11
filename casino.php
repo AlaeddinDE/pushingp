@@ -72,7 +72,7 @@ if ($result) {
     <style>
         .casino-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
             gap: 24px;
             margin-top: 32px;
         }
@@ -1879,11 +1879,19 @@ if ($result) {
             </div>
         </div>
 
-        <!-- Multiplayer Lobby Section -->
+        <!-- Multiplayer Lobby Section - COMING SOON -->
         <div style="margin-top: 48px; background: linear-gradient(135deg, rgba(245, 158, 11, 0.05), rgba(239, 68, 68, 0.05)); 
-                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow-y: auto;">
+                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow: hidden; opacity: 0.6;">
             
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px;">
+            <!-- COMING SOON Overlay -->
+            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-15deg);
+                        background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 20px 60px; border-radius: 16px;
+                        font-size: 2rem; font-weight: 900; color: white; text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                        border: 4px solid white; box-shadow: 0 20px 60px rgba(0,0,0,0.5); z-index: 10;">
+                🚧 COMING SOON 🚧
+            </div>
+            
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 28px; flex-wrap: wrap; gap: 16px; filter: blur(2px);">
                 <div style="display: flex; align-items: center; gap: 16px;">
                     <div style="font-size: 3rem; animation: bounce 2s ease-in-out infinite;">🎲</div>
                     <div>
@@ -1895,26 +1903,26 @@ if ($result) {
                     </div>
                 </div>
                 
-                <button onclick="showCreateTableModal()" style="
+                <button onclick="showNotification('Multiplayer kommt bald!', 'info')" style="
                     padding: 12px 24px;
-                    background: linear-gradient(135deg, #f59e0b, #ef4444);
+                    background: linear-gradient(135deg, #6B7280, #9CA3AF);
                     border: none;
                     border-radius: 12px;
                     color: white;
                     font-weight: 800;
                     font-size: 1rem;
-                    cursor: pointer;
+                    cursor: not-allowed;
                     transition: all 0.2s;
-                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-                " onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
-                    ➕ Tisch erstellen
+                    box-shadow: 0 4px 12px rgba(107, 114, 128, 0.3);
+                ">
+                    ➕ Tisch erstellen (Bald verfügbar)
                 </button>
             </div>
             
             <!-- Active Tables Grid -->
-            <div id="multiplayerTablesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; min-height: 100px;">
+            <div id="multiplayerTablesGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 16px; min-height: 100px; filter: blur(2px);">
                 <div style="text-align: center; padding: 40px; color: var(--text-secondary); grid-column: 1 / -1;">
-                    Lade Tische...
+                    Feature in Entwicklung...
                 </div>
             </div>
         </div>
