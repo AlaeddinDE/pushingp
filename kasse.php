@@ -184,6 +184,20 @@ require_once __DIR__ . '/includes/header.php';
         border-radius: 50%;
         object-fit: cover;
         flex-shrink: 0;
+        background: linear-gradient(135deg, #5865f2, #7c89ff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.25rem;
+    }
+    
+    .member-avatar img {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        object-fit: cover;
     }
     
     .member-info {
@@ -440,12 +454,14 @@ async function loadData() {
                                   m.zahlungsstatus === 'gedeckt' ? 'status-ok' : 'status-warning';
                 const salDoClass = m.konto_saldo >= 0 ? 'amount-positive' : 'amount-negative';
                 
+                const initial = m.name.charAt(0).toUpperCase();
+                const avatarHTML = m.avatar && m.avatar.trim() 
+                    ? `<img src="${m.avatar}" alt="${m.name}" onerror="this.style.display='none'; this.parentElement.textContent='${initial}'">` 
+                    : initial;
+                
                 return `
                     <div class="card-item">
-                        <img src="${m.avatar || '/assets/default-avatar.png'}" 
-                             class="member-avatar" 
-                             alt="${m.name}" 
-                             onerror="this.src='/assets/default-avatar.png'">
+                        <div class="member-avatar">${avatarHTML}</div>
                         <div class="member-info">
                             <div class="member-name">${m.name}</div>
                             <div class="member-status">${m.monate_gedeckt} Monat${m.monate_gedeckt !== 1 ? 'e' : ''} gedeckt</div>
