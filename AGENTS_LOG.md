@@ -1353,3 +1353,35 @@ Dies entspricht der mathematischen Verteilung echter Crash-Spiele wie Stake.com,
 ### API:
 - `/api/casino/play_wheel.php` - No changes needed (already correct)
 
+
+## [2025-11-11 02:54] Casino Plinko Fixes & Balance Korrektur
+
+### Behobene Fehler:
+1. **get_balance.php erstellt** - Fehlende API-Datei für Balance-Abfrage
+   - Gibt korrektes verfügbares Guthaben zurück (Gesamt - 10€ Reserve)
+   
+2. **Balance-Anzeige korrigiert** - 10€ Reserve wurde doppelt abgezogen
+   - `updateAllBalances()` angepasst: Balance von API ist bereits minus 10€
+   - Alle drei Spiele (Crash, Slots, Plinko) zeigen jetzt korrektes Guthaben
+   
+3. **Plinko Modal kompakt gemacht** - Kein Scrollen mehr nötig
+   - Canvas von 500px auf 400px Höhe reduziert
+   - Layout optimiert: Balance und Einsatz nebeneinander
+   - Multiplier-Info entfernt (sichtbar im Canvas)
+   - Result-Display kompakter
+   
+4. **Plinko Canvas-Koordinaten angepasst**
+   - Pins: startY 60px, endY 290px
+   - Slots: Y-Position 320px, Höhe 50px
+   - Ball-Animation: slotY 350px
+   
+5. **Plinko Result-Anzeige optimiert**
+   - Kleinere Schrift und Padding
+   - Multiplier direkt in Gewinn-Zeile
+
+### Technische Details:
+- `/api/casino/get_balance.php` neu erstellt
+- `casino.php` updateAllBalances() korrigiert
+- Plinko Modal Layout komplett überarbeitet
+- Alle Canvas-Positionen proportional angepasst
+

@@ -1974,39 +1974,29 @@ if ($result) {
 
     <!-- PLINKO MODAL -->
     <div class="game-modal" id="plinkoModal">
-        <div class="game-modal-content" style="max-width: 900px; max-height: 95vh; overflow-y: auto; padding: 20px;">
+        <div class="game-modal-content" style="max-width: 850px; max-height: 90vh; overflow: hidden; padding: 20px;">
             <button class="modal-close" onclick="closeGame('plinko')">×</button>
             
-            <h2 style="font-size: 2rem; margin: 0 0 20px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
+            <h2 style="font-size: 1.5rem; margin: 0 0 12px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
                 🎯 PLINKO 🎯
             </h2>
             
-            <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+            <div style="display: grid; gap: 10px;">
                 
-                <!-- Plinko Board -->
-                <div style="position: relative;">
-                    <canvas id="plinkoCanvas" width="700" height="550" 
-                            style="width: 100%; max-width: 700px; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
-                    
-                    <!-- Result Display -->
-                    <div id="plinkoResult" style="margin-top: 16px; min-height: 60px;"></div>
-                </div>
-                
-                <!-- Controls -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    
+                <!-- Balance & Bet in one row -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
                     <!-- Balance -->
-                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 14px; border-radius: 12px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
-                        <div style="font-size: 0.75rem; color: #c4b5fd; font-weight: 700; margin-bottom: 4px; text-align: center; letter-spacing: 1px;">💎 GUTHABEN</div>
-                        <div id="plinkoBalance" style="font-size: 1.75rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
+                    <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 10px; border-radius: 12px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
+                        <div style="font-size: 0.7rem; color: #c4b5fd; font-weight: 700; margin-bottom: 3px; text-align: center; letter-spacing: 1px;">💎 GUTHABEN</div>
+                        <div id="plinkoBalance" style="font-size: 1.3rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
                             <?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €
                         </div>
                     </div>
                     
                     <!-- Bet Selection -->
-                    <div style="background: rgba(0,0,0,0.4); padding: 14px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
-                        <div style="font-size: 0.75rem; color: #fbbf24; font-weight: 700; margin-bottom: 8px; text-align: center; letter-spacing: 1px;">💰 EINSATZ</div>
-                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px;">
+                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
+                        <div style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; margin-bottom: 5px; text-align: center; letter-spacing: 1px;">💰 EINSATZ</div>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(1)">1€</button>
                             <button class="plinko-bet-btn plinko-bet-active" onclick="setPlinkoBet(5)">5€</button>
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(10)">10€</button>
@@ -2015,48 +2005,22 @@ if ($result) {
                         </div>
                         <input type="number" id="plinkoBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
                     </div>
-                    
                 </div>
+                
+                <!-- Plinko Board -->
+                <div style="position: relative;">
+                    <canvas id="plinkoCanvas" width="700" height="400" 
+                            style="width: 100%; max-width: 700px; height: auto; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
+                </div>
+                
+                <!-- Result Display -->
+                <div id="plinkoResult" style="min-height: 35px;"></div>
                 
                 <!-- Drop Button -->
                 <button id="plinkoDropBtn" onclick="dropBall()" 
-                        style="width: 100%; padding: 16px; font-size: 1.4rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 3px solid #a78bfa; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(139,92,246,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff;">
+                        style="width: 100%; padding: 14px; font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 3px solid #a78bfa; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(139,92,246,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff;">
                     🎯 BALL DROPPEN 🎯
                 </button>
-                
-                <!-- Multiplier Info -->
-                <div style="background: rgba(0,0,0,0.4); padding: 12px; border-radius: 12px; border: 2px solid rgba(255,255,255,0.1);">
-                    <div style="font-size: 0.75rem; font-weight: 700; margin-bottom: 8px; text-align: center; color: #fbbf24; letter-spacing: 1px;">🎯 MULTIPLIKATOREN</div>
-                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; gap: 4px;">
-                        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 6px 8px; border-radius: 6px; text-align: center; border: 2px solid #fbbf24; flex: 1;">
-                            <div style="color: #fff; font-weight: 900;">5.0x</div>
-                        </div>
-                        <div style="background: #065f46; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #34d399; font-weight: 900;">2.0x</div>
-                        </div>
-                        <div style="background: #0e7490; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #22d3ee; font-weight: 900;">1.5x</div>
-                        </div>
-                        <div style="background: #854d0e; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #fbbf24; font-weight: 900;">1.0x</div>
-                        </div>
-                        <div style="background: #991b1b; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #f87171; font-weight: 900;">0.5x</div>
-                        </div>
-                        <div style="background: #854d0e; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #fbbf24; font-weight: 900;">1.0x</div>
-                        </div>
-                        <div style="background: #0e7490; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #22d3ee; font-weight: 900;">1.5x</div>
-                        </div>
-                        <div style="background: #065f46; padding: 6px 8px; border-radius: 6px; text-align: center; flex: 1;">
-                            <div style="color: #34d399; font-weight: 900;">2.0x</div>
-                        </div>
-                        <div style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 6px 8px; border-radius: 6px; text-align: center; border: 2px solid #fbbf24; flex: 1;">
-                            <div style="color: #fff; font-weight: 900;">5.0x</div>
-                        </div>
-                    </div>
-                </div>
                 
             </div>
         </div>
@@ -2064,8 +2028,8 @@ if ($result) {
     
     <style>
         .plinko-bet-btn {
-            padding: 8px;
-            font-size: 0.85rem;
+            padding: 6px;
+            font-size: 0.8rem;
             font-weight: 700;
             background: linear-gradient(135deg, #374151, #1f2937);
             border: 2px solid #6b7280;
@@ -2308,19 +2272,18 @@ if ($result) {
     
     // Update all balance displays
     function updateAllBalances(balance) {
-        // Balance from server is already total, so subtract reserve
-        const totalBalance = parseFloat(balance) || 0;
-        userBalance = Math.max(0, totalBalance - RESERVE_AMOUNT);
+        // Balance from get_balance.php is already minus 10€ reserve
+        userBalance = Math.max(0, parseFloat(balance) || 0);
         const formattedBalance = userBalance.toFixed(2).replace('.', ',') + ' €';
         
         // Update all balance displays
         const crashBalanceEl = document.getElementById('crashBalance');
         const slotsBalanceEl = document.getElementById('slotsBalance');
-        const wheelBalanceEl = document.getElementById('wheelBalance');
+        const plinkoBalanceEl = document.getElementById('plinkoBalance');
         
         if (crashBalanceEl) crashBalanceEl.textContent = formattedBalance;
         if (slotsBalanceEl) slotsBalanceEl.textContent = formattedBalance;
-        if (wheelBalanceEl) wheelBalanceEl.textContent = formattedBalance;
+        if (plinkoBalanceEl) plinkoBalanceEl.textContent = formattedBalance;
     }
     
     function openGame(game) {
@@ -2336,6 +2299,11 @@ if ($result) {
         
         document.getElementById(game + 'Modal').classList.add('active');
         document.body.style.overflow = 'hidden';
+        
+        // Initialize Plinko board when opening plinko
+        if (game === 'plinko') {
+            setTimeout(() => initPlinko(), 100);
+        }
     }
     
     function closeGame(game) {
@@ -2564,8 +2532,8 @@ if ($result) {
     // Plinko configuration
     const ROWS = 8;
     const SLOTS = 9;
-    const PIN_RADIUS = 4;
-    const BALL_RADIUS = 8;
+    const PIN_RADIUS = 6;
+    const BALL_RADIUS = 10;
     
     const slotMultipliers = [
         { multiplier: 5.0, color: '#f59e0b' },
@@ -2581,23 +2549,35 @@ if ($result) {
     
     function initPlinko() {
         plinkoCanvas = document.getElementById('plinkoCanvas');
-        if (!plinkoCanvas) return;
+        if (!plinkoCanvas) {
+            console.error('Plinko canvas not found');
+            return;
+        }
         
         plinkoCtx = plinkoCanvas.getContext('2d');
+        if (!plinkoCtx) {
+            console.error('Could not get 2D context');
+            return;
+        }
+        
+        console.log('Plinko initialized successfully');
         drawPlinkoBoard();
     }
     
     function drawPlinkoBoard() {
-        if (!plinkoCanvas || !plinkoCtx) return;
+        if (!plinkoCanvas || !plinkoCtx) {
+            console.error('Canvas or context not available');
+            return;
+        }
         
         const width = 700;
-        const height = 550;
+        const height = 400;
         
         plinkoCtx.clearRect(0, 0, width, height);
         
         // Draw pins
-        const startY = 80;
-        const endY = 420;
+        const startY = 60;
+        const endY = 290;
         const rowSpacing = (endY - startY) / (ROWS - 1);
         
         for (let row = 0; row < ROWS; row++) {
@@ -2627,9 +2607,9 @@ if ($result) {
         }
         
         // Draw slots
-        const slotY = 460;
+        const slotY = 320;
         const slotWidth = width / SLOTS;
-        const slotHeight = 60;
+        const slotHeight = 50;
         
         for (let i = 0; i < SLOTS; i++) {
             const x = i * slotWidth;
@@ -2649,7 +2629,7 @@ if ($result) {
             
             // Multiplier text
             plinkoCtx.fillStyle = '#ffffff';
-            plinkoCtx.font = 'bold 18px Inter';
+            plinkoCtx.font = 'bold 20px Inter';
             plinkoCtx.textAlign = 'center';
             plinkoCtx.textBaseline = 'middle';
             plinkoCtx.shadowColor = 'rgba(0,0,0,0.8)';
@@ -2659,18 +2639,38 @@ if ($result) {
         }
         
         // Draw ball if exists
-        if (ball) {
-            const ballGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 2);
-            ballGradient.addColorStop(0, '#fbbf24');
-            ballGradient.addColorStop(0.5, '#f59e0b');
-            ballGradient.addColorStop(1, 'rgba(245,158,11,0)');
-            plinkoCtx.fillStyle = ballGradient;
-            plinkoCtx.fillRect(ball.x - BALL_RADIUS * 2, ball.y - BALL_RADIUS * 2, BALL_RADIUS * 4, BALL_RADIUS * 4);
+        if (ball !== null && ball !== undefined) {
+            console.log('Drawing ball at', ball.x, ball.y);
             
+            // Ball shadow/glow
+            const ballGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 3);
+            ballGradient.addColorStop(0, 'rgba(251, 191, 36, 0.8)');
+            ballGradient.addColorStop(0.5, 'rgba(245, 158, 11, 0.4)');
+            ballGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+            plinkoCtx.fillStyle = ballGradient;
+            plinkoCtx.beginPath();
+            plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS * 3, 0, Math.PI * 2);
+            plinkoCtx.fill();
+            
+            // Main ball
+            const mainBallGradient = plinkoCtx.createRadialGradient(
+                ball.x - BALL_RADIUS * 0.3, 
+                ball.y - BALL_RADIUS * 0.3, 
+                BALL_RADIUS * 0.2,
+                ball.x, 
+                ball.y, 
+                BALL_RADIUS
+            );
+            mainBallGradient.addColorStop(0, '#fff');
+            mainBallGradient.addColorStop(0.4, '#fbbf24');
+            mainBallGradient.addColorStop(1, '#f59e0b');
+            
+            plinkoCtx.fillStyle = mainBallGradient;
             plinkoCtx.beginPath();
             plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
-            plinkoCtx.fillStyle = '#fbbf24';
             plinkoCtx.fill();
+            
+            // Ball outline
             plinkoCtx.strokeStyle = '#fff';
             plinkoCtx.lineWidth = 2;
             plinkoCtx.stroke();
@@ -2678,18 +2678,29 @@ if ($result) {
     }
     
     function setPlinkoBet(amount) {
+        if (plinkoDropping) return; // Prevent changes during game
+        
         document.getElementById('plinkoBet').value = amount;
         
         document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
             btn.classList.remove('plinko-bet-active');
         });
-        event.target.classList.add('plinko-bet-active');
+        
+        // Find the button that was clicked and add active class
+        const clickedBtn = Array.from(document.querySelectorAll('.plinko-bet-btn')).find(
+            btn => btn.textContent.includes(amount + '€')
+        );
+        if (clickedBtn) {
+            clickedBtn.classList.add('plinko-bet-active');
+        }
     }
     
     async function dropBall() {
         if (plinkoDropping) return;
         
         const bet = parseFloat(document.getElementById('plinkoBet').value);
+        console.log('Drop ball called with bet:', bet);
+        
         if (bet < 0.5 || bet > 50) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
@@ -2701,10 +2712,20 @@ if ($result) {
         }
         
         plinkoDropping = true;
+        
+        // Disable bet buttons and drop button
         document.getElementById('plinkoDropBtn').disabled = true;
+        document.getElementById('plinkoDropBtn').style.opacity = '0.5';
+        document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            btn.style.cursor = 'not-allowed';
+        });
+        
         document.getElementById('plinkoResult').innerHTML = '<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1rem; font-weight: 700;">🎯 Ball fällt...</div>';
         
         try {
+            console.log('Sending request to play_plinko.php');
             const response = await fetch('/api/casino/play_plinko.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2726,7 +2747,16 @@ if ($result) {
                     updateAllBalances(data.new_balance);
                     
                     plinkoDropping = false;
+                    
+                    // Re-enable buttons
                     document.getElementById('plinkoDropBtn').disabled = false;
+                    document.getElementById('plinkoDropBtn').style.opacity = '1';
+                    document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    });
+                    
                     ball = null;
                     drawPlinkoBoard();
                 }, 1000);
@@ -2734,54 +2764,96 @@ if ($result) {
             } else {
                 showNotification('Fehler: ' + data.error, 'error');
                 plinkoDropping = false;
+                
+                // Re-enable buttons
                 document.getElementById('plinkoDropBtn').disabled = false;
+                document.getElementById('plinkoDropBtn').style.opacity = '1';
+                document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+                    btn.disabled = false;
+                    btn.style.opacity = '1';
+                    btn.style.cursor = 'pointer';
+                });
+                
                 document.getElementById('plinkoResult').innerHTML = '';
             }
         } catch (error) {
+            console.error('Plinko error:', error);
             showNotification('Verbindungsfehler: ' + error.message, 'error');
             plinkoDropping = false;
+            
+            // Re-enable buttons
             document.getElementById('plinkoDropBtn').disabled = false;
+            document.getElementById('plinkoDropBtn').style.opacity = '1';
+            document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                btn.style.cursor = 'pointer';
+            });
+            
             document.getElementById('plinkoResult').innerHTML = '';
         }
     }
     
     function animateBallDrop(path, finalSlot) {
         return new Promise((resolve) => {
+            console.log('Starting ball animation. Path:', path, 'Final slot:', finalSlot);
+            
             const width = 700;
-            const startY = 50;
-            const endY = 420;
-            const slotY = 490;
+            const startY = 60;
+            const endY = 290;
+            const slotY = 320;
             const slotWidth = width / SLOTS;
             
+            // Create ball object at TOP CENTER
             ball = {
                 x: width / 2,
                 y: startY,
+                vx: 0,
                 vy: 0
             };
             
             let pathIndex = 0;
             const pathSpeed = 80; // ms per step
             
+            console.log('Ball created at position:', ball.x, ball.y);
+            
+            // Initial draw to show ball at start
+            drawPlinkoBoard();
+            
             const dropInterval = setInterval(() => {
-                if (pathIndex < path.length - 1) {
+                if (pathIndex < path.length) {
                     // Move through pin path
-                    const progress = pathIndex / (path.length - 1);
-                    const targetX = (path[pathIndex] / 8) * width;
+                    const progress = pathIndex / (ROWS - 1);
                     const targetY = startY + (endY - startY) * progress;
                     
-                    ball.x = ball.x * 0.7 + targetX * 0.3;
+                    // Calculate X based on path position
+                    const pinsInRow = pathIndex + 3;
+                    const spacing = width / (pinsInRow + 1);
+                    const pinIndex = path[pathIndex];
+                    const targetX = spacing * (pinIndex + 1);
+                    
+                    // Smooth movement towards target
+                    ball.x += (targetX - ball.x) * 0.3;
                     ball.y = targetY;
                     
                     pathIndex++;
                 } else {
                     // Fall into slot
                     const targetX = finalSlot * slotWidth + slotWidth / 2;
-                    ball.x = ball.x * 0.8 + targetX * 0.2;
-                    ball.y += 6;
+                    ball.x += (targetX - ball.x) * 0.2;
+                    ball.y += 8;
                     
-                    if (ball.y >= slotY) {
+                    if (ball.y >= slotY + 20) {
                         clearInterval(dropInterval);
-                        resolve();
+                        console.log('Ball animation complete at slot', finalSlot);
+                        
+                        // Flash the winning slot
+                        setTimeout(() => {
+                            ball = null;
+                            drawPlinkoBoard();
+                            resolve();
+                        }, 500);
+                        return;
                     }
                 }
                 
@@ -2796,28 +2868,25 @@ if ($result) {
         if (data.multiplier > 1.0) {
             // WIN
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 16px; border-radius: 12px; border: 3px solid #34d399; box-shadow: 0 0 40px rgba(16,185,129,0.8); animation: winPulse 0.6s ease-in-out infinite;">
-                    <div style="font-size: 1.5rem; margin-bottom: 6px; text-align: center;">🎉 GEWONNEN!</div>
-                    <div style="font-size: 1.75rem; font-weight: 900; color: #fff; text-align: center;">${data.win_amount.toFixed(2)}€</div>
-                    <div style="font-size: 1rem; margin-top: 4px; color: #d1fae5; text-align: center;">${data.multiplier}x Multiplier</div>
+                <div style="background: linear-gradient(135deg, #10b981, #059669); padding: 10px; border-radius: 12px; border: 3px solid #34d399; box-shadow: 0 0 40px rgba(16,185,129,0.8); animation: winPulse 0.6s ease-in-out infinite;">
+                    <div style="font-size: 1.1rem; margin-bottom: 2px; text-align: center;">🎉 GEWONNEN!</div>
+                    <div style="font-size: 1.3rem; font-weight: 900; color: #fff; text-align: center;">${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>
                 </div>
             `;
             createPlinkoConfetti();
         } else if (data.multiplier === 1.0) {
             // BREAK EVEN
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 14px; border-radius: 12px; border: 2px solid #fbbf24; color: #fff;">
-                    <div style="font-size: 1.25rem; margin-bottom: 6px; text-align: center;">🟡 Break Even</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; text-align: center;">1.0x = ${bet.toFixed(2)}€ zurück</div>
+                <div style="background: linear-gradient(135deg, #eab308, #ca8a04); padding: 10px; border-radius: 12px; border: 2px solid #fbbf24; color: #fff;">
+                    <div style="font-size: 1rem; text-align: center;">🟡 Break Even (1.0x)</div>
                 </div>
             `;
         } else {
             // LOSS
             const lossAmount = (bet - data.win_amount).toFixed(2);
             resultDiv.innerHTML = `
-                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 14px; border-radius: 12px; border: 2px solid #f87171; color: #fff;">
-                    <div style="font-size: 1.25rem; margin-bottom: 6px; text-align: center;">😢 Verloren</div>
-                    <div style="font-size: 1.25rem; font-weight: 700; text-align: center;">${data.multiplier}x = -${lossAmount}€</div>
+                <div style="background: linear-gradient(135deg, #ef4444, #dc2626); padding: 10px; border-radius: 12px; border: 2px solid #f87171; color: #fff;">
+                    <div style="font-size: 1rem; text-align: center;">😢 Verloren: -${lossAmount}€ (${data.multiplier}x)</div>
                 </div>
             `;
         }
