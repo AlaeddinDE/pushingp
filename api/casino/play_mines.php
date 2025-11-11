@@ -197,7 +197,7 @@ if ($action === 'cashout') {
     $profit = $win_amount - $game['bet_amount'];
     if ($profit != 0) {
         $username = $_SESSION['username'] ?? '';
-        $stmt = $conn->prepare("INSERT INTO transactions_v2 (username, amount, type, description, created_by) VALUES (?, ?, 'casino', ?, 'system')");
+        $stmt = $conn->prepare("INSERT INTO transaktionen (username, amount, type, description, created_by) VALUES (?, ?, 'casino', ?, 'system')");
         $description = $profit > 0 ? "Casino Mines Gewinn (+" . round($game['current_multiplier'], 2) . "x)" : "Casino Mines Verlust";
         $stmt->bind_param('sds', $username, $profit, $description);
         $stmt->execute();

@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>🧪 Live Casino Tester</title>
+    <style>
+        body { background: #0f172a; color: white; font-family: 'Courier New', monospace; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .test-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin: 20px 0; }
+        .test-card { background: #1e293b; padding: 20px; border-radius: 12px; border: 2px solid #334155; }
+        .test-card.running { border-color: #3b82f6; }
+        .test-card.success { border-color: #10b981; background: #065f4620; }
+        .test-card.error { border-color: #ef4444; background: #7f1d1d20; }
+        .test-status { font-size: 2rem; margin-bottom: 10px; }
+        .test-log { background: #0f172a; padding: 10px; border-radius: 8px; max-height: 200px; overflow-y: auto; font-size: 0.875rem; margin-top: 10px; }
+        .test-log div { padding: 4px 0; border-bottom: 1px solid #1e293b; }
+        button { padding: 12px 24px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin: 8px; font-size: 1rem; }
+        button:hover { opacity: 0.9; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .summary { background: #1e293b; padding: 20px; border-radius: 12px; margin: 20px 0; text-align: center; }
+        .summary h2 { margin: 0 0 10px 0; }
+        .progress-bar { width: 100%; height: 30px; background: #0f172a; border-radius: 8px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #3b82f6); transition: width 0.3s; display: flex; align-items: center; justify-content: center; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Live Casino Game Tester</h1>
+        <p>Automatisches Testing mit echten API-Calls</p>
+        
+        <div class="summary">
+            <h2>Status</h2>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progress" style="width: 0%">0%</div>
+            </div>
+            <div id="summaryText">Bereit zum Testen...</div>
+        </div>
+        
+        <button onclick="runAllTests()" id="startBtn">🚀 Alle Tests starten</button>
+        <button onclick="location.reload()">🔄 Reset</button>
+        
+        <div class="test-grid">
+            <div class="test-card" id="card-mines">
+                <div class="test-status">💎</div>
+                <h3>Mines</h3>
+                <div class="test-log" id="log-mines"></div>
+            </div>
+            
+            <div class="test-card" id="card-slots">
+                <div class="test-status">🎰</div>
+                <h3>Slots</h3>
+                <div class="test-log" id="log-slots"></div>
+            </div>
+            
+            <div class="test-card" id="card-plinko">
+                <div class="test-status">🎯</div>
+                <h3>Plinko</h3>
+                <div class="test-log" id="log-plinko"></div>
+            </div>
+            
+            <div class="test-card" id="card-crash">
+                <div class="test-status">🚀</div>
+                <h3>Crash</h3>
+                <div class="test-log" id="log-crash"></div>
+            </div>
+            
+            <div class="test-card" id="card-blackjack">
+                <div class="test-status">🃏</div>
+                <h3>Blackjack</h3>
+                <div class="test-log" id="log-blackjack"></div>
+            </div>
+            
+            <div class="test-card" id="card-chicken">
+                <div class="test-status">🐔</div>
+                <h3>Chicken</h3>
+                <div class="test-log" id="log-chicken"></div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let testResults = {};
+        let totalTests = 0;
+        let completedTests = 0;
+        
+        function log(game, message, type = 'info') {
+            const logEl = document.getElementById('log-' + game);
+            const div = document.createElement('div');
+            div.textContent = message;
+            div.style.color = type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#94a3b8';
+            logEl.appendChild(div);
+            logEl.scrollTop = logEl.scrollHeight;
+        }
+        
+        function updateCard(game, status) {
+            const card = document.getElementById('card-' + game);
+            card.className = 'test-card ' + status;
+        }
+        
+        function updateProgress() {
+            const percent = Math.round((completedTests / totalTests) * 100);
+            document.getElementById('progress').style.width = percent + '%';
+            document.getElementById('progress').textContent = percent + '%';
+            
+            const passed = Object.values(testResults).filter(r => r === 'success').length;
+            const failed = Object.values(testResults).filter(r => r === 'error').length;
+            document.getElementById('summaryText').textContent = 
+                `✅ ${passed} Erfolgreich | ❌ ${failed} Fehler | ⏳ ${totalTests - completedTests} Ausstehend`;
+        }
+        
+        async function testMines() {
+            const game = 'mines';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Mines Test...');
+            
+            try {
+                // Start game
+                log(game, '1️⃣ Spiel starten (1€, 3 Minen)...');
+                let res = await fetch('/api/casino/play_mines.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'start', bet: 1.0, mines: 3})
+                });
+                let data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Start fehlgeschlagen');
+                log(game, '✓ Spiel gestartet', 'success');
+                
+                // Reveal a tile
+                log(game, '2️⃣ Feld aufdecken...');
+                res = await fetch('/api/casino/play_mines.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'reveal', position: 0})
+                });
+                data = await res.json();
+                
+                if (data.status === 'safe') {
+                    log(game, '✓ Feld sicher! Multiplikator: ' + data.current_multiplier + 'x', 'success');
+                    
+                    // Try cashout
+                    log(game, '3️⃣ Auszahlung...');
+                    res = await fetch('/api/casino/play_mines.php', {
+                        method: 'POST',
+                        headers: {'Content-Type': 'application/json'},
+                        body: JSON.stringify({action: 'cashout'})
+                    });
+                    data = await res.json();
+                    
+                    if (data.status === 'cashout') {
+                        log(game, '✓ Ausgezahlt: ' + data.win_amount + '€', 'success');
+                    }
+                } else if (data.status === 'mine_hit') {
+                    log(game, '💣 Mine getroffen (erwartbar)', 'info');
+                }
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function testSlots() {
+            const game = 'slots';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Slots Test...');
+            
+            try {
+                log(game, '1️⃣ Drehen (1€)...');
+                const res = await fetch('/api/casino/play_slots.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({bet: 1.0})
+                });
+                const data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Spin fehlgeschlagen');
+                log(game, '✓ Ergebnis: ' + data.symbols.join(' '), 'success');
+                log(game, '✓ Gewinn: ' + data.win + '€', 'success');
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function testPlinko() {
+            const game = 'plinko';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Plinko Test...');
+            
+            try {
+                log(game, '1️⃣ Ball werfen (1€)...');
+                const res = await fetch('/api/casino/play_plinko.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({bet: 1.0})
+                });
+                const data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Drop fehlgeschlagen');
+                log(game, '✓ Multiplikator: ' + data.multiplier + 'x', 'success');
+                log(game, '✓ Gewinn: ' + data.win + '€', 'success');
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function testCrash() {
+            const game = 'crash';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Crash Test...');
+            
+            try {
+                log(game, '1️⃣ Spiel starten (1€)...');
+                const res = await fetch('/api/casino/start_crash.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({bet: 1.0})
+                });
+                const data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Start fehlgeschlagen');
+                log(game, '✓ Crash Point: ' + data.crash_point + 'x', 'success');
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function testBlackjack() {
+            const game = 'blackjack';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Blackjack Test...');
+            
+            try {
+                log(game, '1️⃣ Karten geben (1€)...');
+                const res = await fetch('/api/casino/play_blackjack.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'deal', bet: 1.0})
+                });
+                const data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Deal fehlgeschlagen');
+                log(game, '✓ Spieler: ' + data.player_score + ', Dealer: ' + data.dealer_score, 'success');
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function testChicken() {
+            const game = 'chicken';
+            updateCard(game, 'running');
+            log(game, '▶ Starte Chicken Test...');
+            
+            try {
+                log(game, '1️⃣ Spiel starten (1€)...');
+                const res = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({action: 'start', bet: 1.0})
+                });
+                const data = await res.json();
+                
+                if (data.status !== 'success') throw new Error(data.error || 'Start fehlgeschlagen');
+                log(game, '✓ Spiel gestartet', 'success');
+                
+                testResults[game] = 'success';
+                updateCard(game, 'success');
+                log(game, '✅ TEST BESTANDEN', 'success');
+                
+            } catch (error) {
+                testResults[game] = 'error';
+                updateCard(game, 'error');
+                log(game, '❌ FEHLER: ' + error.message, 'error');
+            }
+            
+            completedTests++;
+            updateProgress();
+        }
+        
+        async function runAllTests() {
+            document.getElementById('startBtn').disabled = true;
+            testResults = {};
+            completedTests = 0;
+            totalTests = 6;
+            
+            // Run tests sequentially
+            await testMines();
+            await new Promise(r => setTimeout(r, 500));
+            await testSlots();
+            await new Promise(r => setTimeout(r, 500));
+            await testPlinko();
+            await new Promise(r => setTimeout(r, 500));
+            await testCrash();
+            await new Promise(r => setTimeout(r, 500));
+            await testBlackjack();
+            await new Promise(r => setTimeout(r, 500));
+            await testChicken();
+            
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('summaryText').textContent += ' | 🏁 Alle Tests abgeschlossen!';
+        }
+    </script>
+</body>
+</html>

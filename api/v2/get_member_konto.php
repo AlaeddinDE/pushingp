@@ -20,6 +20,7 @@ $stmt->execute();
 $stmt->bind_result(
     $mitglied_id, $name, $username, $avatar, $status, 
     $aktiv_ab, $inaktiv_ab, $pflicht_monatlich,
+    $basis_saldo, $verstrichene_monate, $monatsbeitraege_gesamt,
     $konto_saldo, $letzte_einzahlung, $naechste_faelligkeit,
     $zahlungsstatus, $monate_gedeckt
 );
