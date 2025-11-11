@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Plinko Canvas Test</title>
+    <style>
+        body {
+            background: #111;
+            color: white;
+            font-family: Arial;
+            padding: 20px;
+        }
+        canvas {
+            border: 2px solid #8b5cf6;
+            display: block;
+            margin: 20px auto;
+            background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+        }
+    </style>
+</head>
+<body>
+    <h1>🎯 Plinko Ball Test</h1>
+    <canvas id="plinkoCanvas" width="700" height="400"></canvas>
+    <div id="status"></div>
+    
+    <script>
+        const BALL_RADIUS = 12;
+        const PIN_RADIUS = 6;
+        const ROWS = 8;
+        const SLOTS = 9;
+        
+        let canvas = document.getElementById('plinkoCanvas');
+        let ctx = canvas.getContext('2d');
+        let ball = null;
+        
+        const slotMultipliers = [
+            { multiplier: 5.0, color: '#f59e0b' },
+            { multiplier: 2.0, color: '#10b981' },
+            { multiplier: 1.5, color: '#0e7490' },
+            { multiplier: 1.0, color: '#eab308' },
+            { multiplier: 0.5, color: '#ef4444' },
+            { multiplier: 1.0, color: '#eab308' },
+            { multiplier: 1.5, color: '#0e7490' },
+            { multiplier: 2.0, color: '#10b981' },
+            { multiplier: 5.0, color: '#f59e0b' }
+        ];
+        
+        function drawBoard() {
+            const width = 700;
+            const height = 400;
+            
+            ctx.clearRect(0, 0, width, height);
+            
+            // Draw pins
+            const startY = 60;
+            const endY = 290;
+            const rowSpacing = (endY - startY) / (ROWS - 1);
+            
+            for (let row = 0; row < ROWS; row++) {
+                const pinsInRow = row + 3;
+                const spacing = width / (pinsInRow + 1);
+                const y = startY + row * rowSpacing;
+                
+                for (let pin = 0; pin < pinsInRow; pin++) {
+                    const x = spacing * (pin + 1);
+                    
+                    // Pin glow
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, PIN_RADIUS * 3);
+                    gradient.addColorStop(0, 'rgba(139,92,246,0.6)');
+                    gradient.addColorStop(1, 'rgba(139,92,246,0)');
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(x - PIN_RADIUS * 3, y - PIN_RADIUS * 3, PIN_RADIUS * 6, PIN_RADIUS * 6);
+                    
+                    // Pin
+                    ctx.beginPath();
+                    ctx.arc(x, y, PIN_RADIUS, 0, Math.PI * 2);
+                    ctx.fillStyle = '#8b5cf6';
+                    ctx.fill();
+                    ctx.strokeStyle = '#a78bfa';
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+            
+            // Draw slots
+            const slotY = 320;
+            const slotWidth = width / SLOTS;
+            const slotHeight = 50;
+            
+            for (let i = 0; i < SLOTS; i++) {
+                const x = i * slotWidth;
+                const slot = slotMultipliers[i];
+                
+                // Slot background
+                const gradient = ctx.createLinearGradient(x, slotY, x, slotY + slotHeight);
+                gradient.addColorStop(0, slot.color + '80');
+                gradient.addColorStop(1, slot.color);
+                ctx.fillStyle = gradient;
+                ctx.fillRect(x, slotY, slotWidth, slotHeight);
+                
+                // Slot border
+                ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(x, slotY, slotWidth, slotHeight);
+                
+                // Multiplier text
+                ctx.fillStyle = '#ffffff';
+                ctx.font = 'bold 20px Arial';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.shadowColor = 'rgba(0,0,0,0.8)';
+                ctx.shadowBlur = 6;
+                ctx.fillText(slot.multiplier + 'x', x + slotWidth / 2, slotY + slotHeight / 2);
+                ctx.shadowBlur = 0;
+            }
+            
+            // DRAW BALL
+            if (ball) {
+                console.log('Drawing ball at:', ball.x, ball.y);
+                
+                // Outer glow
+                const glowGradient = ctx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 3);
+                glowGradient.addColorStop(0, 'rgba(251, 191, 36, 1)');
+                glowGradient.addColorStop(0.4, 'rgba(245, 158, 11, 0.8)');
+                glowGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                ctx.fillStyle = glowGradient;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, BALL_RADIUS * 3, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Main ball
+                const ballGradient = ctx.createRadialGradient(
+                    ball.x - BALL_RADIUS * 0.3, 
+                    ball.y - BALL_RADIUS * 0.3, 
+                    BALL_RADIUS * 0.1,
+                    ball.x, 
+                    ball.y, 
+                    BALL_RADIUS
+                );
+                ballGradient.addColorStop(0, '#ffffff');
+                ballGradient.addColorStop(0.2, '#fef3c7');
+                ballGradient.addColorStop(0.5, '#fbbf24');
+                ballGradient.addColorStop(1, '#f59e0b');
+                
+                ctx.fillStyle = ballGradient;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // White outline
+                ctx.strokeStyle = '#ffffff';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+                ctx.stroke();
+                
+                // Highlight spot
+                ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                ctx.beginPath();
+                ctx.arc(ball.x - BALL_RADIUS * 0.3, ball.y - BALL_RADIUS * 0.3, BALL_RADIUS * 0.3, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+        
+        // Initial draw
+        drawBoard();
+        document.getElementById('status').innerHTML = '<p style="color:lime;">✅ Board drawn!</p><p>Ball should appear in 1 second...</p>';
+        
+        // Show ball after 1 second
+        setTimeout(() => {
+            ball = { x: 350, y: 100 };
+            drawBoard();
+            document.getElementById('status').innerHTML += '<p style="color:gold;">🟡 BALL SHOULD BE VISIBLE NOW!</p>';
+            
+            // Animate ball falling
+            let y = 100;
+            const interval = setInterval(() => {
+                y += 5;
+                ball.y = y;
+                drawBoard();
+                
+                if (y > 340) {
+                    clearInterval(interval);
+                    document.getElementById('status').innerHTML += '<p style="color:lime;">✅ Animation complete!</p>';
+                }
+            }, 50);
+        }, 1000);
+    </script>
+</body>
+</html>

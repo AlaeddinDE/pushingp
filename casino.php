@@ -1975,7 +1975,7 @@ if ($result) {
 
     <!-- PLINKO MODAL -->
     <div class="game-modal" id="plinkoModal">
-        <div class="game-modal-content" style="max-width: 850px; max-height: 90vh; overflow: hidden; padding: 20px;">
+        <div class="game-modal-content" style="max-width: 1100px; max-height: 95vh; overflow: hidden; padding: 20px;">
             <button class="modal-close" onclick="closeGame('plinko')">×</button>
             
             <h2 style="font-size: 1.5rem; margin: 0 0 12px 0; text-align: center; background: linear-gradient(135deg, #f59e0b, #ec4899, #8b5cf6); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; filter: drop-shadow(0 0 30px rgba(245,158,11,0.6));">
@@ -1984,19 +1984,19 @@ if ($result) {
             
             <div style="display: grid; gap: 10px;">
                 
-                <!-- Balance & Bet in one row -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                <!-- Balance & Settings -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
                     <!-- Balance -->
                     <div style="background: linear-gradient(135deg, rgba(139,92,246,0.2), rgba(236,72,153,0.2)); padding: 10px; border-radius: 12px; border: 2px solid rgba(139,92,246,0.5); box-shadow: 0 8px 30px rgba(139,92,246,0.3);">
                         <div style="font-size: 0.7rem; color: #c4b5fd; font-weight: 700; margin-bottom: 3px; text-align: center; letter-spacing: 1px;">💎 GUTHABEN</div>
-                        <div id="plinkoBalance" style="font-size: 1.3rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
+                        <div id="plinkoBalance" style="font-size: 1.2rem; font-weight: 900; text-align: center; color: #fff; text-shadow: 0 0 25px rgba(255,255,255,0.8);">
                             <?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €
                         </div>
                     </div>
                     
                     <!-- Bet Selection -->
                     <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 2px solid rgba(245,158,11,0.3);">
-                        <div style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; margin-bottom: 5px; text-align: center; letter-spacing: 1px;">💰 EINSATZ</div>
+                        <div style="font-size: 0.7rem; color: #fbbf24; font-weight: 700; margin-bottom: 5px; text-align: center; letter-spacing: 1px;">💰 EINSATZ PRO BALL</div>
                         <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(1)">1€</button>
                             <button class="plinko-bet-btn plinko-bet-active" onclick="setPlinkoBet(5)">5€</button>
@@ -2006,19 +2006,32 @@ if ($result) {
                         </div>
                         <input type="number" id="plinkoBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
                     </div>
+                    
+                    <!-- Multi-Ball Selection -->
+                    <div style="background: rgba(0,0,0,0.4); padding: 10px; border-radius: 12px; border: 2px solid rgba(16,185,129,0.3);">
+                        <div style="font-size: 0.7rem; color: #10b981; font-weight: 700; margin-bottom: 5px; text-align: center; letter-spacing: 1px;">🎯 ANZAHL BÄLLE</div>
+                        <div style="display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px;">
+                            <button class="plinko-balls-btn plinko-balls-active" onclick="setPlinkoBalls(1)">1</button>
+                            <button class="plinko-balls-btn" onclick="setPlinkoBalls(5)">5</button>
+                            <button class="plinko-balls-btn" onclick="setPlinkoBalls(10)">10</button>
+                            <button class="plinko-balls-btn" onclick="setPlinkoBalls(25)">25</button>
+                            <button class="plinko-balls-btn" onclick="setPlinkoBalls(50)">50</button>
+                        </div>
+                        <input type="number" id="plinkoBallCount" value="1" min="1" max="50" readonly style="display: none;">
+                    </div>
                 </div>
                 
                 <!-- Plinko Board -->
                 <div style="position: relative;">
-                    <canvas id="plinkoCanvas" width="700" height="400" 
-                            style="width: 100%; max-width: 700px; height: auto; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
+                    <canvas id="plinkoCanvas" width="1000" height="600" 
+                            style="width: 100%; max-width: 1000px; height: auto; margin: 0 auto; display: block; border-radius: 16px; background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%); box-shadow: 0 0 60px rgba(139,92,246,0.4), inset 0 0 100px rgba(0,0,0,0.8);"></canvas>
                 </div>
                 
                 <!-- Result Display -->
                 <div id="plinkoResult" style="min-height: 35px;"></div>
                 
                 <!-- Drop Button -->
-                <button id="plinkoDropBtn" onclick="dropBall()" 
+                <button id="plinkoDropBtn" onclick="dropBalls()" 
                         style="width: 100%; padding: 14px; font-size: 1.2rem; font-weight: 900; letter-spacing: 2px; background: linear-gradient(135deg, #8b5cf6, #ec4899); border: 3px solid #a78bfa; border-radius: 12px; cursor: pointer; box-shadow: 0 8px 40px rgba(139,92,246,0.7); text-shadow: 0 3px 10px rgba(0,0,0,0.7); transition: all 0.3s; color: #fff;">
                     🎯 BALL DROPPEN 🎯
                 </button>
@@ -2028,7 +2041,7 @@ if ($result) {
     </div>
     
     <style>
-        .plinko-bet-btn {
+        .plinko-bet-btn, .plinko-balls-btn {
             padding: 6px;
             font-size: 0.8rem;
             font-weight: 700;
@@ -2041,16 +2054,23 @@ if ($result) {
             box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         
-        .plinko-bet-btn:hover {
+        .plinko-bet-btn:hover, .plinko-balls-btn:hover {
             transform: translateY(-2px) scale(1.05);
             box-shadow: 0 8px 30px rgba(139,92,246,0.5);
             border-color: #8b5cf6;
         }
         
         .plinko-bet-btn.plinko-bet-active {
-            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
-            border-color: #a78bfa;
-            box-shadow: 0 0 30px rgba(139,92,246,0.8);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
+            border-color: #fbbf24;
+            box-shadow: 0 0 30px rgba(245,158,11,0.8);
+            transform: scale(1.05);
+        }
+        
+        .plinko-balls-btn.plinko-balls-active {
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-color: #34d399;
+            box-shadow: 0 0 30px rgba(16,185,129,0.8);
             transform: scale(1.05);
         }
         
@@ -2270,6 +2290,47 @@ if ($result) {
     <script>
     let userBalance = parseFloat(<?= $casino_available_balance ?>) || 0; // Already minus 10€ reserve
     const RESERVE_AMOUNT = 10.00; // 10€ Reserve
+    
+    // Notification function
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.textContent = message;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            background: ${type === 'error' ? '#ef4444' : type === 'success' ? '#10b981' : '#8b5cf6'};
+            color: white;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            z-index: 99999;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            animation: slideIn 0.3s ease-out;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }, 3000);
+    }
+    
+    // Add animation styles
+    const notifStyles = document.createElement('style');
+    notifStyles.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(400px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(400px); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(notifStyles);
     
     // Update all balance displays
     function updateAllBalances(balance) {
@@ -2528,13 +2589,16 @@ if ($result) {
     // PLINKO GAME
     let plinkoDropping = false;
     let plinkoCanvas, plinkoCtx;
-    let ball = null;
+    let balls = []; // Array für Multi-Ball
+    let plinkoAnimationId = null;
+    let totalWin = 0;
+    let ballsDropped = 0;
     
-    // Plinko configuration
-    const ROWS = 8;
+    // Plinko configuration (GRÖSSERES SPIELFELD)
+    const ROWS = 12;  // Mehr Reihen für mehr Spannung
     const SLOTS = 9;
-    const PIN_RADIUS = 6;
-    const BALL_RADIUS = 12;
+    const PIN_RADIUS = 8;
+    const BALL_RADIUS = 14;
     
     const slotMultipliers = [
         { multiplier: 5.0, color: '#f59e0b' },
@@ -2549,20 +2613,27 @@ if ($result) {
     ];
     
     function initPlinko() {
+        console.log('🎯 Initializing Plinko...');
         plinkoCanvas = document.getElementById('plinkoCanvas');
         if (!plinkoCanvas) {
             console.error('❌ Plinko canvas not found');
-            return;
+            return false;
         }
         
         plinkoCtx = plinkoCanvas.getContext('2d');
         if (!plinkoCtx) {
             console.error('❌ Could not get 2D context');
-            return;
+            return false;
         }
         
-        console.log('✅ Plinko initialized successfully');
+        console.log('✅ Plinko canvas found:', plinkoCanvas.width, 'x', plinkoCanvas.height);
+        console.log('✅ Plinko context ready');
+        
+        // Draw initial board
         drawPlinkoBoard();
+        
+        console.log('✅ Plinko initialized successfully');
+        return true;
     }
     
     function drawPlinkoBoard() {
@@ -2570,14 +2641,14 @@ if ($result) {
             return;
         }
         
-        const width = 700;
-        const height = 400;
+        const width = 1000;
+        const height = 600;
         
         plinkoCtx.clearRect(0, 0, width, height);
         
         // Draw pins
-        const startY = 60;
-        const endY = 290;
+        const startY = 80;
+        const endY = 450;
         const rowSpacing = (endY - startY) / (ROWS - 1);
         
         for (let row = 0; row < ROWS; row++) {
@@ -2607,9 +2678,9 @@ if ($result) {
         }
         
         // Draw slots
-        const slotY = 320;
+        const slotY = 500;
         const slotWidth = width / SLOTS;
-        const slotHeight = 50;
+        const slotHeight = 70;
         
         for (let i = 0; i < SLOTS; i++) {
             const x = i * slotWidth;
@@ -2629,7 +2700,7 @@ if ($result) {
             
             // Multiplier text
             plinkoCtx.fillStyle = '#ffffff';
-            plinkoCtx.font = 'bold 20px Inter';
+            plinkoCtx.font = 'bold 24px Inter';
             plinkoCtx.textAlign = 'center';
             plinkoCtx.textBaseline = 'middle';
             plinkoCtx.shadowColor = 'rgba(0,0,0,0.8)';
@@ -2638,58 +2709,56 @@ if ($result) {
             plinkoCtx.shadowBlur = 0;
         }
         
-        // ⚠️ CRITICAL: DRAW THE BALL - THIS MUST WORK! ⚠️
-        if (ball && typeof ball.x === 'number' && typeof ball.y === 'number') {
-            console.log('🎨 Drawing ball at:', ball.x, ball.y);
-            
-            // Outer glow (BRIGHT YELLOW)
-            const glowGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 3);
-            glowGradient.addColorStop(0, 'rgba(251, 191, 36, 1)');
-            glowGradient.addColorStop(0.4, 'rgba(245, 158, 11, 0.8)');
-            glowGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
-            plinkoCtx.fillStyle = glowGradient;
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS * 3, 0, Math.PI * 2);
-            plinkoCtx.fill();
-            
-            // Main ball body (GRADIENT GOLD)
-            const ballGradient = plinkoCtx.createRadialGradient(
-                ball.x - BALL_RADIUS * 0.3, 
-                ball.y - BALL_RADIUS * 0.3, 
-                BALL_RADIUS * 0.1,
-                ball.x, 
-                ball.y, 
-                BALL_RADIUS
-            );
-            ballGradient.addColorStop(0, '#ffffff');
-            ballGradient.addColorStop(0.2, '#fef3c7');
-            ballGradient.addColorStop(0.5, '#fbbf24');
-            ballGradient.addColorStop(1, '#f59e0b');
-            
-            plinkoCtx.fillStyle = ballGradient;
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
-            plinkoCtx.fill();
-            
-            // White outline for visibility
-            plinkoCtx.strokeStyle = '#ffffff';
-            plinkoCtx.lineWidth = 2;
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
-            plinkoCtx.stroke();
-            
-            // Highlight spot (shiny effect)
-            plinkoCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-            plinkoCtx.beginPath();
-            plinkoCtx.arc(ball.x - BALL_RADIUS * 0.3, ball.y - BALL_RADIUS * 0.3, BALL_RADIUS * 0.3, 0, Math.PI * 2);
-            plinkoCtx.fill();
-        } else if (ball) {
-            console.warn('⚠️ Ball exists but coordinates invalid:', ball);
-        }
+        // Draw all balls
+        balls.forEach(ball => {
+            if (ball && typeof ball.x === 'number' && typeof ball.y === 'number') {
+                // Outer glow
+                const glowGradient = plinkoCtx.createRadialGradient(ball.x, ball.y, 0, ball.x, ball.y, BALL_RADIUS * 3);
+                glowGradient.addColorStop(0, 'rgba(251, 191, 36, 1)');
+                glowGradient.addColorStop(0.4, 'rgba(245, 158, 11, 0.8)');
+                glowGradient.addColorStop(1, 'rgba(245, 158, 11, 0)');
+                plinkoCtx.fillStyle = glowGradient;
+                plinkoCtx.beginPath();
+                plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS * 3, 0, Math.PI * 2);
+                plinkoCtx.fill();
+                
+                // Main ball body
+                const ballGradient = plinkoCtx.createRadialGradient(
+                    ball.x - BALL_RADIUS * 0.3, 
+                    ball.y - BALL_RADIUS * 0.3, 
+                    BALL_RADIUS * 0.1,
+                    ball.x, 
+                    ball.y, 
+                    BALL_RADIUS
+                );
+                ballGradient.addColorStop(0, '#ffffff');
+                ballGradient.addColorStop(0.2, '#fef3c7');
+                ballGradient.addColorStop(0.5, '#fbbf24');
+                ballGradient.addColorStop(1, '#f59e0b');
+                
+                plinkoCtx.fillStyle = ballGradient;
+                plinkoCtx.beginPath();
+                plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+                plinkoCtx.fill();
+                
+                // White outline
+                plinkoCtx.strokeStyle = '#ffffff';
+                plinkoCtx.lineWidth = 2;
+                plinkoCtx.beginPath();
+                plinkoCtx.arc(ball.x, ball.y, BALL_RADIUS, 0, Math.PI * 2);
+                plinkoCtx.stroke();
+                
+                // Highlight spot
+                plinkoCtx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+                plinkoCtx.beginPath();
+                plinkoCtx.arc(ball.x - BALL_RADIUS * 0.3, ball.y - BALL_RADIUS * 0.3, BALL_RADIUS * 0.3, 0, Math.PI * 2);
+                plinkoCtx.fill();
+            }
+        });
     }
     
     function setPlinkoBet(amount) {
-        if (plinkoDropping) return; // Prevent changes during game
+        if (plinkoDropping) return;
         
         document.getElementById('plinkoBet').value = amount;
         
@@ -2697,7 +2766,6 @@ if ($result) {
             btn.classList.remove('plinko-bet-active');
         });
         
-        // Find the button that was clicked and add active class
         const clickedBtn = Array.from(document.querySelectorAll('.plinko-bet-btn')).find(
             btn => btn.textContent.includes(amount + '€')
         );
@@ -2706,40 +2774,70 @@ if ($result) {
         }
     }
     
-    async function dropBall() {
+    function setPlinkoBalls(count) {
+        if (plinkoDropping) return;
+        
+        document.getElementById('plinkoBallCount').value = count;
+        
+        document.querySelectorAll('.plinko-balls-btn').forEach(btn => {
+            btn.classList.remove('plinko-balls-active');
+        });
+        
+        const clickedBtn = Array.from(document.querySelectorAll('.plinko-balls-btn')).find(
+            btn => btn.textContent.trim() === count.toString()
+        );
+        if (clickedBtn) {
+            clickedBtn.classList.add('plinko-balls-active');
+        }
+    }
+    
+    async function dropBalls() {
         if (plinkoDropping) {
             console.log('❌ Already dropping, wait...');
             return;
         }
         
         const bet = parseFloat(document.getElementById('plinkoBet').value);
-        console.log('🎯 Drop ball - Bet:', bet + '€');
+        const ballCount = parseInt(document.getElementById('plinkoBallCount').value);
+        const totalBet = bet * ballCount;
+        
+        console.log(`🎯 Dropping ${ballCount} balls - Bet per ball: ${bet}€, Total: ${totalBet}€`);
         
         if (bet < 0.5 || bet > 50) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
         }
         
-        if (bet > userBalance) {
-            showNotification('Nicht genug Guthaben! Verfügbar: ' + userBalance.toFixed(2) + '€ (10€ Reserve)', 'error');
+        if (totalBet > userBalance) {
+            showNotification(`Nicht genug Guthaben! Benötigt: ${totalBet.toFixed(2)}€, Verfügbar: ${userBalance.toFixed(2)}€`, 'error');
             return;
         }
         
         plinkoDropping = true;
+        totalWin = 0;
+        ballsDropped = 0;
         
         // Disable all buttons
         document.getElementById('plinkoDropBtn').disabled = true;
         document.getElementById('plinkoDropBtn').style.opacity = '0.5';
-        document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+        document.querySelectorAll('.plinko-bet-btn, .plinko-balls-btn').forEach(btn => {
             btn.disabled = true;
             btn.style.opacity = '0.5';
             btn.style.cursor = 'not-allowed';
         });
         
-        document.getElementById('plinkoResult').innerHTML = '<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1.1rem; font-weight: 700;">🎯 Ball fällt...</div>';
+        document.getElementById('plinkoResult').innerHTML = `<div style="text-align: center; padding: 12px; color: #fbbf24; font-size: 1.1rem; font-weight: 700;">🎯 ${ballCount} Bälle fallen... (${totalBet.toFixed(2)}€ Einsatz)</div>`;
         
+        // Drop balls with delay
+        for (let i = 0; i < ballCount; i++) {
+            setTimeout(async () => {
+                await dropSingleBall(bet, i, ballCount);
+            }, i * 300); // 300ms delay between each ball
+        }
+    }
+    
+    async function dropSingleBall(bet, index, totalBalls) {
         try {
-            console.log('📡 Sending request to server...');
             const response = await fetch('/api/casino/play_plinko.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -2751,125 +2849,212 @@ if ($result) {
             }
             
             const data = await response.json();
-            console.log('✅ Server response:', data);
             
             if (data.status === 'success') {
-                // Animate ball drop
-                await animateBallDrop(data.ball_path, data.slot);
+                // Create and animate ball
+                const ball = createBall();
+                balls.push(ball);
                 
-                // Show result after animation
+                await animateSingleBall(ball, data.slot);
+                
+                // Remove ball after landing
                 setTimeout(() => {
-                    showPlinkoResult(data, bet);
-                    updateAllBalances(data.new_balance);
-                    
-                    plinkoDropping = false;
-                    
-                    // Re-enable buttons
-                    document.getElementById('plinkoDropBtn').disabled = false;
-                    document.getElementById('plinkoDropBtn').style.opacity = '1';
-                    document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
-                        btn.disabled = false;
-                        btn.style.opacity = '1';
-                        btn.style.cursor = 'pointer';
-                    });
-                    
-                    // Clear ball
-                    ball = null;
+                    const idx = balls.indexOf(ball);
+                    if (idx > -1) balls.splice(idx, 1);
                     drawPlinkoBoard();
                 }, 1500);
                 
+                // Accumulate winnings
+                totalWin += data.win;
+                ballsDropped++;
+                
+                // Update result display
+                const profitLoss = totalWin - (bet * ballsDropped);
+                const isWin = profitLoss > 0;
+                document.getElementById('plinkoResult').innerHTML = `
+                    <div style="text-align: center; padding: 12px; background: linear-gradient(135deg, rgba(${isWin ? '16,185,129' : '239,68,68'},0.2), rgba(${isWin ? '5,150,105' : '185,28,28'},0.3)); border-radius: 12px; border: 2px solid ${isWin ? '#10b981' : '#ef4444'};">
+                        <div style="font-size: 1.2rem; font-weight: 900; color: ${isWin ? '#10b981' : '#ef4444'}; margin-bottom: 4px;">
+                            Ball ${ballsDropped}/${totalBalls}: ${data.slot_multiplier}x
+                        </div>
+                        <div style="font-size: 1rem; color: #fff;">
+                            Gewinn: ${totalWin.toFixed(2)}€ | Profit: ${profitLoss > 0 ? '+' : ''}${profitLoss.toFixed(2)}€
+                        </div>
+                    </div>
+                `;
+                
+                // Final ball - show final result and re-enable
+                if (ballsDropped === totalBalls) {
+                    setTimeout(() => {
+                        updateAllBalances(data.new_balance);
+                        plinkoDropping = false;
+                        
+                        // Re-enable buttons
+                        document.getElementById('plinkoDropBtn').disabled = false;
+                        document.getElementById('plinkoDropBtn').style.opacity = '1';
+                        document.querySelectorAll('.plinko-bet-btn, .plinko-balls-btn').forEach(btn => {
+                            btn.disabled = false;
+                            btn.style.opacity = '1';
+                            btn.style.cursor = 'pointer';
+                        });
+                        
+                        balls = [];
+                        drawPlinkoBoard();
+                    }, 2000);
+                }
+                
             } else {
-                showNotification('Fehler: ' + data.error, 'error');
-                plinkoDropping = false;
-                enablePlinkoButtons();
-                document.getElementById('plinkoResult').innerHTML = '';
+                throw new Error(data.error || 'Unbekannter Fehler');
             }
         } catch (error) {
             console.error('❌ Plinko error:', error);
-            showNotification('Verbindungsfehler: ' + error.message, 'error');
+            showNotification('Fehler: ' + error.message, 'error');
             plinkoDropping = false;
             enablePlinkoButtons();
-            document.getElementById('plinkoResult').innerHTML = '';
         }
+    }
     }
     
     function enablePlinkoButtons() {
         document.getElementById('plinkoDropBtn').disabled = false;
         document.getElementById('plinkoDropBtn').style.opacity = '1';
-        document.querySelectorAll('.plinko-bet-btn').forEach(btn => {
+        document.querySelectorAll('.plinko-bet-btn, .plinko-balls-btn').forEach(btn => {
             btn.disabled = false;
             btn.style.opacity = '1';
             btn.style.cursor = 'pointer';
         });
     }
     
-    function animateBallDrop(path, finalSlot) {
+    function createBall() {
+        return {
+            x: 500, // Canvas center (1000 / 2)
+            y: 20,
+            vx: 0,
+            vy: 0,
+            active: true
+        };
+    }
+    
+    function animateSingleBall(ball, finalSlot) {
         return new Promise((resolve) => {
-            console.log('🎬 Starting ball animation - Path:', path, 'Final slot:', finalSlot);
-            
-            const width = 700;
-            const startY = 60;
-            const endY = 290;
-            const slotY = 320;
+            const width = 1000;
+            const startY = 80;
+            const endY = 450;
+            const slotY = 500;
             const slotWidth = width / SLOTS;
+            const rowSpacing = (endY - startY) / (ROWS - 1);
             
-            // CREATE BALL AT TOP CENTER - THIS IS THE CRITICAL PART!
-            ball = {
-                x: width / 2,  // 350 - CENTER OF CANVAS
-                y: 20,         // 20 - ABOVE THE FIRST ROW OF PINS
-                vx: 0,
-                vy: 0
-            };
+            // PHYSIK-KONSTANTEN (langsam und realistisch)
+            const GRAVITY = 0.15;  // Sanfte Gravitation
+            const BOUNCE = 0.75;   // Bounce-Faktor
+            const FRICTION = 0.99; // Wenig Reibung
+            const MAX_SPEED = 4;   // Langsame max Geschwindigkeit
             
-            console.log('🟡 BALL CREATED:', ball);
+            let finished = false;
             
-            // Force initial draw
-            requestAnimationFrame(() => {
-                drawPlinkoBoard();
-            });
+            // Get all pin positions
+            const pins = [];
+            for (let row = 0; row < ROWS; row++) {
+                const pinsInRow = row + 3;
+                const spacing = width / (pinsInRow + 1);
+                const y = startY + row * rowSpacing;
+                
+                for (let pin = 0; pin < pinsInRow; pin++) {
+                    const x = spacing * (pin + 1);
+                    pins.push({ x, y, row, index: pin });
+                }
+            }
             
-            let pathIndex = 0;
-            const pathSpeed = 80; // ms per step
-            
-            const dropInterval = setInterval(() => {
-                if (pathIndex < path.length) {
-                    // Moving through pins
-                    const progress = pathIndex / (ROWS - 1);
-                    const targetY = startY + (endY - startY) * progress;
-                    
-                    // Calculate X based on pin position
-                    const pinsInRow = pathIndex + 3;
-                    const spacing = width / (pinsInRow + 1);
-                    const pinIndex = path[pathIndex];
-                    const targetX = spacing * (pinIndex + 1);
-                    
-                    // Smooth interpolation
-                    ball.x += (targetX - ball.x) * 0.4;
-                    ball.y = targetY;
-                    
-                    console.log(`🟡 Ball at row ${pathIndex}: x=${ball.x.toFixed(1)}, y=${ball.y.toFixed(1)}`);
-                    
-                    pathIndex++;
-                } else {
-                    // Fall into final slot
-                    const targetX = finalSlot * slotWidth + slotWidth / 2;
-                    ball.x += (targetX - ball.x) * 0.3;
-                    ball.y += 10;
-                    
-                    // Check if ball reached slot
-                    if (ball.y >= slotY + 25) {
-                        clearInterval(dropInterval);
-                        console.log('✅ Ball landed in slot', finalSlot);
-                        resolve();
-                        return;
-                    }
+            const animate = () => {
+                if (finished || !ball.active) {
+                    resolve();
+                    return;
                 }
                 
-                // Force redraw with requestAnimationFrame for smooth rendering
-                requestAnimationFrame(() => {
-                    drawPlinkoBoard();
+                // Apply gravity
+                ball.vy += GRAVITY;
+                
+                // Limit max speed
+                const currentSpeed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                if (currentSpeed > MAX_SPEED) {
+                    const ratio = MAX_SPEED / currentSpeed;
+                    ball.vx *= ratio;
+                    ball.vy *= ratio;
+                }
+                
+                // Check collision with pins
+                let collided = false;
+                pins.forEach(pin => {
+                    const dx = ball.x - pin.x;
+                    const dy = ball.y - pin.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    const minDistance = BALL_RADIUS + PIN_RADIUS + 3;
+                    
+                    if (distance < minDistance && !collided) {
+                        collided = true;
+                        
+                        // Collision!
+                        const angle = Math.atan2(dy, dx);
+                        const overlap = minDistance - distance;
+                        
+                        // Push ball away from pin
+                        ball.x += Math.cos(angle) * (overlap + 1);
+                        ball.y += Math.sin(angle) * (overlap + 1);
+                        
+                        // Calculate bounce
+                        const speed = Math.sqrt(ball.vx * ball.vx + ball.vy * ball.vy);
+                        const bounceSpeed = speed * BOUNCE;
+                        
+                        ball.vx = Math.cos(angle) * bounceSpeed;
+                        ball.vy = Math.sin(angle) * bounceSpeed;
+                        
+                        // Random horizontal impulse
+                        ball.vx += (Math.random() - 0.5) * 1.5;
+                    }
                 });
-            }, pathSpeed);
+                
+                // Apply velocity
+                ball.x += ball.vx;
+                ball.y += ball.vy;
+                
+                // Apply friction
+                ball.vx *= FRICTION;
+                
+                // Boundary checks
+                if (ball.x < BALL_RADIUS) {
+                    ball.x = BALL_RADIUS;
+                    ball.vx = Math.abs(ball.vx) * BOUNCE;
+                }
+                if (ball.x > width - BALL_RADIUS) {
+                    ball.x = width - BALL_RADIUS;
+                    ball.vx = -Math.abs(ball.vx) * BOUNCE;
+                }
+                
+                // Check if ball reached slot
+                if (ball.y >= slotY - 10) {
+                    // Determine actual slot
+                    const actualSlot = Math.max(0, Math.min(SLOTS - 1, Math.floor(ball.x / slotWidth)));
+                    
+                    // Snap to center of slot
+                    ball.x = actualSlot * slotWidth + slotWidth / 2;
+                    ball.y = slotY + 35;
+                    ball.vx = 0;
+                    ball.vy = 0;
+                    
+                    finished = true;
+                    drawPlinkoBoard();
+                    setTimeout(() => resolve(), 300);
+                    return;
+                }
+                
+                // Draw current frame
+                drawPlinkoBoard();
+                
+                // Continue animation
+                requestAnimationFrame(animate);
+            };
+            
+            // Start animation
+            animate();
         });
     }
     

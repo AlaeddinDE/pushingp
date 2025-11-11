@@ -5,15 +5,16 @@ secure_session_start();
 
 header('Content-Type: application/json');
 
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    echo json_encode(['status' => 'error', 'error' => 'Invalid request method']);
-    exit;
-}
+try {
+    if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+        echo json_encode(['status' => 'error', 'error' => 'Invalid request method']);
+        exit;
+    }
 
-if (!is_logged_in()) {
-    echo json_encode(['status' => 'error', 'error' => 'Not authenticated']);
-    exit;
-}
+    if (!is_logged_in()) {
+        echo json_encode(['status' => 'error', 'error' => 'Not authenticated']);
+        exit;
+    }
 
 $user_id = get_current_user_id();
 $input = json_decode(file_get_contents('php://input'), true);
@@ -30,15 +31,22 @@ if ($bet < 0.5 || $bet > 50) {
     exit;
 }
 
-// Get user balance
-$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+// Get user balance from transaktionen
+$stmt = $conn->prepare("SELECT 
+    COALESCE(SUM(CASE 
+        WHEN typ = 'EINZAHLUNG' THEN betrag
+        WHEN typ IN ('AUSZAHLUNG', 'SCHADEN') THEN -betrag
+        ELSE 0 
+    END), 0) as balance 
+    FROM transaktionen 
+    WHERE mitglied_id = ? AND status = 'gebucht'");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $stmt->bind_result($balance);
 $stmt->fetch();
 $stmt->close();
 
-$balance = floatval($balance ?? 0);
+$balance = floatval($balance);
 $casino_available_balance = max(0, $balance - 10.00);
 
 if ($bet > $casino_available_balance) {
@@ -110,15 +118,31 @@ for ($row = 0; $row < 8; $row++) {
 // Final position should land in result slot
 $ball_path[] = $result_slot + 0.5; // Center of slot
 
-// Update balance
-$username = $_SESSION['username'];
-$stmt = $conn->prepare("UPDATE members_v2 SET balance = balance + ? WHERE username = ?");
-$stmt->bind_param('ds', $profit, $username);
-$stmt->execute();
-$stmt->close();
+// Update balance via transaction
+if ($profit > 0) {
+    $beschreibung = "Casino Plinko Gewinn (" . $multiplier . "x)";
+    $trans_stmt = $conn->prepare("INSERT INTO transaktionen (typ, betrag, mitglied_id, beschreibung, erstellt_von, datum) VALUES ('EINZAHLUNG', ?, ?, ?, ?, NOW())");
+    $trans_stmt->bind_param('disi', $profit, $user_id, $beschreibung, $user_id);
+    $trans_stmt->execute();
+    $trans_stmt->close();
+} else if ($profit < 0) {
+    $loss = abs($profit);
+    $beschreibung = "Casino Plinko Verlust (" . $multiplier . "x)";
+    $trans_stmt = $conn->prepare("INSERT INTO transaktionen (typ, betrag, mitglied_id, beschreibung, erstellt_von, datum) VALUES ('AUSZAHLUNG', ?, ?, ?, ?, NOW())");
+    $trans_stmt->bind_param('disi', $loss, $user_id, $beschreibung, $user_id);
+    $trans_stmt->execute();
+    $trans_stmt->close();
+}
 
 // Get new balance
-$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+$stmt = $conn->prepare("SELECT 
+    COALESCE(SUM(CASE 
+        WHEN typ = 'EINZAHLUNG' THEN betrag
+        WHEN typ IN ('AUSZAHLUNG', 'SCHADEN') THEN -betrag
+        ELSE 0 
+    END), 0) as balance 
+    FROM transaktionen 
+    WHERE mitglied_id = ? AND status = 'gebucht'");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $stmt->bind_result($new_balance);
@@ -126,17 +150,23 @@ $stmt->fetch();
 $stmt->close();
 
 // Log casino history
-$stmt = $conn->prepare("INSERT INTO casino_history (user_id, game, bet_amount, multiplier, win_amount) VALUES (?, 'plinko', ?, ?, ?)");
+$stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, multiplier, win_amount) VALUES (?, 'plinko', ?, ?, ?)");
 $stmt->bind_param('iddd', $user_id, $bet, $multiplier, $win_amount);
 $stmt->execute();
 $stmt->close();
 
-echo json_encode([
-    'status' => 'success',
-    'slot' => $result_slot,
-    'multiplier' => $multiplier,
-    'win_amount' => $win_amount,
-    'profit' => $profit,
-    'new_balance' => floatval($new_balance),
-    'ball_path' => $ball_path
-]);
+    echo json_encode([
+        'status' => 'success',
+        'slot' => $result_slot,
+        'slot_multiplier' => $multiplier,
+        'multiplier' => $multiplier,
+        'win' => $win_amount,
+        'win_amount' => $win_amount,
+        'profit' => $profit,
+        'new_balance' => floatval($new_balance),
+        'ball_path' => $ball_path
+    ]);
+} catch (Exception $e) {
+    error_log("play_plinko.php Error: " . $e->getMessage());
+    echo json_encode(['status' => 'error', 'error' => 'Spielfehler: ' . $e->getMessage()]);
+}
