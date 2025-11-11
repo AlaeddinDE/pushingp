@@ -796,7 +796,7 @@ if ($result) {
         
         .crash-graph.space-level-2 .celestial-body,
         .crash-graph.space-level-3 .celestial-body {
-            opacity: 0.3;
+            display: none;
         }
         
         @keyframes celestialPulse {
@@ -924,23 +924,6 @@ if ($result) {
         }
         
         /* Danger indicator */
-        .danger-indicator {
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(239, 68, 68, 0.95);
-            color: white;
-            padding: 12px 32px;
-            border-radius: 8px;
-            font-weight: 900;
-            font-size: 1.25rem;
-            letter-spacing: 2px;
-            animation: dangerPulse 0.5s ease-in-out infinite;
-            border: 3px solid #fff;
-            box-shadow: 0 0 30px rgba(239, 68, 68, 0.8);
-            z-index: 100;
-        }
         
         @keyframes dangerPulse {
             0%, 100% {
@@ -1164,6 +1147,194 @@ if ($result) {
         .shooting-star-1 { top: 10%; right: 80%; animation-delay: 0s; }
         .shooting-star-2 { top: 30%; right: 60%; animation-delay: 1.5s; }
         .shooting-star-3 { top: 50%; right: 40%; animation-delay: 2.5s; }
+
+        /* Enhanced background elements */
+        
+        /* More stars */
+        .stars3, .stars4 {
+            position: absolute;
+            width: 2px;
+            height: 2px;
+            background: transparent;
+            animation: starsAnimation 30s linear infinite;
+        }
+        
+        .stars3 {
+            box-shadow: 
+                120px 60px #FFF, 220px 90px #FFF, 340px 120px #FFF,
+                80px 140px #FFF, 190px 160px #FFF, 310px 50px #FFF,
+                420px 180px #FFF, 140px 30px #FFF, 260px 200px #FFF,
+                380px 70px #FFF, 60px 220px #FFF, 500px 100px #FFF;
+        }
+        
+        .stars4 {
+            box-shadow:
+                90px 80px #FFF, 210px 110px #FFF, 330px 40px #FFF,
+                110px 170px #FFF, 230px 60px #FFF, 350px 190px #FFF,
+                470px 90px #FFF, 170px 210px #FFF, 290px 130px #FFF;
+            animation: starsAnimation 40s linear infinite;
+        }
+        
+        /* Twinkling stars */
+        .twinkle-star {
+            position: absolute;
+            color: white;
+            font-size: 1rem;
+            animation: twinkle 2s ease-in-out infinite;
+        }
+        
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.3; transform: scale(0.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+        
+        .twinkle-1 { top: 15%; left: 10%; animation-delay: 0s; }
+        .twinkle-2 { top: 25%; right: 15%; animation-delay: 0.5s; }
+        .twinkle-3 { top: 45%; left: 20%; animation-delay: 1s; }
+        .twinkle-4 { top: 65%; right: 25%; animation-delay: 1.5s; }
+        .twinkle-5 { top: 80%; left: 30%; animation-delay: 2s; }
+        
+        /* Comets */
+        .comet {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0;
+        }
+        
+        .crash-graph.space-level-2 .comet,
+        .crash-graph.space-level-3 .comet {
+            animation: cometFly 4s ease-out infinite;
+        }
+        
+        @keyframes cometFly {
+            0% {
+                opacity: 0;
+                transform: translate(0, 0);
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 0.5;
+            }
+            100% {
+                opacity: 0;
+                transform: translate(-400px, 300px);
+                box-shadow: 0 0 8px 2px rgba(255, 255, 255, 0.5);
+            }
+        }
+        
+        .comet-1 { top: 10%; right: 20%; animation-delay: 0s; }
+        .comet-2 { top: 30%; right: 10%; animation-delay: 2s; }
+        .comet-3 { top: 50%; right: 30%; animation-delay: 3.5s; }
+        
+        /* Distant planets */
+        .distant-planet {
+            position: absolute;
+            border-radius: 50%;
+            opacity: 0;
+            transition: opacity 2s ease;
+        }
+        
+        .planet-small-1 {
+            top: 20%;
+            right: 25%;
+            width: 30px;
+            height: 30px;
+            background: radial-gradient(circle at 30% 30%, #a78bfa, #7c3aed);
+        }
+        
+        .planet-small-2 {
+            top: 70%;
+            left: 20%;
+            width: 25px;
+            height: 25px;
+            background: radial-gradient(circle at 30% 30%, #60a5fa, #3b82f6);
+        }
+        
+        .planet-small-3 {
+            top: 40%;
+            left: 10%;
+            width: 35px;
+            height: 35px;
+            background: radial-gradient(circle at 30% 30%, #fb923c, #ea580c);
+        }
+        
+        .crash-graph.space-level-2 .distant-planet,
+        .crash-graph.space-level-3 .distant-planet {
+            opacity: 0.6;
+        }
+        
+        /* Space dust */
+        .space-dust {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .dust-particle {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.4;
+        }
+        
+        .crash-graph.space-level-3 .space-dust {
+            opacity: 1;
+        }
+        
+        /* Constellation lines */
+        .constellation {
+            position: absolute;
+            opacity: 0;
+        }
+        
+        .constellation svg {
+            width: 200px;
+            height: 200px;
+        }
+        
+        .constellation-1 { top: 10%; left: 60%; }
+        .constellation-2 { bottom: 20%; right: 10%; }
+        
+        .crash-graph.space-level-3 .constellation {
+            opacity: 0.3;
+        }
+        
+        /* Pulsing stars */
+        .pulse-star {
+            position: absolute;
+            font-size: 1.5rem;
+            opacity: 0;
+            animation: pulseStar 3s ease-in-out infinite;
+        }
+        
+        @keyframes pulseStar {
+            0%, 100% {
+                opacity: 0;
+                transform: scale(0.5);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+        
+        .crash-graph.space-level-2 .pulse-star,
+        .crash-graph.space-level-3 .pulse-star {
+            opacity: 1;
+        }
+        
+        .pulse-1 { top: 35%; left: 75%; animation-delay: 0s; }
+        .pulse-2 { top: 55%; right: 20%; animation-delay: 1s; }
+        .pulse-3 { top: 75%; left: 15%; animation-delay: 2s; }
     </style>
 
 </head>
@@ -1286,21 +1457,170 @@ if ($result) {
 
         <!-- Recent Big Wins -->
         <?php if (count($recent_wins) > 0): ?>
-        <div class="recent-wins">
-            <h2 class="section-title" style="margin-bottom: 20px;">🏆 Letzte Gewinne</h2>
-            <?php foreach (array_slice($recent_wins, 0, 5) as $win): ?>
-                <div class="win-item">
-                    <div>
-                        <div style="font-weight: 700;"><?= escape($win['name']) ?></div>
-                        <div style="font-size: 0.875rem; color: var(--text-secondary);">
-                            <?= ucfirst($win['game_type']) ?> • <?= date('d.m.Y H:i', strtotime($win['created_at'])) ?>
+        <div style="margin-top: 48px; background: linear-gradient(135deg, rgba(139, 92, 246, 0.05), rgba(16, 185, 129, 0.05)); 
+                    border: 2px solid var(--border); border-radius: 24px; padding: 32px; position: relative; overflow: hidden;">
+            
+            <!-- Decorative gradient -->
+            <div style="position: absolute; top: -50%; right: -20%; width: 300px; height: 300px; 
+                        background: radial-gradient(circle, rgba(139, 92, 246, 0.1), transparent); 
+                        border-radius: 50%; pointer-events: none;"></div>
+            
+            <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 28px; position: relative;">
+                <div style="font-size: 3rem; animation: bounce 2s ease-in-out infinite;">🏆</div>
+                <div>
+                    <h2 style="font-size: 1.75rem; font-weight: 900; margin: 0; background: linear-gradient(135deg, #8b5cf6, #10b981); 
+                                -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+                        Letzte Gewinne
+                    </h2>
+                    <p style="margin: 4px 0 0 0; color: var(--text-secondary); font-size: 0.875rem;">Die größten Gewinner des Casinos</p>
+                </div>
+            </div>
+            
+            <style>
+                @keyframes bounce {
+                    0%, 100% { transform: translateY(0); }
+                    50% { transform: translateY(-10px); }
+                }
+                
+                .win-card {
+                    background: var(--bg-secondary);
+                    border: 2px solid var(--border);
+                    border-radius: 16px;
+                    padding: 20px 24px;
+                    margin-bottom: 12px;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    transition: all 0.3s ease;
+                    position: relative;
+                    overflow: hidden;
+                }
+                
+                .win-card::before {
+                    content: '';
+                    position: absolute;
+                    top: 0;
+                    left: -100%;
+                    width: 100%;
+                    height: 100%;
+                    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.1), transparent);
+                    transition: left 0.5s ease;
+                }
+                
+                .win-card:hover {
+                    transform: translateX(8px);
+                    border-color: var(--accent);
+                    box-shadow: 0 8px 24px rgba(139, 92, 246, 0.2);
+                }
+                
+                .win-card:hover::before {
+                    left: 100%;
+                }
+                
+                .win-user-info {
+                    display: flex;
+                    align-items: center;
+                    gap: 16px;
+                }
+                
+                .win-avatar {
+                    width: 48px;
+                    height: 48px;
+                    border-radius: 50%;
+                    background: linear-gradient(135deg, var(--accent), var(--success));
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 1.5rem;
+                    font-weight: 900;
+                    color: white;
+                    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                }
+                
+                .win-details {
+                    flex: 1;
+                }
+                
+                .win-name {
+                    font-weight: 800;
+                    font-size: 1.1rem;
+                    color: var(--text-primary);
+                    margin-bottom: 4px;
+                }
+                
+                .win-meta {
+                    display: flex;
+                    gap: 12px;
+                    align-items: center;
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                }
+                
+                .win-game {
+                    padding: 4px 12px;
+                    background: rgba(139, 92, 246, 0.2);
+                    border-radius: 8px;
+                    font-weight: 700;
+                    color: var(--accent);
+                }
+                
+                .win-amount-box {
+                    text-align: right;
+                }
+                
+                .win-profit {
+                    font-size: 1.5rem;
+                    font-weight: 900;
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
+                
+                .win-multiplier {
+                    font-size: 0.85rem;
+                    color: var(--text-secondary);
+                    margin-top: 4px;
+                }
+            </style>
+            
+            <?php foreach (array_slice($recent_wins, 0, 5) as $index => $win): ?>
+                <div class="win-card" style="animation: slideIn 0.5s ease <?= $index * 0.1 ?>s backwards;">
+                    <div class="win-user-info">
+                        <div class="win-avatar">
+                            <?= strtoupper(substr($win['name'], 0, 1)) ?>
+                        </div>
+                        <div class="win-details">
+                            <div class="win-name"><?= escape($win['name']) ?></div>
+                            <div class="win-meta">
+                                <span class="win-game"><?= ucfirst($win['game_type']) ?></span>
+                                <span>⏱️ <?= date('d.m.Y H:i', strtotime($win['created_at'])) ?></span>
+                            </div>
                         </div>
                     </div>
-                    <div class="win-amount">
-                        +<?= number_format($win['win_amount'] - $win['bet_amount'], 2, ',', '.') ?> €
+                    <div class="win-amount-box">
+                        <div class="win-profit">
+                            +<?= number_format($win['win_amount'] - $win['bet_amount'], 2, ',', '.') ?> €
+                        </div>
+                        <div class="win-multiplier">
+                            <?= $win['bet_amount'] > 0 ? number_format(($win['win_amount'] / $win['bet_amount']), 2, ',', '.') . 'x' : '-' ?>
+                        </div>
                     </div>
                 </div>
             <?php endforeach; ?>
+            
+            <style>
+                @keyframes slideIn {
+                    from {
+                        opacity: 0;
+                        transform: translateX(-30px);
+                    }
+                    to {
+                        opacity: 1;
+                        transform: translateX(0);
+                    }
+                }
+            </style>
         </div>
         <?php endif; ?>
         
@@ -1423,6 +1743,27 @@ if ($result) {
                     <!-- Stars background -->
                     <div class="stars"></div>
                     <div class="stars2"></div>
+                    <div class="stars3"></div>
+                    <div class="stars4"></div>
+                    
+                    <!-- Twinkling stars -->
+                    <div class="twinkle-star twinkle-1">✨</div>
+                    <div class="twinkle-star twinkle-2">⭐</div>
+                    <div class="twinkle-star twinkle-3">✨</div>
+                    <div class="twinkle-star twinkle-4">⭐</div>
+                    <div class="twinkle-star twinkle-5">✨</div>
+                    
+                    <!-- Comets -->
+                    <div class="comet comet-1"></div>
+                    <div class="comet comet-2"></div>
+                    
+                    <!-- Pulsing stars -->
+                    <div class="pulse-star pulse-1">💫</div>
+                    <div class="pulse-star pulse-2">🌟</div>
+                    
+                    <!-- Distant planets -->
+                    <div class="distant-planet planet-small-1"></div>
+                    <div class="distant-planet planet-small-2"></div>
                     
                     <!-- Sun (visible at start, fades in space) -->
                     <div class="celestial-body"></div>
@@ -1450,12 +1791,10 @@ if ($result) {
                     <!-- Shooting stars -->
                     <div class="shooting-star shooting-star-1"></div>
                     <div class="shooting-star shooting-star-2"></div>
-                    <div class="shooting-star shooting-star-3"></div>
                     
                     <!-- Asteroids -->
                     <div class="asteroid" id="asteroid1" style="top: 20%; left: 80%;">☄️</div>
                     <div class="asteroid" id="asteroid2" style="top: 70%; left: 10%;">🌑</div>
-                    <div class="asteroid" id="asteroid3" style="top: 45%; right: 15%;">☄️</div>
                     
                     <!-- Altitude meter -->
                     <div class="altitude-meter" id="altitudeMeter">
@@ -1480,41 +1819,25 @@ if ($result) {
                         <div class="shockwave"></div>
                     </div>
                     
-                    <!-- Easter Eggs - repositioned for vertical -->
-                    <div class="easter-egg" id="egg1" data-trigger="1.5" style="display: none; left: 20%; font-size: 2.5rem;">
-                        ☁️
+                    <!-- Easter Eggs - REDUCED & SPACED OUT -->
+                    <div class="easter-egg" id="egg1" data-trigger="3.0" style="display: none; left: 25%; font-size: 2.5rem;">
+                        🌍
                     </div>
-                    <div class="easter-egg" id="egg2" data-trigger="2.0" style="display: none; right: 20%; font-size: 2.5rem;">
-                        🐦
+                    <div class="easter-egg" id="egg2" data-trigger="6.0" style="display: none; right: 25%; font-size: 3rem;">
+                        🛰️
                     </div>
-                    <div class="easter-egg" id="egg3" data-trigger="3.0" style="display: none; left: 15%; font-size: 3rem;">
-                        🛩️
+                    <div class="easter-egg" id="egg3" data-trigger="10.0" style="display: none; left: 35%; font-size: 3.5rem;">
+                        🌙
                     </div>
-                    <div class="easter-egg" id="egg4" data-trigger="4.0" style="display: none; right: 15%; font-size: 3rem;">
-                        🦅
+                    <div class="easter-egg" id="egg4" data-trigger="15.0" style="display: none; right: 30%; font-size: 4rem;">
+                        ⭐
                     </div>
-                    <div class="easter-egg" id="egg5" data-trigger="5.0" style="display: none; left: 50%; transform: translateX(-50%); font-size: 3.5rem;">
-                        ✈️
-                    </div>
-                    <div class="easter-egg" id="egg6" data-trigger="7.0" style="display: none; left: 25%; font-size: 3.5rem;">
-                        🛸
-                    </div>
-                    <div class="easter-egg" id="egg7" data-trigger="9.0" style="display: none; right: 25%; font-size: 4rem;">
-                        👽
-                    </div>
-                    <div class="easter-egg" id="egg8" data-trigger="12.0" style="display: none; left: 30%; font-size: 4.5rem;">
-                        🌟
-                    </div>
-                    <div class="easter-egg" id="egg9" data-trigger="15.0" style="display: none; left: 50%; transform: translateX(-50%); font-size: 6rem;">
-                        👑
+                    <div class="easter-egg" id="egg5" data-trigger="25.0" style="display: none; left: 50%; transform: translateX(-50%); font-size: 5rem;">
+                        🪐
                     </div>
                 </div>
                 <div class="crash-multiplier" id="crashMultiplier">0.00x</div>
                 
-                <!-- Warning indicator -->
-                <div class="danger-indicator" id="dangerIndicator" style="display: none;">
-                    ⚠️ DANGER ZONE ⚠️
-                </div>
             </div>
 
 
@@ -1595,9 +1918,37 @@ if ($result) {
     </div>
 
     <script>
-    let userBalance = parseFloat(<?= $balance ?>) || 0;
+    let userBalance = parseFloat(<?= $casino_available_balance ?>) || 0; // Already minus 10€ reserve
+    const RESERVE_AMOUNT = 10.00; // 10€ Reserve
+    
+    // Update all balance displays
+    function updateAllBalances(balance) {
+        // Balance from server is already total, so subtract reserve
+        const totalBalance = parseFloat(balance) || 0;
+        userBalance = Math.max(0, totalBalance - RESERVE_AMOUNT);
+        const formattedBalance = userBalance.toFixed(2).replace('.', ',') + ' €';
+        
+        // Update all balance displays
+        const crashBalanceEl = document.getElementById('crashBalance');
+        const slotsBalanceEl = document.getElementById('slotsBalance');
+        const wheelBalanceEl = document.getElementById('wheelBalance');
+        
+        if (crashBalanceEl) crashBalanceEl.textContent = formattedBalance;
+        if (slotsBalanceEl) slotsBalanceEl.textContent = formattedBalance;
+        if (wheelBalanceEl) wheelBalanceEl.textContent = formattedBalance;
+    }
     
     function openGame(game) {
+        // Update balance when opening any game
+        fetch('/api/casino/get_balance.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateAllBalances(data.balance);
+                }
+            })
+            .catch(err => console.error('Balance-Fehler:', err));
+        
         document.getElementById(game + 'Modal').classList.add('active');
         document.body.style.overflow = 'hidden';
     }
@@ -1625,7 +1976,7 @@ if ($result) {
         }
         
         if (bet > userBalance) {
-            alert('Nicht genug Guthaben!');
+            alert('Nicht genug Guthaben! Verfügbar: ' + userBalance.toFixed(2) + '€ (10€ Reserve)');
             return;
         }
         
@@ -1684,8 +2035,7 @@ if ($result) {
                 
                 // Update balance after all reels stopped
                 setTimeout(() => {
-                    userBalance = parseFloat(data.new_balance) || 0;
-                    document.getElementById('slotsBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
+                    updateAllBalances(data.new_balance);
                     
                     if (data.win_amount > 0) {
                         document.getElementById('slotsWin').textContent = `🎉 Gewonnen: ${data.win_amount.toFixed(2)}€ (${data.multiplier}x)`;
@@ -1732,7 +2082,7 @@ if ($result) {
         }
         
         if (bet > userBalance) {
-            alert('Nicht genug Guthaben!');
+            alert('Nicht genug Guthaben! Verfügbar: ' + userBalance.toFixed(2) + '€ (10€ Reserve)');
             return;
         }
         
@@ -1756,8 +2106,7 @@ if ($result) {
                 wheel.style.transform = `rotate(${rotation}deg)`;
                 
                 setTimeout(() => {
-                    userBalance = parseFloat(data.new_balance) || 0;
-                    document.getElementById('wheelBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
+                    updateAllBalances(data.new_balance);
                     
                     if (data.multiplier >= 1) {
                         document.getElementById('wheelWin').textContent = `🎉 ${data.multiplier}x! Gewonnen: ${data.win_amount.toFixed(2)}€`;
@@ -1802,7 +2151,7 @@ if ($result) {
         }
         
         if (bet > userBalance) {
-            alert('Nicht genug Guthaben!');
+            alert('Nicht genug Guthaben! Verfügbar: ' + userBalance.toFixed(2) + '€ (10€ Reserve)');
             return;
         }
         
@@ -1822,24 +2171,36 @@ if ($result) {
                 
                 console.log('🎮 Crash point:', crashPoint + 'x');
                 
+                // Disable bet input and quick bet buttons
+                const crashBetInput = document.getElementById('crashBet');
+                const quickBetButtons = document.querySelectorAll('#crashModal .quick-bet-btn');
+                
+                crashBetInput.disabled = true;
+                crashBetInput.style.opacity = '0.5';
+                crashBetInput.style.cursor = 'not-allowed';
+                
+                quickBetButtons.forEach(btn => {
+                    btn.disabled = true;
+                    btn.style.opacity = '0.5';
+                    btn.style.cursor = 'not-allowed';
+                });
+                
                 // Reset rocket and explosion
                 const airplane = document.getElementById('crashAirplane');
                 const explosion = document.getElementById('crashExplosion');
                 const ground = document.getElementById('ground');
                 const crashGraph = document.getElementById('crashGraph');
-                const dangerIndicator = document.getElementById('dangerIndicator');
                 
                 airplane.classList.remove('crashed');
                 airplane.classList.add('flying');
                 airplane.style.opacity = '1';
                 airplane.style.bottom = '150px';
                 explosion.style.display = 'none';
-                dangerIndicator.style.display = 'none';
                 ground.style.transform = 'translateY(0)';
                 crashGraph.className = 'crash-graph';
                 
-                // Hide all easter eggs
-                for (let i = 1; i <= 9; i++) {
+                // Hide all easter eggs (only 5 now)
+                for (let i = 1; i <= 5; i++) {
                     const egg = document.getElementById('egg' + i);
                     if (egg) {
                         egg.style.display = 'none';
@@ -1910,21 +2271,20 @@ if ($result) {
                         n.style.opacity = crashMultiplier >= 7 ? '1' : '0';
                     });
                     
-                    // Show easter eggs at specific multipliers
-                    for (let i = 1; i <= 9; i++) {
+                    // Show easter eggs at specific multipliers (REDUCED TO 5)
+                    for (let i = 1; i <= 5; i++) {
                         const egg = document.getElementById('egg' + i);
                         if (egg) {
                             const trigger = parseFloat(egg.getAttribute('data-trigger'));
                             if (crashMultiplier >= trigger && egg.style.display === 'none') {
                                 egg.style.display = 'block';
-                                egg.style.bottom = (200 + (i * 30) - groundOffset/2) + 'px';
+                                egg.style.bottom = (200 + (i * 50) - groundOffset/2) + 'px';
                             }
                         }
                     }
                     
                     // Show danger indicator when close to crash
                     if (crashMultiplier >= crashPoint * 0.8) {
-                        dangerIndicator.style.display = 'block';
                     }
                     
                     if (crashMultiplier >= crashPoint) {
@@ -1932,8 +2292,7 @@ if ($result) {
                     }
                 }, 100);
                 
-                userBalance = parseFloat(data.balance) || 0;
-                document.getElementById('crashBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
+                updateAllBalances(data.balance);
             } else {
                 alert('Fehler: ' + data.error);
             }
@@ -1964,8 +2323,7 @@ if ($result) {
             const data = await response.json();
             
             if (data.status === 'success') {
-                userBalance = parseFloat(data.new_balance) || 0;
-                document.getElementById('crashBalance').textContent = userBalance.toFixed(2).replace('.', ',') + ' €';
+                updateAllBalances(data.new_balance);
                 document.getElementById('crashWin').textContent = `🎉 Cashed Out! ${crashMultiplier.toFixed(2)}x = ${data.win_amount.toFixed(2)}€`;
                 document.getElementById('crashWin').classList.add('show');
                 
@@ -1977,7 +2335,24 @@ if ($result) {
                     document.getElementById('crashCashoutBtn').style.display = 'none';
                     document.getElementById('crashMultiplier').textContent = '0.00x';
                     document.getElementById('crashMultiplier').style.color = 'var(--success)';
-                }, 3000);
+                    
+                    // Re-enable bet input and buttons
+                    const crashBetInput = document.getElementById('crashBet');
+                    const quickBetButtons = document.querySelectorAll('#crashModal .quick-bet-btn');
+                    
+                    crashBetInput.disabled = false;
+                    crashBetInput.style.opacity = '1';
+                    crashBetInput.style.cursor = 'text';
+                    
+                    quickBetButtons.forEach(btn => {
+                        btn.disabled = false;
+                        btn.style.opacity = '1';
+                        btn.style.cursor = 'pointer';
+                    });
+                    
+                    // Hide win message
+                    document.getElementById('crashWin').classList.remove('show');
+                }, 2000);
             }
         } catch (error) {
             alert('Verbindungsfehler: ' + error.message);
@@ -1992,10 +2367,34 @@ if ($result) {
         const airplane = document.getElementById('crashAirplane');
         const explosion = document.getElementById('crashExplosion');
         const debris = document.getElementById('debris');
-        const dangerIndicator = document.getElementById('dangerIndicator');
         
-        // Hide danger indicator
-        dangerIndicator.style.display = 'none';
+        // Update balance from server SOFORT
+        fetch('/api/casino/get_balance.php')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    updateAllBalances(data.balance);
+                }
+            })
+            .catch(err => console.error('Balance-Fehler:', err));
+        
+        // SOFORT Buttons umschalten!
+        document.getElementById('crashCashoutBtn').style.display = 'none';
+        document.getElementById('crashStartBtn').style.display = 'block';
+        
+        // Re-enable bet input SOFORT!
+        const crashBetInput = document.getElementById('crashBet');
+        const quickBetButtons = document.querySelectorAll('#crashModal .quick-bet-btn');
+        
+        crashBetInput.disabled = false;
+        crashBetInput.style.opacity = '1';
+        crashBetInput.style.cursor = 'text';
+        
+        quickBetButtons.forEach(btn => {
+            btn.disabled = false;
+            btn.style.opacity = '1';
+            btn.style.cursor = 'pointer';
+        });
         
         // Crash animation
         airplane.classList.remove('flying');
@@ -2015,24 +2414,28 @@ if ($result) {
         document.getElementById('crashLoss').textContent = `💥 CRASHED bei ${crashPoint}x!`;
         document.getElementById('crashLoss').classList.add('show');
         
-        // Reset after 3 seconds
+        // Reset after 2 seconds
         setTimeout(() => {
             airplane.classList.remove('crashed');
             airplane.style.bottom = "150px";
-            // Rocket stays centered
             airplane.style.opacity = '1';
             explosion.style.display = 'none';
             debris.style.display = 'none';
             
+            // Reset ground position
+            const ground = document.getElementById('ground');
+            ground.style.transform = 'translateY(0)';
+            
             // Reset meters
-            document.getElementById('altitudeValue').textContent = '0m';
-            document.getElementById('speedValue').textContent = '0 km/h';
+            document.getElementById('altitudeValue').textContent = '0.0km';
+            document.getElementById('speedValue').textContent = '0.00x';
             
             document.getElementById('crashMultiplier').textContent = '0.00x';
             document.getElementById('crashMultiplier').style.color = 'var(--success)';
-            document.getElementById('crashStartBtn').style.display = 'block';
-            document.getElementById('crashCashoutBtn').style.display = 'none';
-        }, 3000);
+            
+            // Hide loss message
+            document.getElementById('crashLoss').classList.remove('show');
+        }, 2000);
     }
     
     // Close modals on ESC
