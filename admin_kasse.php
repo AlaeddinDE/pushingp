@@ -134,31 +134,65 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
 
     <div class="container">
         <div class="welcome">
-            <h1>🛠️ Admin-Panel</h1>
-            <p class="text-secondary">Kassenverwaltung und Transaktionen</p>
+            <h1>💰 Kassen-Admin (vereinfacht)</h1>
+            <p class="text-secondary">Simpel, fair, übersichtlich</p>
         </div>
 
         <div class="admin-stats">
             <div class="admin-stat">
                 <div class="stat-value"><?= $stats['members'] ?? 0 ?></div>
-                <div class="stat-label">👥 Mitglieder</div>
+                <div class="stat-label">👥 Aktive Mitglieder</div>
             </div>
             <div class="admin-stat">
                 <div class="stat-value"><?= $stats['transactions'] ?? 0 ?></div>
                 <div class="stat-label">📊 Transaktionen (Monat)</div>
             </div>
             <div class="admin-stat">
-                <div class="stat-value"><?= number_format($stats['total'] ?? 0, 0) ?>€</div>
-                <div class="stat-label">💰 Gesamtvolumen</div>
+                <div class="stat-value"><?= number_format($stats['total'] ?? 0, 2) ?>€</div>
+                <div class="stat-label">💰 Kassenstand</div>
             </div>
         </div>
 
         <div class="admin-grid">
-            <!-- Gruppenaktion buchen (NEU!) -->
+            <!-- Gutschrift "Nicht dabei gewesen" -->
+            <div class="section" style="grid-column: 1 / -1;">
+                <div class="section-header">
+                    <span>💝</span>
+                    <h2 class="section-title">Gutschrift: Nicht dabei gewesen</h2>
+                </div>
+                
+                <form id="gutschriftForm" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
+                    <div class="form-group">
+                        <label>Mitglied auswählen</label>
+                        <select id="gutschrift_mitglied" required>
+                            <option value="">-- Mitglied wählen --</option>
+                            <?php foreach($mitglieder_list as $m): ?>
+                                <option value="<?= $m['id'] ?>"><?= htmlspecialchars($m['name']) ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Betrag (€)</label>
+                        <input type="number" id="gutschrift_betrag" step="0.01" value="10.00" required>
+                    </div>
+                    
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label>Grund / Beschreibung</label>
+                        <input type="text" id="gutschrift_beschreibung" value="Nicht dabei gewesen" required>
+                    </div>
+                    
+                    <button type="submit" class="btn" style="background: var(--success); grid-column: 1 / -1;">✅ Gutschrift buchen</button>
+                </form>
+                
+                <div id="gutschrift_result" style="margin-top: 16px; padding: 12px; border-radius: 8px; display: none;"></div>
+            </div>
+        
+            <!-- Gruppenaktion buchen -->
             <div class="section" style="grid-column: 1 / -1;">
                 <div class="section-header">
                     <span>🎬</span>
-                    <h2 class="section-title">Gruppenaktion buchen (Kino, Essen, etc.)</h2>
+                    <h2 class="section-title">Gruppenaktion (Kasse zahlt oder anteilig)</h2>
                 </div>
                 
                 <form id="gruppenaktionForm" class="form-grid" style="grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));">
@@ -276,6 +310,46 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
     </div>
 
     <script>
+    // Gutschrift buchen
+    document.getElementById('gutschriftForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const mitglied_id = parseInt(document.getElementById('gutschrift_mitglied').value);
+        const betrag = parseFloat(document.getElementById('gutschrift_betrag').value);
+        const beschreibung = document.getElementById('gutschrift_beschreibung').value.trim();
+        
+        const resultDiv = document.getElementById('gutschrift_result');
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = 'var(--bg-tertiary)';
+        resultDiv.innerHTML = '⏳ Wird gebucht...';
+        
+        try {
+            const response = await fetch('/api/v2/gutschrift_nicht_dabei.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ mitglied_id, betrag, beschreibung })
+            });
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                resultDiv.style.background = '#10b981';
+                resultDiv.style.color = 'white';
+                resultDiv.innerHTML = `✅ Gutschrift von ${betrag.toFixed(2)}€ erfolgreich gebucht!`;
+                e.target.reset();
+                setTimeout(() => location.reload(), 2000);
+            } else {
+                resultDiv.style.background = '#ef4444';
+                resultDiv.style.color = 'white';
+                resultDiv.innerHTML = `❌ Fehler: ${data.error}`;
+            }
+        } catch (error) {
+            resultDiv.style.background = '#ef4444';
+            resultDiv.style.color = 'white';
+            resultDiv.innerHTML = `❌ Fehler: ${error.message}`;
+        }
+    });
+    
     // Gruppenaktion Typ-Wechsel
     document.getElementById('gruppenaktion_typ').addEventListener('change', function() {
         const typ = this.value;
@@ -326,7 +400,6 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                 resultDiv.style.background = '#10b981';
                 resultDiv.style.color = 'white';
                 
-                // Prüfe ob data.data existiert
                 if (data.data && data.data.betrag !== undefined) {
                     resultDiv.innerHTML = `
                         ✅ <strong>${typ === 'einzahlung' ? 'Einzahlung' : 'Gruppenaktion'} gebucht!</strong><br>
@@ -336,14 +409,10 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
                         ✨ Gutgeschrieben an: ${data.data.nicht_teilnehmer.join(', ')}
                     `;
                 } else {
-                    // Fallback wenn data.data fehlt
                     resultDiv.innerHTML = `✅ <strong>Erfolgreich gebucht!</strong>`;
                 }
                 
-                // Form zurücksetzen
                 e.target.reset();
-                
-                // Nach 3 Sekunden Seite neu laden
                 setTimeout(() => location.reload(), 3000);
             } else {
                 resultDiv.style.background = '#ef4444';

@@ -301,11 +301,13 @@ if ($result) {
             margin: 30px 0;
             perspective: 1500px;
             position: relative;
+            flex-wrap: wrap;
         }
         
         .slot-reel {
             width: 160px;
             height: 180px;
+            flex-shrink: 0;
             background: linear-gradient(145deg, #1a0033, #2d0052);
             border-radius: 24px;
             display: flex;
@@ -495,15 +497,15 @@ if ($result) {
         
         .wheel-sparkles {
             position: absolute;
-            width: 500px;
-            height: 500px;
+            width: min(500px, 90vw);
+            height: min(500px, 90vw);
             pointer-events: none;
             z-index: 5;
         }
         
         .wheel-container {
-            width: 400px;
-            height: 400px;
+            width: min(400px, 85vw);
+            height: min(400px, 85vw);
             position: relative;
             filter: drop-shadow(0 10px 40px rgba(0,0,0,0.5));
         }
@@ -557,7 +559,7 @@ if ($result) {
         /* Crash Specific */
         .crash-graph {
             width: 100%;
-            height: 300px;
+            height: clamp(400px, 60vh, 600px);
             background: var(--bg-secondary);
             border-radius: 12px;
             position: relative;
@@ -621,7 +623,7 @@ if ($result) {
         /* Rocket Crash Game - Complete Overhaul */
         .crash-graph {
             position: relative;
-            height: 600px;
+            height: clamp(400px, 60vh, 600px);
             background: linear-gradient(180deg, 
                 #87CEEB 0%,    /* Sky blue (earth) */
                 #4A90E2 20%,   /* Deep blue */
@@ -1346,31 +1348,52 @@ if ($result) {
     /* 📱 MOBILE RESPONSIVE */
     @media (max-width: 768px) {
         .game-modal-content {
-            max-width: 95vw !important;
-            max-height: 85vh !important;
+            max-width: 100vw !important;
+            max-height: 95vh !important;
             overflow-y: auto !important;
-            padding: 15px !important;
+            padding: 12px !important;
+            margin: 0 !important;
+            border-radius: 12px !important;
         }
         
         .game-card {
-            min-width: 280px !important;
+            min-width: 100% !important;
+            padding: 20px !important;
+        }
+        
+        .casino-grid {
+            grid-template-columns: 1fr !important;
+            gap: 16px !important;
         }
         
         .quick-bet-btn, .slot-bet-btn {
-            font-size: 0.75rem !important;
-            padding: 8px 4px !important;
-            min-height: 44px;
+            font-size: 0.85rem !important;
+            padding: 10px 6px !important;
+            min-height: 48px;
+            min-width: 48px;
         }
         
         .game-modal h2 {
-            font-size: 1.5rem !important;
+            font-size: 1.25rem !important;
+            margin-bottom: 12px !important;
         }
         
         .balance-display .balance-value {
-            font-size: 1.5rem !important;
+            font-size: 1.25rem !important;
         }
         
         /* Slots spezifisch */
+        .slots-reels {
+            gap: 10px !important;
+            margin: 15px 0 !important;
+        }
+        
+        .slot-reel {
+            width: 90px !important;
+            height: 100px !important;
+            font-size: 3.5rem !important;
+        }
+        
         .slots-reels-mega {
             gap: 8px !important;
         }
@@ -1386,14 +1409,104 @@ if ($result) {
             height: auto !important;
         }
         
+        .plinko-bet-btn, .plinko-balls-btn {
+            font-size: 0.85rem !important;
+            padding: 10px 8px !important;
+            min-height: 48px;
+            min-width: 48px;
+        }
+        
         /* Crash Graph */
         .crash-graph {
-            height: 300px !important;
+            height: 400px !important;
+            min-height: 400px !important;
+        }
+        
+        .airplane {
+            font-size: 3rem !important;
+        }
+        
+        .altitude-meter, .speed-meter {
+            padding: 8px 12px !important;
+            min-width: 100px !important;
+        }
+        
+        .altitude-value, .speed-value {
+            font-size: 1.3rem !important;
+        }
+        
+        /* Wheel */
+        .wheel-container {
+            width: min(300px, 85vw) !important;
+            height: min(300px, 85vw) !important;
+        }
+        
+        .wheel-sparkles {
+            width: min(350px, 90vw) !important;
+            height: min(350px, 90vw) !important;
         }
         
         /* Chicken Board */
         #chickenBoard {
-            height: 500px !important;
+            height: 600px !important;
+            min-height: 600px !important;
+        }
+        
+        #chickenModal .game-modal-content {
+            max-width: 100vw !important;
+            max-height: 98vh !important;
+            padding: 8px !important;
+        }
+        
+        .chicken-street {
+            min-width: 40px !important;
+        }
+        
+        #chickenPlayer {
+            font-size: 3rem !important;
+        }
+        
+        /* Chicken Displays - Oben/Unten auf Mobile */
+        #chickenMultiplier {
+            top: 10px !important;
+            right: 10px !important;
+            left: auto !important;
+            padding: 12px 16px !important;
+        }
+        
+        #chickenStreets {
+            top: auto !important;
+            bottom: 10px !important;
+            left: 10px !important;
+            padding: 12px 16px !important;
+        }
+        
+        #chickenMultiplierValue, #chickenStreetCount {
+            font-size: 1.5rem !important;
+        }
+        
+        /* Blackjack Cards */
+        .bj-card {
+            width: 60px !important;
+            height: 85px !important;
+            font-size: 0.75rem !important;
+        }
+        
+        .bj-card-rank {
+            font-size: 1.25rem !important;
+        }
+        
+        .bj-card-suit {
+            font-size: 1.75rem !important;
+        }
+        
+        /* Modal Close Button */
+        .modal-close {
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 1.25rem !important;
+            top: 10px !important;
+            right: 10px !important;
         }
     }
     
@@ -1408,10 +1521,75 @@ if ($result) {
         
         .quick-bet-btns, .quick-bet-grid {
             grid-template-columns: repeat(3, 1fr) !important;
+            gap: 6px !important;
         }
         
         .game-modal-content {
-            max-height: 80vh !important;
+            max-height: 92vh !important;
+            padding: 8px !important;
+        }
+        
+        .slot-reel {
+            width: 70px !important;
+            height: 85px !important;
+            font-size: 3rem !important;
+        }
+        
+        .crash-graph {
+            height: 350px !important;
+        }
+        
+        .airplane {
+            font-size: 2.5rem !important;
+        }
+        
+        .wheel-container {
+            width: min(250px, 90vw) !important;
+            height: min(250px, 90vw) !important;
+        }
+        
+        /* Chicken Game Mobile */
+        #chickenBoard {
+            height: 500px !important;
+        }
+        
+        #chickenModal .game-modal-content {
+            max-height: 95vh !important;
+            padding: 6px !important;
+        }
+        
+        .chicken-street {
+            min-width: 30px !important;
+        }
+        
+        #chickenPlayer {
+            font-size: 2.5rem !important;
+        }
+        
+        /* Stack displays vertically on small screens */
+        #chickenMultiplier {
+            top: 10px !important;
+            right: 10px !important;
+            left: auto !important;
+            padding: 10px 14px !important;
+        }
+        
+        #chickenStreets {
+            top: auto !important;
+            bottom: 10px !important;
+            left: 10px !important;
+            right: auto !important;
+            padding: 10px 14px !important;
+        }
+        
+        #chickenMultiplierValue, #chickenStreetCount {
+            font-size: 1.25rem !important;
+        }
+        
+        /* Chicken control buttons */
+        #chickenStartBtn, #chickenCrossBtn, #chickenCashoutBtn {
+            font-size: 1rem !important;
+            padding: 12px !important;
         }
     }
     </style>
@@ -2946,47 +3124,54 @@ if ($result) {
 
     <!-- CHICKEN MODAL -->
     <div class="game-modal" id="chickenModal">
-        <div class="game-modal-content" style="max-width: 900px;">
+        <div class="game-modal-content" style="max-width: 1000px; max-height: 95vh; overflow-y: auto; padding: 16px;">
             <button class="modal-close" onclick="closeGame('chicken')">×</button>
             
             <!-- Header -->
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                 <div>
-                    <h2 style="font-size: 2rem; margin: 0;">🐔 Chicken</h2>
-                    <p style="color: var(--text-secondary); margin: 4px 0 0 0;">Überquere die Straße ohne erwischt zu werden!</p>
+                    <h2 style="font-size: 1.5rem; margin: 0;">🐔 Chicken</h2>
+                    <p style="color: var(--text-secondary); margin: 4px 0 0 0; font-size: 0.875rem;">Überquere die Straße ohne erwischt zu werden!</p>
                 </div>
-                <div class="balance-display" style="margin: 0;">
-                    <div class="balance-label">Guthaben</div>
-                    <div class="balance-value" id="chickenBalance"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
+                <div class="balance-display" style="margin: 0; padding: 12px 16px;">
+                    <div class="balance-label" style="font-size: 0.75rem;">Guthaben</div>
+                    <div class="balance-value" id="chickenBalance" style="font-size: 1.25rem;"><?= number_format(max(0, $balance - 10), 2, ',', '.') ?> €</div>
                 </div>
             </div>
 
-            <!-- Game Board - 10 VERTICAL STREETS -->
-            <div id="chickenBoard" style="background: #2a2a2a; 
-                                          border: 4px solid var(--border); 
+            <!-- Game Board - 10 VERTICAL STREETS - KRASSER STYLE! -->
+            <div id="chickenBoard" style="background: linear-gradient(180deg, #1a1a2e 0%, #0f0f1e 100%); 
+                                          border: 4px solid #f59e0b; 
                                           border-radius: 20px; 
                                           padding: 20px; 
-                                          height: 700px;
+                                          height: clamp(500px, 55vh, 700px);
                                           position: relative;
-                                          overflow-y: auto;
-                                          box-shadow: 0 20px 60px rgba(0,0,0,0.5);">
+                                          overflow: hidden;
+                                          box-shadow: 0 20px 60px rgba(245, 158, 11, 0.6), 
+                                                      inset 0 0 100px rgba(245, 158, 11, 0.1),
+                                                      0 0 100px rgba(236, 72, 153, 0.3);">
                 
-                <!-- Start Zone (Left Side) -->
+                <!-- Animated Background Pattern -->
+                <div style="position: absolute; inset: 0; opacity: 0.1; background-image: repeating-linear-gradient(0deg, transparent, transparent 50px, rgba(255,255,255,0.05) 50px, rgba(255,255,255,0.05) 100px); pointer-events: none; z-index: 0;"></div>
+                
+                <!-- Start Zone (Left Side) - NEON STYLE -->
                 <div style="position: absolute; 
                             left: 0; 
                             top: 0; 
                             width: 80px; 
                             height: 100%; 
-                            background: linear-gradient(135deg, #6B8E23, #556B2F);
-                            border-right: 4px dashed #FFD700;
+                            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                            border-right: 4px solid #34d399;
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             flex-direction: column;
                             z-index: 10;
-                            box-shadow: inset -5px 0 15px rgba(0,0,0,0.3);">
-                    <div style="font-size: 3rem; margin-bottom: 10px; animation: pulse 2s ease-in-out infinite;">🏁</div>
-                    <div style="font-size: 0.8rem; font-weight: 900; color: white; text-shadow: 0 2px 4px rgba(0,0,0,0.5); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 2px;">START</div>
+                            box-shadow: inset -5px 0 20px rgba(0,0,0,0.5),
+                                        0 0 40px rgba(16, 185, 129, 0.6);
+                            animation: startZonePulse 2s ease-in-out infinite;">
+                    <div style="font-size: 3rem; margin-bottom: 10px; filter: drop-shadow(0 0 20px rgba(16, 185, 129, 1));">🏁</div>
+                    <div style="font-size: 0.9rem; font-weight: 900; color: white; text-shadow: 0 0 10px rgba(255,255,255,0.8), 0 2px 4px rgba(0,0,0,0.8); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 3px;">START</div>
                 </div>
 
                 <!-- 10 Vertical Streets Container -->
@@ -2996,76 +3181,157 @@ if ($result) {
                                               right: 80px;
                                               height: 100%; 
                                               display: flex;
-                                              gap: 6px;">
+                                              gap: 8px;">
                     <!-- 10 streets will be created here -->
                 </div>
 
-                <!-- Goal Zone (Right Side) -->
+                <!-- Goal Zone (Right Side) - GOLD NEON -->
                 <div style="position: absolute; 
                             right: 0; 
                             top: 0; 
                             width: 80px; 
                             height: 100%; 
-                            background: linear-gradient(135deg, #FFD700, #FFA500);
-                            border-left: 4px dashed #6B8E23;
+                            background: linear-gradient(135deg, #f59e0b 0%, #d97706 50%, #f59e0b 100%);
+                            border-left: 4px solid #fbbf24;
                             display: flex;
                             align-items: center;
                             justify-content: center;
                             flex-direction: column;
                             z-index: 10;
-                            box-shadow: inset 5px 0 15px rgba(0,0,0,0.2),
-                                        0 0 30px rgba(255, 215, 0, 0.5);
-                            animation: goalGlow 2s ease-in-out infinite;">
-                    <div style="font-size: 3rem; margin-bottom: 10px; animation: bounce 1s ease-in-out infinite;">🏆</div>
-                    <div style="font-size: 0.8rem; font-weight: 900; color: #333; text-shadow: 0 2px 4px rgba(255,255,255,0.5); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 2px;">ZIEL</div>
+                            box-shadow: inset 5px 0 20px rgba(0,0,0,0.3),
+                                        0 0 60px rgba(245, 158, 11, 0.9),
+                                        0 0 100px rgba(251, 191, 36, 0.6);
+                            animation: goalZonePulse 1.5s ease-in-out infinite;">
+                    <div style="font-size: 3.5rem; margin-bottom: 10px; filter: drop-shadow(0 0 30px rgba(251, 191, 36, 1)); animation: trophyFloat 2s ease-in-out infinite;">🏆</div>
+                    <div style="font-size: 0.9rem; font-weight: 900; color: #fff; text-shadow: 0 0 15px rgba(251, 191, 36, 1), 0 2px 6px rgba(0,0,0,0.9); writing-mode: vertical-rl; transform: rotate(180deg); letter-spacing: 3px;">ZIEL</div>
                 </div>
                 
-                <!-- Chicken (starts left, moves right across streets) -->
+                <!-- Chicken (starts left, moves right across streets) - MEGA GLOW -->
                 <div id="chickenPlayer" style="position: absolute; 
                                                left: 40px; 
                                                top: 50%; 
                                                transform: translate(0, -50%); 
-                                               font-size: 4rem; 
+                                               font-size: 5rem; 
                                                transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
-                                               filter: drop-shadow(0 8px 16px rgba(0,0,0,0.9));
-                                               z-index: 100;">
+                                               filter: drop-shadow(0 0 30px rgba(245, 158, 11, 1)) 
+                                                       drop-shadow(0 8px 20px rgba(0,0,0,0.9))
+                                                       drop-shadow(0 0 50px rgba(236, 72, 153, 0.6));
+                                               z-index: 100;
+                                               animation: chickenIdle 1s ease-in-out infinite;">
                     🐔
                 </div>
 
-                <!-- Multiplier Display -->
+                <!-- Multiplier Display - NEON GREEN -->
                 <div id="chickenMultiplier" style="position: absolute; 
-                                                    top: 15px; 
-                                                    right: 90px; 
-                                                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.95), rgba(5, 150, 105, 0.95));
-                                                    padding: 16px 28px; 
-                                                    border-radius: 16px; 
-                                                    border: 3px solid #10b981;
-                                                    box-shadow: 0 8px 32px rgba(16, 185, 129, 0.6),
-                                                                inset 0 2px 8px rgba(255,255,255,0.2);
+                                                    top: 20px; 
+                                                    right: 100px; 
+                                                    background: linear-gradient(135deg, rgba(16, 185, 129, 0.98), rgba(5, 150, 105, 0.98));
+                                                    padding: 18px 32px; 
+                                                    border-radius: 20px; 
+                                                    border: 4px solid #10b981;
+                                                    box-shadow: 0 8px 40px rgba(16, 185, 129, 0.8),
+                                                                inset 0 2px 12px rgba(255,255,255,0.3),
+                                                                0 0 60px rgba(16, 185, 129, 0.5);
                                                     z-index: 200;
-                                                    transform-style: preserve-3d;">
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-bottom: 6px; font-weight: 700; text-align: center; letter-spacing: 1px;">AKTUELL</div>
-                    <div id="chickenMultiplierValue" style="font-size: 2.25rem; font-weight: 900; color: white; text-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; font-family: 'Arial Black', sans-serif;">1.00x</div>
-                    <div id="chickenCurrentWin" style="font-size: 0.9rem; color: rgba(255,255,255,0.8); text-align: center; margin-top: 4px;">0.00€</div>
+                                                    animation: multiplierPulse 1.5s ease-in-out infinite;">
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,1); margin-bottom: 6px; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">💰 GEWINN</div>
+                    <div id="chickenMultiplierValue" style="font-size: 2.5rem; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(255,255,255,1), 0 4px 12px rgba(0,0,0,0.8); text-align: center; font-family: 'Arial Black', sans-serif;">1.00x</div>
+                    <div id="chickenCurrentWin" style="font-size: 1rem; color: #fbbf24; font-weight: 800; text-align: center; margin-top: 6px; text-shadow: 0 0 10px rgba(251, 191, 36, 0.8);">0.00€</div>
                 </div>
 
-                <!-- Street Counter -->
+                <!-- Street Counter - NEON PURPLE -->
                 <div id="chickenStreets" style="position: absolute; 
-                                                top: 15px; 
-                                                left: 90px; 
-                                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.95), rgba(124, 58, 237, 0.95));
-                                                padding: 16px 28px; 
-                                                border-radius: 16px; 
-                                                border: 3px solid #8b5cf6;
-                                                box-shadow: 0 8px 32px rgba(139, 92, 246, 0.6),
-                                                            inset 0 2px 8px rgba(255,255,255,0.2);
+                                                top: 20px; 
+                                                left: 100px; 
+                                                background: linear-gradient(135deg, rgba(139, 92, 246, 0.98), rgba(124, 58, 237, 0.98));
+                                                padding: 18px 32px; 
+                                                border-radius: 20px; 
+                                                border: 4px solid #8b5cf6;
+                                                box-shadow: 0 8px 40px rgba(139, 92, 246, 0.8),
+                                                            inset 0 2px 12px rgba(255,255,255,0.3),
+                                                            0 0 60px rgba(139, 92, 246, 0.5);
                                                 z-index: 200;
-                                                transform-style: preserve-3d;">
-                    <div style="font-size: 0.8rem; color: rgba(255,255,255,0.9); margin-bottom: 6px; font-weight: 700; text-align: center; letter-spacing: 1px;">STRASSE</div>
-                    <div id="chickenStreetCount" style="font-size: 2.25rem; font-weight: 900; color: white; text-shadow: 0 4px 12px rgba(0,0,0,0.5); text-align: center; font-family: 'Arial Black', sans-serif;">0 / 10</div>
+                                                animation: streetPulse 1.5s ease-in-out infinite;">
+                    <div style="font-size: 0.85rem; color: rgba(255,255,255,1); margin-bottom: 6px; font-weight: 900; text-align: center; letter-spacing: 2px; text-shadow: 0 2px 6px rgba(0,0,0,0.8);">🛣️ STRASSEN</div>
+                    <div id="chickenStreetCount" style="font-size: 2.5rem; font-weight: 900; color: white; text-shadow: 0 0 20px rgba(255,255,255,1), 0 4px 12px rgba(0,0,0,0.8); text-align: center; font-family: 'Arial Black', sans-serif;">0 / 10</div>
                 </div>
                 
                 <style>
+                    /* KRASSE CHICKEN GAME ANIMATIONEN */
+                    @keyframes chickenIdle {
+                        0%, 100% { 
+                            transform: translate(0, -50%) scale(1) rotate(0deg); 
+                        }
+                        50% { 
+                            transform: translate(0, -52%) scale(1.05) rotate(2deg); 
+                        }
+                    }
+                    
+                    @keyframes startZonePulse {
+                        0%, 100% { 
+                            box-shadow: inset -5px 0 20px rgba(0,0,0,0.5),
+                                        0 0 40px rgba(16, 185, 129, 0.6);
+                        }
+                        50% { 
+                            box-shadow: inset -5px 0 20px rgba(0,0,0,0.5),
+                                        0 0 60px rgba(16, 185, 129, 1);
+                        }
+                    }
+                    
+                    @keyframes goalZonePulse {
+                        0%, 100% { 
+                            box-shadow: inset 5px 0 20px rgba(0,0,0,0.3),
+                                        0 0 60px rgba(245, 158, 11, 0.9),
+                                        0 0 100px rgba(251, 191, 36, 0.6);
+                        }
+                        50% { 
+                            box-shadow: inset 5px 0 20px rgba(0,0,0,0.3),
+                                        0 0 80px rgba(245, 158, 11, 1),
+                                        0 0 140px rgba(251, 191, 36, 1);
+                        }
+                    }
+                    
+                    @keyframes trophyFloat {
+                        0%, 100% { 
+                            transform: translateY(0) scale(1);
+                            filter: drop-shadow(0 0 30px rgba(251, 191, 36, 1));
+                        }
+                        50% { 
+                            transform: translateY(-10px) scale(1.1);
+                            filter: drop-shadow(0 0 50px rgba(251, 191, 36, 1));
+                        }
+                    }
+                    
+                    @keyframes multiplierPulse {
+                        0%, 100% { 
+                            transform: scale(1);
+                            box-shadow: 0 8px 40px rgba(16, 185, 129, 0.8),
+                                        inset 0 2px 12px rgba(255,255,255,0.3),
+                                        0 0 60px rgba(16, 185, 129, 0.5);
+                        }
+                        50% { 
+                            transform: scale(1.02);
+                            box-shadow: 0 12px 50px rgba(16, 185, 129, 1),
+                                        inset 0 2px 12px rgba(255,255,255,0.5),
+                                        0 0 80px rgba(16, 185, 129, 0.8);
+                        }
+                    }
+                    
+                    @keyframes streetPulse {
+                        0%, 100% { 
+                            transform: scale(1);
+                            box-shadow: 0 8px 40px rgba(139, 92, 246, 0.8),
+                                        inset 0 2px 12px rgba(255,255,255,0.3),
+                                        0 0 60px rgba(139, 92, 246, 0.5);
+                        }
+                        50% { 
+                            transform: scale(1.02);
+                            box-shadow: 0 12px 50px rgba(139, 92, 246, 1),
+                                        inset 0 2px 12px rgba(255,255,255,0.5),
+                                        0 0 80px rgba(139, 92, 246, 0.8);
+                        }
+                    }
+                    
                     @keyframes pulse {
                         0%, 100% { transform: scale(1); opacity: 1; }
                         50% { transform: scale(1.1); opacity: 0.8; }
@@ -3082,48 +3348,50 @@ if ($result) {
             </div>
 
             <!-- Controls -->
-            <div style="margin-top: 24px; background: var(--bg-secondary); padding: 20px; border-radius: 16px; border: 2px solid var(--border);">
+            <div style="margin-top: 16px; background: var(--bg-secondary); padding: 16px; border-radius: 16px; border: 2px solid var(--border);">
                 <!-- Bet Amount -->
-                <div style="margin-bottom: 16px;">
-                    <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary);">Einsatz</label>
-                    <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <button class="quick-bet-btn" onclick="setChickenBet(0.50)">💰 0.50€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(1.00)">💵 1€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(2.00)">💸 2€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(5.00)">💎 5€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(10.00)">👑 10€</button>
+                <div style="margin-bottom: 12px;">
+                    <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary); font-size: 0.875rem;">Einsatz</label>
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(70px, 1fr)); gap: 8px; margin-bottom: 12px;">
+                        <button class="quick-bet-btn" onclick="setChickenBet(0.50)" style="padding: 10px 6px; font-size: 0.875rem;">💰 0.50€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(1.00)" style="padding: 10px 6px; font-size: 0.875rem;">💵 1€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(2.00)" style="padding: 10px 6px; font-size: 0.875rem;">💸 2€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(5.00)" style="padding: 10px 6px; font-size: 0.875rem;">💎 5€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(10.00)" style="padding: 10px 6px; font-size: 0.875rem;">👑 10€</button>
                     </div>
                     <input type="number" id="chickenBet" value="1.00" min="0.01" max="10.00" step="0.01" 
-                           style="width: 100%; padding: 14px; font-size: 1.25rem; font-weight: 700; 
+                           style="width: 100%; padding: 12px; font-size: 1.125rem; font-weight: 700; 
                                   background: var(--bg-primary); border: 2px solid var(--border); 
                                   border-radius: 12px; color: var(--text-primary); text-align: center;">
                 </div>
 
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: 12px;">
+                <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
                     <button id="chickenStartBtn" onclick="startChicken()" 
-                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
+                            style="padding: 14px; font-size: 1.125rem; font-weight: 900; 
                                    background: linear-gradient(135deg, #10b981, #059669); 
                                    color: white; border: none; border-radius: 12px; cursor: pointer;
-                                   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s;">
+                                   box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); transition: all 0.3s; min-height: 52px;">
                         🎮 START
                     </button>
-                    <button id="chickenCrossBtn" onclick="crossStreet()" disabled
-                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
-                                   background: linear-gradient(135deg, #f59e0b, #d97706); 
-                                   color: white; border: none; border-radius: 12px; cursor: pointer;
-                                   box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s;
-                                   opacity: 0.5;">
-                        🚶 ÜBERQUEREN
-                    </button>
-                    <button id="chickenCashoutBtn" onclick="cashoutChicken()" disabled
-                            style="flex: 1; padding: 16px; font-size: 1.25rem; font-weight: 900; 
-                                   background: linear-gradient(135deg, #8b5cf6, #7c3aed); 
-                                   color: white; border: none; border-radius: 12px; cursor: pointer;
-                                   box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); transition: all 0.3s;
-                                   opacity: 0.5;">
-                        💰 CASHOUT
-                    </button>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        <button id="chickenCrossBtn" onclick="crossStreet()" disabled
+                                style="padding: 14px; font-size: 1.125rem; font-weight: 900; 
+                                       background: linear-gradient(135deg, #f59e0b, #d97706); 
+                                       color: white; border: none; border-radius: 12px; cursor: pointer;
+                                       box-shadow: 0 4px 20px rgba(245, 158, 11, 0.4); transition: all 0.3s;
+                                       opacity: 0.5; min-height: 52px;">
+                            🚶 ÜBER­QUEREN
+                        </button>
+                        <button id="chickenCashoutBtn" onclick="cashoutChicken()" disabled
+                                style="padding: 14px; font-size: 1.125rem; font-weight: 900; 
+                                       background: linear-gradient(135deg, #8b5cf6, #7c3aed); 
+                                       color: white; border: none; border-radius: 12px; cursor: pointer;
+                                       box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); transition: all 0.3s;
+                                       opacity: 0.5; min-height: 52px;">
+                            💰 CASHOUT
+                        </button>
+                    </div>
                 </div>
 
                 <!-- Game Info -->
@@ -3251,24 +3519,25 @@ if ($result) {
             street.style.cssText = `
                 flex: 1;
                 background: linear-gradient(to bottom, 
-                    rgba(40, 40, 40, 0.6) 0%, 
-                    rgba(50, 50, 50, 0.6) 10%, 
-                    rgba(60, 60, 60, 0.6) 45%, 
-                    rgba(100, 100, 100, 0.4) 48%, 
-                    rgba(100, 100, 100, 0.4) 52%, 
-                    rgba(60, 60, 60, 0.6) 55%, 
-                    rgba(50, 50, 50, 0.6) 90%, 
-                    rgba(40, 40, 40, 0.6) 100%
+                    rgba(30, 30, 50, 0.8) 0%, 
+                    rgba(40, 40, 60, 0.8) 10%, 
+                    rgba(50, 50, 70, 0.8) 45%, 
+                    rgba(139, 92, 246, 0.3) 48%, 
+                    rgba(139, 92, 246, 0.3) 52%, 
+                    rgba(50, 50, 70, 0.8) 55%, 
+                    rgba(40, 40, 60, 0.8) 90%, 
+                    rgba(30, 30, 50, 0.8) 100%
                 );
                 position: relative;
-                border-left: 2px solid rgba(255, 215, 0, 0.3);
-                border-right: 2px solid rgba(255, 215, 0, 0.3);
+                border-left: 3px solid rgba(139, 92, 246, 0.4);
+                border-right: 3px solid rgba(139, 92, 246, 0.4);
                 transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-                overflow-y: auto;
-                box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+                overflow: hidden;
+                box-shadow: inset 0 0 30px rgba(0,0,0,0.7),
+                            0 0 15px rgba(139, 92, 246, 0.2);
             `;
             
-            // Street number
+            // Street number - NEON STYLE
             const streetNum = document.createElement('div');
             streetNum.textContent = (i + 1);
             streetNum.style.cssText = `
@@ -3276,16 +3545,17 @@ if ($result) {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                font-size: 4rem;
+                font-size: 5rem;
                 font-weight: 900;
-                color: rgba(255, 255, 255, 0.15);
+                color: rgba(139, 92, 246, 0.2);
                 z-index: 1;
-                text-shadow: 0 4px 8px rgba(0,0,0,0.5);
+                text-shadow: 0 0 30px rgba(139, 92, 246, 0.6), 
+                             0 4px 8px rgba(0,0,0,0.8);
                 font-family: 'Arial Black', sans-serif;
             `;
             street.appendChild(streetNum);
             
-            // Potential win label (only on NEXT street, not all)
+            // Potential win label (only on NEXT street, not all) - KRASSER!
             const winLabel = document.createElement('div');
             winLabel.id = `street-win-${i}`;
             winLabel.style.cssText = `
@@ -3293,19 +3563,22 @@ if ($result) {
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
-                background: linear-gradient(135deg, rgba(245, 158, 11, 0.98), rgba(217, 119, 6, 0.98));
-                padding: 12px 20px;
-                border-radius: 16px;
-                border: 3px solid #f59e0b;
-                font-size: 1.5rem;
+                background: linear-gradient(135deg, rgba(245, 158, 11, 1), rgba(217, 119, 6, 1));
+                padding: 14px 24px;
+                border-radius: 20px;
+                border: 4px solid #fbbf24;
+                font-size: 1.75rem;
                 font-weight: 900;
                 color: white;
-                text-shadow: 0 2px 8px rgba(0,0,0,0.8);
+                text-shadow: 0 0 20px rgba(255,255,255,1), 
+                             0 2px 8px rgba(0,0,0,0.9);
                 white-space: nowrap;
                 display: none;
                 z-index: 10;
-                box-shadow: 0 8px 24px rgba(245, 158, 11, 0.8);
+                box-shadow: 0 0 40px rgba(245, 158, 11, 1),
+                            0 8px 30px rgba(245, 158, 11, 0.8);
                 pointer-events: none;
+                animation: winLabelPulse 1s ease-in-out infinite;
             `;
             street.appendChild(winLabel);
             
@@ -3320,6 +3593,19 @@ if ($result) {
             const style = document.createElement('style');
             style.id = 'chickenJumpAnim';
             style.textContent = `
+                @keyframes winLabelPulse {
+                    0%, 100% { 
+                        transform: translate(-50%, -50%) scale(1);
+                        box-shadow: 0 0 40px rgba(245, 158, 11, 1),
+                                    0 8px 30px rgba(245, 158, 11, 0.8);
+                    }
+                    50% { 
+                        transform: translate(-50%, -50%) scale(1.05);
+                        box-shadow: 0 0 60px rgba(245, 158, 11, 1),
+                                    0 12px 50px rgba(245, 158, 11, 1);
+                    }
+                }
+                
                 @keyframes chickenJump {
                     0% { transform: translate(-50%, -50%) scale(1) rotate(0deg); }
                     20% { transform: translate(-50%, -70%) scale(1.3) rotate(-10deg); }
@@ -3339,6 +3625,14 @@ if ($result) {
                     50% { transform: translate(-50%, -40%) scale(2) rotate(360deg); opacity: 1; }
                     75% { transform: translate(-50%, -30%) scale(2.5) rotate(540deg); opacity: 0.5; }
                     100% { transform: translate(-50%, -20%) scale(3) rotate(720deg); opacity: 0; }
+                }
+                @keyframes dangerFlash {
+                    0%, 100% { 
+                        filter: brightness(1);
+                    }
+                    50% { 
+                        filter: brightness(1.3);
+                    }
                 }
             `;
             document.head.appendChild(style);
@@ -3536,21 +3830,24 @@ if ($result) {
             // NOW reveal what happens (street already incremented above)
             
             if (!survived) {
-                // TRAFFIC! Chicken gets hit
+                // TRAFFIC! Chicken gets hit - NEON RED DANGER!
                 streetEl.style.background = `
                     linear-gradient(to bottom, 
-                        rgba(239, 68, 68, 0.95) 0%, 
-                        rgba(220, 38, 38, 0.95) 10%, 
-                        rgba(185, 28, 28, 0.95) 45%, 
-                        rgba(255, 215, 0, 0.6) 48%, 
-                        rgba(255, 215, 0, 0.6) 52%, 
-                        rgba(185, 28, 28, 0.95) 55%, 
-                        rgba(220, 38, 38, 0.95) 90%, 
-                        rgba(239, 68, 68, 0.95) 100%
+                        rgba(239, 68, 68, 1) 0%, 
+                        rgba(220, 38, 38, 1) 10%, 
+                        rgba(185, 28, 28, 1) 45%, 
+                        rgba(245, 158, 11, 0.8) 48%, 
+                        rgba(245, 158, 11, 0.8) 52%, 
+                        rgba(185, 28, 28, 1) 55%, 
+                        rgba(220, 38, 38, 1) 90%, 
+                        rgba(239, 68, 68, 1) 100%
                     )
                 `;
-                streetEl.style.animation = 'streetReveal 0.5s ease-out';
-                streetEl.style.boxShadow = '0 0 40px rgba(239, 68, 68, 0.8), inset 0 0 40px rgba(0,0,0,0.5)';
+                streetEl.style.animation = 'streetReveal 0.5s ease-out, dangerFlash 0.3s ease-in-out infinite';
+                streetEl.style.boxShadow = '0 0 60px rgba(239, 68, 68, 1), ' +
+                                          'inset 0 0 50px rgba(0,0,0,0.7), ' +
+                                          '0 0 100px rgba(239, 68, 68, 0.8)';
+                streetEl.style.border = '3px solid #ef4444';
                 
                 // Add cars
                 addCarsToStreet(streetEl);
@@ -3590,21 +3887,24 @@ if ($result) {
                 return;
             }
             
-            // SAFE! Construction site (Baustelle)
+            // SAFE! Construction site (Baustelle) - NEON GREEN!
             streetEl.style.background = `
                 linear-gradient(to bottom, 
-                    rgba(16, 185, 129, 0.95) 0%, 
-                    rgba(5, 150, 105, 0.95) 10%, 
-                    rgba(4, 120, 87, 0.95) 45%, 
-                    rgba(255, 215, 0, 0.6) 48%, 
-                    rgba(255, 215, 0, 0.6) 52%, 
-                    rgba(4, 120, 87, 0.95) 55%, 
-                    rgba(5, 150, 105, 0.95) 90%, 
-                    rgba(16, 185, 129, 0.95) 100%
+                    rgba(16, 185, 129, 1) 0%, 
+                    rgba(5, 150, 105, 1) 10%, 
+                    rgba(4, 120, 87, 1) 45%, 
+                    rgba(245, 158, 11, 0.8) 48%, 
+                    rgba(245, 158, 11, 0.8) 52%, 
+                    rgba(4, 120, 87, 1) 55%, 
+                    rgba(5, 150, 105, 1) 90%, 
+                    rgba(16, 185, 129, 1) 100%
                 )
             `;
             streetEl.style.animation = 'streetReveal 0.5s ease-out';
-            streetEl.style.boxShadow = '0 0 40px rgba(16, 185, 129, 0.8), inset 0 0 40px rgba(0,0,0,0.3)';
+            streetEl.style.boxShadow = '0 0 60px rgba(16, 185, 129, 1), ' +
+                                      'inset 0 0 50px rgba(0,0,0,0.5), ' +
+                                      '0 0 100px rgba(16, 185, 129, 0.6)';
+            streetEl.style.border = '3px solid #10b981';
             
             // Add construction signs
             addConstructionSigns(streetEl);

@@ -258,3 +258,225 @@ Empfehlung: casino.php ist 5549 Zeilen groß
 **Impact**: Kritisch (Kern-Feature standardisiert)
 
 **Codex Agent** ✅
+
+---
+
+## [2025-11-11 19:30] Kassensystem komplett überarbeitet (Simplified)
+
+### 🎯 Aufgabe
+Vereinfachung des Kassensystems. User-Anforderung:
+- Zu viel Komplexität (Guthaben, Gedeckt-bis, nächste Zahlung)
+- Hauptziel: **Klar sehen, wann die nächste Zahlung fällig ist**
+- **Fairness**: Wer nicht dabei war → Gutschrift aufs Konto
+- Konto nutzbar für Casino UND Monatsbeiträge
+- Simpel, übersichtlich, fair
+
+### ✅ Durchgeführte Änderungen
+
+#### 1. Datenbank-Migration (`/migrations/auto/20251111_simplify_kasse_system.sql`)
+```sql
+- DROP + CREATE VIEW v_member_konto_simple
+  → Zeigt: konto_saldo, naechste_faelligkeit, zahlungsstatus, monate_gedeckt
+  → Status: 'gedeckt', 'ueberfaellig', 'inactive'
+  → Nächste Fälligkeit: immer 1. des nächsten Monats
+
+- DROP + CREATE VIEW v_kasse_dashboard
+  → Dashboard-Stats: kassenstand_pool, aktive_mitglieder, ueberfaellig_count, transaktionen_monat
+
+- CREATE TABLE zahlungs_tracking
+  → Optional für zukünftiges Tracking
+```
+
+**Status**: ✅ Erfolgreich migriert
+
+---
+
+#### 2. API-Endpunkte (vereinfacht)
+
+**`/api/v2/get_member_konto.php`**
+- Zeigt alle Mitglieder mit Konto-Saldo und Status
+- Sortierung: Überfällige zuerst
+- Response: id, name, konto_saldo, naechste_faelligkeit, zahlungsstatus, monate_gedeckt, emoji
+
+**`/api/v2/get_kasse_simple.php`**
+- Dashboard-Stats + letzte 10 Transaktionen
+- Response: kassenstand, aktive_mitglieder, ueberfaellig_count, transaktionen_monat, recent_transactions
+
+**`/api/v2/gutschrift_nicht_dabei.php`**
+- Bucht Gutschrift für Mitglieder, die nicht dabei waren
+- POST: mitglied_id, betrag, beschreibung
+- Bucht als Typ 'AUSGLEICH' (positiv)
+- Nur für Admins
+
+**Status**: ✅ Alle Endpunkte erstellt und getestet
+
+---
+
+#### 3. Frontend komplett neu (`/kasse.php`)
+
+**Alt**: Komplexe Tabellen mit Gedeckt-bis, Rückständen, Verzug-Logik
+**Neu**: Simplizierte Card-basierte UI
+
+**Features:**
+- Dashboard-Stats (4 Cards): Kassenstand, Aktive, Überfällige, Transaktionen
+- Mitglieder-Liste mit:
+  - Avatar + Name + Emoji-Status (🟢/🔴/⚪)
+  - Konto-Saldo (farblich: grün/rot)
+  - "Nächste Zahlung fällig am: [Datum]"
+  - "Gedeckt für: X Monate"
+  - Status-Badge (Gedeckt/Überfällig/Inaktiv)
+- Letzte Transaktionen mit Typ, Datum, Betrag
+- Auto-Refresh alle 30 Sekunden
+- Responsive Mobile-Design
+
+**Status**: ✅ Live
+
+---
+
+#### 4. Admin-Panel Update (`/admin_kasse.php`)
+
+**Neue Sektion hinzugefügt:**
+- **"Gutschrift: Nicht dabei gewesen"**
+  - Mitglied auswählen
+  - Betrag (Standard: 10€)
+  - Grund/Beschreibung
+  - Button → bucht AUSGLEICH
+
+**Bestehende Features:**
+- Gruppenaktion buchen (Kasse zahlt / anteilig)
+- Einzahlung hinzufügen
+- Schaden/Ausgabe erfassen
+
+**Status**: ✅ Erweitert und funktionsfähig
+
+---
+
+#### 5. Dokumentation (`/KASSE_SIMPLE.md`)
+
+Vollständige Dokumentation erstellt:
+- Kern-Konzepte (Konto, nächste Zahlung, Status, Fairness)
+- Datenbank-Struktur (Views, Tabellen)
+- API-Endpunkte mit Request/Response-Beispielen
+- Berechnungslogik (Konto-Saldo, Status, Monate gedeckt)
+- Beispiel-Flows (Nicht dabei, Monatszahlung, Event)
+- Migration-Infos
+
+**Status**: ✅ Dokumentiert
+
+---
+
+### 🔄 Änderungen im Detail
+
+#### Logik-Vereinfachung:
+**Vorher:**
+- Komplexe Verzugs-Berechnung
+- Gedeckt-bis mit Datum-Arithmetik
+- Automatische Monatsbeitrags-Abbuchungen
+- Mehrere Saldo-Typen (Beiträge, Anteile, Schäden getrennt)
+
+**Nachher:**
+- **Ein Konto-Saldo** für alles
+- **Nächste Zahlung**: Immer 1. des nächsten Monats (fix)
+- **Status**: Simpel → Konto >= 10€ = gedeckt, sonst überfällig
+- **Keine automatischen Abbuchungen**
+- **Fairness**: Gutschrift-Button für "nicht dabei"
+
+#### Transaktionstypen (unverändert, aber vereinfacht genutzt):
+- `EINZAHLUNG` → +Betrag aufs Konto
+- `AUSGLEICH` → +Betrag (Gutschrift, z.B. nicht dabei)
+- `AUSZAHLUNG` → -Betrag vom Pool
+- `SCHADEN` → -Betrag vom Mitglieds-Konto
+- `GRUPPENAKTION_ANTEILIG` → Event-Anteil pro Teilnehmer
+- `GRUPPENAKTION_KASSE` → Pool zahlt Event
+
+---
+
+### 🧮 Beispiel-Berechnungen
+
+**Mitglied zahlt 30€ ein:**
+```
+Konto-Saldo: 0€ → 30€
+Monate gedeckt: 30€ / 10€ = 3 Monate
+Nächste Zahlung: 01.12.2025
+Status: 🟢 Gedeckt
+```
+
+**Mitglied hat 5€, Monatsbeitrag 10€:**
+```
+Konto-Saldo: 5€
+Monate gedeckt: 5€ / 10€ = 0 Monate
+Status: 🔴 Überfällig
+```
+
+**Mitglied war nicht dabei (Event 60€, 4 Teilnehmer):**
+```
+Fair-Share: 60€ / 4 = 15€
+Nicht-Teilnehmer bekommen: +15€ Gutschrift
+Konto-Saldo: 10€ → 25€
+```
+
+---
+
+### 📂 Geänderte/Neue Dateien
+
+**Neu erstellt:**
+- `/migrations/auto/20251111_simplify_kasse_system.sql`
+- `/api/v2/get_member_konto.php`
+- `/api/v2/get_kasse_simple.php`
+- `/api/v2/gutschrift_nicht_dabei.php`
+- `/KASSE_SIMPLE.md`
+
+**Überschrieben:**
+- `/kasse.php` (komplett neu, simplifiziert)
+  - Alt gesichert als: `/kasse_old_complex.php`
+
+**Erweitert:**
+- `/admin_kasse.php` (neue Gutschrift-Sektion)
+
+---
+
+### 🚀 Deployment
+
+```bash
+# Migration anwenden
+mysql -u root pushingp < /var/www/html/migrations/auto/20251111_simplify_kasse_system.sql
+
+# Dateien sind bereits live
+# Apache läuft ohne Neustart
+```
+
+**Status**: ✅ Live und getestet
+
+---
+
+### 🎯 Erreichte Ziele
+
+✅ **Simpel**: Nur 3 Haupt-Infos (Konto, nächste Zahlung, Status)
+✅ **Fair**: Gutschrift-System für "nicht dabei"
+✅ **Übersichtlich**: Klare Status-Badges, farbliche Kennzeichnung
+✅ **Flexibel**: Konto für Casino UND Monatsbeiträge nutzbar
+✅ **Transparent**: Alle Transaktionen sichtbar, Echtzeit-Updates
+✅ **Keine Automatik**: Keine automatischen Abbuchungen mehr
+
+---
+
+### ⚠️ Breaking Changes
+
+- **Alte Views** `v_member_payment_overview`, `v2_member_real_balance` werden nicht mehr genutzt (aber nicht gelöscht)
+- **Monatliche Abbuchungen** finden NICHT mehr automatisch statt
+- **API-Endpunkt** `/api/v2/process_monthly_fees.php` ist obsolet (aber bleibt für Legacy)
+
+---
+
+### 🔮 Zukünftige Erweiterungen (optional)
+
+- Automatische Erinnerungen bei Überfälligkeit (Push-Benachrichtigung)
+- Zahlungs-Historie pro Mitglied (Timeline)
+- Budgets für Events (Monatslimit)
+- Raten-Zahlungen für große Beträge
+
+---
+
+**Autor**: Codex Agent  
+**Datum**: 11.11.2025, 19:30 Uhr  
+**Status**: ✅ Abgeschlossen und deployed
