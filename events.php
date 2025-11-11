@@ -11,247 +11,335 @@ $is_admin = is_admin();
 $is_admin_user = $is_admin;
 $page_title = 'Events';
 
-// Custom page styles
+// Custom page styles - Apple iOS Style
 ob_start();
 ?>
 <style>
-    .events-grid {
-        display: grid;
-        grid-template-columns: 2fr 1fr;
-        gap: 24px;
-        margin-top: 24px;
+    /* Apple-Inspired Events Page */
+    .events-container {
+        max-width: 680px;
+        margin: 0 auto;
+        padding: 20px;
     }
     
-    @media (max-width: 968px) {
-        .events-grid {
-            grid-template-columns: 1fr;
+    .month-selector {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 16px;
+        margin-bottom: 24px;
+        padding: 12px;
+        background: var(--bg-secondary);
+        border-radius: 16px;
+    }
+    
+    .month-btn {
+        background: none;
+        border: none;
+        color: var(--accent);
+        font-size: 1.125rem;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 8px 16px;
+        border-radius: 8px;
+        transition: all 0.2s;
+    }
+    
+    .month-btn:hover {
+        background: var(--bg-tertiary);
+    }
+    
+    .month-label {
+        font-size: 1.125rem;
+        font-weight: 700;
+        min-width: 160px;
+        text-align: center;
+    }
+    
+    .events-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .date-group {
+        margin-bottom: 20px;
+    }
+    
+    .date-header {
+        position: sticky;
+        top: 110px;
+        z-index: 10;
+        background: var(--bg-primary);
+        padding: 12px 16px;
+        margin: 0 -16px 8px -16px;
+        border-bottom: 1px solid var(--border);
+        backdrop-filter: blur(10px);
+    }
+    
+    .date-header-day {
+        font-size: 0.813rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        color: var(--text-secondary);
+        letter-spacing: 0.5px;
+    }
+    
+    .date-header-date {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin-top: 2px;
+    }
+    
+    .date-header.today .date-header-date {
+        color: var(--accent);
+    }
+    
+    .event-card {
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 16px;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+    
+    .event-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        border-color: var(--accent);
+    }
+    
+    .event-card:active {
+        transform: scale(0.98);
+    }
+    
+    .event-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 12px;
+    }
+    
+    .event-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin-bottom: 4px;
+    }
+    
+    .event-time {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        padding: 4px 10px;
+        background: var(--bg-tertiary);
+        border-radius: 8px;
+        font-size: 0.813rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    
+    .event-meta {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-bottom: 16px;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+    
+    .event-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .event-meta-icon {
+        font-size: 1rem;
+    }
+    
+    .event-actions {
+        display: flex;
+        gap: 8px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+    }
+    
+    .event-btn {
+        flex: 1;
+        padding: 10px 16px;
+        border-radius: 10px;
+        font-size: 0.875rem;
+        font-weight: 600;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+    }
+    
+    .event-btn.accept {
+        background: var(--success);
+        color: white;
+    }
+    
+    .event-btn.accept:hover {
+        background: #2d8a4d;
+        transform: scale(1.02);
+    }
+    
+    .event-btn.decline {
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+    }
+    
+    .event-btn.decline:hover {
+        background: var(--error);
+        color: white;
+    }
+    
+    .event-btn.accepted {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--success);
+        border: 1px solid var(--success);
+    }
+    
+    .event-btn.declined {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--error);
+        border: 1px solid var(--error);
+    }
+    
+    .participants-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 12px;
+    }
+    
+    .participant-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 10px;
+        background: var(--bg-tertiary);
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+    }
+    
+    .participant-badge.accepted {
+        background: rgba(34, 197, 94, 0.15);
+        color: var(--success);
+    }
+    
+    .participant-badge.declined {
+        background: rgba(239, 68, 68, 0.15);
+        color: var(--error);
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: var(--text-secondary);
+    }
+    
+    .empty-state-icon {
+        font-size: 3rem;
+        margin-bottom: 16px;
+        opacity: 0.5;
+    }
+    
+    .empty-state-text {
+        font-size: 1.125rem;
+        font-weight: 600;
+        margin-bottom: 8px;
+    }
+    
+    /* Admin Actions */
+    .admin-actions {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px solid var(--border);
+        display: flex;
+        gap: 8px;
+    }
+    
+    .admin-btn {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 0.813rem;
+        font-weight: 600;
+        border: 1px solid var(--border);
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+    
+    .admin-btn:hover {
+        background: var(--accent);
+        color: white;
+        border-color: var(--accent);
+    }
+    
+    /* Create Event Button */
+    .create-event-btn {
+        width: 100%;
+        padding: 16px 24px;
+        background: linear-gradient(135deg, var(--accent), #a855f7);
+        color: white;
+        border: none;
+        border-radius: 16px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 16px rgba(88, 101, 242, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+    }
+    
+    .create-event-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(88, 101, 242, 0.4);
+    }
+    
+    .create-event-btn:active {
+        transform: scale(0.98);
+    }
+    
+    /* Mobile Optimizations */
+    @media (max-width: 768px) {
+        .events-container {
+            padding: 16px 12px;
         }
         
-        .calendar {
-            gap: 4px;
-        }
-        
-        .day-box {
-            min-height: 60px;
-            padding: 4px;
-            font-size: 0.75rem;
-        }
-        
-        .weekday-header {
-            font-size: 0.65rem;
-            padding: 4px;
-        }
-        
-        .calendar-header {
-            flex-direction: column;
-            gap: 12px;
-        }
-        
-        .calendar-nav-btn {
-            width: 100%;
+        .date-header {
+            top: 60px;
         }
         
         .event-card {
-            padding: 12px;
+            padding: 14px;
+        }
+        
+        .event-title {
+            font-size: 1rem;
         }
         
         .event-actions {
             flex-direction: column;
         }
         
-        .btn-join, .btn-leave {
+        .event-btn {
             width: 100%;
         }
-    }
-    
-    .calendar {
-        display: grid;
-        grid-template-columns: repeat(7, 1fr);
-        gap: 8px;
-    }
-    
-    .calendar-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 16px;
-        padding: 12px;
-        background: var(--bg-tertiary);
-        border-radius: 8px;
-    }
-    
-    .calendar-nav-btn {
-        background: var(--accent);
-        color: white;
-        border: none;
-        padding: 8px 16px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-weight: 600;
-        transition: all 0.3s;
-    }
-    
-    .calendar-nav-btn:hover {
-        background: var(--accent-hover);
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px var(--accent-glow);
-    }
-    
-    .calendar-month {
-        font-weight: 700;
-        font-size: 1.125rem;
-    }
-    
-    .weekday-header {
-        text-align: center;
-        font-size: 0.75rem;
-        font-weight: 600;
-        color: var(--text-secondary);
-        padding: 8px;
-        text-transform: uppercase;
-    }
-    
-    .event-card {
-        padding: 16px;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: 12px;
-        margin-bottom: 12px;
-        transition: all 0.3s ease;
-    }
-    
-    .event-card:hover {
-        background: var(--bg-tertiary);
-        border-color: var(--border-hover);
-        transform: translateY(-2px);
-    }
-    
-    .event-title {
-        font-weight: 600;
-        margin-bottom: 8px;
-    }
-    
-    .event-meta {
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        margin-bottom: 8px;
-    }
-    
-    .event-actions {
-        display: flex;
-        gap: 8px;
-        margin-top: 12px;
-    }
-    
-    .btn-join {
-        padding: 8px 16px;
-        background: var(--success);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-join:hover {
-        background: #2d8a4d;
-        transform: scale(1.05);
-    }
-    
-    .btn-leave {
-        padding: 8px 16px;
-        background: var(--error);
-        color: white;
-        border: none;
-        border-radius: 8px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: all 0.2s ease;
-    }
-    
-    .btn-leave:hover {
-        background: #c23538;
-        transform: scale(1.05);
-    }
-    
-    .participants {
-        font-size: 0.813rem;
-        color: var(--text-tertiary);
-        margin-top: 8px;
-    }
-    
-    .day-box {
-        min-height: 80px;
-        padding: 8px;
-        background: var(--bg-secondary);
-        border: 1px solid var(--border);
-        border-radius: 8px;
-        position: relative;
-        cursor: pointer;
-        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    
-    .day-box:hover {
-        background: var(--bg-tertiary);
-        border-color: var(--accent);
-        transform: translateY(-4px);
-        box-shadow: 0 8px 20px var(--accent-glow);
-    }
-    
-    .day-box.today {
-        border: 2px solid var(--accent);
-        background: var(--bg-tertiary);
-        box-shadow: 0 0 20px var(--accent-glow);
-    }
-    
-    .day-box.selected {
-        background: var(--accent);
-        border-color: var(--accent);
-        transform: scale(1.05);
-    }
-    
-    .day-box.selected .day-number {
-        color: white;
-        font-weight: 800;
-    }
-    
-    .day-box.has-event {
-        border-color: var(--accent);
-    }
-    
-    .day-number {
-        position: absolute;
-        top: 6px;
-        right: 8px;
-        font-size: 0.875rem;
-        color: var(--text-secondary);
-        font-weight: 600;
-    }
-    
-    .event-pill {
-        margin-top: 20px;
-        background: var(--accent);
-        color: white;
-        border-radius: 6px;
-        padding: 4px 6px;
-        font-size: 0.7rem;
-        font-weight: 600;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        animation: scaleIn 0.3s ease;
-    }
-    
-    .date-picker-info {
-        margin-top: 16px;
-        padding: 12px;
-        background: var(--bg-tertiary);
-        border: 1px solid var(--accent);
-        border-radius: 8px;
-        text-align: center;
-        font-size: 0.875rem;
-        animation: fadeIn 0.3s ease;
     }
 </style>
 <?php
@@ -260,288 +348,266 @@ $page_styles = ob_get_clean();
 require_once __DIR__ . '/includes/header.php';
 ?>
 
-    <div class="container">
+<div class="container">
+    <div class="events-container">
         <div class="welcome">
             <h1>🎉 Events</h1>
-            <p class="text-secondary">Gruppenevents planen und verwalten</p>
+            <p class="text-secondary">Deine kommenden Gruppenevents</p>
         </div>
-
-        <div class="events-grid">
-            <div>
-                <div class="section">
-                    <div class="section-header">
-                        <span>📆</span>
-                        <h2 class="section-title">Event-Kalender</h2>
-                    </div>
-                    <div class="calendar-header">
-                        <button class="calendar-nav-btn" onclick="changeMonth(-1)">◀ Zurück</button>
-                        <div class="calendar-month" id="monthLabel"></div>
-                        <button class="calendar-nav-btn" onclick="changeMonth(1)">Weiter ▶</button>
-                    </div>
-                    <div id="calendar" class="calendar"></div>
-                    <div id="selectedInfo"></div>
-                </div>
-            </div>
-            
-            <div>
-                <div class="section">
-                    <div class="section-header">
-                        <span>📋</span>
-                        <h2 class="section-title">Kommende Events</h2>
-                    </div>
-                    <div id="upcomingList" class="upcoming-events-list"></div>
-                </div>
+        
+        <div style="margin-bottom: 20px;">
+            <button onclick="window.location.href='event_manager.php'" class="create-event-btn">
+                ➕ Neues Event erstellen
+            </button>
+        </div>
+        
+        <div class="month-selector">
+            <button class="month-btn" onclick="changeMonth(-1)">‹</button>
+            <div class="month-label" id="monthLabel"></div>
+            <button class="month-btn" onclick="changeMonth(1)">›</button>
+        </div>
+        
+        <div class="events-timeline" id="eventsTimeline">
+            <div class="empty-state">
+                <div class="empty-state-icon">📅</div>
+                <div class="empty-state-text">Lädt Events...</div>
             </div>
         </div>
     </div>
-                </div>
-            </div>
-        </div>
-    </div>
+</div>
 
 <script>
-const cal = document.getElementById('calendar');
-const upcomingList = document.getElementById('upcomingList');
-const monthLabel = document.getElementById('monthLabel');
-const selectedInfo = document.getElementById('selectedInfo');
-
-let currentYear = new Date().getFullYear();
-let currentMonth = new Date().getMonth();
-let selectedDate = null;
-let allEvents = [];
-
 const isAdmin = <?php echo $is_admin ? 'true' : 'false'; ?>;
-const today = new Date();
-const maxDate = new Date(today.getFullYear(), today.getMonth() + 1, today.getDate());
+const userId = <?php echo $user_id; ?>;
+const monthLabel = document.getElementById('monthLabel');
+const eventsTimeline = document.getElementById('eventsTimeline');
+
+let currentDate = new Date();
+let currentMonth = currentDate.getMonth();
+let currentYear = currentDate.getFullYear();
+let allEvents = [];
 
 const monthNames = ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni', 
                     'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'];
-const weekdays = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+const weekdayNames = ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'];
 
-async function loadEvents() {
-  try {
-    const r = await fetch('/api/events_list.php');
-    allEvents = await r.json();
-    renderUpcomingEvents(allEvents);
-    renderCalendar();
-  } catch (e) {
-    console.error('Fehler:', e);
-  }
-}
-
-// Monat wechseln
 function changeMonth(delta) {
     currentMonth += delta;
-    if (currentMonth > 11) { currentMonth = 0; currentYear++; }
-    else if (currentMonth < 0) { currentMonth = 11; currentYear--; }
-    renderCalendar();
-}
-
-// --- 2️⃣ Kommende Events anzeigen ---
-function renderUpcomingEvents(events) {
-  upcomingList.innerHTML = '';
-  const upcoming = events.filter(e => new Date(e.datum) >= new Date().setHours(0,0,0,0))
-                         .sort((a, b) => new Date(a.datum) - new Date(b.datum));
-  
-  if (upcoming.length === 0) {
-    upcomingList.innerHTML = '<div class="empty-state">Keine kommenden Events</div>';
-    return;
-  }
-  
-  upcoming.forEach(e => {
-    const card = document.createElement('div');
-    card.className = 'event-card';
-    
-    // Payment badge
-    let paymentBadge = '';
-    if (e.cost > 0) {
-        if (e.paid_by === 'pool') {
-            paymentBadge = `<span style="background: #10b981; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💰 ${e.cost}€ aus Kasse</span>`;
-        } else if (e.paid_by === 'anteilig') {
-            paymentBadge = `<span style="background: #f59e0b; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">🔀 ${e.cost}€ anteilig</span>`;
-        } else {
-            paymentBadge = `<span style="background: var(--text-tertiary); color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">💳 ${e.cost}€ privat</span>`;
-        }
+    if (currentMonth > 11) { 
+        currentMonth = 0; 
+        currentYear++; 
+    } else if (currentMonth < 0) { 
+        currentMonth = 11; 
+        currentYear--; 
     }
-    
-    // Cost per person badge
-    let costPerPersonBadge = '';
-    if (e.cost_per_person > 0) {
-        costPerPersonBadge = `<span style="background: #3b82f6; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; margin-left: 8px;">👤 ~${e.cost_per_person}€/Person</span>`;
-    }
-    
-    card.innerHTML = `
-      <div class="event-title">${e.title} ${paymentBadge} ${costPerPersonBadge}</div>
-      <div class="event-meta">
-        📅 ${new Date(e.datum).toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: 'short', year: 'numeric' })}
-        ${e.start_time ? '⏰ ' + e.start_time : ''} ${e.end_time ? '– ' + e.end_time : ''}<br>
-        ${e.location ? '📍 ' + e.location : ''}
-      </div>
-      <div id="p-${e.id}" class="participants"></div>
-      <div class="event-actions">
-        <button onclick="join(${e.id})" class="btn-join">✓ Ich komme</button>
-        <button onclick="leave(${e.id})" class="btn-leave">✗ Absagen</button>
-        ${isAdmin ? '<button onclick="deleteEvent(' + e.id + ')" class="btn-leave" style="background: var(--error);">🗑️</button>' : ''}
-      </div>
-    `;
-    upcomingList.appendChild(card);
-    loadParticipants(e.id);
-  });
-}
-
-// --- 3️⃣ Interaktiver Kalender ---
-function renderCalendar() {
-  cal.innerHTML = '';
-  monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
-  
-  // Wochentage-Header
-  weekdays.forEach(day => {
-    const header = document.createElement('div');
-    header.className = 'weekday-header';
-    header.textContent = day;
-    cal.appendChild(header);
-  });
-  
-  const start = new Date(currentYear, currentMonth, 1);
-  const startDay = start.getDay() === 0 ? 6 : start.getDay() - 1;
-  const days = new Date(currentYear, currentMonth + 1, 0).getDate();
-  
-  const todayStr = today.toISOString().slice(0, 10);
-
-  for (let i = 0; i < startDay; i++) {
-    cal.appendChild(document.createElement('div'));
-  }
-
-  for (let d = 1; d <= days; d++) {
-    const box = document.createElement('div');
-    box.className = 'day-box';
-    
-    const iso = new Date(currentYear, currentMonth, d).toISOString().slice(0, 10);
-    const dateObj = new Date(currentYear, currentMonth, d);
-    const dayEvents = allEvents.filter(e => e.datum === iso);
-    
-    if (iso === todayStr) box.classList.add('today');
-    if (selectedDate === iso) box.classList.add('selected');
-    if (dayEvents.length > 0) box.classList.add('has-event');
-    
-    box.innerHTML = `<div class="day-number">${d}</div>`;
-    
-    dayEvents.forEach(e => {
-      const pill = document.createElement('div');
-      pill.className = 'event-pill';
-      pill.textContent = e.title;
-      box.appendChild(pill);
-    });
-    
-    box.addEventListener('click', () => selectDate(iso, dayEvents, dateObj));
-    
-    cal.appendChild(box);
-  }
-}
-
-// Datum auswählen
-function selectDate(dateStr, events, dateObj) {
-    selectedDate = dateStr;
-    renderCalendar();
-    
-    const canCreate = isAdmin && dateObj >= today && dateObj <= maxDate;
-    
-    selectedInfo.innerHTML = `
-        <div class="date-picker-info">
-            <strong>📅 ${new Date(dateStr).toLocaleDateString('de-DE', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</strong><br>
-            ${events.length > 0 ? '<span style="color: var(--accent);">✓ ' + events.length + ' Event(s)</span>' : '<span style="color: var(--text-secondary);">Keine Events</span>'}
-        </div>
-    `;
-    
-    if (canCreate) {
-        selectedInfo.innerHTML += `
-            <div class="event-form-inline">
-                <h3 style="margin-bottom: 12px; font-size: 1rem;">➕ Event erstellen</h3>
-                <form id="quickEventForm" onsubmit="createQuickEvent(event, '${dateStr}')">
-                    <input type="text" name="title" placeholder="Event-Titel" required>
-                    <input type="time" name="start_time" placeholder="Startzeit">
-                    <input type="time" name="end_time" placeholder="Endzeit">
-                    <input type="text" name="location" placeholder="Ort">
-                    
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px;">
-                        <input type="number" name="cost" step="0.01" placeholder="Gesamtkosten (€)" min="0">
-                        <input type="number" name="cost_per_person" step="0.01" placeholder="Kosten/Person (€)" min="0">
-                    </div>
-                    
-                    <select name="paid_by" style="padding: 8px; border-radius: 6px; border: 1px solid var(--border); background: var(--bg-secondary); margin-top: 8px;">
-                        <option value="private">Jeder zahlt selbst</option>
-                        <option value="pool">Aus Kasse (Pool)</option>
-                        <option value="anteilig">Anteilig aufteilen</option>
-                    </select>
-                    
-                    <button type="submit" class="btn" style="width: 100%; margin-top: 8px;">Event erstellen</button>
-                    <div id="quickEventMsg" style="margin-top: 8px; font-size: 0.875rem;"></div>
-                </form>
-            </div>
-        `;
-    } else if (isAdmin && dateObj > maxDate) {
-        selectedInfo.innerHTML += '<div class="date-picker-info" style="margin-top: 12px; border-color: var(--warning); color: var(--warning);">⚠️ Events nur 1 Monat im Voraus</div>';
-    } else if (isAdmin && dateObj < today) {
-        selectedInfo.innerHTML += '<div class="date-picker-info" style="margin-top: 12px; border-color: var(--text-tertiary);">Vergangenes Datum</div>';
-    }
-}
-
-async function createQuickEvent(e, dateStr) {
-    e.preventDefault();
-    const form = e.target;
-    const fd = new FormData(form);
-    fd.set('datum', dateStr);
-    
-    const resp = await fetch('/api/events_create.php', { method: 'POST', body: fd });
-    const res = await resp.json();
-    
-    const msg = document.getElementById('quickEventMsg');
-    if (res.ok) {
-        msg.textContent = '✔ Event erstellt!';
-        msg.style.color = 'var(--success)';
-        form.reset();
-        loadEvents();
-    } else {
-        msg.textContent = '✖ Fehler';
-        msg.style.color = 'var(--error)';
-    }
-}
-
-// --- 4️⃣ Teilnehmerliste dynamisch laden ---
-async function loadParticipants(eventId) {
-  try {
-    const r = await fetch(`/api/event_participants.php?event_id=${eventId}`);
-    const data = await r.json();
-    const names = data.filter(p => p.status === 'coming').map(p => p.name);
-    const div = document.getElementById(`p-${eventId}`);
-    div.textContent = names.length ? `👥 Dabei: ${names.join(', ')}` : '👤 Noch keine Zusagen';
-  } catch { }
-}
-
-async function join(id) {
-  const fd = new FormData();
-  fd.set('event_id', id);
-  await fetch('/api/event_join.php', { method: 'POST', body: fd });
-  loadEvents();
-}
-
-async function leave(id) {
-  const fd = new FormData();
-  fd.set('event_id', id);
-  await fetch('/api/event_leave.php', { method: 'POST', body: fd });
-  loadEvents();
-}
-
-async function deleteEvent(id) {
-    if (!confirm('Event wirklich löschen?')) return;
-    const fd = new FormData();
-    fd.set('event_id', id);
-    await fetch('/api/events_delete.php', { method: 'POST', body: fd });
     loadEvents();
 }
 
+async function loadEvents() {
+    try {
+        monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+        
+        const response = await fetch('/api/events_list.php');
+        allEvents = await response.json();
+        
+        // Filter events for current month
+        const monthEvents = allEvents.filter(event => {
+            const eventDate = new Date(event.datum);
+            return eventDate.getMonth() === currentMonth && eventDate.getFullYear() === currentYear;
+        });
+        
+        renderEvents(monthEvents);
+    } catch (error) {
+        console.error('Fehler beim Laden:', error);
+        eventsTimeline.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">❌</div>
+                <div class="empty-state-text">Fehler beim Laden</div>
+            </div>
+        `;
+    }
+}
+
+function renderEvents(events) {
+    if (events.length === 0) {
+        eventsTimeline.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-state-icon">📭</div>
+                <div class="empty-state-text">Keine Events in diesem Monat</div>
+                <p class="text-secondary" style="margin-top: 8px;">Schau in einem anderen Monat nach</p>
+            </div>
+        `;
+        return;
+    }
+    
+    // Group events by date
+    const grouped = events.reduce((acc, event) => {
+        const date = event.datum;
+        if (!acc[date]) acc[date] = [];
+        acc[date].push(event);
+        return acc;
+    }, {});
+    
+    // Sort dates
+    const sortedDates = Object.keys(grouped).sort();
+    
+    let html = '';
+    const today = new Date().toISOString().split('T')[0];
+    
+    sortedDates.forEach(date => {
+        const eventDate = new Date(date);
+        const dayName = weekdayNames[eventDate.getDay()];
+        const dayNum = eventDate.getDate();
+        const isToday = date === today;
+        
+        html += `
+            <div class="date-group">
+                <div class="date-header ${isToday ? 'today' : ''}">
+                    <div class="date-header-day">${dayName.toUpperCase()}</div>
+                    <div class="date-header-date">${dayNum}${isToday ? ' • Heute' : ''}</div>
+                </div>
+        `;
+        
+        grouped[date].forEach(event => {
+            html += renderEventCard(event);
+        });
+        
+        html += '</div>';
+    });
+    
+    eventsTimeline.innerHTML = html;
+}
+
+function renderEventCard(event) {
+    const userResponse = event.participants?.find(p => p.mitglied_id == userId);
+    const status = userResponse?.status || 'pending';
+    
+    const accepted = event.participants?.filter(p => p.status === 'accepted').length || 0;
+    const declined = event.participants?.filter(p => p.status === 'declined').length || 0;
+    const pending = event.participants?.filter(p => p.status === 'pending').length || 0;
+    
+    // Check if user is owner or admin
+    const isOwner = event.created_by == userId;
+    const canEdit = isAdmin || isOwner;
+    
+    return `
+        <div class="event-card" onclick="toggleEventDetails(${event.id})">
+            <div class="event-header">
+                <div>
+                    <div class="event-title">${escapeHtml(event.title)}</div>
+                    ${event.start_time ? `<div class="event-time">🕐 ${event.start_time} Uhr</div>` : ''}
+                </div>
+            </div>
+            
+            <div class="event-meta">
+                ${event.location ? `
+                    <div class="event-meta-item">
+                        <span class="event-meta-icon">📍</span>
+                        <span>${escapeHtml(event.location)}</span>
+                    </div>
+                ` : ''}
+                ${event.cost > 0 ? `
+                    <div class="event-meta-item">
+                        <span class="event-meta-icon">💰</span>
+                        <span>${event.cost}€ pro Person</span>
+                    </div>
+                ` : ''}
+                ${event.description ? `
+                    <div class="event-meta-item">
+                        <span class="event-meta-icon">📝</span>
+                        <span>${escapeHtml(event.description)}</span>
+                    </div>
+                ` : ''}
+            </div>
+            
+            ${status === 'pending' ? `
+                <div class="event-actions">
+                    <button class="event-btn accept" onclick="respondToEvent(event, ${event.id}, 'accepted')">
+                        ✓ Zusagen
+                    </button>
+                    <button class="event-btn decline" onclick="respondToEvent(event, ${event.id}, 'declined')">
+                        ✕ Absagen
+                    </button>
+                </div>
+            ` : `
+                <div class="event-actions">
+                    <button class="event-btn ${status}" disabled>
+                        ${status === 'accepted' ? '✓ Zugesagt' : '✕ Abgesagt'}
+                    </button>
+                </div>
+            `}
+            
+            ${accepted + declined > 0 ? `
+                <div class="participants-list">
+                    <div class="participant-badge accepted">✓ ${accepted}</div>
+                    <div class="participant-badge declined">✕ ${declined}</div>
+                    ${pending > 0 ? `<div class="participant-badge">⏳ ${pending}</div>` : ''}
+                </div>
+            ` : ''}
+            
+            ${canEdit ? `
+                <div class="admin-actions">
+                    <button class="admin-btn" onclick="editEvent(event, ${event.id})">✏️ Bearbeiten</button>
+                    ${isAdmin || isOwner ? `<button class="admin-btn" onclick="deleteEvent(event, ${event.id})">🗑️ Löschen</button>` : ''}
+                </div>
+            ` : ''}
+        </div>
+    `;
+}
+
+async function respondToEvent(e, eventId, status) {
+    e.stopPropagation();
+    
+    try {
+        const formData = new FormData();
+        formData.append('event_id', eventId);
+        formData.append('status', status);
+        
+        const response = await fetch('/api/event_respond.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.status === 'success') {
+            loadEvents(); // Reload
+        } else {
+            alert('Fehler: ' + (result.error || 'Unbekannter Fehler'));
+        }
+    } catch (error) {
+        console.error('Fehler:', error);
+        alert('Netzwerkfehler beim Antworten');
+    }
+}
+
+function toggleEventDetails(eventId) {
+    // Optional: Expand event details
+    console.log('Event clicked:', eventId);
+}
+
+function editEvent(e, eventId) {
+    e.stopPropagation();
+    window.location.href = `/event_manager.php?edit=${eventId}`;
+}
+
+function deleteEvent(e, eventId) {
+    e.stopPropagation();
+    if (confirm('Event wirklich löschen?')) {
+        // Delete logic
+        window.location.href = `/api/event_delete.php?id=${eventId}`;
+    }
+}
+
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Initial load
 loadEvents();
-renderCalendar(); // Kalender sofort rendern, nicht erst nach Events laden
 </script>
+
 </body>
 </html>

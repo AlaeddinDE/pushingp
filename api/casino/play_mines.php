@@ -1,4 +1,8 @@
 <?php
+error_reporting(E_ALL);
+ini_set('display_errors', 0); // Don't display, but log
+ini_set('log_errors', 1);
+
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/db.php';
 header('Content-Type: application/json');
@@ -193,15 +197,25 @@ if ($action === 'cashout') {
     $stmt->execute();
     $stmt->close();
     
-    // Add balance
+    // Add balance - Use correct table structure
     $profit = $win_amount - $game['bet_amount'];
     if ($profit != 0) {
-        $username = $_SESSION['username'] ?? '';
-        $stmt = $conn->prepare("INSERT INTO transaktionen (username, amount, type, description, created_by) VALUES (?, ?, 'casino', ?, 'system')");
-        $description = $profit > 0 ? "Casino Mines Gewinn (+" . round($game['current_multiplier'], 2) . "x)" : "Casino Mines Verlust";
-        $stmt->bind_param('sds', $username, $profit, $description);
+        // Get mitglied_id from user_id
+        $stmt = $conn->prepare("SELECT id FROM users WHERE id = ?");
+        $stmt->bind_param('i', $user_id);
         $stmt->execute();
+        $stmt->bind_result($mitglied_id);
+        $stmt->fetch();
         $stmt->close();
+        
+        if ($mitglied_id) {
+            $typ = 'EINZAHLUNG'; // Gewinn = Einzahlung
+            $description = "Casino Mines Gewinn (" . round($game['current_multiplier'], 2) . "x)";
+            $stmt = $conn->prepare("INSERT INTO transaktionen (typ, betrag, mitglied_id, beschreibung, erstellt_von) VALUES (?, ?, ?, ?, ?)");
+            $stmt->bind_param('sdisi', $typ, $profit, $mitglied_id, $description, $user_id);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
     
     unset($_SESSION['mines_game']);

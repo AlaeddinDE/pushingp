@@ -73,7 +73,7 @@ $show_casino = $user_balance >= 10.00;
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
-        /* Mobile Header Styles */
+        /* Modern Two-Row Header */
         .header {
             position: sticky;
             top: 0;
@@ -83,68 +83,107 @@ $show_casino = $user_balance >= 10.00;
             backdrop-filter: blur(10px);
         }
         
-        .header-content {
+        .header-top {
             max-width: 1400px;
             margin: 0 auto;
-            padding: 10px 20px;
+            padding: 12px 20px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            min-height: 50px;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .header-bottom {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 8px 20px;
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            justify-content: center;
         }
         
         .logo {
-            font-size: 1.125rem;
-            font-weight: 800;
+            font-size: 1.5rem;
+            font-weight: 900;
             letter-spacing: -0.02em;
             display: flex;
             align-items: center;
-            gap: 6px;
-            flex-shrink: 0;
+            gap: 10px;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
         }
         
-        .nav {
+        .top-nav {
             display: flex;
-            gap: 4px;
+            gap: 8px;
             align-items: center;
-            flex-wrap: nowrap;
         }
         
-        .nav-item {
-            padding: 6px 12px;
-            border-radius: 8px;
-            font-size: 0.813rem;
+        .bottom-nav {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.875rem;
             font-weight: 600;
             transition: all 0.2s;
             position: relative;
             text-decoration: none;
             color: var(--text-secondary);
-            white-space: nowrap;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
         
-        .nav-item:hover {
+        .nav-btn:hover {
             background: var(--bg-tertiary);
+            border-color: var(--accent);
             color: var(--text-primary);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(88, 101, 242, 0.2);
         }
         
-        .nav-item span.icon {
-            display: none;
+        .nav-btn.top-btn {
+            padding: 8px 16px;
+            font-size: 0.813rem;
+        }
+        
+        .nav-btn.logout {
+            background: rgba(239, 68, 68, 0.1);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: #ef4444;
+        }
+        
+        .nav-btn.logout:hover {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
         }
         
         .notification-badge {
             position: absolute;
-            top: -4px;
-            right: -4px;
+            top: -6px;
+            right: -6px;
             background: #ef4444;
             color: white;
-            font-size: 0.563rem;
+            font-size: 0.625rem;
             font-weight: 700;
-            padding: 2px 5px;
-            border-radius: 8px;
-            min-width: 16px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            min-width: 18px;
             text-align: center;
             line-height: 1.2;
-            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5);
             animation: pulse 2s infinite;
         }
         
@@ -162,16 +201,16 @@ $show_casino = $user_balance >= 10.00;
         /* Mobile Menu Toggle */
         .mobile-menu-toggle {
             display: none;
-            background: none;
-            border: none;
-            padding: 8px;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 10px;
+            border-radius: 8px;
             cursor: pointer;
-            flex-shrink: 0;
         }
         
         .mobile-menu-toggle span {
             display: block;
-            width: 22px;
+            width: 24px;
             height: 2px;
             background: var(--text-primary);
             margin: 4px 0;
@@ -180,7 +219,7 @@ $show_casino = $user_balance >= 10.00;
         }
         
         .mobile-menu-toggle.active span:nth-child(1) {
-            transform: rotate(45deg) translate(6px, 6px);
+            transform: rotate(45deg) translate(7px, 7px);
         }
         
         .mobile-menu-toggle.active span:nth-child(2) {
@@ -188,97 +227,68 @@ $show_casino = $user_balance >= 10.00;
         }
         
         .mobile-menu-toggle.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(6px, -6px);
+            transform: rotate(-45deg) translate(7px, -7px);
         }
         
-        /* Desktop - ab 1200px volle Navigation */
-        @media (min-width: 1200px) {
-            .nav-item {
-                padding: 6px 14px;
-                font-size: 0.875rem;
-            }
-        }
-        
-        /* Tablet - Navigation komprimieren */
-        @media (max-width: 1199px) and (min-width: 769px) {
-            .nav {
-                gap: 2px;
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .header-top {
+                padding: 10px 16px;
             }
             
-            .nav-item {
-                padding: 6px 10px;
-                font-size: 0.75rem;
-            }
-        }
-        
-        /* Mobile - Hamburger Menu */
-        @media (max-width: 768px) {
-            .header-content {
-                padding: 8px 16px;
-                min-height: 48px;
+            .header-bottom {
+                display: none;
             }
             
             .logo {
-                font-size: 1rem;
+                font-size: 1.125rem;
             }
             
             .mobile-menu-toggle {
                 display: block;
             }
             
-            .nav {
+            .top-nav {
                 position: fixed;
-                top: 48px;
+                top: 60px;
                 right: -100%;
                 width: 280px;
                 max-width: 85vw;
-                height: calc(100vh - 48px);
+                height: calc(100vh - 60px);
                 background: var(--bg-secondary);
                 border-left: 1px solid var(--border);
                 flex-direction: column;
                 align-items: stretch;
-                gap: 2px;
-                padding: 12px;
+                gap: 8px;
+                padding: 16px;
                 transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
                 overflow-y: auto;
                 box-shadow: -4px 0 20px rgba(0, 0, 0, 0.5);
             }
             
-            .nav.active {
+            .top-nav.active {
                 right: 0;
             }
             
-            .nav-item {
-                padding: 12px 14px;
-                font-size: 0.875rem;
-                border-radius: 8px;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            
-            .nav-item span.icon {
-                display: inline;
-                font-size: 1.125rem;
-            }
-            
-            .logo span:last-child {
-                font-size: 0.688rem !important;
-                padding: 3px 6px !important;
-            }
-        }
-        
-        /* Small Mobile */
-        @media (max-width: 430px) {
-            .header-content {
-                padding: 8px 12px;
-            }
-            
-            .logo {
+            .nav-btn {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 14px 16px;
                 font-size: 0.938rem;
             }
             
-            .nav {
+            .nav-btn.top-btn {
+                padding: 14px 16px;
+                font-size: 0.938rem;
+            }
+        }
+        
+        @media (max-width: 430px) {
+            .logo {
+                font-size: 1rem;
+            }
+            
+            .top-nav {
                 width: 100%;
             }
         }
@@ -291,11 +301,12 @@ $show_casino = $user_balance >= 10.00;
     <div class="grain"></div>
     
     <div class="header">
-        <div class="header-content">
-            <a href="dashboard.php" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">
-                <span style="background: linear-gradient(135deg, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900;">PUSHING P</span>
+        <!-- Top Row: Logo + Top Actions -->
+        <div class="header-top">
+            <a href="dashboard.php" class="logo">
+                <span style="background: linear-gradient(135deg, var(--accent), #a855f7); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">PUSHING P</span>
                 <?php if ($is_admin_user ?? false): ?>
-                    <span style="color: #ef4444; font-size: 0.688rem; font-weight: 700; background: rgba(239, 68, 68, 0.1); padding: 3px 6px; border-radius: 4px; border: 1px solid rgba(239, 68, 68, 0.3);">ADMIN</span>
+                    <span style="color: #ef4444; font-size: 0.75rem; font-weight: 700; background: rgba(239, 68, 68, 0.1); padding: 4px 8px; border-radius: 6px; border: 1px solid rgba(239, 68, 68, 0.3);">ADMIN</span>
                 <?php endif; ?>
             </a>
             
@@ -305,52 +316,53 @@ $show_casino = $user_balance >= 10.00;
                 <span></span>
             </button>
             
-            <nav class="nav" id="mobileNav">
-                <a href="dashboard.php" class="nav-item">
-                    <span class="icon">🏠</span><span>Dashboard</span>
-                </a>
-                <a href="kasse.php" class="nav-item">
-                    <span class="icon">💰</span><span>Kasse</span>
-                </a>
-                <a href="events.php" class="nav-item" style="position: relative;">
-                    <span class="icon">🎉</span><span>Events</span>
-                    <?php if ($pending_events_count > 0): ?>
-                        <span class="notification-badge"><?= $pending_events_count ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="schichten.php" class="nav-item" style="position: relative;">
-                    <span class="icon">📅</span><span>Schichten</span>
-                    <?php if ($active_shift_count > 0): ?>
-                        <span class="notification-badge" style="background: #10b981;">🔴</span>
-                    <?php endif; ?>
-                </a>
-                <?php if ($show_casino): ?>
-                    <a href="casino.php" class="nav-item" style="position: relative;">
-                        <span class="icon">🎰</span><span>Casino</span>
-                        <span id="casinoMultiplayerBadge" class="notification-badge" style="display: none; background: #f59e0b;"></span>
-                    </a>
-                <?php endif; ?>
-                <a href="leaderboard.php" class="nav-item">
-                    <span class="icon">🏆</span><span>Leaderboard</span>
-                </a>
-                <a href="chat.php" class="nav-item" style="position: relative;">
-                    <span class="icon">💬</span><span>Chat</span>
+            <div class="top-nav" id="mobileNav">
+                <a href="chat.php" class="nav-btn top-btn" style="position: relative;">
+                    💬 Chat
                     <?php if ($unread_messages_count > 0): ?>
                         <span class="notification-badge"><?= $unread_messages_count ?></span>
                     <?php endif; ?>
                 </a>
                 <?php if ($is_admin_user ?? false): ?>
-                    <a href="admin.php" class="nav-item">
-                        <span class="icon">⚙️</span><span>Admin</span>
+                    <a href="admin.php" class="nav-btn top-btn">
+                        ⚙️ Admin
                     </a>
                 <?php endif; ?>
-                <a href="settings.php" class="nav-item">
-                    <span class="icon">⚙️</span><span>Settings</span>
+                <a href="settings.php" class="nav-btn top-btn">
+                    ⚙️ Settings
                 </a>
-                <a href="logout.php" class="nav-item" style="color: #ef4444;">
-                    <span class="icon">🚪</span><span>Logout</span>
+                <a href="logout.php" class="nav-btn top-btn logout">
+                    🚪 Logout
                 </a>
-            </nav>
+            </div>
+        </div>
+        
+        <!-- Bottom Row: Main Navigation Buttons -->
+        <div class="header-bottom">
+            <a href="kasse.php" class="nav-btn">
+                💰 Kasse
+            </a>
+            <a href="events.php" class="nav-btn" style="position: relative;">
+                🎉 Events
+                <?php if ($pending_events_count > 0): ?>
+                    <span class="notification-badge"><?= $pending_events_count ?></span>
+                <?php endif; ?>
+            </a>
+            <a href="schichten.php" class="nav-btn" style="position: relative;">
+                📅 Schichten
+                <?php if ($active_shift_count > 0): ?>
+                    <span class="notification-badge" style="background: #10b981;">🔴</span>
+                <?php endif; ?>
+            </a>
+            <?php if ($show_casino): ?>
+                <a href="casino.php" class="nav-btn" style="position: relative;">
+                    🎰 Casino
+                    <span id="casinoMultiplayerBadge" class="notification-badge" style="display: none; background: #f59e0b;"></span>
+                </a>
+            <?php endif; ?>
+            <a href="leaderboard.php" class="nav-btn">
+                🏆 Leaderboard
+            </a>
         </div>
     </div>
     
@@ -366,17 +378,21 @@ $show_casino = $user_balance >= 10.00;
         document.addEventListener('click', function(e) {
             const nav = document.getElementById('mobileNav');
             const toggle = document.getElementById('mobileMenuToggle');
-            if (!nav.contains(e.target) && !toggle.contains(e.target)) {
+            if (nav && toggle && !nav.contains(e.target) && !toggle.contains(e.target)) {
                 nav.classList.remove('active');
                 toggle.classList.remove('active');
             }
         });
         
         // Close menu when clicking a link
-        document.querySelectorAll('.nav-item').forEach(item => {
+        document.querySelectorAll('.nav-btn').forEach(item => {
             item.addEventListener('click', () => {
-                document.getElementById('mobileNav').classList.remove('active');
-                document.getElementById('mobileMenuToggle').classList.remove('active');
+                const nav = document.getElementById('mobileNav');
+                const toggle = document.getElementById('mobileMenuToggle');
+                if (nav && toggle) {
+                    nav.classList.remove('active');
+                    toggle.classList.remove('active');
+                }
             });
         });
     </script>

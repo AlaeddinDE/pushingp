@@ -30,17 +30,10 @@ if (!isset($_SESSION['mitglied_id'])) {
   }
 }
 
-if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'admin') {
+// Alle eingeloggten User dürfen Events erstellen
+if (!isset($_SESSION['mitglied_id'])) {
   http_response_code(403);
-  echo json_encode([
-    'error' => 'forbidden',
-    'debug' => [
-      'REMOTE_ADDR' => $remote,
-      'HTTP_HOST' => $host,
-      'SAPI' => php_sapi_name(),
-      'SERVER_IP' => $server_ip
-    ]
-  ]);
+  echo json_encode(['error' => 'not_logged_in']);
   exit;
 }
 

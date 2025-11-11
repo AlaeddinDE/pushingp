@@ -290,26 +290,95 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
             </div>
         </div>
         
-        <div class="section" style="margin-top: 32px;">
+        <!-- Letzte Transaktionen verwalten -->
+        <div class="section" style="margin-top: 32px; grid-column: 1 / -1;">
             <div class="section-header">
-                <span>ℹ️</span>
-                <h2 class="section-title">Quick-Tipps</h2>
+                <span>📋</span>
+                <h2 class="section-title">Letzte Transaktionen verwalten</h2>
             </div>
-            <div style="display: grid; gap: 12px; font-size: 0.875rem; color: var(--text-secondary);">
-                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
-                    💡 <strong>Einzahlungen</strong> werden als positiver Betrag auf das Mitgliedskonto gebucht
-                </div>
-                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
-                    💡 <strong>Schäden/Ausgaben</strong> werden als negativer Betrag vom Konto abgezogen
-                </div>
-                <div style="padding: 12px; background: var(--bg-tertiary); border-radius: 8px;">
-                    💡 Alle Transaktionen sind in der <a href="kasse.php" style="color: var(--accent);">Kassenübersicht</a> einsehbar
-                </div>
+            
+            <div id="transactionsList" style="display: grid; gap: 8px; max-height: 500px; overflow-y: auto;">
+                <p style="color: var(--text-secondary); text-align: center; padding: 20px;">Lade Transaktionen...</p>
             </div>
         </div>
     </div>
 
     <script>
+    // Transaktionen laden und anzeigen
+    async function loadTransactions() {
+        try {
+            const res = await fetch('/api/v2/get_kasse_simple.php');
+            const data = await res.json();
+            
+            if (data.status === 'success' && data.data.recent_transactions) {
+                const list = document.getElementById('transactionsList');
+                list.innerHTML = data.data.recent_transactions.map(tx => {
+                    const isPositive = tx.betrag >= 0;
+                    const amountClass = isPositive ? 'konto-positive' : 'konto-negative';
+                    const date = new Date(tx.datum);
+                    const formattedDate = date.toLocaleDateString('de-DE', { 
+                        day: '2-digit', 
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit'
+                    });
+                    
+                    return `
+                        <div style="background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 8px; padding: 16px; display: grid; grid-template-columns: auto 1fr auto auto; gap: 16px; align-items: center;">
+                            <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                                <div>${formattedDate}</div>
+                                <div style="margin-top: 4px; font-weight: 600; color: var(--text-primary);">${tx.typ}</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 0.875rem; color: var(--text-primary);">${tx.beschreibung || '-'}</div>
+                                ${tx.mitglied_name ? `<div style="font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;">👤 ${tx.mitglied_name}</div>` : ''}
+                            </div>
+                            <div style="font-size: 1.25rem; font-weight: 700; color: ${isPositive ? 'var(--success)' : 'var(--error)'};">
+                                ${isPositive ? '+' : ''}${tx.betrag.toFixed(2)}€
+                            </div>
+                            <button onclick="deleteTransaction(${tx.id})" 
+                                    style="padding: 8px 12px; background: var(--error); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 0.875rem;"
+                                    title="Transaktion löschen">
+                                🗑️
+                            </button>
+                        </div>
+                    `;
+                }).join('');
+            }
+        } catch (error) {
+            console.error('Fehler beim Laden:', error);
+        }
+    }
+    
+    async function deleteTransaction(id) {
+        if (!confirm('Transaktion wirklich löschen? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+            return;
+        }
+        
+        try {
+            const res = await fetch('/api/v2/delete_transaction.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ transaction_id: id })
+            });
+            
+            const data = await res.json();
+            
+            if (data.status === 'success') {
+                alert('✅ Transaktion gelöscht!');
+                loadTransactions();
+            } else {
+                alert('❌ Fehler: ' + data.error);
+            }
+        } catch (error) {
+            alert('❌ Fehler beim Löschen: ' + error.message);
+        }
+    }
+    
+    // Initial laden
+    loadTransactions();
+    
     // Gutschrift buchen
     document.getElementById('gutschriftForm').addEventListener('submit', async (e) => {
         e.preventDefault();

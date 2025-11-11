@@ -633,3 +633,58 @@ $_SESSION['mines_game'] = [
   - Tablet (< 968px): Slide-out Menü
   - Mobile (< 430px): Full-Width Menü
 - **Performance:** Keine zusätzlichen Dependencies, Pure CSS + Vanilla JS
+
+## [2025-11-11] Two-Row Header Design
+- **Neue Struktur:** 2-zeiliger Header
+  - **Zeile 1 (Top):** Logo links | Chat, Admin, Settings, Logout rechts
+  - **Zeile 2 (Bottom):** Kasse, Events, Schichten, Casino, Leaderboard (zentriert als Buttons)
+- **Desktop:**
+  - Große klickbare Buttons mit Icons
+  - Hover-Effekte mit translateY + Box-Shadow
+  - Kein Dashboard-Button (Logo-Klick reicht)
+- **Mobile (< 768px):**
+  - Bottom-Row komplett ausgeblendet
+  - Alle Navigation im Hamburger-Menü
+  - Top-Buttons in Slide-Out Menu
+- **Features:**
+  - Button-Design statt Links
+  - Gradient Logo
+  - Logout-Button rot markiert
+  - Notification Badges auf allen relevanten Buttons
+
+## [2025-11-11] Apple-Style Events Page Redesign
+- **Komplett neu gestaltet** im iOS/Apple Calendar Stil
+- **Mobile-First:** Vertikale Timeline statt 2-Spalten-Grid
+- **Features:**
+  - Sticky Date Headers (bleiben beim Scrollen)
+  - Events gruppiert nach Datum
+  - Quick Actions (Zusagen/Absagen direkt in Card)
+  - Minimalistisches Card-Design
+  - Smooth Transitions & Hover Effects
+  - Monatswechsel per Pfeil-Buttons (< >)
+  - Participant Badges (✓ X ⏳ Counts)
+- **UX Improvements:**
+  - "Heute" wird hervorgehoben
+  - Keine unnötige UI-Chrome
+  - Fokus auf Content
+  - Single Column (max-width: 680px)
+  - Admin Actions in Card integriert
+- **Alte Version:** events_old.php (Backup)
+
+### [2025-11-11] Event Creation Button hinzugefügt
+- **Create-Button** oben auf Events-Seite (nur für Admins)
+- Leitet zu `event_manager.php` weiter (statt nicht-existierendem `admin_events.php`)
+- **Design:** Full-width Gradient-Button mit Hover-Effekt
+- **Admin-Edit-Links** in Event-Cards auch auf `event_manager.php` umgeleitet
+
+## [2025-11-11] Event-Erstellung für alle User aktiviert
+- **Alle Member** können jetzt Events erstellen (nicht nur Admins)
+- **Bearbeiten/Löschen:** User können nur ihre eigenen Events bearbeiten/löschen
+- **Admin:** Kann alle Events bearbeiten/löschen
+- **Änderungen:**
+  - `events.php`: Create-Button für alle sichtbar
+  - `events.php`: Edit/Delete-Buttons zeigen nur bei eigenen Events oder Admin
+  - `event_manager.php`: Zugriffskontrolle angepasst (Owner oder Admin)
+  - `api/events_create.php`: Admin-Beschränkung entfernt
+  - `api/events_delete.php`: Bereits korrekt implementiert (Owner oder Admin)
+- **Security:** Events haben `created_by` Feld zur Owner-Prüfung

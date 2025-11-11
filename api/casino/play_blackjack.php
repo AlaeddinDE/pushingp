@@ -1,11 +1,10 @@
 <?php
+header('Content-Type: application/json');
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/db.php';
 
 secure_session_start();
 require_login();
-
-header('Content-Type: application/json');
 
 $user_id = get_current_user_id();
 
@@ -78,7 +77,7 @@ function getHandValue($hand) {
     return $value;
 }
 
-if ($action === 'start') {
+if ($action === 'start' || $action === 'deal') {
     // Deduct bet from balance immediately
     $stmt = $conn->prepare("
         UPDATE members_v2 

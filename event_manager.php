@@ -7,9 +7,24 @@ require_once __DIR__ . '/includes/db.php';
 secure_session_start();
 require_login();
 
-if (!is_admin()) {
-    header('Location: dashboard.php');
-    exit;
+$user_id = get_current_user_id();
+$is_admin = is_admin();
+
+// Nur Admins dürfen alle Events verwalten
+// Normale User können nur ihre eigenen Events bearbeiten
+if (isset($_GET['edit'])) {
+    $edit_id = intval($_GET['edit']);
+    $stmt = $conn->prepare("SELECT created_by FROM events WHERE id = ?");
+    $stmt->bind_param('i', $edit_id);
+    $stmt->execute();
+    $stmt->bind_result($created_by);
+    $stmt->fetch();
+    $stmt->close();
+    
+    if (!$is_admin && $created_by != $user_id) {
+        header('Location: events.php');
+        exit;
+    }
 }
 
 $msg = '';

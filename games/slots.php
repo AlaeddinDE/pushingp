@@ -113,12 +113,12 @@ $casino_available_balance = max(0, $balance - 10.00);
                     setTimeout(() => {
                         reels.forEach((r, i) => {
                             r.classList.remove('spinning');
-                            r.textContent = data.symbols[i];
+                            r.textContent = data.result[i];
                         });
 
                         const resultBox = document.getElementById('resultBox');
-                        if (data.win > 0) {
-                            resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win.toFixed(2)}€ (${data.multiplier}x)</div>`;
+                        if (data.win_amount > 0) {
+                            resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
                         } else {
                             resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
                         }
