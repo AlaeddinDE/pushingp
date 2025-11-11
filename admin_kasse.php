@@ -325,13 +325,20 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
             if (data.status === 'success') {
                 resultDiv.style.background = '#10b981';
                 resultDiv.style.color = 'white';
-                resultDiv.innerHTML = `
-                    ✅ <strong>${typ === 'einzahlung' ? 'Einzahlung' : 'Gruppenaktion'} gebucht!</strong><br>
-                    💰 Betrag: ${data.data.betrag.toFixed(2)}€<br>
-                    👥 Teilnehmer: ${data.data.anzahl_teilnehmer}<br>
-                    🎁 Fair-Share: ${data.data.fair_share.toFixed(2)}€ pro Person<br>
-                    ✨ Gutgeschrieben an: ${data.data.nicht_teilnehmer.join(', ')}
-                `;
+                
+                // Prüfe ob data.data existiert
+                if (data.data && data.data.betrag !== undefined) {
+                    resultDiv.innerHTML = `
+                        ✅ <strong>${typ === 'einzahlung' ? 'Einzahlung' : 'Gruppenaktion'} gebucht!</strong><br>
+                        💰 Betrag: ${data.data.betrag.toFixed(2)}€<br>
+                        👥 Teilnehmer: ${data.data.anzahl_teilnehmer}<br>
+                        🎁 Fair-Share: ${data.data.fair_share.toFixed(2)}€ pro Person<br>
+                        ✨ Gutgeschrieben an: ${data.data.nicht_teilnehmer.join(', ')}
+                    `;
+                } else {
+                    // Fallback wenn data.data fehlt
+                    resultDiv.innerHTML = `✅ <strong>Erfolgreich gebucht!</strong>`;
+                }
                 
                 // Form zurücksetzen
                 e.target.reset();

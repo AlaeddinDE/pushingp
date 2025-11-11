@@ -1262,6 +1262,9 @@ while ($row = $groups_result->fetch_assoc()) {
                     <button class="chat-tool-btn money-btn" id="moneyBtn" title="💰 Geld senden">
                         <span>💰</span>
                     </button>
+                    <button class="chat-tool-btn" id="inviteBtn" style="background: #f59e0b; color: white; padding: 8px 12px;" title="🎰 Einladung senden">
+                        <span>🎰</span>
+                    </button>
                     
                     <textarea class="chat-textarea" id="messageInput" placeholder="Nachricht schreiben..." rows="1"></textarea>
                     
@@ -1364,6 +1367,144 @@ while ($row = $groups_result->fetch_assoc()) {
                     });
                 }, 100);
             });
+        }
+        
+        // INVITATION BUTTON - Send game/casino invitations
+        const inviteBtn = document.getElementById('inviteBtn');
+        if (inviteBtn) {
+            inviteBtn.addEventListener('click', function() {
+                showInvitationModal();
+            });
+        }
+        
+        // Invitation Modal
+        function showInvitationModal() {
+            const modal = document.createElement('div');
+            modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 99999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s;';
+            
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = 'background: var(--bg-primary); padding: 40px; border-radius: 20px; max-width: 500px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5);';
+            
+            modalContent.innerHTML = `
+                <h2 style="font-size: 2rem; font-weight: 900; margin-bottom: 8px; text-align: center;">🎰 Einladung senden</h2>
+                <p style="color: var(--text-secondary); text-align: center; margin-bottom: 32px;">Wähle eine Aktivität aus</p>
+                
+                <div style="display: grid; gap: 12px;">
+                    <button class="invite-option-btn" data-type="casino">
+                        <span style="font-size: 2rem;">🎰</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.125rem;">Casino</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">Zum Casino einladen</div>
+                        </div>
+                    </button>
+                    
+                    <button class="invite-option-btn" data-type="blackjack">
+                        <span style="font-size: 2rem;">🃏</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.125rem;">Blackjack</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">Zusammen Blackjack spielen</div>
+                        </div>
+                    </button>
+                    
+                    <button class="invite-option-btn" data-type="slots">
+                        <span style="font-size: 2rem;">🎰</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.125rem;">Slots</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">Slots zusammen spielen</div>
+                        </div>
+                    </button>
+                    
+                    <button class="invite-option-btn" data-type="crash">
+                        <span style="font-size: 2rem;">🚀</span>
+                        <div>
+                            <div style="font-weight: 700; font-size: 1.125rem;">Crash Game</div>
+                            <div style="font-size: 0.875rem; color: var(--text-secondary);">Crash zusammen spielen</div>
+                        </div>
+                    </button>
+                </div>
+                
+                <button id="cancelInviteBtn" style="width: 100%; margin-top: 20px; padding: 14px; background: var(--bg-secondary); border: none; border-radius: 12px; color: var(--text-secondary); font-weight: 600; cursor: pointer;">
+                    Abbrechen
+                </button>
+                
+                <style>
+                    .invite-option-btn {
+                        width: 100%;
+                        padding: 16px;
+                        background: var(--bg-secondary);
+                        border: 2px solid var(--border);
+                        border-radius: 12px;
+                        color: var(--text-primary);
+                        cursor: pointer;
+                        transition: all 0.2s;
+                        display: flex;
+                        align-items: center;
+                        gap: 16px;
+                    }
+                    
+                    .invite-option-btn:hover {
+                        background: var(--accent);
+                        border-color: var(--accent);
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+                    }
+                </style>
+            `;
+            
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+            
+            const cancelBtn = document.getElementById('cancelInviteBtn');
+            cancelBtn.addEventListener('click', () => modal.remove());
+            
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) modal.remove();
+            });
+            
+            document.querySelectorAll('.invite-option-btn').forEach(btn => {
+                btn.addEventListener('click', async function() {
+                    const type = this.getAttribute('data-type');
+                    modal.remove();
+                    await sendInvitation(type);
+                });
+            });
+        }
+        
+        async function sendInvitation(type) {
+            if (!currentChatId || !currentChatType) {
+                alert('Bitte wähle zuerst einen Chat aus!');
+                return;
+            }
+            
+            try {
+                const payload = {
+                    type: type,
+                    data: null
+                };
+                
+                if (currentChatType === 'user') {
+                    payload.receiver_id = parseInt(currentChatId);
+                } else {
+                    payload.group_id = parseInt(currentChatId);
+                }
+                
+                const response = await fetch('/api/chat/send_invitation.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    loadMessages();
+                    console.log('✅ Einladung gesendet!');
+                } else {
+                    alert('❌ Fehler: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Fehler: ' + error.message);
+            }
         }
         
         // MONEY TRANSFER BUTTON with custom modal
@@ -1756,8 +1897,56 @@ while ($row = $groups_result->fetch_assoc()) {
             }
         }
         
+        // Check if message is invitation
+        const invitationMatch = msg.message.match(/^(🎰|🃏|🎯|🚀|📅|📞) \*\*(.*?)\*\* lädt dich ein: \*\*(.*?)\*\*/);
+        if (invitationMatch) {
+            const [, emoji, inviterName, invitationType] = invitationMatch;
+            messageContent = `
+                <div class="invitation-card" style="
+                    background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+                    color: white;
+                    padding: 24px;
+                    border-radius: 16px;
+                    text-align: center;
+                    position: relative;
+                    overflow: hidden;
+                    box-shadow: 0 8px 32px rgba(245, 158, 11, 0.5);
+                    animation: invitePulse 0.6s ease-out;
+                ">
+                    <div style="position: relative; z-index: 2;">
+                        <div style="font-size: 3.5rem; margin-bottom: 12px; animation: bounceIn 0.8s ease-out;">${emoji}</div>
+                        <div style="font-size: 1.25rem; font-weight: 900; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.05em;">
+                            ${invitationType}
+                        </div>
+                        <div style="font-size: 0.95rem; opacity: 0.95; margin-bottom: 16px;">
+                            ${inviterName} lädt dich ein!
+                        </div>
+                        <a href="/casino.php" style="display: inline-block; background: white; color: #f59e0b; padding: 12px 32px; border-radius: 12px; font-weight: 800; text-decoration: none; transition: all 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+                            🎮 Jetzt spielen
+                        </a>
+                    </div>
+                </div>
+                
+                <style>
+                    @keyframes invitePulse {
+                        0% { transform: scale(0.8); opacity: 0; }
+                        50% { transform: scale(1.05); }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                    
+                    @keyframes bounceIn {
+                        0% { transform: scale(0) rotate(0deg); opacity: 0; }
+                        50% { transform: scale(1.2) rotate(180deg); }
+                        100% { transform: scale(1) rotate(360deg); opacity: 1; }
+                    }
+                </style>
+            `;
+        }
         // Check if message is money transfer
-        let messageContent = escapeHtml(msg.message);
+        else {
+            messageContent = escapeHtml(msg.message);
+        }
+        
         const moneyMatch = msg.message.match(/💰 Geld gesendet: ([\d,.]+) €/);
         if (moneyMatch) {
             messageContent = `

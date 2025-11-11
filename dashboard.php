@@ -371,7 +371,10 @@ if ($result && $result->num_rows > 0) {
                 $stmt_bal->close();
                 if ($user_balance >= 10.00):
                 ?>
-                    <a href="casino.php" class="nav-item">🎰 Casino</a>
+                    <a href="casino.php" class="nav-item" style="position: relative;">
+                        🎰 Casino
+                        <span id="casinoMultiplayerBadge" class="notification-badge" style="display: none; background: #f59e0b;"></span>
+                    </a>
                 <?php endif; ?>
                 <a href="leaderboard.php" class="nav-item">Leaderboard</a>
                 <a href="chat.php" class="nav-item" style="position: relative;">
@@ -1119,6 +1122,32 @@ if ($result && $result->num_rows > 0) {
             sessionStorage.removeItem('dashboardScrollY');
         }
     });
+    
+    // Casino Multiplayer Badge Update
+    async function updateCasinoMultiplayerBadge() {
+        try {
+            const response = await fetch('/api/casino/get_multiplayer_status.php');
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                const badge = document.getElementById('casinoMultiplayerBadge');
+                if (badge) {
+                    if (data.available_tables > 0) {
+                        badge.textContent = data.available_tables;
+                        badge.style.display = 'inline-block';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Failed to update casino badge:', error);
+        }
+    }
+    
+    // Update badge every 5 seconds
+    updateCasinoMultiplayerBadge();
+    setInterval(updateCasinoMultiplayerBadge, 5000);
     </script>
 </body>
 </html>

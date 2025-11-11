@@ -68,6 +68,7 @@ if ($result) {
     <title>🎰 Casino – PUSHING P</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
+    <script src="/assets/js/casino-bet-system.js"></script>
     <style>
         .casino-grid {
             display: grid;
@@ -2078,7 +2079,7 @@ if ($result) {
                     </div>
                     
                     <!-- Hidden input for bet value -->
-                    <input type="hidden" id="slotsBet" value="5">
+                    <input type="hidden" id="slotsBet" value="1.00">
                 </div>
 
                 <!-- Slot Machine Main Area -->
@@ -2389,7 +2390,7 @@ if ($result) {
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(25)">25€</button>
                             <button class="plinko-bet-btn" onclick="setPlinkoBet(50)">50€</button>
                         </div>
-                        <input type="number" id="plinkoBet" value="5" min="0.5" max="50" step="0.5" readonly style="display: none;">
+                        <input type="number" id="plinkoBet" value="1.00" min="0.01" max="10.00" step="0.01" readonly style="display: none;">
                     </div>
                     
                     <!-- Multi-Ball Selection -->
@@ -2534,7 +2535,7 @@ if ($result) {
                         <button class="blackjack-bet-btn" onclick="setBlackjackBet(25)">25€</button>
                         <button class="blackjack-bet-btn" onclick="setBlackjackBet(50)">50€</button>
                     </div>
-                    <input type="hidden" id="blackjackBet" value="1">
+                    <input type="hidden" id="blackjackBet" value="1.00">
                 </div>
                 
                 <!-- Action Buttons -->
@@ -2769,20 +2770,20 @@ if ($result) {
                 
                 <div style="display: flex; gap: 12px; align-items: center; margin-bottom: 12px;">
                     <div class="quick-bet-btns" style="display: flex; gap: 8px; flex-wrap: wrap; flex: 1;">
-                        <button class="quick-bet-btn" onclick="setCrashBet(1)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #8b5cf6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);">
-                            💰 1€
+                        <button class="quick-bet-btn" onclick="setCrashBet(0.50)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #8b5cf6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(139, 92, 246, 0.3);">
+                            💰 0.50€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(5)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #10b981; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
-                            💵 5€
+                        <button class="quick-bet-btn" onclick="setCrashBet(1.00)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #10b981; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);">
+                            💵 1€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(10)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #f59e0b; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">
-                            💸 10€
+                        <button class="quick-bet-btn" onclick="setCrashBet(2.00)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #f59e0b; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);">
+                            💸 2€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(25)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #3b82f6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
-                            💎 25€
+                        <button class="quick-bet-btn" onclick="setCrashBet(5.00)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #3b82f6; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(59, 130, 246, 0.3);">
+                            💎 5€
                         </button>
-                        <button class="quick-bet-btn" onclick="setCrashBet(50)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #ef4444; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);">
-                            👑 50€
+                        <button class="quick-bet-btn" onclick="setCrashBet(10.00)" style="flex: 1; min-width: 60px; padding: 10px 12px; background: linear-gradient(135deg, #1f2937, #374151); border: 2px solid #ef4444; transition: all 0.3s; font-size: 0.95rem; font-weight: 700; color: #fff; box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);">
+                            👑 10€
                         </button>
                     </div>
                 </div>
@@ -2790,7 +2791,7 @@ if ($result) {
                 <div class="bet-input-group" style="display: flex; gap: 12px; align-items: stretch;">
                     <div style="flex: 1; position: relative;">
                         <div style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 1rem; color: var(--accent); font-weight: 900;">💵</div>
-                        <input type="number" class="bet-input" id="crashBet" value="5" min="0.5" max="50" step="0.5" 
+                        <input type="number" class="bet-input" id="crashBet" value="1.00" min="0.01" max="10.00" step="0.01" 
                                style="padding-left: 38px; height: 50px; font-size: 1.25rem; font-weight: 900; text-align: center; border: 3px solid var(--accent); background: var(--bg-secondary); border-radius: 12px;">
                     </div>
                     <button class="bet-btn" id="crashStartBtn" onclick="startCrash()" 
@@ -2980,13 +2981,13 @@ if ($result) {
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 700; color: var(--text-secondary);">Einsatz</label>
                     <div style="display: flex; gap: 12px; margin-bottom: 12px;">
-                        <button class="quick-bet-btn" onclick="setChickenBet(1)">💰 1€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(5)">💵 5€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(10)">💸 10€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(25)">💎 25€</button>
-                        <button class="quick-bet-btn" onclick="setChickenBet(50)">👑 50€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(0.50)">💰 0.50€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(1.00)">💵 1€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(2.00)">💸 2€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(5.00)">💎 5€</button>
+                        <button class="quick-bet-btn" onclick="setChickenBet(10.00)">👑 10€</button>
                     </div>
-                    <input type="number" id="chickenBet" value="5" min="0.5" max="50" step="0.5" 
+                    <input type="number" id="chickenBet" value="1.00" min="0.01" max="10.00" step="0.01" 
                            style="width: 100%; padding: 14px; font-size: 1.25rem; font-weight: 700; 
                                   background: var(--bg-primary); border: 2px solid var(--border); 
                                   border-radius: 12px; color: var(--text-primary); text-align: center;">
@@ -3264,7 +3265,7 @@ if ($result) {
     async function startChicken() {
         const bet = parseFloat(document.getElementById('chickenBet').value);
         
-        if (bet < 0.5 || bet > 50) {
+        if (bet < 0.01 || bet > 10.00) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
         }
@@ -3807,7 +3808,7 @@ if ($result) {
         if (slotsSpinning) return;
         
         const bet = parseFloat(document.getElementById('slotsBet').value);
-        if (bet < 0.5 || bet > 50) {
+        if (bet < 0.01 || bet > 10.00) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
         }
@@ -4265,7 +4266,7 @@ if ($result) {
         
         console.log(`🎯 Preparing ${ballCount} balls - Bet per ball: ${bet}€, Total: ${totalBet}€`);
         
-        if (bet < 0.5 || bet > 50) {
+        if (bet < 0.01 || bet > 10.00) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
         }
@@ -4802,7 +4803,7 @@ if ($result) {
         if (crashRunning) return;
         
         const bet = parseFloat(document.getElementById('crashBet').value);
-        if (bet < 0.5 || bet > 50) {
+        if (bet < 0.01 || bet > 10.00) {
             alert('Einsatz muss zwischen 0.50€ und 50€ liegen!');
             return;
         }
@@ -5108,7 +5109,7 @@ if ($result) {
     
     async function startBlackjack() {
         const bet = parseFloat(document.getElementById('blackjackBet').value);
-        if (bet < 0.5 || bet > 50) {
+        if (bet < 0.01 || bet > 10.00) {
             showNotification('Einsatz muss zwischen 0.50€ und 50€ liegen!', 'error');
             return;
         }
@@ -5390,17 +5391,17 @@ if ($result) {
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Min. Einsatz</label>
-                        <input type="number" id="minBet" value="1" min="0.5" max="50" step="0.5" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                        <input type="number" id="minBet" value="1" min="0.01" max="10.00" step="0.01" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
                     </div>
                     <div>
                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Max. Einsatz</label>
-                        <input type="number" id="maxBet" value="50" min="1" max="100" step="1" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                        <input type="number" id="maxBet" value="50" min="0.01" max="10.00" step="0.01" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
                     </div>
                 </div>
                 
                 <div style="margin-bottom: 24px;">
                     <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Max. Spieler</label>
-                    <input type="number" id="maxPlayers" value="4" min="2" max="6" step="1" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
+                    <input type="number" id="maxPlayers" value="4" min="0.01" max="10.00" step="0.01" style="width: 100%; padding: 12px; background: var(--bg-secondary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary);">
                 </div>
                 
                 <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">

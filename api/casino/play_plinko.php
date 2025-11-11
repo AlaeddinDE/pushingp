@@ -55,18 +55,22 @@ if ($bet > $casino_available_balance) {
 }
 
 // Plinko game logic
-// 9 slots with different multipliers
+// 13 slots with different multipliers (1.0x entfernt für mehr Spannung)
 // Path simulation through pins
 $slots = [
-    ['multiplier' => 5.0, 'weight' => 1],      // 0 - leftmost
-    ['multiplier' => 2.0, 'weight' => 3],      // 1
-    ['multiplier' => 1.5, 'weight' => 5],      // 2
-    ['multiplier' => 1.0, 'weight' => 10],     // 3
-    ['multiplier' => 0.5, 'weight' => 15],     // 4 - center (most likely)
-    ['multiplier' => 1.0, 'weight' => 10],     // 5
-    ['multiplier' => 1.5, 'weight' => 5],      // 6
-    ['multiplier' => 2.0, 'weight' => 3],      // 7
-    ['multiplier' => 5.0, 'weight' => 1]       // 8 - rightmost
+    ['multiplier' => 10.0, 'weight' => 1],     // 0 - Mega Jackpot (extrem selten)
+    ['multiplier' => 0.3, 'weight' => 22],     // 1 - Großer Verlust
+    ['multiplier' => 1.5, 'weight' => 8],      // 2 - Gut
+    ['multiplier' => 0.5, 'weight' => 20],     // 3 - Verlust
+    ['multiplier' => 2.0, 'weight' => 10],     // 4 - Gewinn
+    ['multiplier' => 0.7, 'weight' => 18],     // 5 - Kleiner Verlust
+    ['multiplier' => 5.0, 'weight' => 3],      // 6 - Center - Großer Jackpot
+    ['multiplier' => 0.7, 'weight' => 18],     // 7 - Kleiner Verlust
+    ['multiplier' => 2.0, 'weight' => 10],     // 8 - Gewinn
+    ['multiplier' => 0.5, 'weight' => 20],     // 9 - Verlust
+    ['multiplier' => 1.5, 'weight' => 8],      // 10 - Gut
+    ['multiplier' => 0.3, 'weight' => 22],     // 11 - Großer Verlust
+    ['multiplier' => 10.0, 'weight' => 1]      // 12 - Mega Jackpot (extrem selten)
 ];
 
 // Calculate total weight
@@ -89,15 +93,15 @@ $multiplier = $slots[$result_slot]['multiplier'];
 $win_amount = $bet * $multiplier;
 $profit = $win_amount - $bet;
 
-// Generate ball path (8 rows of pins)
+// Generate ball path (16 rows of pins to match frontend)
 $ball_path = [];
-$position = 4.0; // Start at center (0-8 range)
+$position = 6.0; // Start at center (0-12 range)
 
-for ($row = 0; $row < 8; $row++) {
+for ($row = 0; $row < 16; $row++) {
     // Each pin bounce can go left (-1) or right (+1)
     // Bias towards target slot
-    $target_offset = ($result_slot - 4.0);
-    $current_offset = ($position - 4.0);
+    $target_offset = ($result_slot - 6.0);
+    $current_offset = ($position - 6.0);
     
     // Add randomness but bias towards target
     $direction = 0;
@@ -110,7 +114,7 @@ for ($row = 0; $row < 8; $row++) {
     }
     
     $position += $direction;
-    $position = max(0, min(8, $position)); // Keep in bounds
+    $position = max(0, min(12, $position)); // Keep in bounds (0-12)
     
     $ball_path[] = round($position, 2);
 }
