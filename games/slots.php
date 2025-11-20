@@ -643,7 +643,7 @@ $casino_available_balance = max(0, $balance - 10.00);
     </div>
 
     <script>
-        let balance = <?= $casino_available_balance ?>;
+        let balance = parseFloat(<?= $casino_available_balance ?>) || 0;
         let spinning = false;
         
         // Realistische Slot-Symbole
@@ -679,7 +679,8 @@ $casino_available_balance = max(0, $balance - 10.00);
         initializeReels();
 
         function updateBalance() {
-            document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' €';
+            const balanceNum = parseFloat(balance) || 0;
+            document.getElementById('balance').textContent = balanceNum.toFixed(2).replace('.', ',') + ' €';
         }
         
         // Realistische Roll-Animation
@@ -736,7 +737,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    balance = data.new_balance;
+                    balance = parseFloat(data.new_balance) || 0;
                     
                     // Reset reels
                     initializeReels();
