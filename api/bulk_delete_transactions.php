@@ -36,6 +36,18 @@ try {
     $affected = $stmt->affected_rows;
     $stmt->close();
     
+    // XP für alle stornierten Transaktionen entfernen
+    $ids_str = implode(',', $ids);
+    $xp_result = $conn->query("SELECT id, user_id, xp_change FROM xp_history WHERE source_table = 'transaktionen' AND source_id IN ($ids_str)");
+    if ($xp_result) {
+        while ($xp_row = $xp_result->fetch_assoc()) {
+            $uid = $xp_row['user_id'];
+            $xp_change = $xp_row['xp_change'];
+            $conn->query("UPDATE users SET xp_total = GREATEST(0, xp_total - $xp_change) WHERE id = $uid");
+            $conn->query("DELETE FROM xp_history WHERE id = " . $xp_row['id']);
+        }
+    }
+    
     $conn->commit();
     
     echo json_encode([

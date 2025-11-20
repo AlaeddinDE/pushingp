@@ -593,6 +593,29 @@ $stats['total_badges_awarded'] = $result->fetch_assoc()['total'];
             </form>
         </div>
     </div>
+
+    <!-- Award Badge Modal -->
+    <div id="awardBadgeModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Badge manuell vergeben</div>
+            <form id="awardBadgeForm">
+                <input type="hidden" id="awardBadgeId">
+                <div class="form-group">
+                    <label class="form-label">User auswählen</label>
+                    <select id="awardBadgeUserId" class="form-select" required>
+                        <option value="">Wähle User...</option>
+                        <?php foreach ($all_users as $user): ?>
+                        <option value="<?= $user['id'] ?>"><?= escape($user['name']) ?> (@<?= escape($user['username']) ?>)</option>
+                        <?php endforeach; ?>
+                    </select>
+                </div>
+                <div class="modal-actions">
+                    <button type="submit" class="btn-small btn-primary" style="flex: 1;">Badge vergeben</button>
+                    <button type="button" class="btn-small btn-danger" onclick="closeModal('awardBadgeModal')">Abbrechen</button>
+                </div>
+            </form>
+        </div>
+    </div>
     
     <script>
         function switchTab(tabName) {
@@ -720,8 +743,40 @@ $stats['total_badges_awarded'] = $result->fetch_assoc()['total'];
         }
         
         function manualAwardBadge(badgeId) {
-            alert('Feature wird implementiert...');
+            document.getElementById('awardBadgeId').value = badgeId;
+            document.getElementById('awardBadgeModal').classList.add('active');
         }
+
+        // Award Badge Form Submit
+        document.getElementById('awardBadgeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userId = document.getElementById('awardBadgeUserId').value;
+            const badgeId = document.getElementById('awardBadgeId').value;
+            
+            try {
+                const response = await fetch('/api/v2/admin_award_badge.php', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        user_id: userId,
+                        badge_id: badgeId
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert('✅ Badge erfolgreich vergeben!');
+                    location.reload();
+                } else {
+                    alert('❌ Fehler: ' + data.error);
+                }
+            } catch (error) {
+                alert('❌ Fehler beim Vergeben des Badges');
+                console.error(error);
+            }
+        });
         
         // Close modal on outside click
         document.querySelectorAll('.modal').forEach(modal => {

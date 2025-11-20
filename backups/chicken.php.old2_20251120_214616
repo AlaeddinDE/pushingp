@@ -1,0 +1,747 @@
+<?php
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/db.php';
+secure_session_start();
+require_login();
+
+$user_id = get_current_user_id();
+$balance = 0.0;
+$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$stmt->bind_result($balance);
+$stmt->fetch();
+$stmt->close();
+$casino_available_balance = max(0, $balance - 10.00);
+?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🐔 Chicken Cross Road – PUSHING P Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        body { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            min-height: 100vh; 
+            padding: 20px;
+            overflow-x: hidden;
+        }
+        
+        .game-container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: var(--bg-primary); 
+            border-radius: 24px; 
+            padding: 32px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5); 
+        }
+        
+        .game-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 32px; 
+            flex-wrap: wrap; 
+            gap: 16px; 
+        }
+        
+        .balance-display { 
+            background: var(--bg-secondary); 
+            padding: 16px 24px; 
+            border-radius: 12px; 
+            text-align: center; 
+        }
+        
+        .balance-value { 
+            font-size: 1.5rem; 
+            font-weight: 800; 
+            color: var(--success); 
+        }
+        
+        /* ROAD CANVAS */
+        .road-wrapper {
+            position: relative;
+            background: #2d3748;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            overflow: hidden;
+            box-shadow: inset 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 600px;
+            border-radius: 12px;
+            display: block;
+            cursor: crosshair;
+        }
+        
+        /* STATS PANEL */
+        .stats-panel {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            background: var(--bg-secondary);
+            padding: 24px;
+            border-radius: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-box {
+            text-align: center;
+            padding: 16px;
+            background: var(--bg-tertiary);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+            transition: all 0.3s;
+        }
+        
+        .stat-box:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        
+        .stat-value.success { color: var(--success); }
+        .stat-value.danger { color: var(--error); }
+        
+        /* CONTROLS */
+        .controls-panel {
+            background: var(--bg-secondary);
+            padding: 32px;
+            border-radius: 20px;
+        }
+        
+        .bet-input-wrapper {
+            margin-bottom: 24px;
+        }
+        
+        .bet-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .bet-input {
+            width: 100%;
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border: 3px solid var(--border);
+            border-radius: 16px;
+            color: var(--text-primary);
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-align: center;
+            transition: all 0.3s;
+        }
+        
+        .bet-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.2);
+        }
+        
+        .quick-bets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+        
+        .quick-bet-btn {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-bet-btn:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 24px;
+            border: none;
+            border-radius: 16px;
+            font-size: 1.5rem;
+            font-weight: 900;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(245, 158, 11, 0.6);
+        }
+        
+        .cashout-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+            margin-top: 16px;
+        }
+        
+        .cashout-btn:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(16, 185, 129, 0.6);
+        }
+        
+        .back-btn {
+            display: inline-block;
+            padding: 12px 24px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+            transform: translateX(-4px);
+        }
+        
+        /* RESULT OVERLAY */
+        .result-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s;
+        }
+        
+        .result-box {
+            background: var(--bg-primary);
+            padding: 48px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 500px;
+            animation: scaleIn 0.4s ease-out;
+        }
+        
+        .result-icon {
+            font-size: 6rem;
+            margin-bottom: 24px;
+            animation: bounce 1s infinite;
+        }
+        
+        .result-title {
+            font-size: 2.5rem;
+            font-weight: 900;
+            margin-bottom: 16px;
+        }
+        
+        .result-amount {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 32px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes scaleIn {
+            from { transform: scale(0.8); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-panel { grid-template-columns: repeat(2, 1fr); }
+            .quick-bets { grid-template-columns: repeat(2, 1fr); }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <div class="game-header">
+            <div>
+                <a href="/casino.php" class="back-btn">← Zurück</a>
+                <h1 style="font-size: 2.5rem; margin: 16px 0 8px 0;">🐔 Chicken Cross Road</h1>
+                <p style="color: var(--text-secondary); margin: 0;">Überquere die Straße ohne überfahren zu werden!</p>
+            </div>
+            <div class="balance-display">
+                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Casino Guthaben</div>
+                <div class="balance-value" id="balance"><?= number_format($casino_available_balance, 2, ',', '.') ?> €</div>
+            </div>
+        </div>
+
+        <div id="statsPanel" class="stats-panel" style="display: none;">
+            <div class="stat-box">
+                <div class="stat-label">🐔 Position</div>
+                <div class="stat-value" id="crossed">0/10</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">📊 Multiplikator</div>
+                <div class="stat-value" id="multiplier">1.00x</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">💰 Potenzial</div>
+                <div class="stat-value success" id="potential">0.00€</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-label">🎯 Einsatz</div>
+                <div class="stat-value danger" id="currentBet">0.00€</div>
+            </div>
+        </div>
+
+        <div class="road-wrapper">
+            <canvas id="gameCanvas" width="1000" height="600"></canvas>
+        </div>
+
+        <div class="controls-panel">
+            <div id="configSection">
+                <div class="bet-input-wrapper">
+                    <label class="bet-label">💰 Einsatz festlegen</label>
+                    <input type="number" id="betAmount" class="bet-input" min="0.10" max="100" step="0.10" value="1.00">
+                </div>
+                
+                <div class="quick-bets">
+                    <button class="quick-bet-btn" onclick="setBet(1)">1€</button>
+                    <button class="quick-bet-btn" onclick="setBet(5)">5€</button>
+                    <button class="quick-bet-btn" onclick="setBet(10)">10€</button>
+                    <button class="quick-bet-btn" onclick="setBet(20)">20€</button>
+                </div>
+                
+                <button class="action-btn start-btn" onclick="startGame()">🐔 Spiel starten</button>
+            </div>
+            
+            <button id="cashoutBtn" class="action-btn cashout-btn" onclick="cashout()" style="display: none;">
+                💰 Auszahlen: <span id="cashoutAmount">0.00€</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="result-overlay" id="resultOverlay" onclick="closeResult()">
+        <div class="result-box" onclick="event.stopPropagation()">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <div class="result-title" id="resultTitle">Gewinn!</div>
+            <div class="result-amount" id="resultAmount">+0.00€</div>
+            <button class="action-btn start-btn" onclick="resetGame()">🔄 Neues Spiel</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let balance = <?= $casino_available_balance ?>;
+        let gameActive = false;
+        let currentBet = 0;
+        let crossedRoads = 0;
+        let currentMultiplier = 1.0;
+        let potentialWin = 0;
+        
+        // Game state
+        const lanes = 10;
+        const laneHeight = 60;
+        const chicken = { x: 500, y: 580, size: 40 };
+        const cars = [];
+        
+        function setBet(amount) {
+            document.getElementById('betAmount').value = amount.toFixed(2);
+        }
+        
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' €';
+        }
+        
+        function drawRoad() {
+            // Sky
+            ctx.fillStyle = '#87CEEB';
+            ctx.fillRect(0, 0, canvas.width, 100);
+            
+            // Grass bottom
+            ctx.fillStyle = '#2d5016';
+            ctx.fillRect(0, canvas.height - 100, canvas.width, 100);
+            
+            // Road lanes
+            for (let i = 0; i < lanes; i++) {
+                const y = 100 + (i * laneHeight);
+                
+                // Asphalt
+                ctx.fillStyle = i % 2 === 0 ? '#2c3e50' : '#34495e';
+                ctx.fillRect(0, y, canvas.width, laneHeight);
+                
+                // Lane markings
+                ctx.strokeStyle = '#ecf0f1';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([20, 20]);
+                ctx.beginPath();
+                ctx.moveTo(0, y + laneHeight / 2);
+                ctx.lineTo(canvas.width, y + laneHeight / 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+            
+            // Sidewalk top
+            ctx.fillStyle = '#95a5a6';
+            ctx.fillRect(0, 80, canvas.width, 20);
+            
+            // Sidewalk bottom  
+            ctx.fillStyle = '#95a5a6';
+            ctx.fillRect(0, canvas.height - 100, canvas.width, 20);
+        }
+        
+        function drawChicken() {
+            ctx.save();
+            ctx.translate(chicken.x, chicken.y);
+            
+            // Body
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(0, 0, chicken.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Head
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(0, -chicken.size / 3, chicken.size / 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Beak
+            ctx.fillStyle = '#ff9800';
+            ctx.beginPath();
+            ctx.moveTo(chicken.size / 4, -chicken.size / 3);
+            ctx.lineTo(chicken.size / 2, -chicken.size / 3);
+            ctx.lineTo(chicken.size / 3, -chicken.size / 4);
+            ctx.fill();
+            
+            // Eyes
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(-5, -chicken.size / 2.5, 3, 0, Math.PI * 2);
+            ctx.arc(5, -chicken.size / 2.5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Comb
+            ctx.fillStyle = '#f44336';
+            ctx.beginPath();
+            ctx.arc(0, -chicken.size / 1.5, 8, 0, Math.PI * 2);
+            ctx.fill();
+            
+            ctx.restore();
+        }
+        
+        function drawCars() {
+            cars.forEach(car => {
+                ctx.save();
+                ctx.translate(car.x, car.y);
+                
+                // Car body
+                ctx.fillStyle = car.color;
+                ctx.fillRect(-30, -15, 60, 30);
+                
+                // Car top
+                ctx.fillRect(-20, -30, 40, 15);
+                
+                // Windows
+                ctx.fillStyle = '#1a1a1a';
+                ctx.fillRect(-18, -28, 15, 12);
+                ctx.fillRect(3, -28, 15, 12);
+                
+                // Wheels
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(-20, 15, 8, 0, Math.PI * 2);
+                ctx.arc(20, 15, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Headlights
+                ctx.fillStyle = '#ffeb3b';
+                if (car.speed > 0) {
+                    ctx.fillRect(28, -10, 5, 8);
+                    ctx.fillRect(28, 2, 5, 8);
+                } else {
+                    ctx.fillRect(-33, -10, 5, 8);
+                    ctx.fillRect(-33, 2, 5, 8);
+                }
+                
+                ctx.restore();
+            });
+        }
+        
+        function updateCars() {
+            cars.forEach(car => {
+                car.x += car.speed;
+                
+                // Respawn
+                if (car.speed > 0 && car.x > canvas.width + 50) {
+                    car.x = -50;
+                } else if (car.speed < 0 && car.x < -50) {
+                    car.x = canvas.width + 50;
+                }
+            });
+        }
+        
+        function spawnCars() {
+            cars.length = 0;
+            const colors = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+            
+            for (let i = 0; i < lanes; i++) {
+                const y = 100 + (i * laneHeight) + laneHeight / 2;
+                const speed = (Math.random() > 0.5 ? 1 : -1) * (2 + Math.random() * 3);
+                const x = Math.random() * canvas.width;
+                
+                cars.push({
+                    x: x,
+                    y: y,
+                    speed: speed,
+                    color: colors[Math.floor(Math.random() * colors.length)]
+                });
+            }
+        }
+        
+        function checkCollision() {
+            for (let car of cars) {
+                const dx = Math.abs(chicken.x - car.x);
+                const dy = Math.abs(chicken.y - car.y);
+                
+                if (dx < 50 && dy < 30) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function animate() {
+            if (!gameActive) return;
+            
+            drawRoad();
+            updateCars();
+            drawCars();
+            drawChicken();
+            
+            if (checkCollision()) {
+                gameOver(false);
+                return;
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        canvas.addEventListener('click', function(e) {
+            if (!gameActive) return;
+            
+            const rect = canvas.getBoundingClientRect();
+            const clickY = e.clientY - rect.top;
+            const canvasClickY = (clickY / rect.height) * canvas.height;
+            
+            // Move chicken up
+            if (canvasClickY < chicken.y - 50) {
+                chicken.y -= laneHeight;
+                
+                if (chicken.y < 100) {
+                    chicken.y = 100;
+                }
+                
+                crossStreet();
+            }
+        });
+        
+        async function startGame() {
+            const bet = parseFloat(document.getElementById('betAmount').value);
+            
+            if (bet < 0.10 || bet > balance) {
+                alert('Ungültiger Einsatz!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start', bet })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    gameActive = true;
+                    currentBet = bet;
+                    crossedRoads = 0;
+                    balance -= bet;
+                    updateBalance();
+                    
+                    chicken.y = 580;
+                    chicken.x = 500;
+                    
+                    spawnCars();
+                    
+                    document.getElementById('configSection').style.display = 'none';
+                    document.getElementById('statsPanel').style.display = 'grid';
+                    document.getElementById('currentBet').textContent = bet.toFixed(2) + '€';
+                    
+                    updateStats(0, 1.0, 0);
+                    animate();
+                } else {
+                    alert('Fehler: ' + data.error);
+                }
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        }
+        
+        async function crossStreet() {
+            if (!gameActive) return;
+            
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cross', road: crossedRoads })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'safe') {
+                    crossedRoads++;
+                    currentMultiplier = data.multiplier;
+                    potentialWin = data.potential_win;
+                    
+                    updateStats(crossedRoads, currentMultiplier, potentialWin);
+                    
+                    document.getElementById('cashoutBtn').style.display = 'block';
+                    document.getElementById('cashoutAmount').textContent = potentialWin.toFixed(2) + '€';
+                    
+                    if (crossedRoads >= 10) {
+                        setTimeout(() => cashout(), 1000);
+                    }
+                } else if (data.status === 'hit') {
+                    gameOver(false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function cashout() {
+            if (!gameActive) return;
+            
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cashout' })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    gameActive = false;
+                    balance = data.new_balance;
+                    updateBalance();
+                    showResult(true, data.win, data.multiplier);
+                }
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        }
+        
+        function gameOver(won) {
+            gameActive = false;
+            showResult(won, 0, 0);
+        }
+        
+        function updateStats(crossed, mult, pot) {
+            document.getElementById('crossed').textContent = crossed + '/10';
+            document.getElementById('multiplier').textContent = mult.toFixed(2) + 'x';
+            document.getElementById('potential').textContent = pot.toFixed(2) + '€';
+        }
+        
+        function showResult(won, amount, mult) {
+            const overlay = document.getElementById('resultOverlay');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const amountEl = document.getElementById('resultAmount');
+            
+            if (won) {
+                const profit = amount - currentBet;
+                icon.textContent = '🎉';
+                title.textContent = 'Gewonnen!';
+                title.style.color = 'var(--success)';
+                amountEl.textContent = '+' + profit.toFixed(2) + '€ (' + mult.toFixed(2) + 'x)';
+                amountEl.style.color = 'var(--success)';
+            } else {
+                icon.textContent = '💥';
+                title.textContent = 'Überfahren!';
+                title.style.color = 'var(--error)';
+                amountEl.textContent = '-' + currentBet.toFixed(2) + '€';
+                amountEl.style.color = 'var(--error)';
+            }
+            
+            overlay.style.display = 'flex';
+        }
+        
+        function closeResult() {
+            document.getElementById('resultOverlay').style.display = 'none';
+        }
+        
+        function resetGame() {
+            closeResult();
+            gameActive = false;
+            crossedRoads = 0;
+            chicken.y = 580;
+            chicken.x = 500;
+            
+            document.getElementById('configSection').style.display = 'block';
+            document.getElementById('statsPanel').style.display = 'none';
+            document.getElementById('cashoutBtn').style.display = 'none';
+            
+            drawRoad();
+            drawChicken();
+        }
+        
+        // Initial draw
+        drawRoad();
+        drawChicken();
+    </script>
+</body>
+</html>

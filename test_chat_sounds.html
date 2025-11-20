@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <title>🔊 Chat Sounds Test</title>
+    <style>
+        body {
+            background: #0f0f1e;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .test-container {
+            background: #1a1a2e;
+            padding: 60px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+        }
+        
+        h1 {
+            font-size: 3rem;
+            margin-bottom: 40px;
+        }
+        
+        button {
+            padding: 20px 40px;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            margin: 10px;
+            transition: all 0.3s;
+            font-weight: 700;
+        }
+        
+        button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
+        }
+        
+        button:active {
+            transform: translateY(0);
+        }
+        
+        .info {
+            margin-top: 40px;
+            font-size: 0.875rem;
+            color: #888;
+        }
+        
+        .volume-slider {
+            margin-top: 30px;
+        }
+        
+        input[type="range"] {
+            width: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔊 Chat Sounds Test</h1>
+        
+        <button onclick="playSendSound()">
+            📤 Send Sound (a0.mp3)
+        </button>
+        
+        <button onclick="playReceiveSound()">
+            📥 Receive Sound (e5.mp3)
+        </button>
+        
+        <div class="volume-slider">
+            <label>Volume: <span id="volumeValue">30</span>%</label><br>
+            <input type="range" id="volumeSlider" min="0" max="100" value="30" oninput="updateVolume(this.value)">
+        </div>
+        
+        <div class="info">
+            <p>Teste die Chat-Sounds!</p>
+            <p>Send: <code>/sounds/a0.mp3</code> | Receive: <code>/sounds/e5.mp3</code></p>
+        </div>
+    </div>
+    
+    <script>
+        const sendSound = new Audio('/sounds/a0.mp3');
+        const receiveSound = new Audio('/sounds/e5.mp3');
+        sendSound.volume = 0.3;
+        receiveSound.volume = 0.3;
+        
+        function playSendSound() {
+            sendSound.currentTime = 0;
+            sendSound.play().catch(e => {
+                alert('❌ Autoplay blocked! Click anywhere first.');
+            });
+        }
+        
+        function playReceiveSound() {
+            receiveSound.currentTime = 0;
+            receiveSound.play().catch(e => {
+                alert('❌ Autoplay blocked! Click anywhere first.');
+            });
+        }
+        
+        function updateVolume(value) {
+            const volume = value / 100;
+            sendSound.volume = volume;
+            receiveSound.volume = volume;
+            document.getElementById('volumeValue').textContent = value;
+        }
+    </script>
+</body>
+</html>

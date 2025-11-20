@@ -67,18 +67,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
     
 
-    if ($action === 'password') {
-        $new_pass = $_POST['new_password'] ?? '';
-        $hash = password_hash($new_pass, PASSWORD_DEFAULT);
+    if ($action === 'pin') {
+        $new_pin = $_POST['new_pin'] ?? '';
         
-        $stmt = $conn->prepare("UPDATE users SET password=? WHERE id=?");
-        $stmt->bind_param('si', $hash, $user_id);
-        $stmt->execute();
-        $stmt->close();
-        $success = 'Passwort geändert!';
-        
-        header('Location: settings.php?saved=1');
-        exit;
+        if (!preg_match('/^\d{6}$/', $new_pin)) {
+            $error = 'PIN muss aus 6 Ziffern bestehen.';
+        } else {
+            // Check uniqueness
+            $stmt = $conn->prepare("SELECT id FROM users WHERE pin_hash = ? AND id != ?");
+            $stmt->bind_param('si', $new_pin, $user_id);
+            $stmt->execute();
+            if ($stmt->fetch()) {
+                $stmt->close();
+                $error = 'Diese PIN ist bereits vergeben. Bitte wähle eine andere.';
+            } else {
+                $stmt->close();
+                $stmt = $conn->prepare("UPDATE users SET pin_hash=? WHERE id=?");
+                $stmt->bind_param('si', $new_pin, $user_id);
+                $stmt->execute();
+                $stmt->close();
+                $success = 'PIN geändert!';
+                
+                header('Location: settings.php?saved=1');
+                exit;
+            }
+        }
     }
 }
 
@@ -282,22 +295,22 @@ require_once __DIR__ . '/includes/header.php';
             <div class="section">
                 <div class="section-header">
                     <span>🔐</span>
-                    <h2 class="section-title">Passwort</h2>
+                    <h2 class="section-title">PIN</h2>
                 </div>
                 <form method="POST">
-                    <input type="hidden" name="action" value="password">
+                    <input type="hidden" name="action" value="pin">
                     
                     <div class="form-group">
-                        <label>Neues Passwort</label>
-                        <input type="password" name="new_password" placeholder="Neues Passwort eingeben">
+                        <label>Neue PIN (6 Ziffern)</label>
+                        <input type="text" name="new_pin" placeholder="123456" maxlength="6" pattern="\d{6}" inputmode="numeric">
                     </div>
                     
-                    <button type="submit" class="btn">Passwort ändern</button>
+                    <button type="submit" class="btn">PIN ändern</button>
                 </form>
                 
                 <div style="margin-top: 24px; padding: 16px; background: var(--bg-tertiary); border-radius: 8px;">
                     <p class="text-secondary" style="font-size: 0.875rem;">
-                        💡 Wähle ein sicheres Passwort mit mindestens 8 Zeichen.
+                        💡 Wähle eine sichere 6-stellige PIN, die du dir gut merken kannst.
                     </p>
                 </div>
             </div>

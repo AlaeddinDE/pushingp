@@ -8,5 +8,16 @@ if($to){   $sql .= " AND datum <= '".$conn->real_escape_string($to)."'"; }
 $sql .= " ORDER BY datum ASC";
 $res = $conn->query($sql);
 $out=[]; 
-while($r=$res->fetch_assoc()){ $out[]=$r; }
+while($r=$res->fetch_assoc()){ 
+    // Fetch participants
+    $pid = $r['id'];
+    $p_sql = "SELECT mitglied_id, status FROM event_participants WHERE event_id = $pid";
+    $p_res = $conn->query($p_sql);
+    $participants = [];
+    while($p = $p_res->fetch_assoc()){
+        $participants[] = $p;
+    }
+    $r['participants'] = $participants;
+    $out[]=$r; 
+}
 echo json_encode($out);

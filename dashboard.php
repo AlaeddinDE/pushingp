@@ -2,6 +2,8 @@
 require_once __DIR__ . '/includes/functions.php';
 require_once __DIR__ . '/includes/db.php';
 require_once __DIR__ . '/includes/xp_system.php';
+require_once __DIR__ . '/api/cron/update_daily_balance.php';
+update_daily_balance();
 secure_session_start();
 require_login();
 
@@ -966,10 +968,10 @@ require_once __DIR__ . '/includes/header.php';
                 </div>
             </div>
 
-            <button id="modalChatBtn" onclick="startChat()" style="width: 100%; padding: 16px; background: var(--accent); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s;"
-                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(139,92,246,0.4)';"
+            <button id="modalSendMoneyBtn" onclick="sendMoneyToMember()" style="width: 100%; padding: 16px; background: linear-gradient(135deg, #10b981, #059669); color: white; border: none; border-radius: 12px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.3s;"
+                    onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 8px 24px rgba(16,185,129,0.4)';"
                     onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none';">
-                💬 Chat starten
+                💸 Geld senden
             </button>
         </div>
     </div>
@@ -1004,10 +1006,199 @@ require_once __DIR__ . '/includes/header.php';
         currentMemberId = null;
     }
 
-    function startChat() {
-        if (currentMemberId) {
-            window.location.href = `/chat.php#user-${currentMemberId}`;
-        }
+    function sendMoneyToMember() {
+        if (!currentMemberId) return;
+        
+        // Close member modal first
+        closeMemberModal();
+        
+        // Create money send modal
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 99999; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s;';
+        
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = 'background: var(--bg-primary); padding: 40px; border-radius: 20px; max-width: 450px; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.5); animation: scaleIn 0.3s ease-out;';
+        
+        const memberName = document.getElementById('modalName').textContent;
+        
+        modalContent.innerHTML = `
+            <style>
+                @keyframes fadeIn {
+                    from { opacity: 0; }
+                    to { opacity: 1; }
+                }
+                @keyframes scaleIn {
+                    from { transform: scale(0.9); opacity: 0; }
+                    to { transform: scale(1); opacity: 1; }
+                }
+                .money-input {
+                    width: 100%;
+                    font-size: 2.5rem;
+                    font-weight: 900;
+                    text-align: center;
+                    padding: 20px;
+                    background: var(--bg-secondary);
+                    border: 3px solid var(--accent);
+                    border-radius: 16px;
+                    color: var(--text-primary);
+                    outline: none;
+                    transition: all 0.3s;
+                    -moz-appearance: textfield;
+                }
+                .money-input::-webkit-outer-spin-button,
+                .money-input::-webkit-inner-spin-button {
+                    -webkit-appearance: none;
+                    margin: 0;
+                }
+                .money-input:focus {
+                    border-color: #10b981;
+                    box-shadow: 0 0 0 4px rgba(16, 185, 129, 0.2);
+                    transform: scale(1.02);
+                }
+                .quick-amount {
+                    padding: 14px 20px;
+                    background: var(--bg-secondary);
+                    border: 2px solid var(--border);
+                    border-radius: 12px;
+                    color: var(--text-primary);
+                    font-weight: 700;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                    font-size: 1.125rem;
+                }
+                .quick-amount:hover {
+                    background: #10b981;
+                    border-color: #10b981;
+                    color: white;
+                    transform: translateY(-2px);
+                }
+                .send-money-btn {
+                    width: 100%;
+                    padding: 18px;
+                    background: linear-gradient(135deg, #10b981, #059669);
+                    border: none;
+                    border-radius: 12px;
+                    color: white;
+                    font-weight: 800;
+                    font-size: 1.25rem;
+                    cursor: pointer;
+                    transition: all 0.3s;
+                }
+                .send-money-btn:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
+                }
+                .cancel-btn {
+                    width: 100%;
+                    padding: 14px;
+                    background: var(--bg-secondary);
+                    border: none;
+                    border-radius: 12px;
+                    color: var(--text-secondary);
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s;
+                }
+                .cancel-btn:hover {
+                    background: var(--bg-tertiary);
+                    color: var(--text-primary);
+                }
+            </style>
+            
+            <h2 style="font-size: 2rem; font-weight: 900; margin-bottom: 8px; text-align: center;">💸 Geld senden</h2>
+            <p style="color: var(--text-secondary); text-align: center; margin-bottom: 32px;">An ${memberName}</p>
+            
+            <div style="margin-bottom: 24px;">
+                <input type="number" id="moneyAmountInput" class="money-input" placeholder="0.00" step="0.01" min="0.01" autofocus />
+                <div style="text-align: center; color: var(--text-secondary); font-size: 0.875rem; margin-top: 8px;">EUR €</div>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px;">
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 5">5 €</button>
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 10">10 €</button>
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 20">20 €</button>
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 50">50 €</button>
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 100">100 €</button>
+                <button class="quick-amount" onclick="document.getElementById('moneyAmountInput').value = 200">200 €</button>
+            </div>
+            
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button id="confirmMoneyBtn" class="send-money-btn">💸 Jetzt senden</button>
+                <button id="cancelMoneyBtn" class="cancel-btn">Abbrechen</button>
+            </div>
+        `;
+        
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+        
+        const input = document.getElementById('moneyAmountInput');
+        const confirmBtn = document.getElementById('confirmMoneyBtn');
+        const cancelBtn = document.getElementById('cancelMoneyBtn');
+        
+        // Disable scroll on number input
+        input.addEventListener('wheel', e => e.preventDefault());
+        
+        // Cancel button
+        cancelBtn.addEventListener('click', function() {
+            modal.remove();
+        });
+        
+        // Confirm button
+        confirmBtn.addEventListener('click', async function() {
+            const amount = parseFloat(input.value);
+            if (!amount || isNaN(amount) || amount <= 0) {
+                input.style.borderColor = '#ef4444';
+                input.focus();
+                setTimeout(() => input.style.borderColor = 'var(--accent)', 500);
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/v2/send_money.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        to_user_id: currentMemberId,
+                        amount: amount
+                    })
+                });
+                
+                const data = await response.json();
+                if (data.status === 'success') {
+                    modal.remove();
+                    // Show success message
+                    const success = document.createElement('div');
+                    success.style.cssText = 'position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #10b981; color: white; padding: 20px 32px; border-radius: 12px; font-weight: 700; z-index: 999999; box-shadow: 0 8px 32px rgba(16,185,129,0.5); animation: slideDown 0.3s;';
+                    success.textContent = `✓ ${amount.toFixed(2)}€ an ${memberName} gesendet`;
+                    document.body.appendChild(success);
+                    setTimeout(() => success.remove(), 3000);
+                    
+                    // Reload page to update balance
+                    setTimeout(() => location.reload(), 1500);
+                } else {
+                    alert('❌ Fehler: ' + (data.error || 'Unbekannter Fehler'));
+                }
+            } catch (error) {
+                alert('❌ Fehler: ' + error.message);
+            }
+        });
+        
+        // Click outside to close
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+        
+        // Enter to confirm
+        input.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                confirmBtn.click();
+            }
+        });
+        
+        // Focus input
+        setTimeout(() => input.focus(), 100);
     }
 
     // Scroll to Crew Members section

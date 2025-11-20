@@ -1,0 +1,931 @@
+<?php
+require_once __DIR__ . '/../includes/functions.php';
+require_once __DIR__ . '/../includes/db.php';
+secure_session_start();
+require_login();
+
+$user_id = get_current_user_id();
+$balance = 0.0;
+$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+$stmt->bind_param('i', $user_id);
+$stmt->execute();
+$stmt->bind_result($balance);
+$stmt->fetch();
+$stmt->close();
+$casino_available_balance = max(0, $balance - 10.00);
+?>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>🐔 Chicken – PUSHING P Casino</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/assets/style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            min-height: 100vh;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+        }
+        
+        /* MOBILE FIRST LAYOUT */
+        .game-wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 12px;
+            gap: 12px;
+        }
+        
+        /* HEADER */
+        .game-header {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .back-btn {
+            padding: 8px 16px;
+            background: var(--bg-secondary);
+            border-radius: 8px;
+            color: var(--text-primary);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 0.875rem;
+            transition: all 0.2s;
+        }
+        
+        .back-btn:hover {
+            background: var(--bg-tertiary);
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+            font-weight: 900;
+        }
+        
+        .balance-box {
+            text-align: right;
+        }
+        
+        .balance-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+        
+        .balance-value {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--success);
+        }
+        
+        /* STATS BAR */
+        .stats-bar {
+            display: none;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 16px;
+            gap: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .stats-bar.active {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 12px;
+            background: var(--bg-secondary);
+            border-radius: 12px;
+            border: 2px solid var(--border);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+        }
+        
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: var(--accent);
+        }
+        
+        .stat-value.success { color: var(--success); }
+        .stat-value.warning { color: #f59e0b; }
+        
+        /* GAME CANVAS */
+        .canvas-container {
+            flex: 1;
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            min-height: 400px;
+        }
+        
+        #gameCanvas {
+            width: 100%;
+            height: 100%;
+            border-radius: 12px;
+            cursor: pointer;
+            touch-action: none;
+            image-rendering: crisp-edges;
+        }
+        
+        .canvas-hint {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            padding: 20px 32px;
+            border-radius: 16px;
+            font-size: 1.125rem;
+            font-weight: 700;
+            color: white;
+            text-align: center;
+            pointer-events: none;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 0.8; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 1; transform: translate(-50%, -50%) scale(1.05); }
+        }
+        
+        /* CONTROLS */
+        .controls-panel {
+            background: var(--bg-primary);
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+        
+        .bet-section {
+            margin-bottom: 16px;
+        }
+        
+        .bet-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 700;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+        
+        .bet-input {
+            width: 100%;
+            padding: 16px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 800;
+            text-align: center;
+        }
+        
+        .bet-input:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+        
+        .quick-bets {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+        
+        .quick-bet {
+            padding: 10px;
+            background: var(--bg-secondary);
+            border: 2px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-weight: 700;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-bet:active {
+            transform: scale(0.95);
+        }
+        
+        .quick-bet:hover {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.25rem;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+        
+        .action-btn:active {
+            transform: translateY(2px);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #f59e0b, #ef4444);
+            color: white;
+        }
+        
+        .cashout-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            margin-top: 12px;
+            display: none;
+        }
+        
+        .cashout-btn.active {
+            display: block;
+        }
+        
+        /* RESULT MODAL */
+        .result-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .result-modal.active {
+            display: flex;
+        }
+        
+        .result-content {
+            background: var(--bg-primary);
+            padding: 40px;
+            border-radius: 24px;
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+            animation: modalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        @keyframes modalPop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        .result-icon {
+            font-size: 5rem;
+            margin-bottom: 20px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+        }
+        
+        .result-title {
+            font-size: 2rem;
+            font-weight: 900;
+            margin-bottom: 12px;
+        }
+        
+        .result-amount {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 24px;
+        }
+        
+        /* DESKTOP LAYOUT */
+        @media (min-width: 768px) {
+            .game-wrapper {
+                max-width: 1400px;
+                margin: 0 auto;
+                padding: 20px;
+                gap: 20px;
+            }
+            
+            .game-header {
+                padding: 24px;
+            }
+            
+            .game-title {
+                font-size: 2rem;
+            }
+            
+            .balance-value {
+                font-size: 1.5rem;
+            }
+            
+            .stats-bar.active {
+                grid-template-columns: repeat(4, 1fr);
+                padding: 24px;
+            }
+            
+            .canvas-container {
+                min-height: 500px;
+                padding: 24px;
+            }
+            
+            .controls-panel {
+                padding: 32px;
+            }
+            
+            .action-btn {
+                padding: 24px;
+                font-size: 1.5rem;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .game-wrapper {
+                display: grid;
+                grid-template-columns: 1fr 350px;
+                grid-template-rows: auto auto 1fr;
+            }
+            
+            .game-header {
+                grid-column: 1 / -1;
+            }
+            
+            .stats-bar {
+                grid-column: 1 / -1;
+            }
+            
+            .canvas-container {
+                grid-row: 3;
+                min-height: 600px;
+            }
+            
+            .controls-panel {
+                grid-row: 3;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-wrapper">
+        <!-- HEADER -->
+        <div class="game-header">
+            <div class="header-left">
+                <a href="/casino.php" class="back-btn">← Zurück</a>
+                <div class="game-title">🐔 Chicken</div>
+            </div>
+            <div class="balance-box">
+                <div class="balance-label">Guthaben</div>
+                <div class="balance-value" id="balance"><?= number_format($casino_available_balance, 2, ',', '.') ?>€</div>
+            </div>
+        </div>
+        
+        <!-- STATS -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stat-item">
+                <div class="stat-label">🐔 Straßen</div>
+                <div class="stat-value" id="crossed">0/10</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">📊 Multi</div>
+                <div class="stat-value" id="multiplier">1.00x</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">💰 Potenzial</div>
+                <div class="stat-value success" id="potential">0.00€</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">🎯 Einsatz</div>
+                <div class="stat-value warning" id="currentBet">0.00€</div>
+            </div>
+        </div>
+        
+        <!-- CANVAS -->
+        <div class="canvas-container">
+            <canvas id="gameCanvas"></canvas>
+            <div class="canvas-hint" id="canvasHint" style="display: none;">
+                👆 Tippe, um zu springen
+            </div>
+        </div>
+        
+        <!-- CONTROLS -->
+        <div class="controls-panel">
+            <div id="betControls">
+                <div class="bet-section">
+                    <label class="bet-label">💰 Einsatz</label>
+                    <input type="number" id="betInput" class="bet-input" min="0.10" max="100" step="0.10" value="1.00">
+                    <div class="quick-bets">
+                        <button class="quick-bet" onclick="setBet(1)">1€</button>
+                        <button class="quick-bet" onclick="setBet(5)">5€</button>
+                        <button class="quick-bet" onclick="setBet(10)">10€</button>
+                        <button class="quick-bet" onclick="setBet(20)">20€</button>
+                    </div>
+                </div>
+                <button class="action-btn start-btn" onclick="startGame()">🐔 Starten</button>
+            </div>
+            <button class="action-btn cashout-btn" id="cashoutBtn" onclick="cashout()">
+                💰 Auszahlen: <span id="cashoutAmount">0.00€</span>
+            </button>
+        </div>
+    </div>
+    
+    <!-- RESULT MODAL -->
+    <div class="result-modal" id="resultModal">
+        <div class="result-content">
+            <div class="result-icon" id="resultIcon">🎉</div>
+            <div class="result-title" id="resultTitle">Gewonnen!</div>
+            <div class="result-amount" id="resultAmount">+0.00€</div>
+            <button class="action-btn start-btn" onclick="resetGame()">🔄 Neues Spiel</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let balance = <?= $casino_available_balance ?>;
+        let gameActive = false;
+        let currentBet = 0;
+        let crossedLanes = 0;
+        let animationFrame = null;
+        
+        // Game objects
+        const chicken = { x: 50, y: 0, size: 35, targetY: 0, jumping: false };
+        const lanes = [];
+        const cars = [];
+        
+        const LANE_COUNT = 10;
+        const CAR_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'];
+        
+        function resizeCanvas() {
+            const container = canvas.parentElement;
+            const rect = container.getBoundingClientRect();
+            canvas.width = rect.width - 32;
+            canvas.height = rect.height - 32;
+            
+            if (!gameActive) {
+                drawInitialState();
+            }
+        }
+        
+        function setBet(amount) {
+            document.getElementById('betInput').value = amount.toFixed(2);
+        }
+        
+        function updateBalance() {
+            document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + '€';
+        }
+        
+        function initLanes() {
+            lanes.length = 0;
+            const laneHeight = canvas.height / LANE_COUNT;
+            
+            for (let i = 0; i < LANE_COUNT; i++) {
+                lanes.push({
+                    y: i * laneHeight,
+                    height: laneHeight,
+                    isGrass: i === 0 || i === LANE_COUNT - 1
+                });
+            }
+        }
+        
+        function spawnCars() {
+            cars.length = 0;
+            
+            for (let i = 1; i < LANE_COUNT - 1; i++) {
+                const laneY = lanes[i].y + lanes[i].height / 2;
+                const direction = Math.random() > 0.5 ? 1 : -1;
+                const speed = direction * (3 + Math.random() * 4);
+                const startX = direction > 0 ? -80 : canvas.width + 80;
+                
+                cars.push({
+                    x: startX + Math.random() * 300,
+                    y: laneY,
+                    width: 70,
+                    height: 35,
+                    speed: speed,
+                    color: CAR_COLORS[Math.floor(Math.random() * CAR_COLORS.length)],
+                    lane: i
+                });
+            }
+        }
+        
+        function drawBackground() {
+            // Sky gradient
+            const skyGradient = ctx.createLinearGradient(0, 0, 0, canvas.height / 4);
+            skyGradient.addColorStop(0, '#87CEEB');
+            skyGradient.addColorStop(1, '#B0E0E6');
+            ctx.fillStyle = skyGradient;
+            ctx.fillRect(0, 0, canvas.width, canvas.height / 4);
+            
+            // Lanes
+            lanes.forEach((lane, i) => {
+                if (lane.isGrass) {
+                    // Grass
+                    ctx.fillStyle = i === 0 ? '#2d5016' : '#1a3a0f';
+                    ctx.fillRect(0, lane.y, canvas.width, lane.height);
+                    
+                    // Grass pattern
+                    ctx.fillStyle = 'rgba(255,255,255,0.1)';
+                    for (let x = 0; x < canvas.width; x += 20) {
+                        for (let y = lane.y; y < lane.y + lane.height; y += 15) {
+                            if (Math.random() > 0.5) {
+                                ctx.fillRect(x, y, 2, 8);
+                            }
+                        }
+                    }
+                } else {
+                    // Road
+                    ctx.fillStyle = i % 2 === 0 ? '#2c3e50' : '#34495e';
+                    ctx.fillRect(0, lane.y, canvas.width, lane.height);
+                    
+                    // Lane markings
+                    ctx.strokeStyle = '#ecf0f1';
+                    ctx.lineWidth = 3;
+                    ctx.setLineDash([20, 20]);
+                    ctx.beginPath();
+                    ctx.moveTo(0, lane.y + lane.height / 2);
+                    ctx.lineTo(canvas.width, lane.y + lane.height / 2);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                }
+            });
+        }
+        
+        function drawChicken() {
+            ctx.save();
+            ctx.translate(chicken.x, chicken.y);
+            
+            // Shadow
+            ctx.fillStyle = 'rgba(0,0,0,0.3)';
+            ctx.beginPath();
+            ctx.ellipse(0, chicken.size / 2 + 5, chicken.size / 2, chicken.size / 4, 0, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Body
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(0, 0, chicken.size / 2, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Stroke
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            
+            // Head
+            ctx.fillStyle = '#fff';
+            ctx.beginPath();
+            ctx.arc(chicken.size / 3, -chicken.size / 3, chicken.size / 3.5, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+            
+            // Beak
+            ctx.fillStyle = '#ff9800';
+            ctx.beginPath();
+            ctx.moveTo(chicken.size / 1.5, -chicken.size / 3);
+            ctx.lineTo(chicken.size, -chicken.size / 3);
+            ctx.lineTo(chicken.size / 1.3, -chicken.size / 4);
+            ctx.closePath();
+            ctx.fill();
+            
+            // Eyes
+            ctx.fillStyle = '#000';
+            ctx.beginPath();
+            ctx.arc(chicken.size / 2.5, -chicken.size / 2.5, 3, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Comb
+            ctx.fillStyle = '#f44336';
+            ctx.beginPath();
+            ctx.arc(chicken.size / 4, -chicken.size / 1.5, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Legs (animated)
+            const legOffset = chicken.jumping ? 5 : 0;
+            ctx.strokeStyle = '#ff9800';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(-5, chicken.size / 3);
+            ctx.lineTo(-5, chicken.size / 3 + 10 + legOffset);
+            ctx.moveTo(5, chicken.size / 3);
+            ctx.lineTo(5, chicken.size / 3 + 10 + legOffset);
+            ctx.stroke();
+            
+            ctx.restore();
+        }
+        
+        function drawCars() {
+            cars.forEach(car => {
+                ctx.save();
+                ctx.translate(car.x, car.y);
+                
+                const direction = car.speed > 0 ? 1 : -1;
+                if (direction < 0) {
+                    ctx.scale(-1, 1);
+                }
+                
+                // Shadow
+                ctx.fillStyle = 'rgba(0,0,0,0.3)';
+                ctx.fillRect(-car.width / 2, car.height / 2, car.width, 5);
+                
+                // Car body
+                ctx.fillStyle = car.color;
+                ctx.fillRect(-car.width / 2, -car.height / 2, car.width, car.height);
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(-car.width / 2, -car.height / 2, car.width, car.height);
+                
+                // Car top
+                ctx.fillStyle = car.color;
+                ctx.fillRect(-car.width / 3, -car.height, car.width / 1.5, car.height / 2);
+                ctx.strokeRect(-car.width / 3, -car.height, car.width / 1.5, car.height / 2);
+                
+                // Windows
+                ctx.fillStyle = 'rgba(100,150,200,0.6)';
+                ctx.fillRect(-car.width / 4, -car.height + 2, car.width / 3, car.height / 2.5);
+                
+                // Wheels
+                ctx.fillStyle = '#000';
+                ctx.beginPath();
+                ctx.arc(-car.width / 3, car.height / 2, 8, 0, Math.PI * 2);
+                ctx.arc(car.width / 3, car.height / 2, 8, 0, Math.PI * 2);
+                ctx.fill();
+                
+                // Headlights
+                ctx.fillStyle = '#ffeb3b';
+                ctx.fillRect(car.width / 2 - 5, -car.height / 3, 3, 8);
+                ctx.fillRect(car.width / 2 - 5, car.height / 3 - 8, 3, 8);
+                
+                ctx.restore();
+            });
+        }
+        
+        function updateCars() {
+            cars.forEach(car => {
+                car.x += car.speed;
+                
+                if (car.speed > 0 && car.x > canvas.width + 100) {
+                    car.x = -100;
+                } else if (car.speed < 0 && car.x < -100) {
+                    car.x = canvas.width + 100;
+                }
+            });
+        }
+        
+        function updateChicken() {
+            if (chicken.jumping) {
+                const diff = chicken.targetY - chicken.y;
+                if (Math.abs(diff) > 2) {
+                    chicken.y += diff * 0.2;
+                } else {
+                    chicken.y = chicken.targetY;
+                    chicken.jumping = false;
+                }
+            }
+        }
+        
+        function checkCollision() {
+            for (let car of cars) {
+                const dx = Math.abs(chicken.x - car.x);
+                const dy = Math.abs(chicken.y - car.y);
+                
+                if (dx < (car.width / 2 + chicken.size / 2) && dy < (car.height / 2 + chicken.size / 2)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        function gameLoop() {
+            if (!gameActive) return;
+            
+            drawBackground();
+            updateCars();
+            updateChicken();
+            drawCars();
+            drawChicken();
+            
+            if (checkCollision()) {
+                gameOver(false);
+                return;
+            }
+            
+            animationFrame = requestAnimationFrame(gameLoop);
+        }
+        
+        function drawInitialState() {
+            initLanes();
+            chicken.y = lanes[LANE_COUNT - 1].y + lanes[LANE_COUNT - 1].height / 2;
+            chicken.targetY = chicken.y;
+            drawBackground();
+            drawChicken();
+        }
+        
+        canvas.addEventListener('click', jumpChicken);
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            jumpChicken(e);
+        });
+        
+        function jumpChicken() {
+            if (!gameActive || chicken.jumping) return;
+            
+            const currentLane = Math.floor((chicken.y / canvas.height) * LANE_COUNT);
+            
+            if (currentLane > 0) {
+                chicken.jumping = true;
+                chicken.targetY = lanes[currentLane - 1].y + lanes[currentLane - 1].height / 2;
+                crossLane();
+            }
+        }
+        
+        async function startGame() {
+            const bet = parseFloat(document.getElementById('betInput').value);
+            
+            if (bet < 0.10 || bet > balance) {
+                alert('Ungültiger Einsatz!');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'start', bet })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    gameActive = true;
+                    currentBet = bet;
+                    crossedLanes = 0;
+                    balance -= bet;
+                    updateBalance();
+                    
+                    initLanes();
+                    chicken.y = lanes[LANE_COUNT - 1].y + lanes[LANE_COUNT - 1].height / 2;
+                    chicken.targetY = chicken.y;
+                    spawnCars();
+                    
+                    document.getElementById('betControls').style.display = 'none';
+                    document.getElementById('statsBar').classList.add('active');
+                    document.getElementById('currentBet').textContent = bet.toFixed(2) + '€';
+                    document.getElementById('canvasHint').style.display = 'block';
+                    
+                    setTimeout(() => {
+                        document.getElementById('canvasHint').style.display = 'none';
+                    }, 3000);
+                    
+                    updateStats(0, 1.0, 0);
+                    gameLoop();
+                }
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        }
+        
+        async function crossLane() {
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cross', road: crossedLanes })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'safe') {
+                    crossedLanes++;
+                    updateStats(crossedLanes, data.multiplier, data.potential_win);
+                    
+                    document.getElementById('cashoutBtn').classList.add('active');
+                    document.getElementById('cashoutAmount').textContent = data.potential_win.toFixed(2) + '€';
+                    
+                    if (crossedLanes >= LANE_COUNT - 1) {
+                        setTimeout(() => cashout(), 1000);
+                    }
+                } else if (data.status === 'hit') {
+                    gameOver(false);
+                }
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        }
+        
+        async function cashout() {
+            if (!gameActive) return;
+            
+            try {
+                const response = await fetch('/api/casino/chicken_cross.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'cashout' })
+                });
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    gameActive = false;
+                    balance = data.new_balance;
+                    updateBalance();
+                    showResult(true, data.win, data.multiplier);
+                }
+            } catch (error) {
+                alert('Fehler: ' + error.message);
+            }
+        }
+        
+        function gameOver(won) {
+            gameActive = false;
+            if (animationFrame) {
+                cancelAnimationFrame(animationFrame);
+            }
+            showResult(won, 0, 0);
+        }
+        
+        function updateStats(crossed, mult, pot) {
+            document.getElementById('crossed').textContent = crossed + '/' + (LANE_COUNT - 1);
+            document.getElementById('multiplier').textContent = mult.toFixed(2) + 'x';
+            document.getElementById('potential').textContent = pot.toFixed(2) + '€';
+        }
+        
+        function showResult(won, amount, mult) {
+            const modal = document.getElementById('resultModal');
+            const icon = document.getElementById('resultIcon');
+            const title = document.getElementById('resultTitle');
+            const amountEl = document.getElementById('resultAmount');
+            
+            if (won) {
+                const profit = amount - currentBet;
+                icon.textContent = '🎉';
+                title.textContent = 'Gewonnen!';
+                title.style.color = 'var(--success)';
+                amountEl.textContent = '+' + profit.toFixed(2) + '€ (' + mult.toFixed(2) + 'x)';
+                amountEl.style.color = 'var(--success)';
+            } else {
+                icon.textContent = '💥';
+                title.textContent = 'Überfahren!';
+                title.style.color = 'var(--error)';
+                amountEl.textContent = '-' + currentBet.toFixed(2) + '€';
+                amountEl.style.color = 'var(--error)';
+            }
+            
+            modal.classList.add('active');
+        }
+        
+        function resetGame() {
+            document.getElementById('resultModal').classList.remove('active');
+            document.getElementById('betControls').style.display = 'block';
+            document.getElementById('statsBar').classList.remove('active');
+            document.getElementById('cashoutBtn').classList.remove('active');
+            
+            gameActive = false;
+            crossedLanes = 0;
+            
+            drawInitialState();
+        }
+        
+        // Initialize
+        window.addEventListener('resize', resizeCanvas);
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            drawInitialState();
+        });
+    </script>
+</body>
+</html>

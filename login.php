@@ -8,30 +8,19 @@ if (is_logged_in()) { header('Location: dashboard.php'); exit; }
 $login_error = '';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $username = trim($_POST['username'] ?? '');
     $pin = $_POST['pin'] ?? '';
     
-    if (empty($username)) {
-        $login_error = 'Bitte Benutzername eingeben';
+    if (empty($pin)) {
+        $login_error = 'Bitte PIN eingeben';
     } else {
-        $stmt = $conn->prepare("SELECT id, username, name, password, pin_hash, role, roles, status FROM users WHERE username = ? AND status = 'active'");
-        $stmt->bind_param('s', $username);
+        $stmt = $conn->prepare("SELECT id, username, name, password, pin_hash, role, roles, status FROM users WHERE pin_hash = ? AND status = 'active'");
+        $stmt->bind_param('s', $pin);
         $stmt->execute();
         $stmt->bind_result($user_id, $db_username, $name, $hash, $pin_hash, $role, $roles_json, $status);
         if ($stmt->fetch()) {
             $stmt->close();
             
-            // Prüfe PIN (Klartext)
-            $login_success = false;
-            
-            // PIN-Login (Klartext-Vergleich)
-            if (!empty($pin_hash) && $pin === $pin_hash) {
-                $login_success = true;
-            }
-            // Default PIN "0000" wenn kein PIN-Hash gesetzt
-            elseif (empty($pin_hash) && $pin === '0000') {
-                $login_success = true;
-            }
+            $login_success = true;
             
             if ($login_success) {
                 $_SESSION['user_id'] = $user_id;
@@ -55,18 +44,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 check_profile_completion_xp($user_id);
                 check_milestone_badges($user_id);
                 
-                // Erste Login wenn kein PIN/Passwort gesetzt
-                if (empty($pin_hash) && empty($hash)) {
-                    header('Location: settings.php?first_login=1');
-                } else {
-                    header('Location: dashboard.php');
-                }
+                header('Location: dashboard.php');
                 exit;
             }
-            $login_error = 'Falsche PIN';
         } else {
             $stmt->close();
-            $login_error = 'Benutzer nicht gefunden';
+            $login_error = 'Ungültige PIN';
         }
     }
 }
@@ -410,26 +393,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="error-message"><?= htmlspecialchars($login_error) ?></div>
                 <?php endif; ?>
                 
-                <input 
-                    type="text" 
-                    name="username" 
-                    class="username-input" 
-                    placeholder="Benutzername"
-                    autocomplete="username"
-                    required
-                    id="usernameInput"
-                    value="<?= htmlspecialchars($_POST['username'] ?? '') ?>"
-                    oninput="this.value = this.value.replace(/[0-9]/g, '')"
-                >
-                
                 <div class="pin-dots">
+                    <div class="pin-dot"></div>
+                    <div class="pin-dot"></div>
                     <div class="pin-dot"></div>
                     <div class="pin-dot"></div>
                     <div class="pin-dot"></div>
                     <div class="pin-dot"></div>
                 </div>
                 
-                <input type="password" name="pin" id="pinInput" maxlength="4" autocomplete="off">
+                <input type="password" name="pin" id="pinInput" maxlength="6" autocomplete="off">
                 
                 <div class="numpad">
                     <button type="button" class="num-btn" data-num="1">
@@ -485,7 +458,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         const pinInput = document.getElementById('pinInput');
         const dots = document.querySelectorAll('.pin-dot');
         const form = document.getElementById('loginForm');
-        const usernameInput = document.getElementById('usernameInput');
         let currentPin = '';
 
         // Numpad clicks
@@ -497,34 +469,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if (action === 'delete') {
                     currentPin = currentPin.slice(0, -1);
-                } else if (num && currentPin.length < 4) {
+                } else if (num && currentPin.length < 6) {
                     currentPin += num;
                 }
                 
                 updateDots();
                 pinInput.value = currentPin;
                 
-                // Auto-submit bei 4 Ziffern
-                if (currentPin.length === 4 && usernameInput.value.trim() !== '') {
+                // Auto-submit bei 6 Ziffern
+                if (currentPin.length === 6) {
                     setTimeout(() => form.submit(), 300);
                 }
             });
         });
 
-        // Tastatur-Eingabe - nur wenn Username-Feld nicht fokussiert ist
+        // Tastatur-Eingabe
         document.addEventListener('keydown', (e) => {
-            // Ignore wenn Username-Feld aktiv ist
-            if (document.activeElement === usernameInput) {
-                return;
-            }
-            
-            if (e.key >= '0' && e.key <= '9' && currentPin.length < 4) {
+            if (e.key >= '0' && e.key <= '9' && currentPin.length < 6) {
                 e.preventDefault();
                 currentPin += e.key;
                 updateDots();
                 pinInput.value = currentPin;
                 
-                if (currentPin.length === 4 && usernameInput.value.trim() !== '') {
+                if (currentPin.length === 6) {
                     setTimeout(() => form.submit(), 300);
                 }
             } else if (e.key === 'Backspace') {
@@ -532,7 +499,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 currentPin = currentPin.slice(0, -1);
                 updateDots();
                 pinInput.value = currentPin;
-            } else if (e.key === 'Enter' && currentPin.length === 4 && usernameInput.value.trim() !== '') {
+            } else if (e.key === 'Enter' && currentPin.length === 6) {
                 form.submit();
             }
         });
@@ -545,11 +512,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     dot.classList.remove('filled');
                 }
             });
-        }
-
-        // Focus username on load
-        if (!usernameInput.value) {
-            usernameInput.focus();
         }
         
         // Live Clock

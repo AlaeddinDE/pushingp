@@ -163,12 +163,14 @@ while($m = $mitglieder->fetch_assoc()) {
     
     <div class="header">
         <div class="header-content">
-            <div class="logo">PUSHING P</div>
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit;">PUSHING P <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px;">Admin</span></a>
             <nav class="nav">
-                <a href="dashboard.php" class="nav-item">Dashboard</a>
                 <a href="kasse.php" class="nav-item">Kasse</a>
-                <a href="admin.php" class="nav-item">Admin</a>
-                <a href="admin_transaktionen.php" class="nav-item">Transaktionen</a>
+                <a href="events.php" class="nav-item">Events</a>
+                <a href="schichten.php" class="nav-item">Schichten</a>
+                <a href="chat.php" class="nav-item">Chat</a>
+                <a href="admin.php" class="nav-item active">Admin</a>
+                <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>
         </div>
@@ -238,7 +240,12 @@ while($m = $mitglieder->fetch_assoc()) {
                 <div style="grid-column: 1 / -1; display: flex; gap: 8px;">
                     <button type="submit" class="btn" style="flex: 1;">💾 Speichern</button>
                     <a href="admin_transaktionen.php" class="btn" style="flex: 1; background: var(--text-tertiary); text-decoration: none; display: flex; align-items: center; justify-content: center;">✖ Abbrechen</a>
-                    <button type="button" onclick="loescheTransaktion(<?= $edit_transaction['id'] ?>)" class="btn" style="background: var(--error);">🗑️ Löschen</button>
+                    
+                    <?php if ($edit_transaction['status'] === 'storniert'): ?>
+                        <button type="button" onclick="hardDeleteTransaction(<?= $edit_transaction['id'] ?>)" class="btn" style="background: #7f1d1d; border: 1px solid #ef4444;">🔥 Endgültig Löschen</button>
+                    <?php else: ?>
+                        <button type="button" onclick="loescheTransaktion(<?= $edit_transaction['id'] ?>)" class="btn" style="background: var(--error);">🗑️ Stornieren</button>
+                    <?php endif; ?>
                 </div>
             </form>
         </div>
@@ -580,7 +587,7 @@ while($m = $mitglieder->fetch_assoc()) {
     async function loescheTransaktion(id) {
         showModal(
             '🗑️ Transaktion stornieren',
-            'Diese Transaktion wird auf "storniert" gesetzt und aus der Berechnung entfernt. Fortfahren?',
+            'Diese Transaktion wird auf "storniert" gesetzt und aus der Berechnung entfernt. XP werden ebenfalls entfernt. Fortfahren?',
             async () => {
                 try {
                     const response = await fetch('/api/transaktion_loeschen.php', {
@@ -601,6 +608,34 @@ while($m = $mitglieder->fetch_assoc()) {
                 }
             },
             'Stornieren',
+            'Abbrechen'
+        );
+    }
+
+    async function hardDeleteTransaction(id) {
+        showModal(
+            '🔥 Endgültig Löschen',
+            'Diese Transaktion wird KOMPLETT aus der Datenbank entfernt. Dies kann NICHT rückgängig gemacht werden! XP werden ebenfalls entfernt.',
+            async () => {
+                try {
+                    const response = await fetch('/api/transaktion_hard_delete.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ id })
+                    });
+
+                    const result = await response.json();
+                    if (result.status === 'success') {
+                        showSuccess('Transaktion endgültig gelöscht!');
+                        setTimeout(() => window.location.href = 'admin_transaktionen.php', 1000);
+                    } else {
+                        showError(result.error || 'Fehler beim Löschen');
+                    }
+                } catch (error) {
+                    showError(error.message);
+                }
+            },
+            'LÖSCHEN',
             'Abbrechen'
         );
     }

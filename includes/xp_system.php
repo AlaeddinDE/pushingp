@@ -13,9 +13,10 @@ require_once __DIR__ . '/../includes/db.php';
  * @param string $description (optional custom description)
  * @param int $source_id (optional reference ID)
  * @param string $source_table (optional source table)
+ * @param int $custom_xp (optional custom XP amount, overrides DB value)
  * @return array ['success' => bool, 'xp_gained' => int, 'level_up' => bool, 'new_level' => int]
  */
-function add_xp($user_id, $action_code, $description = null, $source_id = null, $source_table = null) {
+function add_xp($user_id, $action_code, $description = null, $source_id = null, $source_table = null, $custom_xp = null) {
     global $conn;
     
     // Get action XP value
@@ -29,6 +30,11 @@ function add_xp($user_id, $action_code, $description = null, $source_id = null, 
         return ['success' => false, 'error' => 'Unknown action code'];
     }
     $stmt->close();
+    
+    // Use custom XP if provided
+    if ($custom_xp !== null) {
+        $xp_value = $custom_xp;
+    }
     
     // Get user current XP and multiplier
     $stmt = $conn->prepare("SELECT xp_total, level_id, xp_multiplier FROM users WHERE id = ?");
@@ -68,6 +74,35 @@ function add_xp($user_id, $action_code, $description = null, $source_id = null, 
         $stmt->bind_param('ii', $new_level, $user_id);
         $stmt->execute();
         $stmt->close();
+        
+        // CHAT INTEGRATION: Announce Level Up
+        $stmt = $conn->prepare("SELECT name FROM users WHERE id = ?");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->bind_result($user_name);
+        $stmt->fetch();
+        $stmt->close();
+        
+        // Get level title
+        $level_title = "Level $new_level";
+        $res = $conn->query("SELECT title FROM level_config WHERE level_id = $new_level");
+        if ($res && $row = $res->fetch_assoc()) {
+            $level_title .= " (" . $row['title'] . ")";
+        }
+        
+        $msg = "🎉 **$user_name** ist aufgestiegen zu **$level_title**! 🚀";
+        
+        // Post to all group chats where user is member
+        $groups = $conn->query("SELECT group_id FROM chat_group_members WHERE user_id = $user_id");
+        if ($groups) {
+            $stmt_chat = $conn->prepare("INSERT INTO chat_messages (sender_id, group_id, message, created_at) VALUES (?, ?, ?, NOW())");
+            while ($row = $groups->fetch_assoc()) {
+                $gid = $row['group_id'];
+                $stmt_chat->bind_param('iis', $user_id, $gid, $msg);
+                $stmt_chat->execute();
+            }
+            $stmt_chat->close();
+        }
     }
     
     // Check for new badges

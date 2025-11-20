@@ -115,6 +115,19 @@ ob_start();
         transform: scale(0.98);
     }
     
+    .event-card.past {
+        opacity: 0.6;
+        background: var(--bg-tertiary);
+        border-color: transparent;
+    }
+    
+    .event-card.past:hover {
+        transform: none;
+        box-shadow: none;
+        border-color: transparent;
+        cursor: default;
+    }
+
     .event-header {
         display: flex;
         justify-content: space-between;
@@ -315,6 +328,158 @@ ob_start();
         transform: scale(0.98);
     }
     
+    /* Event Creation Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(10px);
+        z-index: 10000;
+        align-items: center;
+        justify-content: center;
+        animation: fadeIn 0.2s ease;
+    }
+    
+    .modal.active {
+        display: flex;
+    }
+    
+    .modal-content {
+        background: var(--bg-secondary);
+        border-radius: 24px;
+        padding: 32px;
+        max-width: 500px;
+        width: 90%;
+        max-height: 85vh;
+        overflow-y: auto;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        animation: slideUp 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+        from { 
+            opacity: 0;
+            transform: translateY(40px);
+        }
+        to { 
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
+    }
+    
+    .modal-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--text-primary);
+    }
+    
+    .modal-close {
+        background: var(--bg-tertiary);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 1.25rem;
+        color: var(--text-secondary);
+        transition: all 0.2s;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .modal-close:hover {
+        background: var(--error);
+        color: white;
+        transform: rotate(90deg);
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-label {
+        display: block;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        margin-bottom: 8px;
+    }
+    
+    .form-input,
+    .form-textarea,
+    .form-select {
+        width: 100%;
+        padding: 12px 16px;
+        background: var(--bg-tertiary);
+        border: 1px solid var(--border);
+        border-radius: 12px;
+        color: var(--text-primary);
+        font-size: 0.938rem;
+        transition: all 0.2s;
+        font-family: inherit;
+    }
+    
+    .form-input:focus,
+    .form-textarea:focus,
+    .form-select:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: var(--bg-secondary);
+    }
+    
+    .form-textarea {
+        resize: vertical;
+        min-height: 80px;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+    }
+    
+    .submit-btn {
+        width: 100%;
+        padding: 14px 24px;
+        background: linear-gradient(135deg, var(--accent), #a855f7);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        margin-top: 8px;
+    }
+    
+    .submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(88, 101, 242, 0.4);
+    }
+    
+    .submit-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
     /* Mobile Optimizations */
     @media (max-width: 768px) {
         .events-container {
@@ -356,7 +521,7 @@ require_once __DIR__ . '/includes/header.php';
         </div>
         
         <div style="margin-bottom: 20px;">
-            <button onclick="window.location.href='event_manager.php'" class="create-event-btn">
+            <button onclick="openCreateModal()" class="create-event-btn">
                 ➕ Neues Event erstellen
             </button>
         </div>
@@ -365,6 +530,7 @@ require_once __DIR__ . '/includes/header.php';
             <button class="month-btn" onclick="changeMonth(-1)">‹</button>
             <div class="month-label" id="monthLabel"></div>
             <button class="month-btn" onclick="changeMonth(1)">›</button>
+            <button class="month-btn" onclick="jumpToToday()" style="font-size: 0.8rem; margin-left: 8px; opacity: 0.7;">Heute</button>
         </div>
         
         <div class="events-timeline" id="eventsTimeline">
@@ -376,11 +542,75 @@ require_once __DIR__ . '/includes/header.php';
     </div>
 </div>
 
+<!-- Event Creation Modal -->
+<div id="createEventModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Neues Event erstellen</h2>
+            <button class="modal-close" onclick="closeCreateModal()">✕</button>
+        </div>
+        
+        <form id="createEventForm" onsubmit="submitEvent(event)">
+            <div class="form-group">
+                <label class="form-label">Event-Titel *</label>
+                <input type="text" name="title" class="form-input" placeholder="z.B. Shisha-Abend" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Datum *</label>
+                    <input type="date" name="datum" class="form-input" required>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Uhrzeit</label>
+                    <input type="time" name="start_time" class="form-input">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Location</label>
+                <input type="text" name="location" class="form-input" placeholder="z.B. Shisha Lounge">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Beschreibung</label>
+                <textarea name="description" class="form-textarea" placeholder="Details zum Event..."></textarea>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Kosten (gesamt)</label>
+                    <input type="number" name="cost" class="form-input" step="0.01" min="0" placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Pro Person</label>
+                    <input type="number" name="cost_per_person" class="form-input" step="0.01" min="0" placeholder="0.00">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Bezahlung</label>
+                <select name="paid_by" class="form-select">
+                    <option value="private">Privat (jeder zahlt selbst)</option>
+                    <option value="pool">Aus Pool (Crew zahlt)</option>
+                    <option value="anteilig">Anteilig aufgeteilt</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="submit-btn" id="submitBtn">
+                ✓ Event erstellen
+            </button>
+        </form>
+    </div>
+</div>
+
 <script>
 const isAdmin = <?php echo $is_admin ? 'true' : 'false'; ?>;
 const userId = <?php echo $user_id; ?>;
 const monthLabel = document.getElementById('monthLabel');
 const eventsTimeline = document.getElementById('eventsTimeline');
+const createModal = document.getElementById('createEventModal');
+const createForm = document.getElementById('createEventForm');
 
 let currentDate = new Date();
 let currentMonth = currentDate.getMonth();
@@ -400,6 +630,13 @@ function changeMonth(delta) {
         currentMonth = 11; 
         currentYear--; 
     }
+    loadEvents();
+}
+
+function jumpToToday() {
+    const now = new Date();
+    currentMonth = now.getMonth();
+    currentYear = now.getFullYear();
     loadEvents();
 }
 
@@ -479,22 +716,35 @@ function renderEvents(events) {
 }
 
 function renderEventCard(event) {
-    const userResponse = event.participants?.find(p => p.mitglied_id == userId);
+    const today = new Date().toISOString().split('T')[0];
+    const isPast = event.datum < today;
+    
+    // Map DB status 'coming' to 'accepted' for frontend logic
+    const participants = event.participants || [];
+    const mappedParticipants = participants.map(p => ({
+        ...p,
+        status: p.status === 'coming' ? 'accepted' : p.status
+    }));
+    
+    const userResponse = mappedParticipants.find(p => p.mitglied_id == userId);
     const status = userResponse?.status || 'pending';
     
-    const accepted = event.participants?.filter(p => p.status === 'accepted').length || 0;
-    const declined = event.participants?.filter(p => p.status === 'declined').length || 0;
-    const pending = event.participants?.filter(p => p.status === 'pending').length || 0;
+    const accepted = mappedParticipants.filter(p => p.status === 'accepted').length || 0;
+    const declined = mappedParticipants.filter(p => p.status === 'declined').length || 0;
+    const pending = mappedParticipants.filter(p => p.status === 'pending').length || 0;
     
     // Check if user is owner or admin
     const isOwner = event.created_by == userId;
     const canEdit = isAdmin || isOwner;
     
     return `
-        <div class="event-card" onclick="toggleEventDetails(${event.id})">
+        <div class="event-card ${isPast ? 'past' : ''}" onclick="${isPast ? '' : `toggleEventDetails(${event.id})`}">
             <div class="event-header">
                 <div>
-                    <div class="event-title">${escapeHtml(event.title)}</div>
+                    <div class="event-title">
+                        ${escapeHtml(event.title)}
+                        ${isPast ? '<span style="font-size: 0.75rem; background: var(--text-secondary); color: var(--bg-primary); padding: 2px 6px; border-radius: 4px; margin-left: 8px; vertical-align: middle;">VERGANGEN</span>' : ''}
+                    </div>
                     ${event.start_time ? `<div class="event-time">🕐 ${event.start_time} Uhr</div>` : ''}
                 </div>
             </div>
@@ -520,7 +770,13 @@ function renderEventCard(event) {
                 ` : ''}
             </div>
             
-            ${status === 'pending' ? `
+            ${isPast ? `
+                <div class="event-actions">
+                    <button class="event-btn" disabled style="background: rgba(255,255,255,0.05); color: var(--text-secondary); cursor: not-allowed;">
+                        🔒 Event beendet
+                    </button>
+                </div>
+            ` : status === 'pending' ? `
                 <div class="event-actions">
                     <button class="event-btn accept" onclick="respondToEvent(event, ${event.id}, 'accepted')">
                         ✓ Zusagen
@@ -545,7 +801,7 @@ function renderEventCard(event) {
                 </div>
             ` : ''}
             
-            ${canEdit ? `
+            ${canEdit && !isPast ? `
                 <div class="admin-actions">
                     <button class="admin-btn" onclick="editEvent(event, ${event.id})">✏️ Bearbeiten</button>
                     ${isAdmin || isOwner ? `<button class="admin-btn" onclick="deleteEvent(event, ${event.id})">🗑️ Löschen</button>` : ''}
@@ -588,21 +844,114 @@ function toggleEventDetails(eventId) {
 
 function editEvent(e, eventId) {
     e.stopPropagation();
-    window.location.href = `/event_manager.php?edit=${eventId}`;
+    if (isAdmin) {
+        window.location.href = `/event_manager.php?edit=${eventId}`;
+    } else {
+        // TODO: Add edit modal for normal users
+        alert('Event bearbeiten kommt bald!');
+    }
 }
 
 function deleteEvent(e, eventId) {
     e.stopPropagation();
-    if (confirm('Event wirklich löschen?')) {
-        // Delete logic
-        window.location.href = `/api/event_delete.php?id=${eventId}`;
-    }
+    if (!confirm('Event wirklich löschen?')) return;
+    
+    fetch('/api/events_delete.php', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: `event_id=${eventId}`
+    })
+    .then(res => res.json())
+    .then(result => {
+        if (result.ok) {
+            loadEvents(); // Reload
+            
+            // Success message
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = 'position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: var(--error); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 600; z-index: 10001; animation: slideUp 0.3s ease;';
+            successMsg.textContent = '✓ Event gelöscht!';
+            document.body.appendChild(successMsg);
+            setTimeout(() => successMsg.remove(), 3000);
+        } else {
+            alert('Fehler: ' + (result.error || 'Konnte Event nicht löschen'));
+        }
+    })
+    .catch(error => {
+        console.error('Fehler:', error);
+        alert('Netzwerkfehler beim Löschen');
+    });
 }
 
 function escapeHtml(text) {
     const div = document.createElement('div');
     div.textContent = text;
     return div.innerHTML;
+}
+
+// Modal Functions
+function openCreateModal() {
+    createModal.classList.add('active');
+    // Set default date to today
+    const today = new Date().toISOString().split('T')[0];
+    createForm.querySelector('[name="datum"]').value = today;
+}
+
+function closeCreateModal() {
+    createModal.classList.remove('active');
+    createForm.reset();
+}
+
+// Close modal on outside click
+createModal.addEventListener('click', (e) => {
+    if (e.target === createModal) {
+        closeCreateModal();
+    }
+});
+
+// Close on ESC key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && createModal.classList.contains('active')) {
+        closeCreateModal();
+    }
+});
+
+async function submitEvent(e) {
+    e.preventDefault();
+    
+    const submitBtn = document.getElementById('submitBtn');
+    submitBtn.disabled = true;
+    submitBtn.textContent = '⏳ Erstelle Event...';
+    
+    try {
+        const formData = new FormData(createForm);
+        
+        const response = await fetch('/api/events_create.php', {
+            method: 'POST',
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.ok) {
+            closeCreateModal();
+            loadEvents(); // Reload events
+            
+            // Show success message
+            const successMsg = document.createElement('div');
+            successMsg.style.cssText = 'position: fixed; top: 100px; left: 50%; transform: translateX(-50%); background: var(--success); color: white; padding: 16px 24px; border-radius: 12px; font-weight: 600; z-index: 10001; animation: slideUp 0.3s ease;';
+            successMsg.textContent = '✓ Event erfolgreich erstellt!';
+            document.body.appendChild(successMsg);
+            setTimeout(() => successMsg.remove(), 3000);
+        } else {
+            alert('Fehler: ' + (result.msg || result.error || 'Unbekannter Fehler'));
+        }
+    } catch (error) {
+        console.error('Fehler:', error);
+        alert('Netzwerkfehler beim Erstellen');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = '✓ Event erstellen';
+    }
 }
 
 // Initial load

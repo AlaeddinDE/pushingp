@@ -18,6 +18,17 @@ if ($transaction_id <= 0) {
     exit;
 }
 
+// XP entfernen, bevor die Transaktion gelöscht wird
+$xp_result = $conn->query("SELECT id, user_id, xp_change FROM xp_history WHERE source_table = 'transaktionen' AND source_id = $transaction_id");
+if ($xp_result) {
+    while ($xp_row = $xp_result->fetch_assoc()) {
+        $uid = $xp_row['user_id'];
+        $xp_change = $xp_row['xp_change'];
+        $conn->query("UPDATE users SET xp_total = GREATEST(0, xp_total - $xp_change) WHERE id = $uid");
+        $conn->query("DELETE FROM xp_history WHERE id = " . $xp_row['id']);
+    }
+}
+
 // Transaktion löschen
 $stmt = $conn->prepare("DELETE FROM transaktionen WHERE id = ?");
 $stmt->bind_param('i', $transaction_id);

@@ -25,11 +25,14 @@ if ($result) {
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['reset_pin'])) {
     $user_id = intval($_POST['user_id']);
     
-    $stmt = $conn->prepare("UPDATE users SET pin_hash = NULL, password = '' WHERE id = ?");
-    $stmt->bind_param('i', $user_id);
+    // Reset to default unique PIN (100000 + ID)
+    $default_pin = (string)(100000 + $user_id);
+    
+    $stmt = $conn->prepare("UPDATE users SET pin_hash = ? WHERE id = ?");
+    $stmt->bind_param('si', $default_pin, $user_id);
     
     if ($stmt->execute()) {
-        $success = "PIN wurde zurückgesetzt. Standard-PIN: 0000";
+        $success = "PIN wurde zurückgesetzt. Standard-PIN: " . $default_pin;
     } else {
         $error = "Fehler beim Zurücksetzen";
     }
@@ -69,20 +72,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_pin'])) {
     $user_id = intval($_POST['user_id']);
     $new_pin = $_POST['new_pin'];
     
-    if (preg_match('/^\d{4}$/', $new_pin)) {
-        $pin_hash = password_hash($new_pin, PASSWORD_DEFAULT);
-        
-        $stmt = $conn->prepare("UPDATE users SET pin_hash = ? WHERE id = ?");
-        $stmt->bind_param('si', $pin_hash, $user_id);
-        
-        if ($stmt->execute()) {
-            $success = "Neuer PIN wurde gesetzt";
+    if (preg_match('/^\d{6}$/', $new_pin)) {
+        // Check uniqueness
+        $stmt = $conn->prepare("SELECT id FROM users WHERE pin_hash = ? AND id != ?");
+        $stmt->bind_param('si', $new_pin, $user_id);
+        $stmt->execute();
+        if ($stmt->fetch()) {
+            $stmt->close();
+            $error = "Dieser PIN ist bereits vergeben.";
         } else {
-            $error = "Fehler beim Setzen des PINs";
+            $stmt->close();
+            $stmt = $conn->prepare("UPDATE users SET pin_hash = ? WHERE id = ?");
+            $stmt->bind_param('si', $new_pin, $user_id);
+            
+            if ($stmt->execute()) {
+                $success = "Neuer PIN wurde gesetzt";
+            } else {
+                $error = "Fehler beim Setzen des PINs";
+            }
+            $stmt->close();
         }
-        $stmt->close();
     } else {
-        $error = "PIN muss 4 Ziffern haben";
+        $error = "PIN muss 6 Ziffern haben";
     }
 }
 ?>
@@ -286,8 +297,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_pin'])) {
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
                 <a href="schichten.php" class="nav-item">Schichten</a>
-                <a href="admin_kasse.php" class="nav-item">Admin Kasse</a>
-                <a href="admin_members.php" class="nav-item active">Members</a>
+                <a href="chat.php" class="nav-item">Chat</a>
+                <a href="admin.php" class="nav-item active">Admin</a>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>
@@ -427,8 +438,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_pin'])) {
                 <input type="hidden" name="user_id" id="pin_user_id">
                 
                 <div class="form-group">
-                    <label>Neuer PIN (4 Ziffern)</label>
-                    <input type="text" name="new_pin" pattern="\d{4}" maxlength="4" placeholder="0000" required>
+                    <label>Neuer PIN (6 Ziffern)</label>
+                    <input type="text" name="new_pin" pattern="\d{6}" maxlength="6" placeholder="123456" required>
                 </div>
                 
                 <button type="submit" name="set_pin" class="btn" style="width: 100%; background: var(--success);">
@@ -439,7 +450,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['set_pin'])) {
             <form method="POST">
                 <input type="hidden" name="user_id" id="pin_user_id_reset">
                 <button type="submit" name="reset_pin" class="btn" style="width: 100%; background: var(--warning);">
-                    PIN auf 0000 zurücksetzen
+                    PIN auf Standard zurücksetzen (100000 + ID)
                 </button>
             </form>
         </div>

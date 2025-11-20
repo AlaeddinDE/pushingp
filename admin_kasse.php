@@ -119,13 +119,13 @@ if ($result && $row = $result->fetch_assoc()) $stats['total'] = floatval($row['s
     
     <div class="header">
         <div class="header-content">
-            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P</a>
+            <a href="https://pushingp.de" class="logo" style="text-decoration: none; color: inherit; cursor: pointer;">PUSHING P <span style="color: #7f1010; margin-left: 12px; font-weight: 700; font-size: 0.9rem; background: rgba(127, 16, 16, 0.1); padding: 4px 12px; border-radius: 6px;">Admin</span></a>
             <nav class="nav">
                 <a href="kasse.php" class="nav-item">Kasse</a>
                 <a href="events.php" class="nav-item">Events</a>
                 <a href="schichten.php" class="nav-item">Schichten</a>
                 <a href="chat.php" class="nav-item">Chat</a>
-                <a href="admin.php" class="nav-item">Admin</a>
+                <a href="admin.php" class="nav-item active">Admin</a>
                 <a href="settings.php" class="nav-item">Settings</a>
                 <a href="logout.php" class="nav-item">Logout</a>
             </nav>

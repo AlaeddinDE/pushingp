@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 require_once '../../includes/functions.php';
 require_once '../../includes/db.php';
+require_once '../../includes/xp_system.php';
 secure_session_start();
 require_login();
 
@@ -44,7 +45,11 @@ try {
     ");
     $stmt->bind_param('dii', $win_amount, $user_id, $user_id);
     $stmt->execute();
+    $trans_id = $conn->insert_id;
     $stmt->close();
+    
+    // Award XP for win (10 XP per 1€)
+    add_xp($user_id, 'CASINO_WIN', 'Casino Crash Gewinn', $trans_id, 'transaktionen', round($win_amount * 10));
     
     $stmt = $conn->prepare("
         UPDATE member_payment_status mps

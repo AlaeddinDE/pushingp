@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 require_once __DIR__ . '/../../includes/functions.php';
 require_once __DIR__ . '/../../includes/db.php';
+require_once __DIR__ . '/../../includes/xp_system.php';
 
 secure_session_start();
 require_login();
@@ -14,7 +15,7 @@ $action = $input['action'] ?? '';
 $bet = isset($input['bet']) ? floatval($input['bet']) : 0;
 
 // Validate bet amount
-if ($action === 'start' && ($bet < 0.5 || $bet > 50)) {
+if (($action === 'start' || $action === 'deal') && ($bet < 0.5 || $bet > 50)) {
     echo json_encode(['status' => 'error', 'error' => 'Einsatz muss zwischen 0.50€ und 50€ liegen']);
     exit;
 }
@@ -31,7 +32,7 @@ $total_balance = floatval($db_balance ?? 0);
 $available_balance = max(0, $total_balance - 10.00);
 
 // Check sufficient balance
-if ($action === 'start' && $bet > $available_balance) {
+if (($action === 'start' || $action === 'deal') && $bet > $available_balance) {
     echo json_encode(['status' => 'error', 'error' => 'Nicht genug Guthaben!']);
     exit;
 }
@@ -80,13 +81,27 @@ function getHandValue($hand) {
 if ($action === 'start' || $action === 'deal') {
     // Deduct bet from balance immediately
     $stmt = $conn->prepare("
-        UPDATE members_v2 
-        SET saldo = saldo - ? 
-        WHERE user_id = (SELECT id FROM users WHERE id = ?)
+        INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
+        VALUES ('AUSZAHLUNG', 'POOL', ?, ?, 'Casino Blackjack Einsatz', ?, NOW())
     ");
-    $stmt->bind_param('di', $bet, $user_id);
+    $stmt->bind_param('dii', $bet, $user_id, $user_id);
+    $stmt->execute();
+    $bet_trans_id = $conn->insert_id;
+    $stmt->close();
+    
+    // Update member_payment_status
+    $stmt = $conn->prepare("
+        UPDATE member_payment_status mps
+        JOIN v_member_balance vmb ON vmb.id = mps.mitglied_id
+        SET mps.guthaben = vmb.balance
+        WHERE mps.mitglied_id = ?
+    ");
+    $stmt->bind_param('i', $user_id);
     $stmt->execute();
     $stmt->close();
+    
+    // Award XP for bet
+    add_xp($user_id, 'CASINO_BET', 'Blackjack Einsatz', $bet_trans_id, 'transaktionen', round($bet * 10));
     
     // Create new deck
     $deck = createDeck();
@@ -111,56 +126,73 @@ if ($action === 'start' || $action === 'deal') {
     
     // Check for immediate Blackjack
     $result = null;
-    $winAmount = 0;
-    $profit = 0;
+    $payout = 0;
+    $net_profit = 0;
     $gameOver = false;
     
     if ($playerValue === 21 && $dealerValue === 21) {
         // Both Blackjack - Push
         $result = 'push';
-        $winAmount = $bet; // Get bet back
-        $profit = 0;
+        $payout = $bet; // Get bet back
+        $net_profit = 0;
         $gameOver = true;
     } elseif ($playerValue === 21) {
-        // Player Blackjack - Pays 2.5x
+        // Player Blackjack - Pays 2.5x (3:2)
         $result = 'blackjack';
-        $winAmount = $bet * 2.5; // Blackjack pays 3:2 (bet back + 1.5x bet)
-        $profit = $bet * 1.5;
+        $payout = $bet * 2.5; // Bet back + 1.5x bet
+        $net_profit = $bet * 1.5;
         $gameOver = true;
     } elseif ($dealerValue === 21) {
         // Dealer Blackjack - Player loses
         $result = 'dealer_blackjack';
-        $winAmount = 0;
-        $profit = -$bet;
+        $payout = 0;
+        $net_profit = -$bet;
         $gameOver = true;
     }
     
     // If game over immediately, update balance and save
     if ($gameOver) {
-        // Update balance in database
+        // Add winnings if any
+        if ($payout > 0) {
+            $stmt = $conn->prepare("
+                INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
+                VALUES ('EINZAHLUNG', 'POOL', ?, ?, 'Casino Blackjack Gewinn', ?, NOW())
+            ");
+            $stmt->bind_param('dii', $payout, $user_id, $user_id);
+            $stmt->execute();
+            $win_trans_id = $conn->insert_id;
+            $stmt->close();
+            
+            // Award XP for Net Profit (10 XP per 1€)
+            // Only award if there is actual profit (not just push)
+            if ($net_profit > 0) {
+                add_xp($user_id, 'CASINO_WIN', 'Blackjack Gewinn', $win_trans_id, 'transaktionen', round($net_profit * 10));
+            }
+        }
+        
+        // Update member_payment_status
         $stmt = $conn->prepare("
-            UPDATE members_v2 
-            SET saldo = saldo + ? 
-            WHERE user_id = (SELECT id FROM users WHERE id = ?)
+            UPDATE member_payment_status mps
+            JOIN v_member_balance vmb ON vmb.id = mps.mitglied_id
+            SET mps.guthaben = vmb.balance
+            WHERE mps.mitglied_id = ?
         ");
-        $stmt->bind_param('di', $profit, $user_id);
+        $stmt->bind_param('i', $user_id);
         $stmt->execute();
         $stmt->close();
         
         // Get new balance
-        $stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+        $stmt = $conn->prepare("SELECT balance FROM v_member_balance WHERE id = ?");
         $stmt->bind_param('i', $user_id);
         $stmt->execute();
-        $stmt->bind_result($new_total_balance);
+        $stmt->bind_result($new_balance);
         $stmt->fetch();
         $stmt->close();
         
-        $new_balance = max(0, floatval($new_total_balance ?? 0) - 10.00);
-        
         // Save to casino history
-        $multiplier = $winAmount > 0 ? ($winAmount / $bet) : 0;
+        $multiplier = $payout > 0 ? ($payout / $bet) : 0;
         $stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, win_amount, multiplier, result) VALUES (?, 'blackjack', ?, ?, ?, ?)");
-        $stmt->bind_param('isdds', $user_id, $bet, $winAmount, $multiplier, $result);
+        $stmt->bind_param('isdds', $user_id, $bet, $payout, $multiplier, $result);
         $stmt->execute();
         $stmt->close();
         
@@ -169,24 +201,26 @@ if ($action === 'start' || $action === 'deal') {
         
         echo json_encode([
             'status' => 'success',
-            'playerHand' => $playerHand,
-            'dealerHand' => $dealerHand,
-            'playerValue' => $playerValue,
-            'dealerValue' => $dealerValue,
+            'player_hand' => $playerHand,
+            'dealer_hand' => $dealerHand,
+            'player_score' => $playerValue,
+            'dealer_score' => $dealerValue,
             'result' => $result,
-            'winAmount' => $winAmount,
-            'profit' => $profit,
-            'newBalance' => $new_balance,
-            'gameOver' => true
+            'win' => $payout,
+            'profit' => $net_profit,
+            'new_balance' => $new_balance,
+            'game_over' => true,
+            'dealer_visible' => true
         ]);
     } else {
         echo json_encode([
             'status' => 'success',
-            'playerHand' => $playerHand,
-            'dealerHand' => [$dealerHand[0]], // Only show one dealer card
-            'playerValue' => $playerValue,
+            'player_hand' => $playerHand,
+            'dealer_hand' => [$dealerHand[0]], // Only show one dealer card
+            'player_score' => $playerValue,
             'result' => null,
-            'gameOver' => false
+            'game_over' => false,
+            'dealer_visible' => false
         ]);
     }
     exit;
@@ -214,20 +248,62 @@ if ($action === 'hit') {
     $_SESSION['blackjack']['deckIndex'] = $deckIndex;
     
     $result = null;
+    $new_balance = null;
+    
     if ($playerValue > 21) {
         $result = 'bust';
+        
+        // Save to casino history (Loss)
+        $stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, win_amount, multiplier, result) VALUES (?, 'blackjack', ?, 0, 0, 'bust')");
+        $stmt->bind_param('id', $user_id, $bet);
+        $stmt->execute();
+        $stmt->close();
+        
+        // Get current balance
+        $stmt = $conn->prepare("SELECT balance FROM v_member_balance WHERE id = ?");
+        $stmt->bind_param('i', $user_id);
+        $stmt->execute();
+        $stmt->bind_result($new_balance);
+        $stmt->fetch();
+        $stmt->close();
+        
+        // Clear session
+        unset($_SESSION['blackjack']);
+        
+        echo json_encode([
+            'status' => 'success',
+            'player_hand' => $playerHand,
+            'dealer_hand' => [$dealerHand[0]],
+            'player_score' => $playerValue,
+            'dealer_score' => '?',
+            'result' => $result,
+            'game_over' => true,
+            'dealer_visible' => false,
+            'new_balance' => $new_balance,
+            'win' => 0
+        ]);
+        exit;
     }
     
-    echo json_encode([
-        'status' => 'success',
-        'playerHand' => $playerHand,
-        'playerValue' => $playerValue,
-        'result' => $result
-    ]);
-    exit;
+    // If player has 21, auto-stand (proceed to resolution)
+    if ($playerValue == 21) {
+        // Fall through to resolution block
+    } else {
+        echo json_encode([
+            'status' => 'success',
+            'player_hand' => $playerHand,
+            'dealer_hand' => [$dealerHand[0]],
+            'player_score' => $playerValue,
+            'dealer_score' => '?',
+            'result' => null,
+            'game_over' => false,
+            'dealer_visible' => false
+        ]);
+        exit;
+    }
 }
 
-if ($action === 'stand' || $action === 'double') {
+if ($action === 'stand' || $action === 'double' || ($action === 'hit' && $playerValue == 21)) {
     if ($action === 'double') {
         // Double: Check if player has enough balance for additional bet
         if ($bet > $available_balance) {
@@ -237,13 +313,27 @@ if ($action === 'stand' || $action === 'double') {
         
         // Deduct additional bet (original bet was already deducted at start)
         $stmt = $conn->prepare("
-            UPDATE members_v2 
-            SET saldo = saldo - ? 
-            WHERE user_id = (SELECT id FROM users WHERE id = ?)
+            INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
+            VALUES ('AUSZAHLUNG', 'POOL', ?, ?, 'Casino Blackjack Double', ?, NOW())
         ");
-        $stmt->bind_param('di', $bet, $user_id);
+        $stmt->bind_param('dii', $bet, $user_id, $user_id);
+        $stmt->execute();
+        $double_trans_id = $conn->insert_id;
+        $stmt->close();
+        
+        // Update member_payment_status
+        $stmt = $conn->prepare("
+            UPDATE member_payment_status mps
+            JOIN v_member_balance vmb ON vmb.id = mps.mitglied_id
+            SET mps.guthaben = vmb.balance
+            WHERE mps.mitglied_id = ?
+        ");
+        $stmt->bind_param('i', $user_id);
         $stmt->execute();
         $stmt->close();
+        
+        // Award XP for additional bet
+        add_xp($user_id, 'CASINO_BET', 'Blackjack Double', $double_trans_id, 'transaktionen', round($bet * 10));
         
         // Double the total bet amount for win calculations
         $bet *= 2;
@@ -264,65 +354,82 @@ if ($action === 'stand' || $action === 'double') {
     // Determine winner
     // Note: Bet was already deducted, so we calculate what to add back
     $result = 'lose';
-    $winAmount = 0;
+    $payout = 0;
     $multiplier = 0;
-    $profit = 0; // What to add/subtract from balance
+    $net_profit = 0; // What to add/subtract from balance
     
     if ($playerValue > 21) {
         // Player bust - loses (bet already deducted, nothing to add back)
         $result = 'bust';
-        $winAmount = 0;
+        $payout = 0;
         $multiplier = 0;
-        $profit = 0; // Lost the bet
+        $net_profit = -$bet; // Lost the bet
     } elseif ($dealerValue > 21) {
         // Dealer bust - player wins
         $result = 'dealer_bust';
-        $winAmount = $bet * 2; // Display: bet back + winnings
+        $payout = $bet * 2; // Display: bet back + winnings
         $multiplier = 2.0;
-        $profit = $bet * 2; // Add: bet back + winnings
+        $net_profit = $bet; // Add: bet back + winnings
     } elseif ($playerValue > $dealerValue) {
         // Player has higher value
         $result = 'win';
-        $winAmount = $bet * 2;
+        $payout = $bet * 2;
         $multiplier = 2.0;
-        $profit = $bet * 2; // Add: bet back + winnings
+        $net_profit = $bet; // Add: bet back + winnings
     } elseif ($playerValue === $dealerValue) {
         // Tie - push
         $result = 'push';
-        $winAmount = $bet; // Display: bet returned
+        $payout = $bet; // Display: bet returned
         $multiplier = 1.0;
-        $profit = $bet; // Add: just the bet back
+        $net_profit = 0; // Add: just the bet back
     } else {
         // Dealer wins (bet already deducted, nothing to add back)
         $result = 'lose';
-        $winAmount = 0;
+        $payout = 0;
         $multiplier = 0;
-        $profit = 0; // Lost the bet
+        $net_profit = -$bet; // Lost the bet
     }
     
-    // Update balance in database via transaction
+    // Add winnings if any
+    if ($payout > 0) {
+        $stmt = $conn->prepare("
+            INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
+            VALUES ('EINZAHLUNG', 'POOL', ?, ?, 'Casino Blackjack Gewinn', ?, NOW())
+        ");
+        $stmt->bind_param('dii', $payout, $user_id, $user_id);
+        $stmt->execute();
+        $win_trans_id = $conn->insert_id;
+        $stmt->close();
+        
+        // Award XP for Net Profit (10 XP per 1€)
+        // Only award if there is actual profit (not just push)
+        if ($net_profit > 0) {
+            add_xp($user_id, 'CASINO_WIN', 'Blackjack Gewinn', $win_trans_id, 'transaktionen', round($net_profit * 10));
+        }
+    }
+    
+    // Update member_payment_status
     $stmt = $conn->prepare("
-        UPDATE members_v2 
-        SET saldo = saldo + ? 
-        WHERE user_id = (SELECT id FROM users WHERE id = ?)
+        UPDATE member_payment_status mps
+        JOIN v_member_balance vmb ON vmb.id = mps.mitglied_id
+        SET mps.guthaben = vmb.balance
+        WHERE mps.mitglied_id = ?
     ");
-    $stmt->bind_param('di', $profit, $user_id);
+    $stmt->bind_param('i', $user_id);
     $stmt->execute();
     $stmt->close();
     
     // Get new balance
-    $stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+    $stmt = $conn->prepare("SELECT balance FROM v_member_balance WHERE id = ?");
     $stmt->bind_param('i', $user_id);
     $stmt->execute();
-    $stmt->bind_result($new_total_balance);
+    $stmt->bind_result($new_balance);
     $stmt->fetch();
     $stmt->close();
     
-    $new_balance = max(0, floatval($new_total_balance ?? 0) - 10.00);
-    
     // Save to casino history
     $stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, win_amount, multiplier, result) VALUES (?, 'blackjack', ?, ?, ?, ?)");
-    $stmt->bind_param('isdds', $user_id, $bet, $winAmount, $multiplier, $result);
+    $stmt->bind_param('isdds', $user_id, $bet, $payout, $multiplier, $result);
     $stmt->execute();
     $stmt->close();
     
@@ -331,14 +438,16 @@ if ($action === 'stand' || $action === 'double') {
     
     echo json_encode([
         'status' => 'success',
-        'playerHand' => $playerHand,
-        'dealerHand' => $dealerHand,
-        'playerValue' => $playerValue,
-        'dealerValue' => $dealerValue,
+        'player_hand' => $playerHand,
+        'dealer_hand' => $dealerHand,
+        'player_score' => $playerValue,
+        'dealer_score' => $dealerValue,
         'result' => $result,
-        'winAmount' => $winAmount,
-        'profit' => $profit,
-        'newBalance' => $new_balance
+        'win' => $payout,
+        'profit' => $net_profit,
+        'new_balance' => $new_balance,
+        'game_over' => true,
+        'dealer_visible' => true
     ]);
     exit;
 }

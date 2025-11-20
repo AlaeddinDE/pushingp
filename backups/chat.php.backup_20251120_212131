@@ -335,10 +335,34 @@ require_once __DIR__ . '/includes/header.php';
             display: flex;
             gap: 14px;
             animation: slideIn 0.3s ease;
+            width: fit-content;
+            max-width: 70%;
+            margin-bottom: 16px;
         }
         
         .chat-message.own {
-            flex-direction: row-reverse;
+            flex-direction: row-reverse !important;
+            align-self: flex-end !important;
+            margin-left: auto !important;
+            margin-right: 0 !important;
+        }
+        
+        .chat-message:not(.own) {
+            align-self: flex-start !important;
+            margin-right: auto !important;
+            margin-left: 0 !important;
+        }
+        
+        .chat-message.own .chat-message-content {
+            align-items: flex-end !important;
+            display: flex !important;
+            flex-direction: column !important;
+        }
+        
+        .chat-message:not(.own) .chat-message-content {
+            align-items: flex-start !important;
+            display: flex !important;
+            flex-direction: column !important;
         }
         
         .chat-message-avatar {
@@ -360,7 +384,7 @@ require_once __DIR__ . '/includes/header.php';
         }
         
         .chat-message-content {
-            max-width: 65%;
+            max-width: 100%;
         }
         
         .chat-message-bubble {
@@ -1059,6 +1083,35 @@ require_once __DIR__ . '/includes/header.php';
     const userId = <?= $user_id ?>;
     const isAdmin = <?= $is_admin ? 'true' : 'false' ?>;
     
+    // SOUND SYSTEM DIRECT INTEGRATION
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const sendSound = new Audio('/sounds/a0.mp3');
+    const receiveSound = new Audio('/sounds/e5.mp3');
+    sendSound.volume = 0.6;
+    receiveSound.volume = 0.6;
+    
+    // Unlock AudioContext on first interaction
+    document.addEventListener('click', function() {
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        // Pre-load sounds
+        sendSound.load();
+        receiveSound.load();
+    }, { once: true });
+
+    function playChatSound(type) {
+        const sound = type === 'send' ? sendSound : receiveSound;
+        sound.currentTime = 0;
+        const playPromise = sound.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.catch(error => {
+                console.log('Audio playback failed:', error);
+            });
+        }
+    }
+    
     // Mobile Sidebar Functions
     function openMobileSidebar() {
         document.getElementById('chatSidebar').classList.add('mobile-open');
@@ -1715,6 +1768,7 @@ require_once __DIR__ . '/includes/header.php';
     }
     
     let lastMessageId = 0;
+    let firstLoad = true; // Track first load
     
     async function loadMessages() {
         if (!currentChatId || !currentChatType) return;
@@ -1733,6 +1787,14 @@ require_once __DIR__ . '/includes/header.php';
                 const newMessages = data.messages.filter(msg => msg.id > lastMessageId);
                 
                 if (newMessages.length > 0 || lastMessageId === 0) {
+                    // Play sound if not first load and incoming message is not from me
+                    if (!firstLoad && newMessages.length > 0) {
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg.sender_id != userId) {
+                            playChatSound('receive');
+                        }
+                    }
+
                     // If first load, render all
                     if (lastMessageId === 0) {
                         messagesContainer.innerHTML = data.messages.map(msg => renderMessage(msg)).join('');
@@ -1751,6 +1813,8 @@ require_once __DIR__ . '/includes/header.php';
                     if (wasAtBottom || lastMessageId === 0) {
                         messagesContainer.scrollTop = messagesContainer.scrollHeight;
                     }
+                    
+                    firstLoad = false; // Reset first load flag
                 }
             }
         } catch (error) {
@@ -2050,6 +2114,7 @@ require_once __DIR__ . '/includes/header.php';
                         ${!isOwn ? `<div style="font-weight: 600; font-size: 0.75rem; margin-bottom: 4px; opacity: 0.8;">${msg.sender_name}</div>` : ''}
                         <div class="chat-message-text">${messageContent}</div>
                         ${fileContent}
+                        <div class="chat-message-reactions" id="reactions-${msg.id}"></div>
                     </div>
                     <div class="chat-message-meta">${formatTime(msg.created_at)}</div>
                 </div>
@@ -2078,6 +2143,7 @@ require_once __DIR__ . '/includes/header.php';
             if (data.status === 'success') {
                 input.value = '';
                 input.style.height = 'auto';
+                playChatSound('send'); // PLAY SOUND HERE
                 loadMessages();
             } else {
                 alert('Fehler: ' + data.error);
@@ -2686,7 +2752,6 @@ require_once __DIR__ . '/includes/header.php';
     </script>
 
     <!-- PREMIUM CHAT FEATURES INTEGRATION -->
-    <script src="/chat_premium_features.js"></script>
     
     <script>
     // Integrate premium features into existing chat
@@ -2751,5 +2816,20 @@ require_once __DIR__ . '/includes/header.php';
     }
     </style>
 
+     
+     <!-- Advanced Chat Features -->
+     <script src="/chat_advanced_features.js?v=2.2"></script>
+    <script>
+        // Cleanup any stray debug tags
+        document.addEventListener('DOMContentLoaded', function() {
+            const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT, null, false);
+            let node;
+            while(node = walker.nextNode()) {
+                if(node.nodeValue.includes('<current_datetime>')) {
+                    node.nodeValue = node.nodeValue.replace(/<current_datetime>.*?<\/current_datetime>/g, '');
+                }
+            }
+        });
+    </script>
 </body>
 </html>

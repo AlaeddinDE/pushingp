@@ -2,6 +2,7 @@
 header('Content-Type: application/json');
 require_once '../../includes/functions.php';
 require_once '../../includes/db.php';
+require_once '../../includes/xp_system.php';
 secure_session_start();
 require_login();
 
@@ -109,7 +110,11 @@ try {
     ");
     $stmt->bind_param('dii', $bet, $user_id, $user_id);
     $stmt->execute();
+    $bet_trans_id = $conn->insert_id;
     $stmt->close();
+    
+    // Award XP for bet (10 XP per 1€)
+    add_xp($user_id, 'CASINO_BET', 'Casino Slots Einsatz', $bet_trans_id, 'transaktionen', round($bet * 10));
     
     // Add winnings if won
     if ($win_amount > 0) {
@@ -119,7 +124,11 @@ try {
         ");
         $stmt->bind_param('dii', $win_amount, $user_id, $user_id);
         $stmt->execute();
+        $win_trans_id = $conn->insert_id;
         $stmt->close();
+        
+        // Award XP for win (10 XP per 1€)
+        add_xp($user_id, 'CASINO_WIN', 'Casino Slots Gewinn', $win_trans_id, 'transaktionen', round($win_amount * 10));
     }
     
     // Update member_payment_status

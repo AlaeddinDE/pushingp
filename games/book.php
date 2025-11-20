@@ -165,6 +165,36 @@ $casino_available_balance = max(0, $balance - 10.00);
         .book-symbol.winning {
             animation: bookWin 0.5s ease-in-out infinite;
             filter: brightness(1.5) drop-shadow(0 0 20px rgba(255,215,0,1));
+            position: relative;
+            z-index: 10;
+        }
+        
+        /* Payline Visualization */
+        .payline-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 5;
+        }
+        
+        .payline {
+            position: absolute;
+            height: 4px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                rgba(255,215,0,0.8) 10%, 
+                rgba(255,215,0,0.8) 90%, 
+                transparent);
+            box-shadow: 0 0 10px rgba(255,215,0,0.8);
+            animation: paylinePulse 0.8s ease-in-out infinite;
+        }
+        
+        @keyframes paylinePulse {
+            0%, 100% { opacity: 0.6; transform: scaleY(1); }
+            50% { opacity: 1; transform: scaleY(1.5); }
         }
         
         .book-symbol.expanding {
@@ -369,12 +399,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                 </div>
             </div>
             
-            <div class="book-reels">
+            <div class="book-reels" id="bookReels">
                 <div class="book-reel" id="reel1"><div class="book-reel-strip"></div></div>
                 <div class="book-reel" id="reel2"><div class="book-reel-strip"></div></div>
                 <div class="book-reel" id="reel3"><div class="book-reel-strip"></div></div>
                 <div class="book-reel" id="reel4"><div class="book-reel-strip"></div></div>
                 <div class="book-reel" id="reel5"><div class="book-reel-strip"></div></div>
+                <div class="payline-overlay" id="paylineOverlay"></div>
             </div>
         </div>
 
@@ -443,7 +474,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             document.getElementById('balance').textContent = balanceNum.toFixed(2).replace('.', ',') + ' €';
         }
         
-        function rollReel(reelElement, duration, finalSymbol) {
+        function rollReel(reelElement, duration, finalSymbols) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.book-reel-strip');
                 const symbolHeight = 90;
@@ -451,10 +482,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
                 
-                const finalSymbolEl = document.createElement('div');
-                finalSymbolEl.className = 'book-symbol';
-                finalSymbolEl.textContent = finalSymbol;
-                strip.appendChild(finalSymbolEl);
+                // Add final 3 symbols to end of strip
+                finalSymbols.forEach(sym => {
+                    const finalSymbolEl = document.createElement('div');
+                    finalSymbolEl.className = 'book-symbol';
+                    finalSymbolEl.textContent = sym;
+                    strip.appendChild(finalSymbolEl);
+                });
                 
                 const startTime = Date.now();
                 const interval = setInterval(() => {
@@ -528,6 +562,86 @@ $casino_available_balance = max(0, $balance - 10.00);
                 🎉 FREISPIELE BEENDET! 🎉<br>
                 Gesamtgewinn: ${freespinsTotalWin.toFixed(2)}€
             </div>`;
+        }
+
+        // Show Winning Lines Visualization
+        function showWinningLines(winningLines, result) {
+            const overlay = document.getElementById('paylineOverlay');
+            overlay.innerHTML = '';
+            
+            // Paylines definition (same as backend)
+            const paylines = [
+                [1, 1, 1, 1, 1], // Line 1: Middle row
+                [0, 0, 0, 0, 0], // Line 2: Top row
+                [2, 2, 2, 2, 2], // Line 3: Bottom row
+                [0, 1, 2, 1, 0], // Line 4: V-shape
+                [2, 1, 0, 1, 2], // Line 5: Inverted V
+                [1, 0, 0, 0, 1], // Line 6: W-shape top
+                [1, 2, 2, 2, 1], // Line 7: W-shape bottom
+                [0, 0, 1, 2, 2], // Line 8: Rising
+                [2, 2, 1, 0, 0]  // Line 9: Falling
+            ];
+            
+            const reelsContainer = document.getElementById('bookReels');
+            const containerRect = reelsContainer.getBoundingClientRect();
+            const reelWidth = containerRect.width / 5;
+            const symbolHeight = 90; // matches CSS
+            
+            winningLines.forEach((winLine, idx) => {
+                const linePattern = paylines[winLine.line];
+                const count = winLine.count;
+                
+                // Highlight winning symbols
+                for (let i = 0; i < count; i++) {
+                    const reel = document.getElementById(`reel${i + 1}`);
+                    const symbols = reel.querySelectorAll('.book-symbol');
+                    const row = linePattern[i];
+                    
+                    // Get the visible symbol at this row position (last 3 symbols in strip)
+                    if (symbols.length >= 3) {
+                        const symbolIndex = symbols.length - 3 + row;
+                        if (symbols[symbolIndex]) {
+                            symbols[symbolIndex].classList.add('winning');
+                        }
+                    }
+                }
+                
+                // Draw the payline
+                const svgNS = "http://www.w3.org/2000/svg";
+                const svg = document.createElementNS(svgNS, "svg");
+                svg.style.position = 'absolute';
+                svg.style.top = '0';
+                svg.style.left = '0';
+                svg.style.width = '100%';
+                svg.style.height = '100%';
+                svg.style.pointerEvents = 'none';
+                svg.style.zIndex = '5';
+                
+                const path = document.createElementNS(svgNS, "path");
+                let pathData = `M ${reelWidth * 0.5} ${(linePattern[0] + 0.5) * symbolHeight}`;
+                
+                for (let i = 1; i < 5; i++) {
+                    pathData += ` L ${reelWidth * (i + 0.5)} ${(linePattern[i] + 0.5) * symbolHeight}`;
+                }
+                
+                path.setAttribute("d", pathData);
+                path.setAttribute("stroke", "rgba(255,215,0,0.9)");
+                path.setAttribute("stroke-width", "5");
+                path.setAttribute("fill", "none");
+                path.setAttribute("filter", "drop-shadow(0 0 10px rgba(255,215,0,0.8))");
+                path.style.animation = 'paylinePulse 0.8s ease-in-out infinite';
+                
+                svg.appendChild(path);
+                overlay.appendChild(svg);
+            });
+            
+            // Clear winning animations after 3 seconds
+            setTimeout(() => {
+                document.querySelectorAll('.book-symbol.winning').forEach(sym => {
+                    sym.classList.remove('winning');
+                });
+                overlay.innerHTML = '';
+            }, 3000);
         }
 
         // Sound Effects
@@ -620,8 +734,7 @@ $casino_available_balance = max(0, $balance - 10.00);
 
                 if (data.status === 'success') {
                     if (!freespinsActive) {
-                        const totalBalance = parseFloat(data.new_balance) || 0;
-                        balance = Math.max(0, totalBalance - 10.00);
+                        balance = parseFloat(data.new_balance) || 0;
                     }
                     
                     initializeReels();
@@ -639,6 +752,11 @@ $casino_available_balance = max(0, $balance - 10.00);
                     );
                     
                     await Promise.all(rollPromises);
+                    
+                    // Show winning lines if any
+                    if (data.winning_lines && data.winning_lines.length > 0) {
+                        showWinningLines(data.winning_lines, data.result);
+                    }
                     
                     // Check for freespin trigger (3+ P symbols)
                     if (!freespinsActive && data.freespins_triggered) {
@@ -679,8 +797,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                                 document.getElementById('spinBtn').disabled = false;
                             }, 2000);
                         } else {
-                            const totalBalance = parseFloat(data.new_balance) || 0;
-                            balance = Math.max(0, totalBalance - 10.00);
+                            balance = parseFloat(data.new_balance) || 0;
                             endFreespins();
                             spinning = false;
                             document.getElementById('spinBtn').disabled = false;
@@ -692,7 +809,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                     }
                 } else {
                     console.error('Game failed:', data.error);
-                    alert('Spiel fehlgeschlagen: ' + data.error);
+                    console.error('Full response data:', data);
+                    alert('Spiel fehlgeschlagen: ' + (data.error || 'Unbekannter Fehler'));
                     spinning = false;
                     document.getElementById('spinBtn').disabled = false;
                 }

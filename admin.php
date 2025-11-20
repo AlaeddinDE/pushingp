@@ -390,17 +390,17 @@ if ($result && $row = $result->fetch_assoc()) {
                 </div>
             </a>
 
-            <!-- Datenbank-Backup (Platzhalter) -->
-            <div class="admin-card" style="opacity: 0.5; cursor: not-allowed;">
+            <!-- Datenbank-Backup -->
+            <a href="api/v2/create_backup.php" class="admin-card" target="_blank">
                 <span class="card-icon">💾</span>
                 <h3 class="card-title">Datenbank-Backup</h3>
                 <p class="card-description">
                     Manuelles Backup der Datenbank erstellen und herunterladen.
                 </p>
                 <div class="card-stat">
-                    <span style="color: var(--text-secondary);">Bald verfügbar</span>
+                    <span>Jetzt sichern</span>
                 </div>
-            </div>
+            </a>
         </div>
 
         <div style="margin-top: 64px; padding: 24px; background: var(--bg-secondary); border: 1px solid var(--border); border-radius: 12px; text-align: center;">

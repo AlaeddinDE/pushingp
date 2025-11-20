@@ -230,8 +230,19 @@ $show_casino = $user_balance >= 10.00;
             transform: rotate(-45deg) translate(7px, -7px);
         }
         
+        .mobile-only-links {
+            display: none;
+            width: 100%;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
         /* Mobile Responsive */
         @media (max-width: 768px) {
+            .mobile-only-links {
+                display: flex;
+            }
+
             .header-top {
                 padding: 10px 16px;
             }
@@ -317,8 +328,36 @@ $show_casino = $user_balance >= 10.00;
             </button>
             
             <div class="top-nav" id="mobileNav">
+                <!-- Mobile Only Main Nav -->
+                <div class="mobile-only-links">
+                    <a href="kasse.php" class="nav-btn top-btn">
+                        💰 Kasse
+                    </a>
+                    <a href="events.php" class="nav-btn top-btn" style="position: relative;">
+                        🎉 Events
+                        <?php if ($pending_events_count > 0): ?>
+                            <span class="notification-badge"><?= $pending_events_count ?></span>
+                        <?php endif; ?>
+                    </a>
+                    <a href="schichten.php" class="nav-btn top-btn" style="position: relative;">
+                        📅 Schichten
+                        <?php if ($active_shift_count > 0): ?>
+                            <span class="notification-badge" style="background: #10b981;">🔴</span>
+                        <?php endif; ?>
+                    </a>
+                    <?php if ($show_casino): ?>
+                        <a href="casino.php" class="nav-btn top-btn" style="position: relative;">
+                            🎰 Casino
+                        </a>
+                    <?php endif; ?>
+                    <a href="leaderboard.php" class="nav-btn top-btn">
+                        🏆 Leaderboard
+                    </a>
+                    <div style="height: 1px; background: var(--border); margin: 4px 0;"></div>
+                </div>
+
                 <a href="chat.php" class="nav-btn top-btn" style="position: relative;">
-                    💬 Chat
+                    👥 Crew
                     <?php if ($unread_messages_count > 0): ?>
                         <span class="notification-badge"><?= $unread_messages_count ?></span>
                     <?php endif; ?>

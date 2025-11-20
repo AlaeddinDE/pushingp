@@ -12,7 +12,7 @@ $page_title = 'Casino';
 
 // Get user balance (MINIMUM 10€ RESERVE!)
 $balance = 0.0;
-$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
+$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON LOWER(u.username) = LOWER(v.username) WHERE u.id = ?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $stmt->bind_result($balance);
@@ -20,9 +20,9 @@ $stmt->fetch();
 $stmt->close();
 $balance = floatval($balance ?? 0);
 
-// Casino nur ab 10€+ Guthaben zugänglich
+// Casino nur ab 10€+ Guthaben zugänglich (10€ Reserve)
 $casino_available_balance = max(0, $balance - 10.00);
-$casino_locked = ($balance < 10.00);
+$casino_locked = ($balance <= 10.00);
 
 // Get casino stats
 $total_wagered = 0;

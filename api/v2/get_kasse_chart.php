@@ -12,63 +12,41 @@ require_login();
 $days = isset($_GET['days']) ? intval($_GET['days']) : 30;
 $days = min(365, max(1, $days)); // Limit: 1-365 Tage
 
-// Hole tägliche Kassen-Salden
-$data = [];
-
-$query = "
-    SELECT 
-        DATE(t.datum) as tag,
-        SUM(CASE 
-            WHEN t.typ = 'EINZAHLUNG' THEN t.betrag
-            WHEN t.typ IN ('AUSZAHLUNG', 'MONATSBEITRAG', 'SCHADEN', 'GRUPPENAKTION_KASSE') THEN -t.betrag
-            ELSE 0
-        END) as tages_saldo
-    FROM transaktionen t
-    WHERE t.status = 'gebucht'
-    AND t.datum >= DATE_SUB(CURDATE(), INTERVAL ? DAY)
-    AND (t.beschreibung IS NULL OR t.beschreibung NOT LIKE '%Casino%')
-    GROUP BY DATE(t.datum)
-    ORDER BY tag ASC
-";
-
-$stmt = $conn->prepare($query);
+// Hole Historie aus balance_history
+$history = [];
+$stmt = $conn->prepare("SELECT date, balance FROM balance_history WHERE date >= DATE_SUB(CURDATE(), INTERVAL ? DAY) ORDER BY date ASC");
 $stmt->bind_param('i', $days);
 $stmt->execute();
 $result = $stmt->get_result();
-$daily_changes = [];
-
 while ($row = $result->fetch_assoc()) {
-    $daily_changes[$row['tag']] = floatval($row['tages_saldo']);
+    $history[$row['date']] = floatval($row['balance']);
 }
 $stmt->close();
 
-// Hole GESAMTEN Saldo bis vor X Tagen (Startwert)
-$start_balance_query = "
-    SELECT COALESCE(SUM(CASE 
-        WHEN t.typ = 'EINZAHLUNG' THEN t.betrag
-        WHEN t.typ IN ('AUSZAHLUNG', 'MONATSBEITRAG', 'SCHADEN', 'GRUPPENAKTION_KASSE') THEN -t.betrag
-        ELSE 0
-    END), 0) as saldo
-    FROM transaktionen t
-    WHERE t.status = 'gebucht'
-    AND t.datum < DATE_SUB(CURDATE(), INTERVAL ? DAY)
-    AND (t.beschreibung IS NULL OR t.beschreibung NOT LIKE '%Casino%')
-";
-
-$stmt = $conn->prepare($start_balance_query);
+// Hole Startwert (letzter bekannter Wert vor dem Zeitraum)
+$last_balance = 0;
+$stmt = $conn->prepare("SELECT balance FROM balance_history WHERE date < DATE_SUB(CURDATE(), INTERVAL ? DAY) ORDER BY date DESC LIMIT 1");
 $stmt->bind_param('i', $days);
 $stmt->execute();
-$stmt->bind_result($cumulative_balance);
-$stmt->fetch();
+$stmt->bind_result($last_balance);
+if (!$stmt->fetch()) {
+    // Fallback: Erster Wert im Zeitraum oder 0
+    if (!empty($history)) {
+        $last_balance = reset($history);
+    } else {
+        $last_balance = 0;
+    }
+}
 $stmt->close();
 
-// Berechne täglichen Verlauf über X Tage
+// Berechne täglichen Verlauf
 $start_date = new DateTime("-{$days} days");
 $end_date = new DateTime('tomorrow');
 $interval = new DateInterval('P1D');
 $period = new DatePeriod($start_date, $interval, $end_date);
 
 $chart_data = [];
+$current_val = $last_balance;
 
 foreach ($period as $date) {
     $date_str = $date->format('Y-m-d');
@@ -78,15 +56,25 @@ foreach ($period as $date) {
         break;
     }
     
-    $day_change = $daily_changes[$date_str] ?? 0;
-    $cumulative_balance += $day_change;
+    if (isset($history[$date_str])) {
+        $current_val = $history[$date_str];
+    }
     
     $chart_data[] = [
         'date' => $date->format('d.m'),
         'full_date' => $date_str,
-        'balance' => round($cumulative_balance, 2),
-        'change' => round($day_change, 2)
+        'balance' => round($current_val, 2),
+        'change' => 0 // Wird gleich berechnet
     ];
+}
+
+// Changes berechnen
+for ($i = 0; $i < count($chart_data); $i++) {
+    if ($i === 0) {
+        $chart_data[$i]['change'] = $chart_data[$i]['balance'] - $last_balance;
+    } else {
+        $chart_data[$i]['change'] = $chart_data[$i]['balance'] - $chart_data[$i-1]['balance'];
+    }
 }
 
 // Statistiken
