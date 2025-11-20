@@ -23,11 +23,41 @@ $casino_available_balance = max(0, $balance - 10.00);
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); min-height: 100vh; padding: 20px; }
-        .game-container { max-width: 900px; margin: 0 auto; background: var(--bg-primary); border-radius: 24px; padding: 32px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
-        .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
-        .balance-display { background: var(--bg-secondary); padding: 16px 24px; border-radius: 12px; text-align: center; }
-        .balance-value { font-size: 1.5rem; font-weight: 800; color: var(--success); }
+        body { 
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            height: 100vh; 
+            margin: 0;
+            padding: 10px; 
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-container { 
+            max-width: 1000px; 
+            width: 100%;
+            background: var(--bg-primary); 
+            border-radius: 20px; 
+            padding: 20px; 
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            max-height: 98vh;
+        }
+        .game-header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 15px; 
+            gap: 16px; 
+        }
+        .balance-display { 
+            background: var(--bg-secondary); 
+            padding: 10px 20px; 
+            border-radius: 12px; 
+            text-align: center; 
+        }
+        .balance-value { font-size: 1.3rem; font-weight: 800; color: var(--success); }
         
         /* === ULTRA KRASSE LAS VEGAS SLOT MACHINE === */
         .slots-machine {
@@ -36,8 +66,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 radial-gradient(circle at 30% 30%, rgba(255,215,0,0.15), transparent 50%),
                 radial-gradient(circle at 70% 70%, rgba(255,0,150,0.15), transparent 50%),
                 linear-gradient(180deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%);
-            border-radius: 40px;
-            padding: 70px 50px 50px;
+            border-radius: 30px;
+            padding: 45px 30px 25px;
             box-shadow: 
                 0 40px 120px rgba(0,0,0,1),
                 0 0 100px rgba(255,215,0,0.4),
@@ -46,8 +76,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 inset 0 -3px 12px rgba(0,0,0,0.8);
             border: 6px solid transparent;
             background-clip: padding-box;
-            margin: 20px auto;
-            max-width: 700px;
+            margin: 10px auto;
+            max-width: 650px;
             animation: machineGlow 3s ease-in-out infinite;
         }
         
@@ -55,7 +85,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             content: '';
             position: absolute;
             inset: -6px;
-            border-radius: 40px;
+            border-radius: 30px;
             background: linear-gradient(45deg, 
                 #FFD700, #FF00FF, #00FFFF, #FFD700, 
                 #FF00FF, #00FFFF, #FFD700);
@@ -96,11 +126,12 @@ $casino_available_balance = max(0, $balance - 10.00);
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFD700, #FFA500, #FF00FF, #FFD700);
             background-size: 300% 300%;
-            padding: 20px 80px;
+            padding: 12px 50px;
             border-radius: 30px 30px 0 0;
-            font-size: 2rem;
+            font-size: 1.3rem;
             font-weight: 900;
             color: #000;
+            text-align: center;
             text-shadow: 
                 0 0 10px rgba(255,255,255,1),
                 0 0 20px rgba(255,215,0,1),
@@ -111,11 +142,11 @@ $casino_available_balance = max(0, $balance - 10.00);
                 0 0 150px rgba(255,165,0,0.6),
                 inset 0 4px 16px rgba(255,255,255,0.6),
                 inset 0 -4px 16px rgba(0,0,0,0.3);
-            letter-spacing: 6px;
+            letter-spacing: 4px;
             animation: crownPulse 1.5s ease-in-out infinite, crownBg 3s linear infinite;
             border: 3px solid rgba(255,255,255,0.8);
-            position: relative;
             overflow: hidden;
+            white-space: nowrap;
         }
         
         .slots-crown::before {
@@ -186,7 +217,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             content: '';
             position: absolute;
             inset: -10px;
-            border-radius: 40px;
+            border-radius: 30px;
             background: inherit;
             opacity: 0.5;
             filter: blur(15px);
@@ -200,11 +231,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-reels {
             display: flex;
-            gap: 15px;
+            gap: 12px;
             justify-content: center;
-            margin: 30px 0;
+            margin: 15px 0;
             background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
-            padding: 30px 15px;
+            padding: 20px 15px;
             border-radius: 20px;
             box-shadow: inset 0 10px 30px rgba(0,0,0,0.8);
             flex-wrap: nowrap;
@@ -247,8 +278,8 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .slot-reel {
-            width: 120px;
-            height: 180px;
+            width: 110px;
+            height: 150px;
             background: 
                 radial-gradient(circle at center, rgba(139, 92, 246, 0.2), transparent 70%),
                 radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.15), transparent 60%),
@@ -281,11 +312,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .reel-symbol {
             width: 100%;
-            height: 180px;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
+            font-size: 4rem;
             flex-shrink: 0;
         }
         
@@ -474,9 +505,9 @@ $casino_available_balance = max(0, $balance - 10.00);
             100% { filter: hue-rotate(360deg) brightness(1.2) saturate(1.3); }
         }
         
-        .controls { background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-top: 24px; }
-        .bet-input { width: 100%; padding: 16px; background: var(--bg-tertiary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 16px; }
-        .spin-btn { width: 100%; padding: 20px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 5px solid #fbbf24; color: white; font-weight: 900; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; border-radius: 16px; text-transform: uppercase; letter-spacing: 3px; box-shadow: 0 10px 50px rgba(245, 158, 11, 0.8); animation: spinBtnPulse 1.5s ease-in-out infinite; }
+        .controls { background: var(--bg-secondary); padding: 15px; border-radius: 16px; margin-top: 15px; }
+        .bet-input { width: 100%; padding: 12px; background: var(--bg-tertiary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1.1rem; font-weight: 700; text-align: center; margin-bottom: 12px; }
+        .spin-btn { width: 100%; padding: 15px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 4px solid #fbbf24; color: white; font-weight: 900; font-size: 1.3rem; cursor: pointer; transition: all 0.3s; border-radius: 16px; text-transform: uppercase; letter-spacing: 3px; box-shadow: 0 10px 50px rgba(245, 158, 11, 0.8); animation: spinBtnPulse 1.5s ease-in-out infinite; }
         .spin-btn:hover { transform: scale(1.05); box-shadow: 0 15px 60px rgba(245, 158, 11, 1); }
         .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
         
@@ -485,7 +516,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             50% { box-shadow: 0 15px 70px rgba(245, 158, 11, 1); }
         }
         
-        .result-box { margin-top: 20px; padding: 20px; border-radius: 12px; text-align: center; font-size: 1.25rem; font-weight: 800; }
+        .result-box { margin-top: 10px; padding: 12px; border-radius: 12px; text-align: center; font-size: 1.1rem; font-weight: 800; }
         .result-box.win { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)); border: 2px solid var(--success); color: var(--success); }
         .result-box.loss { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.2)); border: 2px solid var(--error); color: var(--error); }
         .back-btn { display: inline-block; padding: 12px 24px; background: var(--bg-secondary); border-radius: 12px; color: var(--text-primary); text-decoration: none; font-weight: 600; transition: all 0.2s; }
@@ -548,11 +579,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="game-header">
             <div>
                 <a href="/casino.php" class="back-btn">← Zurück</a>
-                <h1 style="font-size: 2.5rem; margin: 16px 0 8px 0;">🎰 Slot Machine</h1>
-                <p style="color: var(--text-secondary); margin: 0;">Drei gleiche Symbole = Gewinn!</p>
+                <h1 style="font-size: 1.8rem; margin: 8px 0 4px 0;">🎰 Slot Machine</h1>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">4 gleiche Symbole = Gewinn!</p>
             </div>
             <div class="balance-display">
-                <div style="font-size: 0.875rem; color: var(--text-secondary); margin-bottom: 4px;">Guthaben</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">Guthaben</div>
                 <div class="balance-value" id="balance"><?= number_format($casino_available_balance, 2, ',', '.') ?> €</div>
             </div>
         </div>
@@ -586,25 +617,26 @@ $casino_available_balance = max(0, $balance - 10.00);
         </div>
 
         <div class="controls">
+            <label style="display: block; margin-bottom: 6px; font-weight: 700; color: white; text-align: center; font-size: 0.9rem;">💰 Einsatz</label>
             <input type="number" id="betAmount" class="bet-input" min="0.10" max="100" step="0.10" value="1.00" placeholder="Einsatz">
             <button id="spinBtn" class="spin-btn" onclick="spin()">🎰 DREHEN</button>
         </div>
 
         <div id="resultBox"></div>
 
-        <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.875rem; color: var(--text-secondary);">
-            <strong style="font-size: 1rem; color: var(--text-primary);">🎰 Auszahlungen (4 Symbole):</strong><br><br>
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div>💎💎💎💎 = <span style="color: #FFD700; font-weight: 800;">50x</span></div>
-                <div>7️⃣7️⃣7️⃣7️⃣ = <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
-                <div>🔔🔔🔔🔔 = <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
-                <div>⭐⭐⭐⭐ = <span style="color: #FFA500; font-weight: 800;">10x</span></div>
-                <div>BAR BAR BAR BAR = <span style="color: #FF0080; font-weight: 700;">8x</span></div>
-                <div>🍇🍇🍇🍇 = <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
-                <div>🍉🍉🍉🍉 = <span style="color: #10B981; font-weight: 700;">6x</span></div>
-                <div>🍊🍊🍊🍊 = <span style="color: #F97316; font-weight: 700;">5x</span></div>
-                <div>🍋🍋🍋🍋 = <span style="color: #EAB308; font-weight: 700;">4x</span></div>
-                <div>🍒🍒🍒🍒 = <span style="color: #EF4444; font-weight: 700;">3x</span></div>
+        <div style="margin-top: 12px; padding: 10px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.75rem; color: var(--text-secondary);">
+            <strong style="font-size: 0.85rem; color: var(--text-primary);">🎰 Auszahlungen:</strong>
+            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px;">
+                <div>💎x4 <span style="color: #FFD700; font-weight: 800;">50x</span></div>
+                <div>7️⃣x4 <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
+                <div>🔔x4 <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
+                <div>⭐x4 <span style="color: #FFA500; font-weight: 800;">10x</span></div>
+                <div>BARx4 <span style="color: #FF0080; font-weight: 700;">8x</span></div>
+                <div>🍇x4 <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
+                <div>🍉x4 <span style="color: #10B981; font-weight: 700;">6x</span></div>
+                <div>🍊x4 <span style="color: #F97316; font-weight: 700;">5x</span></div>
+                <div>🍋x4 <span style="color: #EAB308; font-weight: 700;">4x</span></div>
+                <div>🍒x4 <span style="color: #EF4444; font-weight: 700;">3x</span></div>
             </div>
         </div>
     </div>
@@ -653,7 +685,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         function rollReel(reelElement, duration, finalSymbol) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.reel-strip');
-                const symbolHeight = 180;
+                const symbolHeight = 150;
                 let currentPos = 0;
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
