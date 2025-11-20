@@ -62,37 +62,37 @@ $multiplier = 0;
 if ($result[0] === $result[1] && $result[1] === $result[2] && $result[2] === $result[3]) {
     switch ($result[0]) {
         case '💎':
-            $multiplier = 500;
-            break;
-        case '7️⃣':
-            $multiplier = 200;
-            break;
-        case '🔔':
-            $multiplier = 100;
-            break;
-        case '⭐':
             $multiplier = 50;
             break;
-        case 'BAR':
-            $multiplier = 40;
-            break;
-        case '🍇':
-            $multiplier = 30;
-            break;
-        case '🍉':
+        case '7️⃣':
             $multiplier = 25;
             break;
-        case '🍊':
-            $multiplier = 20;
-            break;
-        case '🍋':
+        case '🔔':
             $multiplier = 15;
             break;
-        case '🍒':
+        case '⭐':
             $multiplier = 10;
             break;
-        default:
+        case 'BAR':
+            $multiplier = 8;
+            break;
+        case '🍇':
+            $multiplier = 7;
+            break;
+        case '🍉':
+            $multiplier = 6;
+            break;
+        case '🍊':
             $multiplier = 5;
+            break;
+        case '🍋':
+            $multiplier = 4;
+            break;
+        case '🍒':
+            $multiplier = 3;
+            break;
+        default:
+            $multiplier = 2;
     }
     $win_amount = $bet * $multiplier;
 }

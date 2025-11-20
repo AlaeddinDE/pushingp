@@ -68,17 +68,17 @@ $casino_available_balance = max(0, $balance - 10.00);
             0%, 100% {
                 box-shadow: 
                     0 40px 120px rgba(0,0,0,1),
-                    0 0 100px rgba(255,215,0,0.4),
-                    0 0 150px rgba(255,0,150,0.3),
-                    inset 0 3px 12px rgba(255,255,255,0.15),
+                    0 0 60px rgba(255,215,0,0.2),
+                    0 0 80px rgba(255,0,150,0.15),
+                    inset 0 3px 12px rgba(255,255,255,0.1),
                     inset 0 -3px 12px rgba(0,0,0,0.8);
             }
             50% {
                 box-shadow: 
                     0 40px 120px rgba(0,0,0,1),
-                    0 0 150px rgba(255,215,0,0.8),
-                    0 0 200px rgba(255,0,150,0.6),
-                    inset 0 3px 12px rgba(255,255,255,0.2),
+                    0 0 80px rgba(255,215,0,0.3),
+                    0 0 100px rgba(255,0,150,0.2),
+                    inset 0 3px 12px rgba(255,255,255,0.15),
                     inset 0 -3px 12px rgba(0,0,0,0.8);
             }
         }
@@ -144,18 +144,16 @@ $casino_available_balance = max(0, $balance - 10.00);
             0%, 100% { 
                 transform: translateX(-50%) scale(1);
                 box-shadow: 
-                    0 0 50px rgba(255,215,0,1),
-                    0 0 100px rgba(255,0,255,0.8),
-                    0 0 150px rgba(255,165,0,0.6),
-                    inset 0 4px 16px rgba(255,255,255,0.6);
+                    0 0 30px rgba(255,215,0,0.8),
+                    0 0 50px rgba(255,0,255,0.4),
+                    inset 0 4px 16px rgba(255,255,255,0.5);
             }
             50% { 
-                transform: translateX(-50%) scale(1.05);
+                transform: translateX(-50%) scale(1.02);
                 box-shadow: 
-                    0 0 80px rgba(255,215,0,1),
-                    0 0 150px rgba(255,0,255,1),
-                    0 0 200px rgba(255,165,0,1),
-                    inset 0 6px 20px rgba(255,255,255,0.8);
+                    0 0 40px rgba(255,215,0,0.9),
+                    0 0 70px rgba(255,0,255,0.5),
+                    inset 0 5px 18px rgba(255,255,255,0.6);
             }
         }
         
@@ -232,18 +230,18 @@ $casino_available_balance = max(0, $balance - 10.00);
         @keyframes frameGlow {
             0%, 100% {
                 box-shadow: 
-                    0 0 30px rgba(255,215,0,0.8),
-                    0 0 60px rgba(255,165,0,0.6),
+                    0 0 20px rgba(255,215,0,0.5),
+                    0 0 40px rgba(255,165,0,0.3),
                     0 12px 32px rgba(0,0,0,0.9),
-                    inset 0 3px 10px rgba(255,255,255,0.5),
+                    inset 0 3px 10px rgba(255,255,255,0.4),
                     inset 0 -3px 10px rgba(0,0,0,0.7);
             }
             50% {
                 box-shadow: 
-                    0 0 50px rgba(255,215,0,1),
-                    0 0 100px rgba(255,165,0,1),
+                    0 0 30px rgba(255,215,0,0.7),
+                    0 0 60px rgba(255,165,0,0.5),
                     0 12px 32px rgba(0,0,0,0.9),
-                    inset 0 4px 12px rgba(255,255,255,0.7),
+                    inset 0 4px 12px rgba(255,255,255,0.5),
                     inset 0 -4px 12px rgba(0,0,0,0.7);
             }
         }
@@ -333,20 +331,20 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         @keyframes reelIdle {
             0%, 100% { 
-                transform: translateY(0) scale(1) rotateX(0deg);
+                transform: translateY(0) scale(1);
                 box-shadow: 
                     inset 0 0 60px rgba(0,0,0,1),
-                    inset 0 0 30px rgba(139, 92, 246, 0.3),
-                    0 0 50px rgba(139, 92, 246, 0.5),
-                    0 0 100px rgba(236, 72, 153, 0.3);
+                    inset 0 0 20px rgba(139, 92, 246, 0.2),
+                    0 0 30px rgba(139, 92, 246, 0.3),
+                    0 0 50px rgba(236, 72, 153, 0.2);
             }
             50% { 
-                transform: translateY(-3px) scale(1.02) rotateX(2deg);
+                transform: translateY(-2px) scale(1.01);
                 box-shadow: 
                     inset 0 0 60px rgba(0,0,0,1),
-                    inset 0 0 40px rgba(139, 92, 246, 0.5),
-                    0 0 70px rgba(139, 92, 246, 0.8),
-                    0 0 140px rgba(236, 72, 153, 0.6);
+                    inset 0 0 25px rgba(139, 92, 246, 0.3),
+                    0 0 40px rgba(139, 92, 246, 0.4),
+                    0 0 70px rgba(236, 72, 153, 0.3);
             }
         }
         
@@ -472,8 +470,8 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         @keyframes rainbowGlow {
-            0% { filter: hue-rotate(0deg) brightness(1.5) saturate(2); }
-            100% { filter: hue-rotate(360deg) brightness(1.5) saturate(2); }
+            0% { filter: hue-rotate(0deg) brightness(1.2) saturate(1.3); }
+            100% { filter: hue-rotate(360deg) brightness(1.2) saturate(1.3); }
         }
         
         .controls { background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-top: 24px; }
@@ -496,12 +494,12 @@ $casino_available_balance = max(0, $balance - 10.00);
         /* === ULTRA KRASSE PARTIKEL & COIN RAIN === */
         .coin-particle {
             position: fixed;
-            font-size: 3rem;
+            font-size: 2rem;
             pointer-events: none;
             z-index: 99999;
-            animation: coinRain 2.5s ease-in forwards;
-            filter: drop-shadow(0 0 15px gold) drop-shadow(0 0 30px rgba(255,215,0,0.8));
-            text-shadow: 0 0 20px rgba(255,215,0,1);
+            animation: coinRain 2s ease-in forwards;
+            filter: drop-shadow(0 0 8px gold);
+            text-shadow: 0 0 10px rgba(255,215,0,0.8);
         }
         
         @keyframes coinRain {
@@ -524,11 +522,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .explosion-particle {
             position: fixed;
-            font-size: 2rem;
+            font-size: 1.5rem;
             pointer-events: none;
             z-index: 99998;
-            animation: explode 1.5s ease-out forwards;
-            filter: drop-shadow(0 0 10px currentColor);
+            animation: explode 1.2s ease-out forwards;
+            filter: drop-shadow(0 0 5px currentColor);
         }
         
         @keyframes explode {
@@ -542,41 +540,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             }
         }
         
-        .laser-beam {
-            position: fixed;
-            width: 4px;
-            height: 200vh;
-            background: linear-gradient(180deg, 
-                transparent,
-                rgba(255,215,0,0.8),
-                rgba(255,0,255,0.8),
-                rgba(0,255,255,0.8),
-                transparent
-            );
-            pointer-events: none;
-            z-index: 99997;
-            animation: laserScan 2s linear forwards;
-            filter: blur(2px);
-            box-shadow: 
-                0 0 20px rgba(255,215,0,1),
-                0 0 40px rgba(255,0,255,1),
-                0 0 60px rgba(0,255,255,1);
-        }
-        
-        @keyframes laserScan {
-            0% { 
-                transform: translateX(-100vw) scaleY(0.5);
-                opacity: 0;
-            }
-            50% {
-                opacity: 1;
-                transform: translateX(50vw) scaleY(1);
-            }
-            100% { 
-                transform: translateX(200vw) scaleY(0.5);
-                opacity: 0;
-            }
-        }
+
     </style>
 </head>
 <body>
@@ -631,16 +595,16 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.875rem; color: var(--text-secondary);">
             <strong style="font-size: 1rem; color: var(--text-primary);">🎰 Auszahlungen (4 Symbole):</strong><br><br>
             <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
-                <div>💎💎💎💎 = <span style="color: #FFD700; font-weight: 800;">500x</span></div>
-                <div>7️⃣7️⃣7️⃣7️⃣ = <span style="color: #FF00FF; font-weight: 800;">200x</span></div>
-                <div>🔔🔔🔔🔔 = <span style="color: #00FFFF; font-weight: 800;">100x</span></div>
-                <div>⭐⭐⭐⭐ = <span style="color: #FFA500; font-weight: 800;">50x</span></div>
-                <div>BAR BAR BAR BAR = <span style="color: #FF0080; font-weight: 800;">40x</span></div>
-                <div>🍇🍇🍇🍇 = <span style="color: #9F7AEA; font-weight: 700;">30x</span></div>
-                <div>🍉🍉🍉🍉 = <span style="color: #10B981; font-weight: 700;">25x</span></div>
-                <div>🍊🍊🍊🍊 = <span style="color: #F97316; font-weight: 700;">20x</span></div>
-                <div>🍋🍋🍋🍋 = <span style="color: #EAB308; font-weight: 700;">15x</span></div>
-                <div>🍒🍒🍒🍒 = <span style="color: #EF4444; font-weight: 700;">10x</span></div>
+                <div>💎💎💎💎 = <span style="color: #FFD700; font-weight: 800;">50x</span></div>
+                <div>7️⃣7️⃣7️⃣7️⃣ = <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
+                <div>🔔🔔🔔🔔 = <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
+                <div>⭐⭐⭐⭐ = <span style="color: #FFA500; font-weight: 800;">10x</span></div>
+                <div>BAR BAR BAR BAR = <span style="color: #FF0080; font-weight: 700;">8x</span></div>
+                <div>🍇🍇🍇🍇 = <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
+                <div>🍉🍉🍉🍉 = <span style="color: #10B981; font-weight: 700;">6x</span></div>
+                <div>🍊🍊🍊🍊 = <span style="color: #F97316; font-weight: 700;">5x</span></div>
+                <div>🍋🍋🍋🍋 = <span style="color: #EAB308; font-weight: 700;">4x</span></div>
+                <div>🍒🍒🍒🍒 = <span style="color: #EF4444; font-weight: 700;">3x</span></div>
             </div>
         </div>
     </div>
@@ -769,10 +733,18 @@ $casino_available_balance = max(0, $balance - 10.00);
                     if (data.win_amount > 0) {
                         resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
                         
-                        // ULTRA KRASSE EFFEKTE
-                        createCoinRain(50);
-                        createExplosion(reels[2]);
-                        createLaserBeams(3);
+                        // Sanfte Gewinn-Effekte basierend auf Multiplikator
+                        if (data.multiplier >= 25) {
+                            // Große Gewinne (Diamond/7): mehr Effekte
+                            createCoinRain(15);
+                            createExplosion(reels[2]);
+                        } else if (data.multiplier >= 10) {
+                            // Mittlere Gewinne: moderate Effekte
+                            createCoinRain(8);
+                        } else {
+                            // Kleine Gewinne: minimale Effekte
+                            createCoinRain(5);
+                        }
                     } else {
                         resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
                     }
@@ -812,41 +784,30 @@ $casino_available_balance = max(0, $balance - 10.00);
             const rect = centerElement.getBoundingClientRect();
             const centerX = rect.left + rect.width / 2;
             const centerY = rect.top + rect.height / 2;
-            const particles = ['✨', '⭐', '🌟', '💫', '✨', '⚡', '🔥', '💥'];
+            const particles = ['✨', '⭐', '🌟', '💫'];
             
-            for (let i = 0; i < 30; i++) {
+            for (let i = 0; i < 12; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'explosion-particle';
                 particle.textContent = particles[Math.floor(Math.random() * particles.length)];
                 particle.style.left = centerX + 'px';
                 particle.style.top = centerY + 'px';
                 
-                const angle = (Math.PI * 2 * i) / 30;
-                const distance = 150 + Math.random() * 200;
+                const angle = (Math.PI * 2 * i) / 12;
+                const distance = 100 + Math.random() * 100;
                 const tx = Math.cos(angle) * distance;
                 const ty = Math.sin(angle) * distance;
                 
                 particle.style.setProperty('--tx', tx + 'px');
                 particle.style.setProperty('--ty', ty + 'px');
-                particle.style.animationDelay = Math.random() * 0.3 + 's';
+                particle.style.animationDelay = Math.random() * 0.2 + 's';
                 
                 document.body.appendChild(particle);
-                setTimeout(() => particle.remove(), 2000);
+                setTimeout(() => particle.remove(), 1500);
             }
         }
         
-        function createLaserBeams(count) {
-            for (let i = 0; i < count; i++) {
-                setTimeout(() => {
-                    const laser = document.createElement('div');
-                    laser.className = 'laser-beam';
-                    laser.style.left = Math.random() * window.innerWidth + 'px';
-                    laser.style.animationDelay = (i * 0.3) + 's';
-                    document.body.appendChild(laser);
-                    setTimeout(() => laser.remove(), 2500);
-                }, i * 400);
-            }
-        }
+
     </script>
 </body>
 </html>
