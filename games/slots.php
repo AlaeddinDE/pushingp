@@ -121,14 +121,14 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-crown {
             position: absolute;
-            top: -25px;
+            top: -40px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFD700, #FFA500, #FF00FF, #FFD700);
             background-size: 300% 300%;
-            padding: 10px 45px;
-            border-radius: 25px 25px 0 0;
-            font-size: 1.2rem;
+            padding: 8px 40px;
+            border-radius: 20px 20px 0 0;
+            font-size: 1.1rem;
             font-weight: 900;
             color: #000;
             text-align: center;
@@ -147,6 +147,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             border: 3px solid rgba(255,255,255,0.8);
             overflow: hidden;
             white-space: nowrap;
+            z-index: 10;
         }
         
         .slots-crown::before {
