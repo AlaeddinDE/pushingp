@@ -2,9 +2,16 @@
 session_start();
 header('Content-Type: text/html; charset=utf-8');
 
-// Simulate logged in user for testing
-$_SESSION['user_id'] = 1; // Change to your user ID
-$_SESSION['username'] = 'test';
+// Check current session
+require_once 'includes/functions.php';
+require_once 'includes/db.php';
+secure_session_start();
+
+echo "<div style='background:#333;padding:10px;margin:10px 0;border:1px solid #0f0;'>";
+echo "<strong>SESSION INFO:</strong><br>";
+echo "user_id: " . ($_SESSION['user_id'] ?? 'NOT SET') . "<br>";
+echo "username: " . ($_SESSION['username'] ?? 'NOT SET') . "<br>";
+echo "</div>";
 
 ?>
 <!DOCTYPE html>
