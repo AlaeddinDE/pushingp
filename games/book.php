@@ -27,25 +27,26 @@ $casino_available_balance = max(0, $balance - 10.00);
             background: linear-gradient(135deg, #1a0f0a 0%, #2d1810 100%); 
             min-height: 100vh; 
             margin: 0;
-            padding: 15px; 
+            padding: 10px; 
             overflow-x: hidden;
             overflow-y: auto;
             display: flex;
-            align-items: center;
+            align-items: flex-start;
             justify-content: center;
         }
         .game-container { 
-            max-width: 1400px; 
+            max-width: 1300px; 
             width: 100%;
             background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%);
-            border-radius: 20px; 
-            padding: 15px; 
+            border-radius: 16px; 
+            padding: 12px; 
             box-shadow: 
                 0 20px 60px rgba(0,0,0,0.9),
                 0 0 100px rgba(255,215,0,0.2);
             display: flex;
             flex-direction: column;
             border: 3px solid rgba(255,215,0,0.3);
+            margin: 10px 0;
         }
         .game-header { 
             display: flex; 
@@ -68,13 +69,13 @@ $casino_available_balance = max(0, $balance - 10.00);
             position: relative;
             background: 
                 linear-gradient(180deg, #2d1810 0%, #1a0f0a 50%, #2d1810 100%);
-            border-radius: 20px;
-            padding: 25px 40px 20px;
+            border-radius: 16px;
+            padding: 20px 30px 15px;
             box-shadow: 
                 inset 0 0 80px rgba(0,0,0,0.9),
                 0 0 60px rgba(255,215,0,0.3);
-            border: 4px solid rgba(255,215,0,0.4);
-            margin: 5px auto;
+            border: 3px solid rgba(255,215,0,0.4);
+            margin: 0 auto;
             width: 100%;
         }
         
@@ -93,19 +94,19 @@ $casino_available_balance = max(0, $balance - 10.00);
         .book-reels {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 25px;
-            padding: 25px 30px;
+            gap: 18px;
+            padding: 20px 25px;
             background: rgba(0,0,0,0.5);
-            border-radius: 15px;
-            margin-bottom: 15px;
+            border-radius: 12px;
+            margin-bottom: 12px;
             position: relative;
         }
         
         .book-reel {
             background: linear-gradient(180deg, #1a0f0a, #0a0404);
-            border: 4px solid rgba(255,215,0,0.4);
-            border-radius: 15px;
-            height: 390px;
+            border: 3px solid rgba(255,215,0,0.4);
+            border-radius: 12px;
+            height: 330px;
             overflow: hidden;
             position: relative;
             box-shadow: 
@@ -125,11 +126,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .book-symbol {
             width: 100%;
-            height: 130px;
+            height: 110px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4.5rem;
+            font-size: 3.8rem;
             flex-shrink: 0;
             background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
             border-bottom: 1px solid rgba(255,215,0,0.1);
@@ -295,11 +296,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .payouts {
-            margin-top: 8px;
+            margin-top: 6px;
             padding: 8px;
             background: rgba(255,215,0,0.05);
-            border-radius: 12px;
-            font-size: 0.7rem;
+            border-radius: 10px;
+            font-size: 0.65rem;
             color: rgba(255,215,0,0.7);
             border: 2px solid rgba(255,215,0,0.2);
         }
@@ -418,7 +419,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         function rollReel(reelElement, duration, finalSymbol) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.book-reel-strip');
-                const symbolHeight = 130;
+                const symbolHeight = 110;
                 let currentPos = 0;
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
