@@ -19,7 +19,7 @@ $casino_available_balance = max(0, $balance - 10.00);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📖 Book of P – PUSHING P Casino</title>
+    <title>🅿️ Book of P – PUSHING P Casino</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/assets/style.css">
     <style>
@@ -134,6 +134,47 @@ $casino_available_balance = max(0, $balance - 10.00);
             flex-shrink: 0;
             background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
             border-bottom: 1px solid rgba(255,215,0,0.1);
+        }
+        
+        .p-symbol {
+            font-size: 4rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00, #FFD700);
+            background-size: 200% 200%;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: p-glow 2s ease-in-out infinite;
+            filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)) 
+                    drop-shadow(0 0 20px rgba(255,165,0,0.6))
+                    drop-shadow(0 0 30px rgba(255,140,0,0.4));
+            position: relative;
+            display: inline-block;
+        }
+        
+        @keyframes p-glow {
+            0%, 100% {
+                background-position: 0% 50%;
+                filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)) 
+                        drop-shadow(0 0 20px rgba(255,165,0,0.6))
+                        drop-shadow(0 0 30px rgba(255,140,0,0.4));
+            }
+            50% {
+                background-position: 100% 50%;
+                filter: drop-shadow(0 0 20px rgba(255,215,0,1)) 
+                        drop-shadow(0 0 30px rgba(255,165,0,0.8))
+                        drop-shadow(0 0 40px rgba(255,140,0,0.6));
+            }
+        }
+        
+        .p-symbol.scatter-trigger {
+            animation: p-scatter 0.8s ease-in-out;
+        }
+        
+        @keyframes p-scatter {
+            0%, 100% { transform: scale(1) rotate(0deg); }
+            25% { transform: scale(1.3) rotate(-10deg); }
+            50% { transform: scale(1.5) rotate(10deg); }
+            75% { transform: scale(1.3) rotate(-5deg); }
         }
         
         .book-symbol.winning {
@@ -318,7 +359,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="game-header">
             <div>
                 <a href="/casino.php" class="back-btn">← Zurück</a>
-                <h1 style="font-size: 1.8rem; margin: 8px 0 4px 0; color: #FFD700;">📖 Book of P</h1>
+                <h1 style="font-size: 1.8rem; margin: 8px 0 4px 0; color: #FFD700;">🅿️ Book of P</h1>
                 <p style="color: rgba(255,215,0,0.7); margin: 0; font-size: 0.85rem;">5 Reels - 3 Symbole gewinnen!</p>
             </div>
             <div class="balance-display">
@@ -328,7 +369,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         </div>
 
         <div class="book-machine">
-            <div class="book-title">📖 BOOK OF P 📖</div>
+            <div class="book-title">🅿️ BOOK OF P 🅿️</div>
             
             <!-- Freespins Counter -->
             <div id="freespinsCounter" style="display: none; text-align: center; margin-bottom: 6px; padding: 6px; background: rgba(255,215,0,0.2); border-radius: 8px; border: 2px solid #FFD700;">
@@ -355,7 +396,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="controls">
             <label style="display: block; margin-bottom: 6px; font-weight: 700; color: #FFD700; text-align: center; font-size: 0.9rem;">💰 Einsatz</label>
             <input type="number" id="betAmount" class="bet-input" min="0.50" max="50" step="0.50" value="1.00" placeholder="Einsatz">
-            <button id="spinBtn" class="spin-btn" onclick="spin()">📖 DREHEN</button>
+            <button id="spinBtn" class="spin-btn" onclick="spin()">🅿️ DREHEN</button>
         </div>
 
         <div id="resultBox"></div>
@@ -363,7 +404,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="payouts">
             <strong style="font-size: 0.85rem; color: #FFD700;">📖 Auszahlungen (3+ gleiche Symbole):</strong>
             <div class="payouts-grid">
-                <div>📖📖📖 <span style="color: #FFD700; font-weight: 800;">100x</span></div>
+                <div><span class="p-symbol">P</span><span class="p-symbol">P</span><span class="p-symbol">P</span> <span style="color: #FFD700; font-weight: 800;">100x</span></div>
                 <div>👑👑👑 <span style="color: #FFD700; font-weight: 800;">50x</span></div>
                 <div>🦅🦅🦅 <span style="color: #FFA500; font-weight: 800;">25x</span></div>
                 <div>⚱️⚱️⚱️ <span style="color: #FFA500; font-weight: 700;">15x</span></div>
@@ -374,8 +415,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 <div>🎯🎯🎯 <span style="color: #FFD700; font-weight: 700;">3x</span></div>
             </div>
             <div style="margin-top: 8px; font-size: 0.7rem; text-align: center;">
-                📖 Book Symbol = Scatter & Wild!<br>
-                📖📖📖 = 10 Freispiele mit expanding Symbol!
+                <span class="p-symbol">P</span> P Symbol = Scatter & Wild!<br>
+                <span class="p-symbol">P</span><span class="p-symbol">P</span><span class="p-symbol">P</span> = 10 Freispiele mit expanding Symbol!
             </div>
         </div>
     </div>
@@ -393,7 +434,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         let currentBet = 0;
         
         // Book of Ra Symbole (Ägyptisch)
-        const symbols = ['📖', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
+        const symbols = ['<span class="p-symbol">P</span>', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
         
         // Initialize reels
         function initializeReels() {
@@ -403,7 +444,9 @@ $casino_available_balance = max(0, $balance - 10.00);
                 for (let j = 0; j < 30; j++) {
                     const symbol = document.createElement('div');
                     symbol.className = 'book-symbol';
-                    symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    symbol.innerHTML = randomSymbol;
+                    const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
+                    symbol.innerHTML = randomSymbol;
                     reel.appendChild(symbol);
                 }
             }
@@ -426,7 +469,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 
                 const finalSymbolEl = document.createElement('div');
                 finalSymbolEl.className = 'book-symbol';
-                finalSymbolEl.textContent = finalSymbol;
+                finalSymbolEl.innerHTML = finalSymbol;
+                finalSymbolEl.innerHTML = finalSymbol;
                 strip.appendChild(finalSymbolEl);
                 
                 const startTime = Date.now();
@@ -451,7 +495,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             overlay.innerHTML = `
                 <div class="freespins-overlay">
                     <div class="freespins-content">
-                        <div class="freespins-title">📖 FREISPIELE! 📖</div>
+                        <div class="freespins-title">🅿️ FREISPIELE! 🅿️</div>
                         <div class="freespins-count">${count} Freispiele gewonnen!</div>
                         <div style="font-size: 3rem; margin: 20px 0;">${symbol}</div>
                         <div class="freespins-info">
@@ -465,6 +509,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             `;
             overlay.style.display = 'block';
             
+            playSound('p-expand');
             setTimeout(() => {
                 overlay.style.display = 'none';
                 startFreespins(count, symbol);
@@ -486,7 +531,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         function updateFreespinsDisplay() {
             document.getElementById('freespinsRemaining').textContent = freespinsRemaining;
-            document.getElementById('expandingSymbol').textContent = expandingSymbol;
+            document.getElementById('expandingSymbol').innerHTML = expandingSymbol;
             document.getElementById('freespinsTotalWin').textContent = freespinsTotalWin.toFixed(2);
         }
         
@@ -500,6 +545,51 @@ $casino_available_balance = max(0, $balance - 10.00);
                 🎉 FREISPIELE BEENDET! 🎉<br>
                 Gesamtgewinn: ${freespinsTotalWin.toFixed(2)}€
             </div>`;
+        }
+
+        // Sound Effects
+        function playSound(type) {
+            const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            switch(type) {
+                case 'p-scatter':
+                    // Epic P Symbol Sound
+                    oscillator.frequency.setValueAtTime(440, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(880, audioContext.currentTime + 0.2);
+                    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.5);
+                    break;
+                case 'p-trigger':
+                    // Freispiel Trigger Sound
+                    for(let i = 0; i < 3; i++) {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        osc.frequency.setValueAtTime(523 + (i * 100), audioContext.currentTime + (i * 0.1));
+                        gain.gain.setValueAtTime(0.2, audioContext.currentTime + (i * 0.1));
+                        gain.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + (i * 0.1) + 0.3);
+                        osc.start(audioContext.currentTime + (i * 0.1));
+                        osc.stop(audioContext.currentTime + (i * 0.1) + 0.3);
+                    }
+                    break;
+                case 'p-expand':
+                    // Expanding P Sound
+                    oscillator.frequency.setValueAtTime(200, audioContext.currentTime);
+                    oscillator.frequency.exponentialRampToValueAtTime(600, audioContext.currentTime + 0.4);
+                    gainNode.gain.setValueAtTime(0.25, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.4);
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.4);
+                    break;
+            }
         }
 
         async function spin() {
@@ -553,8 +643,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                     
                     await Promise.all(rollPromises);
                     
-                    // Check for freespin trigger (3+ Book symbols)
+                    // Check for freespin trigger (3+ P symbols)
                     if (!freespinsActive && data.freespins_triggered) {
+                        playSound('p-trigger');
+                        // Add scatter animation to P symbols
+                        document.querySelectorAll('.p-symbol').forEach(p => {
+                            p.classList.add('scatter-trigger');
+                        });
                         showFreespinsOverlay(data.freespins_count, data.expanding_symbol);
                         spinning = false;
                         document.getElementById('spinBtn').disabled = false;
