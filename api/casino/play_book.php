@@ -36,8 +36,8 @@ if (!$is_freespin && $balance - $bet < 10) {
 }
 
 // Book of Ra symbols
-$symbols = ['📖', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
-$weights = [2, 5, 8, 12, 15, 18, 20, 25, 30]; // Book is rarest
+$symbols = ['🅿️', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
+$weights = [2, 5, 8, 12, 15, 18, 20, 25, 30]; // P is rarest
 
 function weightedRandom($symbols, $weights) {
     $total = array_sum($weights);
@@ -69,7 +69,7 @@ foreach ($symbol_counts as $symbol => $count) {
         $temp_multiplier = 0;
         
         switch ($symbol) {
-            case '📖':
+            case '🅿️':
                 if ($count == 5) $temp_multiplier = 100;
                 elseif ($count == 4) $temp_multiplier = 50;
                 elseif ($count == 3) $temp_multiplier = 20;
@@ -125,23 +125,23 @@ foreach ($symbol_counts as $symbol => $count) {
 $win_amount = $bet * $multiplier;
 $profit = $win_amount - $bet;
 
-// Check for freespin trigger (3+ Book symbols)
-$book_count = 0;
+// Check for freespin trigger (3+ P symbols)
+$p_count = 0;
 foreach ($result as $symbol) {
-    if ($symbol === '📖') $book_count++;
+    if ($symbol === '🅿️') $p_count++;
 }
 
 $freespins_triggered = false;
 $freespins_count = 0;
 $freespin_expanding_symbol = null;
 
-if (!$is_freespin && $book_count >= 3) {
+if (!$is_freespin && $p_count >= 3) {
     $freespins_triggered = true;
     $freespins_count = 10; // Standard: 10 Freispiele
     
-    // Random expanding symbol (nicht Book)
-    $non_book_symbols = array_diff($symbols, ['📖']);
-    $freespin_expanding_symbol = $non_book_symbols[array_rand($non_book_symbols)];
+    // Random expanding symbol (nicht P)
+    $non_p_symbols = array_diff($symbols, ['🅿️']);
+    $freespin_expanding_symbol = $non_p_symbols[array_rand($non_p_symbols)];
 }
 
 // Start transaction
