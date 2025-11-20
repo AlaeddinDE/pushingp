@@ -641,6 +641,118 @@ $casino_available_balance = max(0, $balance - 10.00);
         let balance = parseFloat(<?= $casino_available_balance ?>) || 0;
         let spinning = false;
         
+        // Audio Context für realistische Sounds
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // Sound-Funktionen
+        function playSpinSound() {
+            // Mechanisches Rollen-Geräusch
+            const duration = 0.1;
+            for (let i = 0; i < 20; i++) {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = 80 + Math.random() * 40;
+                    oscillator.type = 'square';
+                    
+                    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + duration);
+                }, i * 50);
+            }
+        }
+        
+        function playStopSound(index) {
+            // Klack-Geräusch beim Stoppen
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.value = 200 - (index * 20);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
+        function playWinSound(multiplier) {
+            // Gewinn-Melodie basierend auf Höhe des Gewinns
+            const notes = multiplier >= 25 ? [523, 659, 784, 1047] : 
+                         multiplier >= 10 ? [523, 659, 784] : 
+                         [523, 659];
+            
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.value = freq;
+                    oscillator.type = 'sine';
+                    
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.3);
+                }, i * 150);
+            });
+            
+            // Münzen-Sound bei Gewinn
+            if (multiplier >= 10) {
+                for (let i = 0; i < 8; i++) {
+                    setTimeout(() => {
+                        const osc = audioContext.createOscillator();
+                        const gain = audioContext.createGain();
+                        
+                        osc.connect(gain);
+                        gain.connect(audioContext.destination);
+                        
+                        osc.frequency.value = 800 + Math.random() * 400;
+                        osc.type = 'sine';
+                        
+                        gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                        
+                        osc.start(audioContext.currentTime);
+                        osc.stop(audioContext.currentTime + 0.1);
+                    }, i * 80);
+                }
+            }
+        }
+        
+        function playLoseSound() {
+            // Trauriger Abstieg
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
+            oscillator.type = 'sine';
+            
+            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.5);
+        }
+        
         // Realistische Slot-Symbole
         const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', '🎰'];
         const payouts = { 
@@ -722,6 +834,9 @@ $casino_available_balance = max(0, $balance - 10.00);
             spinning = true;
             document.getElementById('spinBtn').disabled = true;
             document.getElementById('resultBox').innerHTML = '';
+            
+            // Spin-Sound abspielen
+            playSpinSound();
 
             try {
                 const response = await fetch('/api/casino/play_slots.php', {
@@ -747,9 +862,11 @@ $casino_available_balance = max(0, $balance - 10.00);
                     ];
                     
                     // Roll each reel with different durations for realistic effect
-                    const rollPromises = reels.map((reel, i) => 
-                        rollReel(reel, 2000 + (i * 300), results[i])
-                    );
+                    const rollPromises = reels.map((reel, i) => {
+                        // Stop-Sound für jedes Reel
+                        setTimeout(() => playStopSound(i), 2000 + (i * 300));
+                        return rollReel(reel, 2000 + (i * 300), results[i]);
+                    });
                     
                     await Promise.all(rollPromises);
                     
@@ -758,11 +875,14 @@ $casino_available_balance = max(0, $balance - 10.00);
                     if (data.win_amount > 0) {
                         resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
                         
+                        // Gewinn-Sound abspielen
+                        playWinSound(data.multiplier);
+                        
                         // Sanfte Gewinn-Effekte basierend auf Multiplikator
                         if (data.multiplier >= 25) {
                             // Große Gewinne (Diamond/7): mehr Effekte
                             createCoinRain(15);
-                            createExplosion(reels[2]);
+                            createExplosion(reels[1]);
                         } else if (data.multiplier >= 10) {
                             // Mittlere Gewinne: moderate Effekte
                             createCoinRain(8);
@@ -772,6 +892,9 @@ $casino_available_balance = max(0, $balance - 10.00);
                         }
                     } else {
                         resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
+                        
+                        // Verlust-Sound abspielen
+                        playLoseSound();
                     }
                     
                     updateBalance();
