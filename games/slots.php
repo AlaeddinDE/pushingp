@@ -28,15 +28,230 @@ $casino_available_balance = max(0, $balance - 10.00);
         .game-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; flex-wrap: wrap; gap: 16px; }
         .balance-display { background: var(--bg-secondary); padding: 16px 24px; border-radius: 12px; text-align: center; }
         .balance-value { font-size: 1.5rem; font-weight: 800; color: var(--success); }
-        .slots-reels { display: flex; gap: 20px; justify-content: center; margin: 30px 0; }
-        .slot-reel { width: 140px; height: 160px; background: linear-gradient(145deg, #1a0033, #2d0052); border-radius: 24px; display: flex; align-items: center; justify-content: center; font-size: 5rem; border: 6px solid transparent; background-image: linear-gradient(#1a0033, #2d0052), linear-gradient(135deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6); background-origin: border-box; background-clip: padding-box, border-box; box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 15px 40px rgba(0,0,0,0.6); }
-        .slot-reel.spinning { animation: slotSpin 0.05s linear infinite; }
+        
+        /* === LAS VEGAS SLOT MACHINE STYLE === */
+        .slots-machine {
+            position: relative;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 50%, #1a1a1a 100%);
+            border-radius: 40px;
+            padding: 60px 40px 40px;
+            box-shadow: 
+                0 30px 80px rgba(0,0,0,0.9),
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                inset 0 -2px 4px rgba(0,0,0,0.5);
+            border: 4px solid #2a2a2a;
+            margin: 20px auto;
+            max-width: 700px;
+        }
+        
+        .slots-crown {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+            padding: 15px 60px;
+            border-radius: 20px 20px 0 0;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #000;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+            box-shadow: 
+                0 0 30px rgba(255,215,0,0.8),
+                0 0 60px rgba(255,165,0,0.6),
+                inset 0 2px 8px rgba(255,255,255,0.4);
+            letter-spacing: 4px;
+            animation: crownPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes crownPulse {
+            0%, 100% { 
+                box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,165,0,0.6), inset 0 2px 8px rgba(255,255,255,0.4);
+            }
+            50% { 
+                box-shadow: 0 0 50px rgba(255,215,0,1), 0 0 100px rgba(255,165,0,0.9), inset 0 2px 8px rgba(255,255,255,0.6);
+            }
+        }
+        
+        .slots-lights {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 3px solid transparent;
+            border-radius: 36px;
+            pointer-events: none;
+            background: linear-gradient(90deg, 
+                #FF0000 0%, #FF7F00 12.5%, #FFFF00 25%, 
+                #00FF00 37.5%, #0000FF 50%, #4B0082 62.5%, 
+                #9400D3 75%, #FF0000 87.5%, #FF0000 100%
+            );
+            background-size: 400% 100%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            padding: 3px;
+            animation: ledChase 3s linear infinite;
+        }
+        
+        @keyframes ledChase {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 400% 0%; }
+        }
+        
+        .slots-reels {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin: 30px 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.8);
+        }
+        
+        .slot-reel-frame {
+            position: relative;
+            padding: 8px;
+            background: linear-gradient(145deg, #c0c0c0, #808080, #c0c0c0);
+            border-radius: 28px;
+            box-shadow: 
+                0 8px 24px rgba(0,0,0,0.8),
+                inset 0 2px 6px rgba(255,255,255,0.3),
+                inset 0 -2px 6px rgba(0,0,0,0.5);
+        }
+        
+        .slot-reel {
+            width: 140px;
+            height: 160px;
+            background: linear-gradient(145deg, #0a0015, #1a0033, #0a0015);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            border: 3px solid #1a1a2a;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 
+                inset 0 0 50px rgba(0,0,0,0.9),
+                inset 0 4px 12px rgba(139, 92, 246, 0.2),
+                0 0 40px rgba(139, 92, 246, 0.3);
+            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            animation: reelIdle 3s ease-in-out infinite;
+        }
+        
+        .slot-reel::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, 
+                rgba(255,255,255,0.1) 0%, 
+                transparent 20%,
+                transparent 80%,
+                rgba(0,0,0,0.4) 100%
+            );
+            border-radius: 18px;
+            pointer-events: none;
+        }
+        
+        .slot-reel::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(180deg, transparent, rgba(255,255,255,0.15), transparent);
+            animation: scanLine 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes scanLine {
+            0% { top: -100%; }
+            50% { top: 100%; }
+            100% { top: -100%; }
+        }
+        
+        @keyframes reelIdle {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                box-shadow: inset 0 0 50px rgba(0,0,0,0.9), inset 0 4px 12px rgba(139, 92, 246, 0.2), 0 0 40px rgba(139, 92, 246, 0.3);
+            }
+            50% { 
+                transform: translateY(-2px) scale(1.01);
+                box-shadow: inset 0 0 50px rgba(0,0,0,0.9), inset 0 4px 12px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.5);
+            }
+        }
+        
+        .slot-reel.spinning {
+            animation: slotSpin 0.05s linear infinite, slotShake 0.12s ease-in-out infinite, slotGlow 0.15s ease-in-out infinite;
+            filter: brightness(1.4) saturate(1.3) blur(1px);
+        }
+        
+        .slot-reel.spinning::before {
+            animation: none;
+            background: linear-gradient(180deg, rgba(255,215,0,0.3), rgba(255,165,0,0.3), rgba(255,215,0,0.3));
+        }
+        
+        .slot-reel.winning {
+            animation: slotWin 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite, rainbowGlow 1s linear infinite;
+        }
+        
+        .slot-reel.winning::before {
+            animation: none;
+            background: linear-gradient(180deg, rgba(255,215,0,0.6), rgba(255,255,255,0.4), rgba(255,215,0,0.6));
+        }
+        
         @keyframes slotSpin { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
+        
+        @keyframes slotShake {
+            0%, 100% { transform: translateX(0) scale(1) rotate(0deg); }
+            25% { transform: translateX(-5px) scale(1.03) rotate(-2deg); }
+            75% { transform: translateX(5px) scale(1.03) rotate(2deg); }
+        }
+        
+        @keyframes slotGlow {
+            0%, 100% { box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 60px rgba(139, 92, 246, 0.6); }
+            50% { box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 100px rgba(16, 185, 129, 0.9); }
+        }
+        
+        @keyframes slotWin {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                box-shadow: 0 0 60px rgba(245, 158, 11, 0.8);
+            }
+            25% { 
+                transform: scale(1.15) rotate(-5deg);
+                box-shadow: 0 0 100px rgba(245, 158, 11, 1);
+            }
+            50% { 
+                transform: scale(1.1) rotate(5deg);
+                box-shadow: 0 0 80px rgba(16, 185, 129, 1);
+            }
+            75% { 
+                transform: scale(1.15) rotate(-5deg);
+                box-shadow: 0 0 100px rgba(139, 92, 246, 1);
+            }
+        }
+        
+        @keyframes rainbowGlow {
+            0% { filter: hue-rotate(0deg) brightness(1.3); }
+            100% { filter: hue-rotate(360deg) brightness(1.3); }
+        }
+        
         .controls { background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-top: 24px; }
         .bet-input { width: 100%; padding: 16px; background: var(--bg-tertiary); border: 2px solid var(--border); border-radius: 12px; color: var(--text-primary); font-size: 1.25rem; font-weight: 700; text-align: center; margin-bottom: 16px; }
-        .spin-btn { width: 100%; padding: 20px; background: linear-gradient(135deg, #f59e0b, #ef4444); border: none; border-radius: 16px; color: white; font-weight: 900; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; }
-        .spin-btn:hover { transform: translateY(-2px); box-shadow: 0 12px 40px rgba(245, 158, 11, 0.6); }
-        .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .spin-btn { width: 100%; padding: 20px; background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 5px solid #fbbf24; color: white; font-weight: 900; font-size: 1.5rem; cursor: pointer; transition: all 0.3s; border-radius: 16px; text-transform: uppercase; letter-spacing: 3px; box-shadow: 0 10px 50px rgba(245, 158, 11, 0.8); animation: spinBtnPulse 1.5s ease-in-out infinite; }
+        .spin-btn:hover { transform: scale(1.05); box-shadow: 0 15px 60px rgba(245, 158, 11, 1); }
+        .spin-btn:disabled { opacity: 0.5; cursor: not-allowed; animation: none; }
+        
+        @keyframes spinBtnPulse {
+            0%, 100% { box-shadow: 0 10px 50px rgba(245, 158, 11, 0.8); }
+            50% { box-shadow: 0 15px 70px rgba(245, 158, 11, 1); }
+        }
+        
         .result-box { margin-top: 20px; padding: 20px; border-radius: 12px; text-align: center; font-size: 1.25rem; font-weight: 800; }
         .result-box.win { background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.2)); border: 2px solid var(--success); color: var(--success); }
         .result-box.loss { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.2)); border: 2px solid var(--error); color: var(--error); }
@@ -58,10 +273,21 @@ $casino_available_balance = max(0, $balance - 10.00);
             </div>
         </div>
 
-        <div class="slots-reels">
-            <div class="slot-reel" id="reel1">��</div>
-            <div class="slot-reel" id="reel2">🍋</div>
-            <div class="slot-reel" id="reel3">⭐</div>
+        <div class="slots-machine">
+            <div class="slots-crown">⭐ JACKPOT ⭐</div>
+            <div class="slots-lights"></div>
+            
+            <div class="slots-reels">
+                <div class="slot-reel-frame">
+                    <div class="slot-reel" id="reel1">🍒</div>
+                </div>
+                <div class="slot-reel-frame">
+                    <div class="slot-reel" id="reel2">🍋</div>
+                </div>
+                <div class="slot-reel-frame">
+                    <div class="slot-reel" id="reel3">⭐</div>
+                </div>
+            </div>
         </div>
 
         <div class="controls">
@@ -114,11 +340,23 @@ $casino_available_balance = max(0, $balance - 10.00);
                         reels.forEach((r, i) => {
                             r.classList.remove('spinning');
                             r.textContent = data.result[i];
+                            
+                            // Add winning animation if it's a win
+                            if (data.win_amount > 0) {
+                                setTimeout(() => {
+                                    r.classList.add('winning');
+                                }, (i + 1) * 200);
+                            }
                         });
 
                         const resultBox = document.getElementById('resultBox');
                         if (data.win_amount > 0) {
                             resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
+                            
+                            // Remove winning class after animation
+                            setTimeout(() => {
+                                reels.forEach(r => r.classList.remove('winning'));
+                            }, 3000);
                         } else {
                             resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
                         }
