@@ -602,7 +602,21 @@ $casino_available_balance = max(0, $balance - 10.00);
                         expanding_symbol: expandingSymbol
                     })
                 });
-                const data = await response.json();
+                
+                console.log('Response status:', response.status);
+                const responseText = await response.text();
+                console.log('Response text:', responseText);
+                
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    console.error('JSON Parse Error:', e);
+                    console.error('Response was:', responseText);
+                    throw new Error('Server returned invalid JSON');
+                }
+                
+                console.log('Parsed data:', data);
 
                 if (data.status === 'success') {
                     if (!freespinsActive) {
@@ -677,11 +691,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                         document.getElementById('spinBtn').disabled = false;
                     }
                 } else {
-                    alert(data.error);
+                    console.error('Game failed:', data.error);
+                    alert('Spiel fehlgeschlagen: ' + data.error);
                     spinning = false;
                     document.getElementById('spinBtn').disabled = false;
                 }
             } catch (error) {
+                console.error('Catch block error:', error);
                 alert('Fehler: ' + error.message);
                 spinning = false;
                 document.getElementById('spinBtn').disabled = false;
