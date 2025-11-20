@@ -2203,7 +2203,7 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/chicken.php'" style="cursor:pointer;">
                 <span class="game-icon">🐔</span>
                 <div class="game-title">Chicken</div>
-                <div class="game-desc">Überquere die Straßen von links nach rechts! M = (1-h) / P(k)
+                <div class="game-desc">Überquere die Straßen von links nach rechts! M = (1-h) / P(k)</div>
                 <div class="game-stats">
                     <div class="game-stat">
                         <div class="game-stat-label">House Edge</div>
