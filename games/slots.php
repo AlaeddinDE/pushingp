@@ -1054,7 +1054,9 @@ $casino_available_balance = max(0, $balance - 10.00);
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    balance = parseFloat(data.new_balance) || 0;
+                    // Neue Balance berechnen: Verfügbar = Total - 10€ Reserve
+                    const totalBalance = parseFloat(data.new_balance) || 0;
+                    balance = Math.max(0, totalBalance - 10.00);
                     
                     // Reset reels
                     initializeReels();
