@@ -8,6 +8,8 @@ require_login();
 $user_id = get_current_user_id();
 $data = json_decode(file_get_contents('php://input'), true);
 $bet = floatval($data['bet'] ?? 0);
+$is_freespin = ($data['freespin'] ?? false) === true;
+$expanding_symbol = $data['expanding_symbol'] ?? null;
 
 if ($bet < 0.50 || $bet > 50) {
     echo json_encode(['status' => 'error', 'error' => 'Ungültiger Einsatz']);
@@ -27,8 +29,8 @@ if ($balance === null) {
     exit;
 }
 
-// Check reserve (10€ minimum)
-if ($balance - $bet < 10) {
+// Check reserve (10€ minimum) - skip for freespins
+if (!$is_freespin && $balance - $bet < 10) {
     echo json_encode(['status' => 'error', 'error' => 'Nicht genug Guthaben (10€ Reserve!)']);
     exit;
 }
@@ -123,18 +125,39 @@ foreach ($symbol_counts as $symbol => $count) {
 $win_amount = $bet * $multiplier;
 $profit = $win_amount - $bet;
 
+// Check for freespin trigger (3+ Book symbols)
+$book_count = 0;
+foreach ($result as $symbol) {
+    if ($symbol === '📖') $book_count++;
+}
+
+$freespins_triggered = false;
+$freespins_count = 0;
+$freespin_expanding_symbol = null;
+
+if (!$is_freespin && $book_count >= 3) {
+    $freespins_triggered = true;
+    $freespins_count = 10; // Standard: 10 Freispiele
+    
+    // Random expanding symbol (nicht Book)
+    $non_book_symbols = array_diff($symbols, ['📖']);
+    $freespin_expanding_symbol = $non_book_symbols[array_rand($non_book_symbols)];
+}
+
 // Start transaction
 $conn->begin_transaction();
 
 try {
-    // Deduct bet
-    $stmt = $conn->prepare("
-        INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
-        VALUES ('AUSZAHLUNG', 'POOL', ?, ?, 'Casino Book of P Einsatz', ?, NOW())
-    ");
-    $stmt->bind_param('dii', $bet, $user_id, $user_id);
-    $stmt->execute();
-    $stmt->close();
+    // Deduct bet (only if not freespin)
+    if (!$is_freespin) {
+        $stmt = $conn->prepare("
+            INSERT INTO transaktionen (typ, typ_differenziert, betrag, mitglied_id, beschreibung, erstellt_von, datum)
+            VALUES ('AUSZAHLUNG', 'POOL', ?, ?, 'Casino Book of P Einsatz', ?, NOW())
+        ");
+        $stmt->bind_param('dii', $bet, $user_id, $user_id);
+        $stmt->execute();
+        $stmt->close();
+    }
     
     // Add winnings if won
     if ($win_amount > 0) {
@@ -183,7 +206,10 @@ try {
         'result' => $result,
         'win_amount' => $win_amount,
         'multiplier' => $multiplier,
-        'new_balance' => $new_balance
+        'new_balance' => $new_balance,
+        'freespins_triggered' => $freespins_triggered,
+        'freespins_count' => $freespins_count,
+        'expanding_symbol' => $freespin_expanding_symbol
     ]);
     
 } catch (Exception $e) {

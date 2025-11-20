@@ -34,7 +34,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             justify-content: center;
         }
         .game-container { 
-            max-width: 1100px; 
+            max-width: 1400px; 
             width: 100%;
             background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%);
             border-radius: 20px; 
@@ -75,7 +75,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 0 0 60px rgba(255,215,0,0.3);
             border: 4px solid rgba(255,215,0,0.4);
             margin: 10px auto;
-            max-width: 900px;
+            max-width: 1200px;
         }
         
         .book-title {
@@ -140,9 +140,71 @@ $casino_available_balance = max(0, $balance - 10.00);
             filter: brightness(1.5) drop-shadow(0 0 20px rgba(255,215,0,1));
         }
         
+        .book-symbol.expanding {
+            animation: expandSymbol 1s ease-in-out;
+            filter: brightness(2) drop-shadow(0 0 30px rgba(255,215,0,1));
+            z-index: 10;
+        }
+        
         @keyframes bookWin {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.1); }
+        }
+        
+        @keyframes expandSymbol {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5); opacity: 0.8; }
+            100% { transform: scale(3); opacity: 0; }
+        }
+        
+        .freespins-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.5s;
+        }
+        
+        .freespins-content {
+            text-align: center;
+            color: #FFD700;
+        }
+        
+        .freespins-title {
+            font-size: 4rem;
+            font-weight: 900;
+            margin-bottom: 20px;
+            text-shadow: 0 0 40px rgba(255,215,0,1);
+            animation: pulse 1s infinite;
+        }
+        
+        .freespins-count {
+            font-size: 2rem;
+            margin: 20px 0;
+        }
+        
+        .freespins-info {
+            background: rgba(255,215,0,0.1);
+            padding: 15px 30px;
+            border-radius: 12px;
+            border: 2px solid rgba(255,215,0,0.3);
+            margin-top: 20px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
         .controls {
@@ -267,6 +329,19 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="book-machine">
             <div class="book-title">📖 BOOK OF P 📖</div>
             
+            <!-- Freespins Counter -->
+            <div id="freespinsCounter" style="display: none; text-align: center; margin-bottom: 10px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 12px; border: 2px solid #FFD700;">
+                <div style="font-size: 1.2rem; font-weight: 800; color: #FFD700;">
+                    🎰 FREISPIELE AKTIV 🎰
+                </div>
+                <div style="font-size: 0.9rem; margin-top: 5px; color: #FFA500;">
+                    <span id="freespinsRemaining">0</span> Freispiele übrig | Expanding Symbol: <span id="expandingSymbol"></span>
+                </div>
+                <div style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,215,0,0.8);">
+                    Gesamtgewinn: <span id="freespinsTotalWin">0.00</span>€
+                </div>
+            </div>
+            
             <div class="book-reels">
                 <div class="book-reel" id="reel1"><div class="book-reel-strip"></div></div>
                 <div class="book-reel" id="reel2"><div class="book-reel-strip"></div></div>
@@ -298,14 +373,23 @@ $casino_available_balance = max(0, $balance - 10.00);
                 <div>🎯🎯🎯 <span style="color: #FFD700; font-weight: 700;">3x</span></div>
             </div>
             <div style="margin-top: 8px; font-size: 0.7rem; text-align: center;">
-                📖 Book Symbol = Scatter & Wild!
+                📖 Book Symbol = Scatter & Wild!<br>
+                📖📖📖 = 10 Freispiele mit expanding Symbol!
             </div>
         </div>
     </div>
 
+    <!-- Freespins Trigger Overlay -->
+    <div id="freespinsOverlay" style="display: none;"></div>
+
     <script>
         let balance = parseFloat(<?= $casino_available_balance ?>) || 0;
         let spinning = false;
+        let freespinsActive = false;
+        let freespinsRemaining = 0;
+        let expandingSymbol = null;
+        let freespinsTotalWin = 0;
+        let currentBet = 0;
         
         // Book of Ra Symbole (Ägyptisch)
         const symbols = ['📖', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
@@ -361,12 +445,73 @@ $casino_available_balance = max(0, $balance - 10.00);
             });
         }
 
+        function showFreespinsOverlay(count, symbol) {
+            const overlay = document.getElementById('freespinsOverlay');
+            overlay.innerHTML = `
+                <div class="freespins-overlay">
+                    <div class="freespins-content">
+                        <div class="freespins-title">📖 FREISPIELE! 📖</div>
+                        <div class="freespins-count">${count} Freispiele gewonnen!</div>
+                        <div style="font-size: 3rem; margin: 20px 0;">${symbol}</div>
+                        <div class="freespins-info">
+                            <div style="font-size: 1.2rem; font-weight: 700;">Expanding Symbol: ${symbol}</div>
+                            <div style="margin-top: 10px; font-size: 0.9rem;">
+                                Das Symbol expandiert über alle 3 Positionen!
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            overlay.style.display = 'block';
+            
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                startFreespins(count, symbol);
+            }, 3000);
+        }
+        
+        function startFreespins(count, symbol) {
+            freespinsActive = true;
+            freespinsRemaining = count;
+            expandingSymbol = symbol;
+            freespinsTotalWin = 0;
+            
+            document.getElementById('freespinsCounter').style.display = 'block';
+            document.getElementById('betAmount').disabled = true;
+            updateFreespinsDisplay();
+            
+            setTimeout(() => spin(), 1000);
+        }
+        
+        function updateFreespinsDisplay() {
+            document.getElementById('freespinsRemaining').textContent = freespinsRemaining;
+            document.getElementById('expandingSymbol').textContent = expandingSymbol;
+            document.getElementById('freespinsTotalWin').textContent = freespinsTotalWin.toFixed(2);
+        }
+        
+        function endFreespins() {
+            freespinsActive = false;
+            document.getElementById('freespinsCounter').style.display = 'none';
+            document.getElementById('betAmount').disabled = false;
+            
+            const resultBox = document.getElementById('resultBox');
+            resultBox.innerHTML = `<div class="result-box win" style="font-size: 1.3rem;">
+                🎉 FREISPIELE BEENDET! 🎉<br>
+                Gesamtgewinn: ${freespinsTotalWin.toFixed(2)}€
+            </div>`;
+        }
+
         async function spin() {
             if (spinning) return;
-            const bet = parseFloat(document.getElementById('betAmount').value);
-            if (bet < 0.50 || bet > balance) {
-                alert('Ungültiger Einsatz!');
-                return;
+            
+            let bet = currentBet;
+            if (!freespinsActive) {
+                bet = parseFloat(document.getElementById('betAmount').value);
+                if (bet < 0.50 || bet > balance) {
+                    alert('Ungültiger Einsatz!');
+                    return;
+                }
+                currentBet = bet;
             }
 
             spinning = true;
@@ -377,13 +522,19 @@ $casino_available_balance = max(0, $balance - 10.00);
                 const response = await fetch('/api/casino/play_book.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ bet })
+                    body: JSON.stringify({ 
+                        bet: bet,
+                        freespin: freespinsActive,
+                        expanding_symbol: expandingSymbol
+                    })
                 });
                 const data = await response.json();
 
                 if (data.status === 'success') {
-                    const totalBalance = parseFloat(data.new_balance) || 0;
-                    balance = Math.max(0, totalBalance - 10.00);
+                    if (!freespinsActive) {
+                        const totalBalance = parseFloat(data.new_balance) || 0;
+                        balance = Math.max(0, totalBalance - 10.00);
+                    }
                     
                     initializeReels();
                     
@@ -401,16 +552,49 @@ $casino_available_balance = max(0, $balance - 10.00);
                     
                     await Promise.all(rollPromises);
                     
-                    const resultBox = document.getElementById('resultBox');
-                    if (data.win_amount > 0) {
-                        resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
-                    } else {
-                        resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
+                    // Check for freespin trigger (3+ Book symbols)
+                    if (!freespinsActive && data.freespins_triggered) {
+                        showFreespinsOverlay(data.freespins_count, data.expanding_symbol);
+                        spinning = false;
+                        document.getElementById('spinBtn').disabled = false;
+                        return;
                     }
                     
-                    updateBalance();
-                    spinning = false;
-                    document.getElementById('spinBtn').disabled = false;
+                    const resultBox = document.getElementById('resultBox');
+                    if (data.win_amount > 0) {
+                        if (freespinsActive) {
+                            freespinsTotalWin += data.win_amount;
+                            resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
+                        } else {
+                            resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
+                        }
+                    } else {
+                        if (!freespinsActive) {
+                            resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
+                        }
+                    }
+                    
+                    if (freespinsActive) {
+                        freespinsRemaining--;
+                        updateFreespinsDisplay();
+                        
+                        if (freespinsRemaining > 0) {
+                            setTimeout(() => {
+                                spinning = false;
+                                document.getElementById('spinBtn').disabled = false;
+                            }, 2000);
+                        } else {
+                            const totalBalance = parseFloat(data.new_balance) || 0;
+                            balance = Math.max(0, totalBalance - 10.00);
+                            endFreespins();
+                            spinning = false;
+                            document.getElementById('spinBtn').disabled = false;
+                        }
+                    } else {
+                        updateBalance();
+                        spinning = false;
+                        document.getElementById('spinBtn').disabled = false;
+                    }
                 } else {
                     alert(data.error);
                     spinning = false;
