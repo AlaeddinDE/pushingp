@@ -287,7 +287,85 @@ require_once __DIR__ . '/includes/header.php';
             box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
         }
         
-        /* Slots Specific - VEGAS STYLE */
+        /* Slots Specific - ULTRA REALISTISCH LAS VEGAS STYLE */
+        .slots-machine {
+            position: relative;
+            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 50%, #1a1a1a 100%);
+            border-radius: 40px;
+            padding: 60px 40px 40px;
+            box-shadow: 
+                0 30px 80px rgba(0,0,0,0.9),
+                inset 0 2px 4px rgba(255,255,255,0.1),
+                inset 0 -2px 4px rgba(0,0,0,0.5);
+            border: 4px solid #2a2a2a;
+            margin: 20px auto;
+            max-width: 800px;
+        }
+        
+        /* Vegas Crown/Top Section */
+        .slots-crown {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
+            padding: 15px 80px;
+            border-radius: 20px 20px 0 0;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #000;
+            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+            box-shadow: 
+                0 0 30px rgba(255,215,0,0.8),
+                0 0 60px rgba(255,165,0,0.6),
+                inset 0 2px 8px rgba(255,255,255,0.4);
+            letter-spacing: 4px;
+            animation: crownPulse 2s ease-in-out infinite;
+        }
+        
+        @keyframes crownPulse {
+            0%, 100% { 
+                box-shadow: 
+                    0 0 30px rgba(255,215,0,0.8),
+                    0 0 60px rgba(255,165,0,0.6),
+                    inset 0 2px 8px rgba(255,255,255,0.4);
+            }
+            50% { 
+                box-shadow: 
+                    0 0 50px rgba(255,215,0,1),
+                    0 0 100px rgba(255,165,0,0.9),
+                    inset 0 2px 8px rgba(255,255,255,0.6);
+            }
+        }
+        
+        /* LED Border Lights */
+        .slots-lights {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 10px;
+            border: 3px solid transparent;
+            border-radius: 36px;
+            pointer-events: none;
+            background: linear-gradient(90deg, 
+                #FF0000 0%, #FF7F00 12.5%, #FFFF00 25%, 
+                #00FF00 37.5%, #0000FF 50%, #4B0082 62.5%, 
+                #9400D3 75%, #FF0000 87.5%, #FF0000 100%
+            );
+            background-size: 400% 100%;
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            padding: 3px;
+            animation: ledChase 3s linear infinite;
+        }
+        
+        @keyframes ledChase {
+            0% { background-position: 0% 0%; }
+            100% { background-position: 400% 0%; }
+        }
+        
         .slots-reels {
             display: flex;
             gap: 20px;
@@ -296,77 +374,98 @@ require_once __DIR__ . '/includes/header.php';
             perspective: 1500px;
             position: relative;
             flex-wrap: wrap;
+            background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
+            padding: 30px 20px;
+            border-radius: 20px;
+            box-shadow: inset 0 10px 30px rgba(0,0,0,0.8);
+        }
+        
+        /* Chrome/Metal Frame um jeden Reel */
+        .slot-reel-frame {
+            position: relative;
+            padding: 8px;
+            background: linear-gradient(145deg, #c0c0c0, #808080, #c0c0c0);
+            border-radius: 28px;
+            box-shadow: 
+                0 8px 24px rgba(0,0,0,0.8),
+                inset 0 2px 6px rgba(255,255,255,0.3),
+                inset 0 -2px 6px rgba(0,0,0,0.5);
         }
         
         .slot-reel {
             width: 160px;
             height: 180px;
             flex-shrink: 0;
-            background: linear-gradient(145deg, #1a0033, #2d0052);
-            border-radius: 24px;
+            background: linear-gradient(145deg, #0a0015, #1a0033, #0a0015);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 6rem;
-            border: 6px solid transparent;
-            background-image: 
-                linear-gradient(#1a0033, #2d0052),
-                linear-gradient(135deg, #8b5cf6, #ec4899, #f59e0b, #8b5cf6);
-            background-origin: border-box;
-            background-clip: padding-box, border-box;
+            border: 3px solid #1a1a2a;
             position: relative;
-            overflow-y: auto;
+            overflow: hidden;
             box-shadow: 
-                inset 0 0 40px rgba(0,0,0,0.7),
-                0 15px 40px rgba(0,0,0,0.6),
-                0 0 60px rgba(139, 92, 246, 0.4),
-                0 0 100px rgba(236, 72, 153, 0.2);
+                inset 0 0 50px rgba(0,0,0,0.9),
+                inset 0 4px 12px rgba(139, 92, 246, 0.2),
+                0 0 40px rgba(139, 92, 246, 0.3);
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             animation: reelIdle 3s ease-in-out infinite;
-            filter: brightness(1.1);
         }
         
-        @keyframes reelIdle {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-3px) scale(1.02); }
-        }
-        
-        .slot-reel::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: linear-gradient(
-                45deg,
-                transparent 30%,
-                rgba(255,255,255,0.1) 50%,
-                transparent 70%
-            );
-            transform: rotate(45deg);
-            animation: shine 3s linear infinite;
-        }
-        
-        @keyframes shine {
-            0% {
-                transform: translateX(-100%) translateY(-100%) rotate(45deg);
-            }
-            100% {
-                transform: translateX(100%) translateY(100%) rotate(45deg);
-            }
-        }
-        
+        /* Glass/Screen Effect */
         .slot-reel::after {
             content: '';
             position: absolute;
             inset: 0;
-            border-radius: 20px;
             background: linear-gradient(180deg, 
-                rgba(255,255,255,0.15) 0%, 
-                transparent 50%, 
-                rgba(0,0,0,0.3) 100%);
+                rgba(255,255,255,0.1) 0%, 
+                transparent 20%,
+                transparent 80%,
+                rgba(0,0,0,0.4) 100%
+            );
+            border-radius: 18px;
             pointer-events: none;
+        }
+        
+        @keyframes reelIdle {
+            0%, 100% { 
+                transform: translateY(0) scale(1);
+                box-shadow: 
+                    inset 0 0 50px rgba(0,0,0,0.9),
+                    inset 0 4px 12px rgba(139, 92, 246, 0.2),
+                    0 0 40px rgba(139, 92, 246, 0.3);
+            }
+            50% { 
+                transform: translateY(-2px) scale(1.01);
+                box-shadow: 
+                    inset 0 0 50px rgba(0,0,0,0.9),
+                    inset 0 4px 12px rgba(139, 92, 246, 0.4),
+                    0 0 60px rgba(139, 92, 246, 0.5);
+            }
+        }
+        
+        /* Scanning Light Effect */
+        .slot-reel::before {
+            content: '';
+            position: absolute;
+            top: -100%;
+            left: 0;
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(180deg, 
+                transparent,
+                rgba(255,255,255,0.15),
+                transparent
+            );
+            animation: scanLine 4s ease-in-out infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes scanLine {
+            0% { top: -100%; }
+            50% { top: 100%; }
+            100% { top: -100%; }
         }
         
         .slot-reel.spinning {
@@ -374,7 +473,16 @@ require_once __DIR__ . '/includes/header.php';
                 slotSpin 0.05s linear infinite,
                 slotShake 0.12s ease-in-out infinite,
                 slotGlow 0.15s ease-in-out infinite;
-            filter: brightness(1.4) saturate(1.3);
+            filter: brightness(1.4) saturate(1.3) blur(1px);
+        }
+        
+        .slot-reel.spinning::before {
+            animation: none;
+            background: linear-gradient(180deg, 
+                rgba(255,215,0,0.3),
+                rgba(255,165,0,0.3),
+                rgba(255,215,0,0.3)
+            );
         }
         
         .slot-reel.stopping {
@@ -388,6 +496,15 @@ require_once __DIR__ . '/includes/header.php';
             animation: 
                 slotWin 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite,
                 rainbowGlow 1s linear infinite;
+        }
+        
+        .slot-reel.winning::before {
+            animation: none;
+            background: linear-gradient(180deg, 
+                rgba(255,215,0,0.6),
+                rgba(255,255,255,0.4),
+                rgba(255,215,0,0.6)
+            );
         }
         
         @keyframes slotSpin {
@@ -477,6 +594,72 @@ require_once __DIR__ . '/includes/header.php';
         @keyframes spin {
             0% { transform: translateY(0); }
             100% { transform: translateY(-100%); }
+        }
+        
+        /* Vegas Coin Rain Effect */
+        .vegas-coin {
+            position: fixed;
+            font-size: 2.5rem;
+            pointer-events: none;
+            z-index: 99999;
+            animation: coinFall 2s ease-in forwards;
+            filter: drop-shadow(0 0 10px gold);
+        }
+        
+        @keyframes coinFall {
+            0% {
+                transform: translateY(-100px) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0) rotate(180deg) scale(1);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(100vh) rotate(720deg) scale(0.5);
+                opacity: 0;
+            }
+        }
+        
+        /* Lever Pull Animation */
+        .slot-lever {
+            position: absolute;
+            right: -60px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 200px;
+            background: linear-gradient(90deg, #8B4513, #A0522D, #8B4513);
+            border-radius: 20px;
+            box-shadow: 
+                inset 2px 0 8px rgba(0,0,0,0.6),
+                inset -2px 0 8px rgba(255,255,255,0.2),
+                0 10px 30px rgba(0,0,0,0.8);
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .slot-lever::before {
+            content: '🔴';
+            position: absolute;
+            top: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 3rem;
+            filter: drop-shadow(0 5px 15px rgba(255,0,0,0.8));
+        }
+        
+        .slot-lever.pulled {
+            animation: leverPull 1s ease-out;
+        }
+        
+        @keyframes leverPull {
+            0% { transform: translateY(-50%) rotate(0deg); }
+            30% { transform: translateY(-30%) rotate(15deg); }
+            100% { transform: translateY(-50%) rotate(0deg); }
         }
         
         /* Wheel Specific */
@@ -2319,37 +2502,37 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 </div>
 
-                <!-- Slot Machine Main Area -->
-                <div style="position: relative; display: flex; flex-direction: column; gap: 16px; max-height: 500px;">
+                <!-- Slot Machine Main Area - LAS VEGAS STYLE -->
+                <div class="slots-machine">
+                    <!-- Vegas Crown -->
+                    <div class="slots-crown">⭐ JACKPOT ⭐</div>
                     
-                    <!-- Slot Reels -->
-                    <div style="position: relative; background: linear-gradient(180deg, #1a0033 0%, #0a0015 50%, #1a0033 100%); border: 6px solid #f59e0b; border-radius: 24px; padding: 30px 20px; box-shadow: inset 0 0 100px rgba(245, 158, 11, 0.4), 0 0 80px rgba(245, 158, 11, 0.7); overflow-y: auto;">
-                        
-                        <!-- Animated Neon Glow -->
-                        <div style="position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at center, rgba(245, 158, 11, 0.3), transparent 70%); pointer-events: none; animation: neonPulse 2s ease-in-out infinite;"></div>
-                        
-                        <!-- Corner Stars -->
-                        <div style="position: absolute; top: 10px; left: 10px; font-size: 2rem; animation: starRotate 4s linear infinite;">✨</div>
-                        <div style="position: absolute; top: 10px; right: 10px; font-size: 2rem; animation: starRotate 4s linear infinite reverse;">✨</div>
-                        <div style="position: absolute; bottom: 10px; left: 10px; font-size: 2rem; animation: starRotate 4s linear infinite reverse;">⭐</div>
-                        <div style="position: absolute; bottom: 10px; right: 10px; font-size: 2rem; animation: starRotate 4s linear infinite;">⭐</div>
-                        
-                        <div class="slots-reels-mega" id="slotsReels">
-                            <div class="slot-reel-mega">
+                    <!-- LED Lights Border -->
+                    <div class="slots-lights"></div>
+                    
+                    <!-- Slot Reels Container -->
+                    <div class="slots-reels" id="slotsReels">
+                        <div class="slot-reel-frame">
+                            <div class="slot-reel">
                                 <div class="reel-inner" id="reel1">🍒</div>
                             </div>
-                            <div class="slot-reel-mega">
+                        </div>
+                        <div class="slot-reel-frame">
+                            <div class="slot-reel">
                                 <div class="reel-inner" id="reel2">🍋</div>
                             </div>
-                            <div class="slot-reel-mega">
+                        </div>
+                        <div class="slot-reel-frame">
+                            <div class="slot-reel">
                                 <div class="reel-inner" id="reel3">⭐</div>
                             </div>
                         </div>
-                        
-                        <!-- Win/Loss Messages -->
-                        <div id="slotsWin" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; text-align: center; pointer-events: none; z-index: 100;"></div>
-                        <div id="slotsLoss" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 900; text-align: center; color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 1), 0 0 40px rgba(239, 68, 68, 0.8); pointer-events: none; z-index: 100;"></div>
                     </div>
+                    
+                    <!-- Win/Loss Messages -->
+                    <div id="slotsWin" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 3rem; font-weight: 900; text-align: center; pointer-events: none; z-index: 100;"></div>
+                    <div id="slotsLoss" style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 2rem; font-weight: 900; text-align: center; color: #ef4444; text-shadow: 0 0 20px rgba(239, 68, 68, 1), 0 0 40px rgba(239, 68, 68, 0.8); pointer-events: none; z-index: 100;"></div>
+                </div>
                     
                     <!-- Spin Button -->
                     <button id="slotsSpin" onclick="spinSlots()" style="background: linear-gradient(135deg, #f59e0b 0%, #ef4444 50%, #f59e0b 100%); border: 5px solid #fbbf24; color: #fff; padding: 18px; border-radius: 20px; font-size: 1.8rem; font-weight: 900; cursor: pointer; text-transform: uppercase; letter-spacing: 5px; box-shadow: 0 10px 50px rgba(245, 158, 11, 1), inset 0 -5px 20px rgba(0,0,0,0.5); transition: all 0.3s; animation: slotSpinPulse 1.5s ease-in-out infinite; background-size: 200% 100%; position: relative; overflow-y: auto;">
@@ -2513,7 +2696,7 @@ require_once __DIR__ . '/includes/header.php';
             justify-content: center;
             font-size: 5rem;
             position: relative;
-            overflow-y: auto;
+            overflow: hidden;
             box-shadow: inset 0 0 50px rgba(245, 158, 11, 0.4), 0 0 40px rgba(245, 158, 11, 0.6);
         }
         
