@@ -16,21 +16,20 @@ if ($bet < 0.50 || $bet > 50) {
     exit;
 }
 
-// Get current balance
-$stmt = $conn->prepare("SELECT balance FROM v_member_balance WHERE id = ?");
+// Get current balance (join users with v_member_balance via username)
+$stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
 $stmt->bind_param('i', $user_id);
 $stmt->execute();
 $stmt->bind_result($balance);
 $stmt->fetch();
 $stmt->close();
 
-if ($balance === null) {
-    echo json_encode(['status' => 'error', 'error' => 'Balance nicht gefunden']);
-    exit;
-}
+// Default to 0 if no balance found (non-member users)
+$balance = floatval($balance ?? 0);
+$available = max(0, $balance - 10.00);
 
 // Check reserve (10€ minimum) - skip for freespins
-if (!$is_freespin && $balance - $bet < 10) {
+if (!$is_freespin && $available < $bet) {
     echo json_encode(['status' => 'error', 'error' => 'Nicht genug Guthaben (10€ Reserve!)']);
     exit;
 }
@@ -194,19 +193,22 @@ try {
     $conn->commit();
     
     // Get new balance
-    $stmt = $conn->prepare("SELECT balance FROM v_member_balance WHERE id = ?");
+    $stmt = $conn->prepare("SELECT v.balance FROM users u LEFT JOIN v_member_balance v ON u.username = v.username WHERE u.id = ?");
     $stmt->bind_param('i', $user_id);
     $stmt->execute();
     $stmt->bind_result($new_balance);
     $stmt->fetch();
     $stmt->close();
     
+    $new_balance = floatval($new_balance ?? 0);
+    $new_available = max(0, $new_balance - 10.00);
+    
     echo json_encode([
         'status' => 'success',
         'result' => $result,
         'win_amount' => $win_amount,
         'multiplier' => $multiplier,
-        'new_balance' => $new_balance,
+        'new_balance' => $new_available,
         'freespins_triggered' => $freespins_triggered,
         'freespins_count' => $freespins_count,
         'expanding_symbol' => $freespin_expanding_symbol
