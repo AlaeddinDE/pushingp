@@ -34,7 +34,7 @@ if ($balance - $bet < 10) {
 }
 
 // Generate slots result - 4 REELS
-$symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', 'BAR'];
+$symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', '🎰'];
 $weights = [25, 25, 20, 18, 15, 12, 10, 8, 5, 2];
 
 function weightedRandom($symbols, $weights) {
@@ -73,7 +73,7 @@ if ($result[0] === $result[1] && $result[1] === $result[2] && $result[2] === $re
         case '⭐':
             $multiplier = 10;
             break;
-        case 'BAR':
+        case '🎰':
             $multiplier = 8;
             break;
         case '🍇':

@@ -121,14 +121,14 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-crown {
             position: absolute;
-            top: -30px;
+            top: -25px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFD700, #FFA500, #FF00FF, #FFD700);
             background-size: 300% 300%;
-            padding: 12px 50px;
-            border-radius: 30px 30px 0 0;
-            font-size: 1.3rem;
+            padding: 10px 45px;
+            border-radius: 25px 25px 0 0;
+            font-size: 1.2rem;
             font-weight: 900;
             color: #000;
             text-align: center;
@@ -142,7 +142,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 0 0 150px rgba(255,165,0,0.6),
                 inset 0 4px 16px rgba(255,255,255,0.6),
                 inset 0 -4px 16px rgba(0,0,0,0.3);
-            letter-spacing: 4px;
+            letter-spacing: 3px;
             animation: crownPulse 1.5s ease-in-out infinite, crownBg 3s linear infinite;
             border: 3px solid rgba(255,255,255,0.8);
             overflow: hidden;
@@ -631,7 +631,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 <div>7️⃣x4 <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
                 <div>🔔x4 <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
                 <div>⭐x4 <span style="color: #FFA500; font-weight: 800;">10x</span></div>
-                <div>BARx4 <span style="color: #FF0080; font-weight: 700;">8x</span></div>
+                <div>🎰x4 <span style="color: #FF0080; font-weight: 700;">8x</span></div>
                 <div>🍇x4 <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
                 <div>🍉x4 <span style="color: #10B981; font-weight: 700;">6x</span></div>
                 <div>🍊x4 <span style="color: #F97316; font-weight: 700;">5x</span></div>
@@ -646,7 +646,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         let spinning = false;
         
         // Realistische Slot-Symbole
-        const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', 'BAR'];
+        const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', '🎰'];
         const payouts = { 
             '💎💎💎💎': 500, 
             '7️⃣7️⃣7️⃣7️⃣': 200, 
