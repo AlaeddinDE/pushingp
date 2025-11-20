@@ -2226,6 +2226,23 @@ require_once __DIR__ . '/includes/header.php';
                     </div>
                 </div>
             </div>
+
+            <!-- BOOK OF P -->
+            <div class="game-card" onclick="window.location.href='/games/book.php'" style="cursor:pointer; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05));">
+                <span class="game-icon">📖</span>
+                <div class="game-title" style="color: #FFD700;">Book of P</div>
+                <div class="game-desc">Ägyptische Schätze erwarten dich! 5 Reels voller Mysterien!</div>
+                <div class="game-stats">
+                    <div class="game-stat">
+                        <div class="game-stat-label">House Edge</div>
+                        <div class="game-stat-value" style="color: #FFD700;">5%</div>
+                    </div>
+                    <div class="game-stat">
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value" style="color: #FFD700;">95%</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Multiplayer Lobby Section - COMING SOON -->
