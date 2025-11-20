@@ -29,47 +29,133 @@ $casino_available_balance = max(0, $balance - 10.00);
         .balance-display { background: var(--bg-secondary); padding: 16px 24px; border-radius: 12px; text-align: center; }
         .balance-value { font-size: 1.5rem; font-weight: 800; color: var(--success); }
         
-        /* === LAS VEGAS SLOT MACHINE STYLE === */
+        /* === ULTRA KRASSE LAS VEGAS SLOT MACHINE === */
         .slots-machine {
             position: relative;
-            background: linear-gradient(180deg, #1a1a1a 0%, #0a0a0a 50%, #1a1a1a 100%);
+            background: 
+                radial-gradient(circle at 30% 30%, rgba(255,215,0,0.15), transparent 50%),
+                radial-gradient(circle at 70% 70%, rgba(255,0,150,0.15), transparent 50%),
+                linear-gradient(180deg, #1a1a1a 0%, #000000 50%, #1a1a1a 100%);
             border-radius: 40px;
-            padding: 60px 40px 40px;
+            padding: 70px 50px 50px;
             box-shadow: 
-                0 30px 80px rgba(0,0,0,0.9),
-                inset 0 2px 4px rgba(255,255,255,0.1),
-                inset 0 -2px 4px rgba(0,0,0,0.5);
-            border: 4px solid #2a2a2a;
+                0 40px 120px rgba(0,0,0,1),
+                0 0 100px rgba(255,215,0,0.4),
+                0 0 150px rgba(255,0,150,0.3),
+                inset 0 3px 12px rgba(255,255,255,0.15),
+                inset 0 -3px 12px rgba(0,0,0,0.8);
+            border: 6px solid transparent;
+            background-clip: padding-box;
             margin: 20px auto;
             max-width: 700px;
+            animation: machineGlow 3s ease-in-out infinite;
+        }
+        
+        .slots-machine::before {
+            content: '';
+            position: absolute;
+            inset: -6px;
+            border-radius: 40px;
+            background: linear-gradient(45deg, 
+                #FFD700, #FF00FF, #00FFFF, #FFD700, 
+                #FF00FF, #00FFFF, #FFD700);
+            background-size: 400% 400%;
+            animation: borderFlow 4s linear infinite;
+            z-index: -1;
+        }
+        
+        @keyframes machineGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 40px 120px rgba(0,0,0,1),
+                    0 0 100px rgba(255,215,0,0.4),
+                    0 0 150px rgba(255,0,150,0.3),
+                    inset 0 3px 12px rgba(255,255,255,0.15),
+                    inset 0 -3px 12px rgba(0,0,0,0.8);
+            }
+            50% {
+                box-shadow: 
+                    0 40px 120px rgba(0,0,0,1),
+                    0 0 150px rgba(255,215,0,0.8),
+                    0 0 200px rgba(255,0,150,0.6),
+                    inset 0 3px 12px rgba(255,255,255,0.2),
+                    inset 0 -3px 12px rgba(0,0,0,0.8);
+            }
+        }
+        
+        @keyframes borderFlow {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         .slots-crown {
             position: absolute;
-            top: -20px;
+            top: -30px;
             left: 50%;
             transform: translateX(-50%);
-            background: linear-gradient(135deg, #FFD700, #FFA500, #FFD700);
-            padding: 15px 60px;
-            border-radius: 20px 20px 0 0;
-            font-size: 1.5rem;
+            background: linear-gradient(135deg, #FFD700, #FFA500, #FF00FF, #FFD700);
+            background-size: 300% 300%;
+            padding: 20px 80px;
+            border-radius: 30px 30px 0 0;
+            font-size: 2rem;
             font-weight: 900;
             color: #000;
-            text-shadow: 0 2px 4px rgba(255,255,255,0.5);
+            text-shadow: 
+                0 0 10px rgba(255,255,255,1),
+                0 0 20px rgba(255,215,0,1),
+                0 2px 4px rgba(255,255,255,0.5);
             box-shadow: 
-                0 0 30px rgba(255,215,0,0.8),
-                0 0 60px rgba(255,165,0,0.6),
-                inset 0 2px 8px rgba(255,255,255,0.4);
-            letter-spacing: 4px;
-            animation: crownPulse 2s ease-in-out infinite;
+                0 0 50px rgba(255,215,0,1),
+                0 0 100px rgba(255,0,255,0.8),
+                0 0 150px rgba(255,165,0,0.6),
+                inset 0 4px 16px rgba(255,255,255,0.6),
+                inset 0 -4px 16px rgba(0,0,0,0.3);
+            letter-spacing: 6px;
+            animation: crownPulse 1.5s ease-in-out infinite, crownBg 3s linear infinite;
+            border: 3px solid rgba(255,255,255,0.8);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .slots-crown::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
+            animation: crownShine 2s linear infinite;
+        }
+        
+        @keyframes crownShine {
+            0% { transform: rotate(0deg) translateX(-100%); }
+            100% { transform: rotate(0deg) translateX(100%); }
+        }
+        
+        @keyframes crownBg {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
         
         @keyframes crownPulse {
             0%, 100% { 
-                box-shadow: 0 0 30px rgba(255,215,0,0.8), 0 0 60px rgba(255,165,0,0.6), inset 0 2px 8px rgba(255,255,255,0.4);
+                transform: translateX(-50%) scale(1);
+                box-shadow: 
+                    0 0 50px rgba(255,215,0,1),
+                    0 0 100px rgba(255,0,255,0.8),
+                    0 0 150px rgba(255,165,0,0.6),
+                    inset 0 4px 16px rgba(255,255,255,0.6);
             }
             50% { 
-                box-shadow: 0 0 50px rgba(255,215,0,1), 0 0 100px rgba(255,165,0,0.9), inset 0 2px 8px rgba(255,255,255,0.6);
+                transform: translateX(-50%) scale(1.05);
+                box-shadow: 
+                    0 0 80px rgba(255,215,0,1),
+                    0 0 150px rgba(255,0,255,1),
+                    0 0 200px rgba(255,165,0,1),
+                    inset 0 6px 20px rgba(255,255,255,0.8);
             }
         }
         
@@ -79,25 +165,39 @@ $casino_available_balance = max(0, $balance - 10.00);
             left: 10px;
             right: 10px;
             bottom: 10px;
-            border: 3px solid transparent;
+            border: 5px solid transparent;
             border-radius: 36px;
             pointer-events: none;
             background: linear-gradient(90deg, 
-                #FF0000 0%, #FF7F00 12.5%, #FFFF00 25%, 
-                #00FF00 37.5%, #0000FF 50%, #4B0082 62.5%, 
-                #9400D3 75%, #FF0000 87.5%, #FF0000 100%
+                #FF0000 0%, #FF7F00 8%, #FFFF00 16%, 
+                #7FFF00 24%, #00FF00 32%, #00FF7F 40%,
+                #00FFFF 48%, #007FFF 56%, #0000FF 64%, 
+                #7F00FF 72%, #FF00FF 80%, #FF007F 88%,
+                #FF0000 100%
             );
-            background-size: 400% 100%;
+            background-size: 600% 100%;
             -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
             -webkit-mask-composite: xor;
             mask-composite: exclude;
-            padding: 3px;
-            animation: ledChase 3s linear infinite;
+            padding: 5px;
+            animation: ledChase 2s linear infinite;
+            filter: drop-shadow(0 0 10px currentColor) drop-shadow(0 0 20px currentColor);
+        }
+        
+        .slots-lights::before {
+            content: '';
+            position: absolute;
+            inset: -10px;
+            border-radius: 40px;
+            background: inherit;
+            opacity: 0.5;
+            filter: blur(15px);
+            animation: ledChase 2s linear infinite;
         }
         
         @keyframes ledChase {
             0% { background-position: 0% 0%; }
-            100% { background-position: 400% 0%; }
+            100% { background-position: 600% 0%; }
         }
         
         .slots-reels {
@@ -113,33 +213,65 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slot-reel-frame {
             position: relative;
-            padding: 8px;
-            background: linear-gradient(145deg, #c0c0c0, #808080, #c0c0c0);
-            border-radius: 28px;
+            padding: 10px;
+            background: linear-gradient(145deg, 
+                #FFD700 0%, #FFA500 25%, #FFD700 50%, 
+                #FFA500 75%, #FFD700 100%
+            );
+            border-radius: 32px;
             box-shadow: 
-                0 8px 24px rgba(0,0,0,0.8),
-                inset 0 2px 6px rgba(255,255,255,0.3),
-                inset 0 -2px 6px rgba(0,0,0,0.5);
+                0 0 30px rgba(255,215,0,0.8),
+                0 0 60px rgba(255,165,0,0.6),
+                0 12px 32px rgba(0,0,0,0.9),
+                inset 0 3px 10px rgba(255,255,255,0.5),
+                inset 0 -3px 10px rgba(0,0,0,0.7);
+            animation: frameGlow 2s ease-in-out infinite;
+        }
+        
+        @keyframes frameGlow {
+            0%, 100% {
+                box-shadow: 
+                    0 0 30px rgba(255,215,0,0.8),
+                    0 0 60px rgba(255,165,0,0.6),
+                    0 12px 32px rgba(0,0,0,0.9),
+                    inset 0 3px 10px rgba(255,255,255,0.5),
+                    inset 0 -3px 10px rgba(0,0,0,0.7);
+            }
+            50% {
+                box-shadow: 
+                    0 0 50px rgba(255,215,0,1),
+                    0 0 100px rgba(255,165,0,1),
+                    0 12px 32px rgba(0,0,0,0.9),
+                    inset 0 4px 12px rgba(255,255,255,0.7),
+                    inset 0 -4px 12px rgba(0,0,0,0.7);
+            }
         }
         
         .slot-reel {
             width: 140px;
             height: 160px;
-            background: linear-gradient(145deg, #0a0015, #1a0033, #0a0015);
-            border-radius: 20px;
+            background: 
+                radial-gradient(circle at center, rgba(139, 92, 246, 0.2), transparent 70%),
+                radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.15), transparent 60%),
+                linear-gradient(145deg, #0a0015, #1a0033, #2d0052, #0a0015);
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 5rem;
-            border: 3px solid #1a1a2a;
+            font-size: 5.5rem;
+            border: 4px solid rgba(139, 92, 246, 0.5);
             position: relative;
             overflow: hidden;
             box-shadow: 
-                inset 0 0 50px rgba(0,0,0,0.9),
-                inset 0 4px 12px rgba(139, 92, 246, 0.2),
-                0 0 40px rgba(139, 92, 246, 0.3);
+                inset 0 0 60px rgba(0,0,0,1),
+                inset 0 0 30px rgba(139, 92, 246, 0.3),
+                inset 0 6px 20px rgba(139, 92, 246, 0.4),
+                0 0 50px rgba(139, 92, 246, 0.5),
+                0 0 100px rgba(236, 72, 153, 0.3);
             transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            animation: reelIdle 3s ease-in-out infinite;
+            animation: reelIdle 2.5s ease-in-out infinite;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
         
         .slot-reel::after {
@@ -159,86 +291,221 @@ $casino_available_balance = max(0, $balance - 10.00);
         .slot-reel::before {
             content: '';
             position: absolute;
-            top: -100%;
+            top: -150%;
             left: 0;
             width: 100%;
-            height: 40px;
-            background: linear-gradient(180deg, transparent, rgba(255,255,255,0.15), transparent);
-            animation: scanLine 4s ease-in-out infinite;
+            height: 60px;
+            background: linear-gradient(180deg, 
+                rgba(255,215,0,0.6), 
+                rgba(255,255,255,0.4), 
+                rgba(0,255,255,0.4),
+                transparent
+            );
+            animation: scanLine 3s ease-in-out infinite;
             pointer-events: none;
+            filter: blur(2px);
         }
         
         @keyframes scanLine {
-            0% { top: -100%; }
-            50% { top: 100%; }
-            100% { top: -100%; }
+            0% { top: -150%; opacity: 0; }
+            10% { opacity: 1; }
+            50% { top: 100%; opacity: 1; }
+            60% { opacity: 0; }
+            100% { top: -150%; opacity: 0; }
         }
         
         @keyframes reelIdle {
             0%, 100% { 
-                transform: translateY(0) scale(1);
-                box-shadow: inset 0 0 50px rgba(0,0,0,0.9), inset 0 4px 12px rgba(139, 92, 246, 0.2), 0 0 40px rgba(139, 92, 246, 0.3);
+                transform: translateY(0) scale(1) rotateX(0deg);
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,1),
+                    inset 0 0 30px rgba(139, 92, 246, 0.3),
+                    0 0 50px rgba(139, 92, 246, 0.5),
+                    0 0 100px rgba(236, 72, 153, 0.3);
             }
             50% { 
-                transform: translateY(-2px) scale(1.01);
-                box-shadow: inset 0 0 50px rgba(0,0,0,0.9), inset 0 4px 12px rgba(139, 92, 246, 0.4), 0 0 60px rgba(139, 92, 246, 0.5);
+                transform: translateY(-3px) scale(1.02) rotateX(2deg);
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,1),
+                    inset 0 0 40px rgba(139, 92, 246, 0.5),
+                    0 0 70px rgba(139, 92, 246, 0.8),
+                    0 0 140px rgba(236, 72, 153, 0.6);
             }
         }
         
         .slot-reel.spinning {
-            animation: slotSpin 0.05s linear infinite, slotShake 0.12s ease-in-out infinite, slotGlow 0.15s ease-in-out infinite;
-            filter: brightness(1.4) saturate(1.3) blur(1px);
+            animation: 
+                slotSpin 0.04s linear infinite, 
+                slotShake 0.1s ease-in-out infinite, 
+                slotGlow 0.12s ease-in-out infinite,
+                slotRotate 0.3s ease-in-out infinite;
+            filter: brightness(1.6) saturate(1.5) blur(2px) hue-rotate(0deg);
+            transform: scale(1.05) rotateY(5deg);
         }
         
         .slot-reel.spinning::before {
-            animation: none;
-            background: linear-gradient(180deg, rgba(255,215,0,0.3), rgba(255,165,0,0.3), rgba(255,215,0,0.3));
+            animation: spinningLight 0.3s linear infinite;
+            background: linear-gradient(180deg, 
+                rgba(255,215,0,0.8), 
+                rgba(255,0,255,0.6), 
+                rgba(0,255,255,0.6),
+                rgba(255,215,0,0.8)
+            );
+            height: 100%;
+            filter: blur(5px);
+        }
+        
+        @keyframes spinningLight {
+            0% { opacity: 1; transform: translateY(-100%) scaleY(2); }
+            100% { opacity: 1; transform: translateY(100%) scaleY(2); }
+        }
+        
+        @keyframes slotRotate {
+            0% { transform: scale(1.05) rotateY(-5deg); }
+            50% { transform: scale(1.05) rotateY(5deg); }
+            100% { transform: scale(1.05) rotateY(-5deg); }
         }
         
         .slot-reel.winning {
-            animation: slotWin 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite, rainbowGlow 1s linear infinite;
+            animation: 
+                slotWin 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite, 
+                rainbowGlow 0.8s linear infinite,
+                explosionPulse 0.6s ease-out infinite;
+            z-index: 100;
         }
         
         .slot-reel.winning::before {
-            animation: none;
-            background: linear-gradient(180deg, rgba(255,215,0,0.6), rgba(255,255,255,0.4), rgba(255,215,0,0.6));
+            animation: winningExplosion 0.8s ease-out infinite;
+            background: radial-gradient(circle, 
+                rgba(255,215,0,1) 0%,
+                rgba(255,0,255,0.8) 30%,
+                rgba(0,255,255,0.8) 60%,
+                transparent 100%
+            );
+            width: 200%;
+            height: 200%;
+            left: -50%;
+            top: -50%;
+            filter: blur(8px);
+        }
+        
+        @keyframes explosionPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes winningExplosion {
+            0% { 
+                transform: scale(0.5) rotate(0deg); 
+                opacity: 0; 
+            }
+            50% { 
+                transform: scale(1.5) rotate(180deg); 
+                opacity: 1; 
+            }
+            100% { 
+                transform: scale(2) rotate(360deg); 
+                opacity: 0; 
+            }
         }
         
         @keyframes slotSpin { 0% { transform: translateY(0); } 100% { transform: translateY(-20px); } }
         
         @keyframes slotShake {
-            0%, 100% { transform: translateX(0) scale(1) rotate(0deg); }
-            25% { transform: translateX(-5px) scale(1.03) rotate(-2deg); }
-            75% { transform: translateX(5px) scale(1.03) rotate(2deg); }
+            0%, 100% { transform: translateX(0) scale(1.05) rotate(0deg) rotateY(0deg); }
+            25% { transform: translateX(-8px) scale(1.08) rotate(-3deg) rotateY(-5deg); }
+            75% { transform: translateX(8px) scale(1.08) rotate(3deg) rotateY(5deg); }
         }
         
         @keyframes slotGlow {
-            0%, 100% { box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 60px rgba(139, 92, 246, 0.6); }
-            50% { box-shadow: inset 0 0 40px rgba(0,0,0,0.7), 0 0 100px rgba(16, 185, 129, 0.9); }
+            0% { 
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,0.9), 
+                    0 0 80px rgba(139, 92, 246, 1),
+                    0 0 150px rgba(236, 72, 153, 0.8); 
+            }
+            25% { 
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,0.9), 
+                    0 0 100px rgba(16, 185, 129, 1),
+                    0 0 180px rgba(245, 158, 11, 1); 
+            }
+            50% { 
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,0.9), 
+                    0 0 120px rgba(236, 72, 153, 1),
+                    0 0 200px rgba(139, 92, 246, 1); 
+            }
+            75% { 
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,0.9), 
+                    0 0 100px rgba(245, 158, 11, 1),
+                    0 0 180px rgba(16, 185, 129, 1); 
+            }
+            100% { 
+                box-shadow: 
+                    inset 0 0 60px rgba(0,0,0,0.9), 
+                    0 0 80px rgba(139, 92, 246, 1),
+                    0 0 150px rgba(236, 72, 153, 0.8); 
+            }
         }
         
         @keyframes slotWin {
             0%, 100% { 
-                transform: scale(1) rotate(0deg);
-                box-shadow: 0 0 60px rgba(245, 158, 11, 0.8);
+                transform: scale(1) rotate(0deg) rotateY(0deg) rotateX(0deg);
+                box-shadow: 
+                    0 0 80px rgba(255,215,0,1),
+                    0 0 150px rgba(255,0,255,0.8),
+                    0 0 220px rgba(0,255,255,0.6);
+            }
+            12.5% { 
+                transform: scale(1.25) rotate(-10deg) rotateY(-10deg) rotateX(5deg);
+                box-shadow: 
+                    0 0 120px rgba(255,0,0,1),
+                    0 0 200px rgba(255,215,0,1);
             }
             25% { 
-                transform: scale(1.15) rotate(-5deg);
-                box-shadow: 0 0 100px rgba(245, 158, 11, 1);
+                transform: scale(1.2) rotate(10deg) rotateY(10deg) rotateX(-5deg);
+                box-shadow: 
+                    0 0 120px rgba(255,165,0,1),
+                    0 0 200px rgba(255,0,255,1);
+            }
+            37.5% { 
+                transform: scale(1.25) rotate(-10deg) rotateY(-10deg) rotateX(5deg);
+                box-shadow: 
+                    0 0 120px rgba(0,255,0,1),
+                    0 0 200px rgba(0,255,255,1);
             }
             50% { 
-                transform: scale(1.1) rotate(5deg);
-                box-shadow: 0 0 80px rgba(16, 185, 129, 1);
+                transform: scale(1.2) rotate(10deg) rotateY(10deg) rotateX(-5deg);
+                box-shadow: 
+                    0 0 120px rgba(0,0,255,1),
+                    0 0 200px rgba(139,92,246,1);
+            }
+            62.5% { 
+                transform: scale(1.25) rotate(-10deg) rotateY(-10deg) rotateX(5deg);
+                box-shadow: 
+                    0 0 120px rgba(139,92,246,1),
+                    0 0 200px rgba(236,72,153,1);
             }
             75% { 
-                transform: scale(1.15) rotate(-5deg);
-                box-shadow: 0 0 100px rgba(139, 92, 246, 1);
+                transform: scale(1.2) rotate(10deg) rotateY(10deg) rotateX(-5deg);
+                box-shadow: 
+                    0 0 120px rgba(236,72,153,1),
+                    0 0 200px rgba(245,158,11,1);
+            }
+            87.5% { 
+                transform: scale(1.25) rotate(-10deg) rotateY(-10deg) rotateX(5deg);
+                box-shadow: 
+                    0 0 120px rgba(16,185,129,1),
+                    0 0 200px rgba(255,215,0,1);
             }
         }
         
         @keyframes rainbowGlow {
-            0% { filter: hue-rotate(0deg) brightness(1.3); }
-            100% { filter: hue-rotate(360deg) brightness(1.3); }
+            0% { filter: hue-rotate(0deg) brightness(1.5) saturate(2); }
+            100% { filter: hue-rotate(360deg) brightness(1.5) saturate(2); }
         }
         
         .controls { background: var(--bg-secondary); padding: 24px; border-radius: 16px; margin-top: 24px; }
@@ -257,6 +524,91 @@ $casino_available_balance = max(0, $balance - 10.00);
         .result-box.loss { background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.2)); border: 2px solid var(--error); color: var(--error); }
         .back-btn { display: inline-block; padding: 12px 24px; background: var(--bg-secondary); border-radius: 12px; color: var(--text-primary); text-decoration: none; font-weight: 600; transition: all 0.2s; }
         .back-btn:hover { background: var(--bg-tertiary); transform: translateY(-2px); }
+        
+        /* === ULTRA KRASSE PARTIKEL & COIN RAIN === */
+        .coin-particle {
+            position: fixed;
+            font-size: 3rem;
+            pointer-events: none;
+            z-index: 99999;
+            animation: coinRain 2.5s ease-in forwards;
+            filter: drop-shadow(0 0 15px gold) drop-shadow(0 0 30px rgba(255,215,0,0.8));
+            text-shadow: 0 0 20px rgba(255,215,0,1);
+        }
+        
+        @keyframes coinRain {
+            0% {
+                transform: translateY(-150px) rotate(0deg) scale(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+                transform: translateY(0) rotate(180deg) scale(1.2);
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(120vh) rotate(1080deg) scale(0.3);
+                opacity: 0;
+            }
+        }
+        
+        .explosion-particle {
+            position: fixed;
+            font-size: 2rem;
+            pointer-events: none;
+            z-index: 99998;
+            animation: explode 1.5s ease-out forwards;
+            filter: drop-shadow(0 0 10px currentColor);
+        }
+        
+        @keyframes explode {
+            0% {
+                transform: translate(0, 0) scale(1) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) scale(0) rotate(720deg);
+                opacity: 0;
+            }
+        }
+        
+        .laser-beam {
+            position: fixed;
+            width: 4px;
+            height: 200vh;
+            background: linear-gradient(180deg, 
+                transparent,
+                rgba(255,215,0,0.8),
+                rgba(255,0,255,0.8),
+                rgba(0,255,255,0.8),
+                transparent
+            );
+            pointer-events: none;
+            z-index: 99997;
+            animation: laserScan 2s linear forwards;
+            filter: blur(2px);
+            box-shadow: 
+                0 0 20px rgba(255,215,0,1),
+                0 0 40px rgba(255,0,255,1),
+                0 0 60px rgba(0,255,255,1);
+        }
+        
+        @keyframes laserScan {
+            0% { 
+                transform: translateX(-100vw) scaleY(0.5);
+                opacity: 0;
+            }
+            50% {
+                opacity: 1;
+                transform: translateX(50vw) scaleY(1);
+            }
+            100% { 
+                transform: translateX(200vw) scaleY(0.5);
+                opacity: 0;
+            }
+        }
     </style>
 </head>
 <body>
@@ -353,6 +705,11 @@ $casino_available_balance = max(0, $balance - 10.00);
                         if (data.win_amount > 0) {
                             resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
                             
+                            // ULTRA KRASSE EFFEKTE
+                            createCoinRain(50);
+                            createExplosion(reels[1]);
+                            createLaserBeams(3);
+                            
                             // Remove winning class after animation
                             setTimeout(() => {
                                 reels.forEach(r => r.classList.remove('winning'));
@@ -373,6 +730,62 @@ $casino_available_balance = max(0, $balance - 10.00);
                 alert('Fehler: ' + error.message);
                 spinning = false;
                 document.getElementById('spinBtn').disabled = false;
+            }
+        }
+        
+        // === ULTRA KRASSE PARTIKEL-EFFEKTE ===
+        function createCoinRain(count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const coin = document.createElement('div');
+                    coin.className = 'coin-particle';
+                    coin.textContent = ['💰', '💎', '🪙', '💵', '🏆'][Math.floor(Math.random() * 5)];
+                    coin.style.left = Math.random() * window.innerWidth + 'px';
+                    coin.style.animationDelay = Math.random() * 0.5 + 's';
+                    coin.style.animationDuration = (1.5 + Math.random()) + 's';
+                    document.body.appendChild(coin);
+                    setTimeout(() => coin.remove(), 3000);
+                }, i * 30);
+            }
+        }
+        
+        function createExplosion(centerElement) {
+            const rect = centerElement.getBoundingClientRect();
+            const centerX = rect.left + rect.width / 2;
+            const centerY = rect.top + rect.height / 2;
+            const particles = ['✨', '⭐', '🌟', '💫', '✨', '⚡', '🔥', '💥'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'explosion-particle';
+                particle.textContent = particles[Math.floor(Math.random() * particles.length)];
+                particle.style.left = centerX + 'px';
+                particle.style.top = centerY + 'px';
+                
+                const angle = (Math.PI * 2 * i) / 30;
+                const distance = 150 + Math.random() * 200;
+                const tx = Math.cos(angle) * distance;
+                const ty = Math.sin(angle) * distance;
+                
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+                particle.style.animationDelay = Math.random() * 0.3 + 's';
+                
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 2000);
+            }
+        }
+        
+        function createLaserBeams(count) {
+            for (let i = 0; i < count; i++) {
+                setTimeout(() => {
+                    const laser = document.createElement('div');
+                    laser.className = 'laser-beam';
+                    laser.style.left = Math.random() * window.innerWidth + 'px';
+                    laser.style.animationDelay = (i * 0.3) + 's';
+                    document.body.appendChild(laser);
+                    setTimeout(() => laser.remove(), 2500);
+                }, i * 400);
             }
         }
     </script>
