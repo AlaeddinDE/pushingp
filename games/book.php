@@ -34,7 +34,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             justify-content: center;
         }
         .game-container { 
-            max-width: 1400px; 
+            max-width: 95vw; 
             width: 100%;
             background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%);
             border-radius: 20px; 
@@ -75,7 +75,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 0 0 60px rgba(255,215,0,0.3);
             border: 4px solid rgba(255,215,0,0.4);
             margin: 10px auto;
-            max-width: 1200px;
+            max-width: 90vw;
         }
         
         .book-title {
@@ -93,8 +93,8 @@ $casino_available_balance = max(0, $balance - 10.00);
         .book-reels {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
-            padding: 20px;
+            gap: 20px;
+            padding: 30px;
             background: rgba(0,0,0,0.5);
             border-radius: 15px;
             margin-bottom: 20px;
@@ -105,7 +105,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             background: linear-gradient(180deg, #1a0f0a, #0a0404);
             border: 3px solid rgba(255,215,0,0.4);
             border-radius: 12px;
-            height: 360px;
+            height: 450px;
             overflow: hidden;
             position: relative;
             box-shadow: 
@@ -125,11 +125,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .book-symbol {
             width: 100%;
-            height: 120px;
+            height: 150px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 5rem;
             flex-shrink: 0;
             background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
             border-bottom: 1px solid rgba(255,215,0,0.1);
@@ -418,7 +418,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         function rollReel(reelElement, duration, finalSymbol) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.book-reel-strip');
-                const symbolHeight = 120;
+                const symbolHeight = 150;
                 let currentPos = 0;
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
