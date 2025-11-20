@@ -232,7 +232,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-reels {
             display: flex;
-            gap: 12px;
+            gap: 20px;
             justify-content: center;
             margin: 15px 0;
             background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
@@ -279,8 +279,8 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .slot-reel {
-            width: 110px;
-            height: 150px;
+            width: 130px;
+            height: 170px;
             background: 
                 radial-gradient(circle at center, rgba(139, 92, 246, 0.2), transparent 70%),
                 radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.15), transparent 60%),
@@ -313,11 +313,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .reel-symbol {
             width: 100%;
-            height: 150px;
+            height: 170px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 4rem;
+            font-size: 5rem;
             flex-shrink: 0;
         }
         
@@ -581,7 +581,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             <div>
                 <a href="/casino.php" class="back-btn">← Zurück</a>
                 <h1 style="font-size: 1.8rem; margin: 8px 0 4px 0;">🎰 Slot Machine</h1>
-                <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">4 gleiche Symbole = Gewinn!</p>
+                <p style="color: var(--text-secondary); margin: 0; font-size: 0.85rem;">3 gleiche Symbole = Gewinn!</p>
             </div>
             <div class="balance-display">
                 <div style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 2px;">Guthaben</div>
@@ -609,11 +609,6 @@ $casino_available_balance = max(0, $balance - 10.00);
                         <div class="reel-strip"></div>
                     </div>
                 </div>
-                <div class="slot-reel-frame">
-                    <div class="slot-reel" id="reel4">
-                        <div class="reel-strip"></div>
-                    </div>
-                </div>
             </div>
         </div>
 
@@ -626,18 +621,18 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div id="resultBox"></div>
 
         <div style="margin-top: 12px; padding: 10px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.75rem; color: var(--text-secondary);">
-            <strong style="font-size: 0.85rem; color: var(--text-primary);">🎰 Auszahlungen:</strong>
+            <strong style="font-size: 0.85rem; color: var(--text-primary);">🎰 Auszahlungen (3 Symbole):</strong>
             <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 8px;">
-                <div>💎x4 <span style="color: #FFD700; font-weight: 800;">50x</span></div>
-                <div>7️⃣x4 <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
-                <div>🔔x4 <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
-                <div>⭐x4 <span style="color: #FFA500; font-weight: 800;">10x</span></div>
-                <div>🎰x4 <span style="color: #FF0080; font-weight: 700;">8x</span></div>
-                <div>🍇x4 <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
-                <div>🍉x4 <span style="color: #10B981; font-weight: 700;">6x</span></div>
-                <div>🍊x4 <span style="color: #F97316; font-weight: 700;">5x</span></div>
-                <div>🍋x4 <span style="color: #EAB308; font-weight: 700;">4x</span></div>
-                <div>🍒x4 <span style="color: #EF4444; font-weight: 700;">3x</span></div>
+                <div>💎💎💎 <span style="color: #FFD700; font-weight: 800;">50x</span></div>
+                <div>7️⃣7️⃣7️⃣ <span style="color: #FF00FF; font-weight: 800;">25x</span></div>
+                <div>🔔🔔🔔 <span style="color: #00FFFF; font-weight: 800;">15x</span></div>
+                <div>⭐⭐⭐ <span style="color: #FFA500; font-weight: 800;">10x</span></div>
+                <div>🎰🎰🎰 <span style="color: #FF0080; font-weight: 700;">8x</span></div>
+                <div>🍇🍇🍇 <span style="color: #9F7AEA; font-weight: 700;">7x</span></div>
+                <div>🍉🍉🍉 <span style="color: #10B981; font-weight: 700;">6x</span></div>
+                <div>🍊🍊🍊 <span style="color: #F97316; font-weight: 700;">5x</span></div>
+                <div>🍋🍋🍋 <span style="color: #EAB308; font-weight: 700;">4x</span></div>
+                <div>🍒🍒🍒 <span style="color: #EF4444; font-weight: 700;">3x</span></div>
             </div>
         </div>
     </div>
@@ -663,7 +658,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         // Initialize reels with symbols
         function initializeReels() {
-            for (let i = 1; i <= 4; i++) {
+            for (let i = 1; i <= 3; i++) {
                 const reel = document.querySelector(`#reel${i} .reel-strip`);
                 reel.innerHTML = '';
                 // Create long strip of random symbols for realistic rolling
@@ -687,7 +682,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         function rollReel(reelElement, duration, finalSymbol) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.reel-strip');
-                const symbolHeight = 150;
+                const symbolHeight = 170;
                 let currentPos = 0;
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
@@ -742,17 +737,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                     // Reset reels
                     initializeReels();
                     
-                    // Make sure we have 4 results
-                    const results = data.result.length === 3 
-                        ? [...data.result, symbols[Math.floor(Math.random() * symbols.length)]]
-                        : data.result;
+                    const results = data.result;
                     
                     // Start rolling all reels with staggered stop times
                     const reels = [
                         document.getElementById('reel1'),
                         document.getElementById('reel2'),
-                        document.getElementById('reel3'),
-                        document.getElementById('reel4')
+                        document.getElementById('reel3')
                     ];
                     
                     // Roll each reel with different durations for realistic effect
