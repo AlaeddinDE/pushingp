@@ -35,18 +35,18 @@ $casino_available_balance = max(0, $balance - 10.00);
             justify-content: center;
         }
         .game-container { 
-            max-width: 1300px; 
+            max-width: 1200px; 
             width: 100%;
             background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%);
-            border-radius: 16px; 
-            padding: 12px; 
+            border-radius: 12px; 
+            padding: 8px; 
             box-shadow: 
                 0 20px 60px rgba(0,0,0,0.9),
                 0 0 100px rgba(255,215,0,0.2);
             display: flex;
             flex-direction: column;
-            border: 3px solid rgba(255,215,0,0.3);
-            margin: 10px 0;
+            border: 2px solid rgba(255,215,0,0.3);
+            margin: 5px 0;
         }
         .game-header { 
             display: flex; 
@@ -69,12 +69,12 @@ $casino_available_balance = max(0, $balance - 10.00);
             position: relative;
             background: 
                 linear-gradient(180deg, #2d1810 0%, #1a0f0a 50%, #2d1810 100%);
-            border-radius: 16px;
-            padding: 20px 30px 15px;
+            border-radius: 12px;
+            padding: 12px 20px 10px;
             box-shadow: 
                 inset 0 0 80px rgba(0,0,0,0.9),
                 0 0 60px rgba(255,215,0,0.3);
-            border: 3px solid rgba(255,215,0,0.4);
+            border: 2px solid rgba(255,215,0,0.4);
             margin: 0 auto;
             width: 100%;
         }
@@ -94,19 +94,19 @@ $casino_available_balance = max(0, $balance - 10.00);
         .book-reels {
             display: grid;
             grid-template-columns: repeat(5, 1fr);
-            gap: 18px;
-            padding: 20px 25px;
+            gap: 12px;
+            padding: 12px 15px;
             background: rgba(0,0,0,0.5);
-            border-radius: 12px;
-            margin-bottom: 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             position: relative;
         }
         
         .book-reel {
             background: linear-gradient(180deg, #1a0f0a, #0a0404);
-            border: 3px solid rgba(255,215,0,0.4);
-            border-radius: 12px;
-            height: 330px;
+            border: 2px solid rgba(255,215,0,0.4);
+            border-radius: 10px;
+            height: 270px;
             overflow: hidden;
             position: relative;
             box-shadow: 
@@ -126,11 +126,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .book-symbol {
             width: 100%;
-            height: 110px;
+            height: 90px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 3.8rem;
+            font-size: 3.2rem;
             flex-shrink: 0;
             background: radial-gradient(circle, rgba(255,215,0,0.1), transparent);
             border-bottom: 1px solid rgba(255,215,0,0.1);
@@ -296,11 +296,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .payouts {
-            margin-top: 6px;
-            padding: 8px;
+            margin-top: 4px;
+            padding: 6px;
             background: rgba(255,215,0,0.05);
-            border-radius: 10px;
-            font-size: 0.65rem;
+            border-radius: 8px;
+            font-size: 0.6rem;
             color: rgba(255,215,0,0.7);
             border: 2px solid rgba(255,215,0,0.2);
         }
@@ -331,14 +331,14 @@ $casino_available_balance = max(0, $balance - 10.00);
             <div class="book-title">📖 BOOK OF P 📖</div>
             
             <!-- Freespins Counter -->
-            <div id="freespinsCounter" style="display: none; text-align: center; margin-bottom: 10px; padding: 10px; background: rgba(255,215,0,0.2); border-radius: 12px; border: 2px solid #FFD700;">
-                <div style="font-size: 1.2rem; font-weight: 800; color: #FFD700;">
+            <div id="freespinsCounter" style="display: none; text-align: center; margin-bottom: 6px; padding: 6px; background: rgba(255,215,0,0.2); border-radius: 8px; border: 2px solid #FFD700;">
+                <div style="font-size: 0.9rem; font-weight: 800; color: #FFD700;">
                     🎰 FREISPIELE AKTIV 🎰
                 </div>
-                <div style="font-size: 0.9rem; margin-top: 5px; color: #FFA500;">
+                <div style="font-size: 0.75rem; margin-top: 3px; color: #FFA500;">
                     <span id="freespinsRemaining">0</span> Freispiele übrig | Expanding Symbol: <span id="expandingSymbol"></span>
                 </div>
-                <div style="font-size: 0.8rem; margin-top: 5px; color: rgba(255,215,0,0.8);">
+                <div style="font-size: 0.7rem; margin-top: 3px; color: rgba(255,215,0,0.8);">
                     Gesamtgewinn: <span id="freespinsTotalWin">0.00</span>€
                 </div>
             </div>
@@ -419,7 +419,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         function rollReel(reelElement, duration, finalSymbol) {
             return new Promise((resolve) => {
                 const strip = reelElement.querySelector('.book-reel-strip');
-                const symbolHeight = 110;
+                const symbolHeight = 90;
                 let currentPos = 0;
                 const totalSymbols = 30;
                 const rollDistance = symbolHeight * totalSymbols;
