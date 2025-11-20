@@ -2211,7 +2211,7 @@ require_once __DIR__ . '/includes/header.php';
             </div>
 
             <!-- MINES -->
-            <div class="game-card" onclick="window.location.href='/games/mines.php'">
+            <div class="game-card" onclick="window.location.href='/games/mines.php'" style="cursor:pointer;">
                 <span class="game-icon">💎</span>
                 <div class="game-title">Mines</div>
                 <div class="game-desc">Finde Diamanten, vermeide Minen! Mathematisch faire Quoten!</div>
