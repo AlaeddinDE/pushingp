@@ -25,18 +25,18 @@ $casino_available_balance = max(0, $balance - 10.00);
     <style>
         body { 
             background: linear-gradient(135deg, #1a0f0a 0%, #2d1810 100%); 
-            min-height: 100vh; 
+            height: 100vh; 
             margin: 0;
             padding: 10px; 
-            overflow-x: hidden;
-            overflow-y: auto;
+            overflow: hidden;
             display: flex;
-            align-items: flex-start;
+            align-items: center;
             justify-content: center;
         }
         .game-container { 
             max-width: 1200px; 
             width: 100%;
+            max-height: 98vh;
             background: linear-gradient(180deg, #1a0808 0%, #0a0404 100%);
             border-radius: 12px; 
             padding: 8px; 
@@ -46,7 +46,7 @@ $casino_available_balance = max(0, $balance - 10.00);
             display: flex;
             flex-direction: column;
             border: 2px solid rgba(255,215,0,0.3);
-            margin: 5px 0;
+            overflow: hidden;
         }
         .game-header { 
             display: flex; 
