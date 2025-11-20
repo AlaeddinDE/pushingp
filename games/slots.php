@@ -646,111 +646,318 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         // Sound-Funktionen
         function playSpinSound() {
-            // Mechanisches Rollen-Geräusch
-            const duration = 0.1;
+            // Verbessertes mechanisches Rollen mit mehreren Layern
+            const baseFreq = 60;
+            const duration = 0.05;
+            
+            // Layer 1: Tiefes Brummen (Motor)
+            for (let i = 0; i < 40; i++) {
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    filter.type = 'lowpass';
+                    filter.frequency.value = 200;
+                    
+                    osc.frequency.value = baseFreq + Math.random() * 20;
+                    osc.type = 'sawtooth';
+                    
+                    gain.gain.setValueAtTime(0.03, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + duration);
+                }, i * 25);
+            }
+            
+            // Layer 2: Klick-Geräusche (Mechanik)
+            for (let i = 0; i < 30; i++) {
+                setTimeout(() => {
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
+                    
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioContext.destination);
+                    
+                    filter.type = 'bandpass';
+                    filter.frequency.value = 800 + Math.random() * 400;
+                    filter.Q.value = 10;
+                    
+                    osc.frequency.value = 100 + Math.random() * 100;
+                    osc.type = 'square';
+                    
+                    gain.gain.setValueAtTime(0.08, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.03);
+                    
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.03);
+                }, i * 35);
+            }
+            
+            // Layer 3: High-Freq Rauschen (Metall)
             for (let i = 0; i < 20; i++) {
                 setTimeout(() => {
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
+                    const osc = audioContext.createOscillator();
+                    const gain = audioContext.createGain();
+                    const filter = audioContext.createBiquadFilter();
                     
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                    osc.connect(filter);
+                    filter.connect(gain);
+                    gain.connect(audioContext.destination);
                     
-                    oscillator.frequency.value = 80 + Math.random() * 40;
-                    oscillator.type = 'square';
+                    filter.type = 'highpass';
+                    filter.frequency.value = 2000;
                     
-                    gainNode.gain.setValueAtTime(0.05, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration);
+                    osc.frequency.value = 3000 + Math.random() * 2000;
+                    osc.type = 'square';
                     
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + duration);
+                    gain.gain.setValueAtTime(0.02, audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.02);
+                    
+                    osc.start(audioContext.currentTime);
+                    osc.stop(audioContext.currentTime + 0.02);
                 }, i * 50);
             }
         }
         
         function playStopSound(index) {
-            // Klack-Geräusch beim Stoppen
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            // Verbessertes Stopp-Geräusch (CHUNK!)
+            const time = audioContext.currentTime;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            // Impact Sound (tiefer Schlag)
+            const osc1 = audioContext.createOscillator();
+            const gain1 = audioContext.createGain();
+            const filter1 = audioContext.createBiquadFilter();
             
-            oscillator.frequency.value = 200 - (index * 20);
-            oscillator.type = 'sine';
+            osc1.connect(filter1);
+            filter1.connect(gain1);
+            gain1.connect(audioContext.destination);
             
-            gainNode.gain.setValueAtTime(0.15, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+            filter1.type = 'lowpass';
+            filter1.frequency.value = 300;
             
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.1);
+            osc1.frequency.setValueAtTime(120 - (index * 15), time);
+            osc1.frequency.exponentialRampToValueAtTime(40, time + 0.08);
+            osc1.type = 'sine';
+            
+            gain1.gain.setValueAtTime(0.3, time);
+            gain1.gain.exponentialRampToValueAtTime(0.001, time + 0.08);
+            
+            osc1.start(time);
+            osc1.stop(time + 0.08);
+            
+            // Click Sound (hoher Klick)
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            
+            osc2.frequency.value = 800 + (index * 100);
+            osc2.type = 'square';
+            
+            gain2.gain.setValueAtTime(0.2, time);
+            gain2.gain.exponentialRampToValueAtTime(0.001, time + 0.03);
+            
+            osc2.start(time);
+            osc2.stop(time + 0.03);
+            
+            // Metall-Resonanz
+            const osc3 = audioContext.createOscillator();
+            const gain3 = audioContext.createGain();
+            const filter3 = audioContext.createBiquadFilter();
+            
+            osc3.connect(filter3);
+            filter3.connect(gain3);
+            gain3.connect(audioContext.destination);
+            
+            filter3.type = 'bandpass';
+            filter3.frequency.value = 2000;
+            filter3.Q.value = 20;
+            
+            osc3.frequency.value = 2000;
+            osc3.type = 'sine';
+            
+            gain3.gain.setValueAtTime(0.15, time + 0.01);
+            gain3.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
+            
+            osc3.start(time + 0.01);
+            osc3.stop(time + 0.15);
         }
         
         function playWinSound(multiplier) {
-            // Gewinn-Melodie basierend auf Höhe des Gewinns
-            const notes = multiplier >= 25 ? [523, 659, 784, 1047] : 
-                         multiplier >= 10 ? [523, 659, 784] : 
-                         [523, 659];
+            // Verbesserte Gewinn-Melodie mit Harmonie
+            const notes = multiplier >= 25 ? [523, 659, 784, 1047, 1319] : 
+                         multiplier >= 10 ? [523, 659, 784, 1047] : 
+                         [523, 659, 784];
             
             notes.forEach((freq, i) => {
                 setTimeout(() => {
-                    const oscillator = audioContext.createOscillator();
-                    const gainNode = audioContext.createGain();
+                    // Hauptton
+                    const osc1 = audioContext.createOscillator();
+                    const gain1 = audioContext.createGain();
+                    const filter1 = audioContext.createBiquadFilter();
                     
-                    oscillator.connect(gainNode);
-                    gainNode.connect(audioContext.destination);
+                    osc1.connect(filter1);
+                    filter1.connect(gain1);
+                    gain1.connect(audioContext.destination);
                     
-                    oscillator.frequency.value = freq;
-                    oscillator.type = 'sine';
+                    filter1.type = 'lowpass';
+                    filter1.frequency.value = 3000;
                     
-                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
-                    gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+                    osc1.frequency.value = freq;
+                    osc1.type = 'triangle';
                     
-                    oscillator.start(audioContext.currentTime);
-                    oscillator.stop(audioContext.currentTime + 0.3);
-                }, i * 150);
+                    gain1.gain.setValueAtTime(0.25, audioContext.currentTime);
+                    gain1.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+                    
+                    osc1.start(audioContext.currentTime);
+                    osc1.stop(audioContext.currentTime + 0.4);
+                    
+                    // Harmonie (Quinte)
+                    const osc2 = audioContext.createOscillator();
+                    const gain2 = audioContext.createGain();
+                    
+                    osc2.connect(gain2);
+                    gain2.connect(audioContext.destination);
+                    
+                    osc2.frequency.value = freq * 1.5;
+                    osc2.type = 'sine';
+                    
+                    gain2.gain.setValueAtTime(0.12, audioContext.currentTime);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.4);
+                    
+                    osc2.start(audioContext.currentTime);
+                    osc2.stop(audioContext.currentTime + 0.4);
+                }, i * 120);
             });
             
-            // Münzen-Sound bei Gewinn
-            if (multiplier >= 10) {
-                for (let i = 0; i < 8; i++) {
-                    setTimeout(() => {
+            // Verbesserte Münzen-Sounds
+            const coinCount = multiplier >= 25 ? 20 : multiplier >= 10 ? 12 : 8;
+            for (let i = 0; i < coinCount; i++) {
+                setTimeout(() => {
+                    const time = audioContext.currentTime;
+                    
+                    // Münz-Klang mit Obertönen
+                    for (let harmonic = 1; harmonic <= 3; harmonic++) {
                         const osc = audioContext.createOscillator();
                         const gain = audioContext.createGain();
+                        const filter = audioContext.createBiquadFilter();
                         
-                        osc.connect(gain);
+                        osc.connect(filter);
+                        filter.connect(gain);
                         gain.connect(audioContext.destination);
                         
-                        osc.frequency.value = 800 + Math.random() * 400;
+                        filter.type = 'bandpass';
+                        filter.frequency.value = 1500 * harmonic;
+                        filter.Q.value = 5;
+                        
+                        osc.frequency.value = (800 + Math.random() * 600) * harmonic;
                         osc.type = 'sine';
                         
-                        gain.gain.setValueAtTime(0.08, audioContext.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.1);
+                        const volume = 0.08 / harmonic;
+                        gain.gain.setValueAtTime(volume, time);
+                        gain.gain.exponentialRampToValueAtTime(0.001, time + 0.15);
                         
-                        osc.start(audioContext.currentTime);
-                        osc.stop(audioContext.currentTime + 0.1);
-                    }, i * 80);
-                }
+                        osc.start(time);
+                        osc.stop(time + 0.15);
+                    }
+                }, notes.length * 120 + i * 60);
+            }
+            
+            // Jackpot-Fanfare bei großen Gewinnen
+            if (multiplier >= 25) {
+                setTimeout(() => {
+                    const fanfare = [1047, 1319, 1568, 2093];
+                    fanfare.forEach((freq, i) => {
+                        setTimeout(() => {
+                            const osc = audioContext.createOscillator();
+                            const gain = audioContext.createGain();
+                            
+                            osc.connect(gain);
+                            gain.connect(audioContext.destination);
+                            
+                            osc.frequency.value = freq;
+                            osc.type = 'sawtooth';
+                            
+                            gain.gain.setValueAtTime(0.15, audioContext.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.6);
+                            
+                            osc.start(audioContext.currentTime);
+                            osc.stop(audioContext.currentTime + 0.6);
+                        }, i * 100);
+                    });
+                }, notes.length * 120 + 200);
             }
         }
         
         function playLoseSound() {
-            // Trauriger Abstieg
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
+            // Verbesserter trauriger Sound mit Dissonanz
+            const time = audioContext.currentTime;
             
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
+            // Hauptton (absteigend)
+            const osc1 = audioContext.createOscillator();
+            const gain1 = audioContext.createGain();
+            const filter1 = audioContext.createBiquadFilter();
             
-            oscillator.frequency.setValueAtTime(400, audioContext.currentTime);
-            oscillator.frequency.exponentialRampToValueAtTime(200, audioContext.currentTime + 0.5);
-            oscillator.type = 'sine';
+            osc1.connect(filter1);
+            filter1.connect(gain1);
+            gain1.connect(audioContext.destination);
             
-            gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
-            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.5);
+            filter1.type = 'lowpass';
+            filter1.frequency.setValueAtTime(800, time);
+            filter1.frequency.exponentialRampToValueAtTime(200, time + 0.6);
             
-            oscillator.start(audioContext.currentTime);
-            oscillator.stop(audioContext.currentTime + 0.5);
+            osc1.frequency.setValueAtTime(350, time);
+            osc1.frequency.exponentialRampToValueAtTime(180, time + 0.6);
+            osc1.type = 'triangle';
+            
+            gain1.gain.setValueAtTime(0.12, time);
+            gain1.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+            
+            osc1.start(time);
+            osc1.stop(time + 0.6);
+            
+            // Dissonanter Ton (verstimmt)
+            const osc2 = audioContext.createOscillator();
+            const gain2 = audioContext.createGain();
+            
+            osc2.connect(gain2);
+            gain2.connect(audioContext.destination);
+            
+            osc2.frequency.setValueAtTime(365, time);
+            osc2.frequency.exponentialRampToValueAtTime(190, time + 0.6);
+            osc2.type = 'sine';
+            
+            gain2.gain.setValueAtTime(0.08, time);
+            gain2.gain.exponentialRampToValueAtTime(0.001, time + 0.6);
+            
+            osc2.start(time);
+            osc2.stop(time + 0.6);
+            
+            // Dumpfer Bass
+            const osc3 = audioContext.createOscillator();
+            const gain3 = audioContext.createGain();
+            
+            osc3.connect(gain3);
+            gain3.connect(audioContext.destination);
+            
+            osc3.frequency.setValueAtTime(100, time);
+            osc3.frequency.exponentialRampToValueAtTime(50, time + 0.7);
+            osc3.type = 'sine';
+            
+            gain3.gain.setValueAtTime(0.15, time);
+            gain3.gain.exponentialRampToValueAtTime(0.001, time + 0.7);
+            
+            osc3.start(time);
+            osc3.stop(time + 0.7);
         }
         
         // Realistische Slot-Symbole
