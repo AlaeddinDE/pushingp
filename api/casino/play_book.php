@@ -66,101 +66,99 @@ for ($i = 0; $i < 5; $i++) {
     $result[] = $reel;
 }
 
-// Check for wins on each of 9 paylines (like Book of Ra)
+// Check for wins - Find connected clusters (orthogonal adjacency only)
 $win_amount = 0;
 $multiplier = 0;
 $winning_lines = [];
 
-// 9 Paylines like in Book of Ra
-$paylines = [
-    [1, 1, 1, 1, 1], // Line 1: Middle row
-    [0, 0, 0, 0, 0], // Line 2: Top row
-    [2, 2, 2, 2, 2], // Line 3: Bottom row
-    [0, 1, 2, 1, 0], // Line 4: V-shape
-    [2, 1, 0, 1, 2], // Line 5: Inverted V
-    [1, 0, 0, 0, 1], // Line 6: W-shape top
-    [1, 2, 2, 2, 1], // Line 7: W-shape bottom
-    [0, 0, 1, 2, 2], // Line 8: Rising
-    [2, 2, 1, 0, 0]  // Line 9: Falling
+// Payout table (per symbol based on cluster size)
+$payouts = [
+    '🅿️' => [3 => 5, 4 => 20, 5 => 50, 6 => 150, 7 => 300, 8 => 600],
+    '👑' => [3 => 3, 4 => 10, 5 => 30, 6 => 80, 7 => 150, 8 => 300],
+    '🦅' => [3 => 2, 4 => 8, 5 => 20, 6 => 50, 7 => 100, 8 => 200],
+    '⚱️' => [3 => 2, 4 => 6, 5 => 15, 6 => 40, 7 => 80, 8 => 150],
+    '🔱' => [3 => 1.5, 4 => 5, 5 => 12, 6 => 30, 7 => 60, 8 => 120],
+    '💎' => [3 => 1.2, 4 => 4, 5 => 10, 6 => 25, 7 => 50, 8 => 100],
+    '🎴' => [3 => 1, 4 => 3, 5 => 8, 6 => 20, 7 => 40, 8 => 80],
+    '🃏' => [3 => 0.8, 4 => 2.5, 5 => 6, 6 => 15, 7 => 30, 8 => 60],
+    '🎯' => [3 => 0.5, 4 => 2, 5 => 5, 6 => 12, 7 => 25, 8 => 50]
 ];
 
-foreach ($paylines as $line_idx => $line) {
-    // Get symbols on this payline
-    $line_symbols = [];
-    for ($i = 0; $i < 5; $i++) {
-        $line_symbols[] = $result[$i][$line[$i]];
+// Convert result[reel][row] to grid[row][reel] for easier processing
+$grid = [];
+for ($row = 0; $row < 3; $row++) {
+    $grid[$row] = [];
+    for ($reel = 0; $reel < 5; $reel++) {
+        $grid[$row][$reel] = $result[$reel][$row];
     }
-    
-    // Check for matching symbols from left to right
-    $first_symbol = $line_symbols[0];
-    $match_count = 1;
-    
-    for ($i = 1; $i < 5; $i++) {
-        if ($line_symbols[$i] === $first_symbol) {
-            $match_count++;
-        } else {
-            break;
+}
+
+// Find all clusters using flood fill
+$visited = array_fill(0, 3, array_fill(0, 5, false));
+
+for ($row = 0; $row < 3; $row++) {
+    for ($col = 0; $col < 5; $col++) {
+        if (!$visited[$row][$col]) {
+            $symbol = $grid[$row][$col];
+            $cluster = [];
+            floodFill($grid, $visited, $row, $col, $symbol, $cluster);
+            
+            // Win if cluster has 3+ connected symbols
+            $count = count($cluster);
+            if ($count >= 3 && isset($payouts[$symbol])) {
+                // Find highest payout for this cluster size
+                $temp_multiplier = 0;
+                foreach ($payouts[$symbol] as $minCount => $mult) {
+                    if ($count >= $minCount) {
+                        $temp_multiplier = $mult;
+                    }
+                }
+                
+                if ($temp_multiplier > 0) {
+                    $win = $bet * $temp_multiplier;
+                    $win_amount += $win;
+                    
+                    if ($temp_multiplier > $multiplier) {
+                        $multiplier = $temp_multiplier;
+                    }
+                    
+                    // Convert cluster positions back to reel/row format
+                    $positions = [];
+                    foreach ($cluster as $pos) {
+                        $positions[] = ['reel' => $pos[1], 'row' => $pos[0]];
+                    }
+                    
+                    $winning_lines[] = [
+                        'line' => 0, 
+                        'symbol' => $symbol, 
+                        'count' => $count, 
+                        'multiplier' => $temp_multiplier,
+                        'win_amount' => $win,
+                        'positions' => $positions
+                    ];
+                }
+            }
         }
     }
-    
-    if ($match_count >= 3) {
-        $temp_multiplier = 0;
-        
-        switch ($first_symbol) {
-            case '🅿️':
-                if ($match_count == 5) $temp_multiplier = 100;
-                elseif ($match_count == 4) $temp_multiplier = 50;
-                elseif ($match_count == 3) $temp_multiplier = 20;
-                break;
-            case '👑':
-                if ($match_count == 5) $temp_multiplier = 50;
-                elseif ($match_count == 4) $temp_multiplier = 25;
-                elseif ($match_count == 3) $temp_multiplier = 15;
-                break;
-            case '🦅':
-                if ($match_count == 5) $temp_multiplier = 25;
-                elseif ($match_count == 4) $temp_multiplier = 15;
-                elseif ($match_count == 3) $temp_multiplier = 10;
-                break;
-            case '⚱️':
-                if ($match_count == 5) $temp_multiplier = 15;
-                elseif ($match_count == 4) $temp_multiplier = 10;
-                elseif ($match_count == 3) $temp_multiplier = 6;
-                break;
-            case '🔱':
-                if ($match_count == 5) $temp_multiplier = 10;
-                elseif ($match_count == 4) $temp_multiplier = 8;
-                elseif ($match_count == 3) $temp_multiplier = 5;
-                break;
-            case '💎':
-                if ($match_count == 5) $temp_multiplier = 8;
-                elseif ($match_count == 4) $temp_multiplier = 6;
-                elseif ($match_count == 3) $temp_multiplier = 4;
-                break;
-            case '🎴':
-                if ($match_count == 5) $temp_multiplier = 6;
-                elseif ($match_count == 4) $temp_multiplier = 4;
-                elseif ($match_count == 3) $temp_multiplier = 3;
-                break;
-            case '🃏':
-                if ($match_count == 5) $temp_multiplier = 4;
-                elseif ($match_count == 4) $temp_multiplier = 3;
-                elseif ($match_count == 3) $temp_multiplier = 2;
-                break;
-            case '🎯':
-                if ($match_count == 5) $temp_multiplier = 3;
-                elseif ($match_count == 4) $temp_multiplier = 2;
-                elseif ($match_count == 3) $temp_multiplier = 1.5;
-                break;
-        }
-        
-        $win_amount += $bet * $temp_multiplier;
-        $winning_lines[] = ['line' => $line_idx, 'symbol' => $first_symbol, 'count' => $match_count, 'multiplier' => $temp_multiplier];
-        
-        if ($temp_multiplier > $multiplier) {
-            $multiplier = $temp_multiplier;
-        }
+}
+
+// Flood fill function to find connected symbols (orthogonal only)
+function floodFill(&$grid, &$visited, $row, $col, $symbol, &$cluster) {
+    if ($row < 0 || $row >= 3 || $col < 0 || $col >= 5 || $visited[$row][$col]) {
+        return;
     }
+    if ($grid[$row][$col] !== $symbol) {
+        return;
+    }
+    
+    $visited[$row][$col] = true;
+    $cluster[] = [$row, $col];
+    
+    // Check 4 directions (up, down, left, right)
+    floodFill($grid, $visited, $row - 1, $col, $symbol, $cluster);
+    floodFill($grid, $visited, $row + 1, $col, $symbol, $cluster);
+    floodFill($grid, $visited, $row, $col - 1, $symbol, $cluster);
+    floodFill($grid, $visited, $row, $col + 1, $symbol, $cluster);
 }
 
 $profit = $win_amount - ($is_freespin ? 0 : $bet);

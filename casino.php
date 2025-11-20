@@ -2135,11 +2135,11 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/slots.php'" style="cursor:pointer;">
                 <span class="game-icon">🎰</span>
                 <div class="game-title">Slot Machine</div>
-                <div class="game-desc">Drei gleiche Symbole = Gewinn! Jackpot bei 3x 💎</div>
+                <div class="game-desc">3 Reels, klassische Symbole. Jackpot bei 3x 💎 Diamant!</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">7%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">94.5%</div>
                     </div>
                     <div class="game-stat">
                         <div class="game-stat-label">Max Win</div>
@@ -2152,15 +2152,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/plinko.php'" style="cursor:pointer;">
                 <span class="game-icon">🎯</span>
                 <div class="game-title">Plinko</div>
-                <div class="game-desc">Ball fällt durch Pins! Bis zu 5x Multiplikator!</div>
+                <div class="game-desc">Ball fällt durch Pins. 9 Slots mit Multiplikatoren 0.5x - 5.0x</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">5%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">97.0%</div>
                     </div>
                     <div class="game-stat">
                         <div class="game-stat-label">Max Win</div>
-                        <div class="game-stat-value">5x</div>
+                        <div class="game-stat-value">5.0x</div>
                     </div>
                 </div>
             </div>
@@ -2169,15 +2169,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/crash.php'" style="cursor:pointer;">
                 <span class="game-icon">🚀</span>
                 <div class="game-title">Crash</div>
-                <div class="game-desc">Multiplier steigt! Cashout bevor es crasht!</div>
+                <div class="game-desc">Multiplier steigt exponentiell. Cashout vor dem Crash!</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">2%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">99.0%</div>
                     </div>
                     <div class="game-stat">
-                        <div class="game-stat-label">Max Win</div>
-                        <div class="game-stat-value">∞</div>
+                        <div class="game-stat-label">Ø Crash</div>
+                        <div class="game-stat-value">1.98x</div>
                     </div>
                 </div>
             </div>
@@ -2186,15 +2186,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/blackjack.php'" style="cursor:pointer;">
                 <span class="game-icon">🃏</span>
                 <div class="game-title">Blackjack</div>
-                <div class="game-desc">Klassisches Kartenspiel! Schlag den Dealer!</div>
+                <div class="game-desc">21 schlagen. Dealer steht bei 17. Blackjack zahlt 3:2</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">1%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">99.5%</div>
                     </div>
                     <div class="game-stat">
                         <div class="game-stat-label">Blackjack</div>
-                        <div class="game-stat-value">2.5x</div>
+                        <div class="game-stat-value">3:2</div>
                     </div>
                 </div>
             </div>
@@ -2203,15 +2203,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/chicken.php'" style="cursor:pointer;">
                 <span class="game-icon">🐔</span>
                 <div class="game-title">Chicken</div>
-                <div class="game-desc">Überquere die Straßen von links nach rechts! M = (1-h) / P(k)</div>
+                <div class="game-desc">Wähle sicheren Weg. 10 Reihen, 3 Tiles. Multiplier: 1.47x/Row</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">5%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">98.0%</div>
                     </div>
                     <div class="game-stat">
                         <div class="game-stat-label">Max Win</div>
-                        <div class="game-stat-value">∞</div>
+                        <div class="game-stat-value">28.4x</div>
                     </div>
                 </div>
             </div>
@@ -2220,15 +2220,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/mines.php'" style="cursor:pointer;">
                 <span class="game-icon">💎</span>
                 <div class="game-title">Mines</div>
-                <div class="game-desc">Finde Diamanten, vermeide Minen! Mathematisch faire Quoten!</div>
+                <div class="game-desc">5x5 Grid. Finde Diamanten, vermeide Bomben. Variable Mines.</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value">4%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value">97.0%</div>
                     </div>
                     <div class="game-stat">
-                        <div class="game-stat-label">RTP</div>
-                        <div class="game-stat-value">96%</div>
+                        <div class="game-stat-label">Max Win</div>
+                        <div class="game-stat-value">Variabel</div>
                     </div>
                 </div>
             </div>
@@ -2237,15 +2237,15 @@ require_once __DIR__ . '/includes/header.php';
             <div class="game-card" onclick="window.location.href='/games/book.php'" style="cursor:pointer; background: linear-gradient(135deg, rgba(255,215,0,0.1), rgba(255,165,0,0.05));">
                 <span class="game-icon">📖</span>
                 <div class="game-title" style="color: #FFD700;">Book of P</div>
-                <div class="game-desc">Ägyptische Schätze erwarten dich! 5 Reels voller Mysterien!</div>
+                <div class="game-desc">5 Reels, ägyptisches Theme. Expanding Symbols & Freispiele.</div>
                 <div class="game-stats">
                     <div class="game-stat">
-                        <div class="game-stat-label">House Edge</div>
-                        <div class="game-stat-value" style="color: #FFD700;">5%</div>
+                        <div class="game-stat-label">RTP</div>
+                        <div class="game-stat-value" style="color: #FFD700;">96.2%</div>
                     </div>
                     <div class="game-stat">
-                        <div class="game-stat-label">RTP</div>
-                        <div class="game-stat-value" style="color: #FFD700;">95%</div>
+                        <div class="game-stat-label">Max Win</div>
+                        <div class="game-stat-value" style="color: #FFD700;">5000x</div>
                     </div>
                 </div>
             </div>

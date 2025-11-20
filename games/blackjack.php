@@ -198,14 +198,20 @@ $casino_available_balance = max(0, $balance - 10.00);
         let gameActive = false;
         let displayedPlayerCards = 0;
         let displayedDealerCards = 0;
+        let isProcessing = false;
 
         function updateBalance() {
             document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' €';
         }
 
         async function deal() {
+            if (isProcessing) return;
+            
             const bet = parseFloat(document.getElementById('betAmount').value);
             if (bet < 0.10 || bet > balance) { alert('Ungültiger Einsatz!'); return; }
+
+            isProcessing = true;
+            toggleButtons(false);
 
             try {
                 const response = await fetch('/api/casino/play_blackjack.php', {
@@ -230,13 +236,22 @@ $casino_available_balance = max(0, $balance - 10.00);
                     document.getElementById('startControls').style.display = 'none';
                     document.getElementById('gameControls').style.display = 'grid';
                     document.getElementById('resultBox').innerHTML = '';
+                } else {
+                    alert(data.error || 'Ein unbekannter Fehler ist aufgetreten.');
                 }
             } catch (error) {
                 alert('Fehler: ' + error.message);
+            } finally {
+                isProcessing = false;
+                toggleButtons(true);
             }
         }
 
         async function hit() {
+            if (isProcessing) return;
+            isProcessing = true;
+            toggleButtons(false);
+
             try {
                 const response = await fetch('/api/casino/play_blackjack.php', {
                     method: 'POST',
@@ -244,14 +259,30 @@ $casino_available_balance = max(0, $balance - 10.00);
                     body: JSON.stringify({ action: 'hit' })
                 });
                 const data = await response.json();
+                
+                if (data.status === 'error') {
+                    // Ignore "No active game" error if we think the game is over, otherwise alert
+                    if (data.error !== 'Kein aktives Spiel') {
+                        alert(data.error);
+                    }
+                    return;
+                }
+                
                 renderGame(data);
                 if (data.game_over) endGame(data);
             } catch (error) {
                 alert('Fehler: ' + error.message);
+            } finally {
+                isProcessing = false;
+                if (gameActive) toggleButtons(true);
             }
         }
 
         async function stand() {
+            if (isProcessing) return;
+            isProcessing = true;
+            toggleButtons(false);
+
             try {
                 const response = await fetch('/api/casino/play_blackjack.php', {
                     method: 'POST',
@@ -259,14 +290,29 @@ $casino_available_balance = max(0, $balance - 10.00);
                     body: JSON.stringify({ action: 'stand' })
                 });
                 const data = await response.json();
+                
+                if (data.status === 'error') {
+                    if (data.error !== 'Kein aktives Spiel') {
+                        alert(data.error);
+                    }
+                    return;
+                }
+
                 renderGame(data);
                 endGame(data);
             } catch (error) {
                 alert('Fehler: ' + error.message);
+            } finally {
+                isProcessing = false;
+                // No need to enable buttons as game ends
             }
         }
         
         async function double() {
+            if (isProcessing) return;
+            isProcessing = true;
+            toggleButtons(false);
+
             try {
                 const response = await fetch('/api/casino/play_blackjack.php', {
                     method: 'POST',
@@ -274,15 +320,31 @@ $casino_available_balance = max(0, $balance - 10.00);
                     body: JSON.stringify({ action: 'double' })
                 });
                 const data = await response.json();
+                
                 if (data.status === 'error') {
-                    alert(data.error);
+                    if (data.error !== 'Kein aktives Spiel') {
+                        alert(data.error);
+                    }
                     return;
                 }
+                
                 renderGame(data);
                 endGame(data);
             } catch (error) {
                 alert('Fehler: ' + error.message);
+            } finally {
+                isProcessing = false;
+                // No need to enable buttons as game ends
             }
+        }
+
+        function toggleButtons(enabled) {
+            const buttons = document.querySelectorAll('.btn-game');
+            buttons.forEach(btn => {
+                btn.disabled = !enabled;
+                btn.style.opacity = enabled ? '1' : '0.5';
+                btn.style.cursor = enabled ? 'pointer' : 'not-allowed';
+            });
         }
 
         function renderGame(data) {
@@ -329,7 +391,7 @@ $casino_available_balance = max(0, $balance - 10.00);
 
         function endGame(data) {
             gameActive = false;
-            balance = data.new_balance;
+            balance = parseFloat(data.new_balance);
             updateBalance();
             
             document.getElementById('startControls').style.display = 'block';

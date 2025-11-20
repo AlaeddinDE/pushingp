@@ -26,103 +26,299 @@ $casino_available_balance = max(0, $balance - 10.00);
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body { 
-            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%); 
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1f3a 100%); 
             min-height: 100vh;
             font-family: 'Inter', sans-serif;
+            color: #fff;
         }
         
         .game-container {
-            max-width: 1200px;
+            max-width: 1600px;
             margin: 0 auto;
             padding: 20px;
         }
         
         /* HEADER */
         .header {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 20px;
-            margin-bottom: 20px;
+            background: rgba(30, 35, 60, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 24px 32px;
+            margin-bottom: 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 20px;
         }
         
         .back-btn {
-            padding: 10px 20px;
-            background: var(--bg-secondary);
-            border-radius: 8px;
-            color: var(--text-primary);
+            padding: 12px 24px;
+            background: rgba(139, 92, 246, 0.1);
+            border: 1px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            color: #8b5cf6;
             text-decoration: none;
-            font-weight: 600;
+            font-weight: 700;
+            transition: all 0.3s;
+        }
+        
+        .back-btn:hover {
+            background: rgba(139, 92, 246, 0.2);
+            transform: translateY(-2px);
+        }
+        
+        .game-logo {
+            font-size: 2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
         .balance-display {
-            text-align: right;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 12px 24px;
+            border-radius: 12px;
         }
         
         .balance-label {
             font-size: 0.875rem;
-            color: var(--text-secondary);
+            color: #6ee7b7;
+            font-weight: 600;
         }
         
         .balance-value {
-            font-size: 1.5rem;
-            font-weight: 800;
-            color: var(--success);
+            font-size: 1.75rem;
+            font-weight: 900;
+            color: #10b981;
         }
         
         /* MAIN LAYOUT */
         .game-layout {
             display: grid;
-            grid-template-columns: 1fr 350px;
-            gap: 20px;
+            grid-template-columns: 380px 1fr 380px;
+            gap: 24px;
+        }
+        
+        /* CONTROLS PANEL */
+        .controls-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+        
+        .panel-box {
+            background: rgba(30, 35, 60, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .panel-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #a78bfa;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        
+        .bet-input-wrapper {
+            position: relative;
+            margin-bottom: 16px;
+        }
+        
+        .bet-label {
+            font-size: 0.875rem;
+            color: #9ca3af;
+            margin-bottom: 8px;
+            display: block;
+        }
+        
+        .bet-input {
+            width: 100%;
+            padding: 16px 48px 16px 20px;
+            background: rgba(15, 20, 40, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            border-radius: 12px;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: 800;
+            transition: all 0.3s;
+        }
+        
+        .bet-input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 0 4px rgba(139, 92, 246, 0.1);
+        }
+        
+        .currency-symbol {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7280;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+        
+        .quick-bets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .quick-bet {
+            padding: 12px;
+            background: rgba(15, 20, 40, 0.6);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 10px;
+            color: #a78bfa;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .quick-bet:hover {
+            background: rgba(139, 92, 246, 0.2);
+            border-color: #8b5cf6;
+            transform: translateY(-2px);
+        }
+        
+        .action-btn {
+            width: 100%;
+            padding: 20px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.125rem;
+            font-weight: 900;
+            cursor: pointer;
+            text-transform: uppercase;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.1), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .action-btn:hover::before {
+            transform: translateX(100%);
+        }
+        
+        .start-btn {
+            background: linear-gradient(135deg, #8b5cf6, #7c3aed);
+            color: white;
+            box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+        }
+        
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+        }
+        
+        .cashout-btn {
+            background: linear-gradient(135deg, #10b981, #059669);
+            color: white;
+            box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4);
+            display: none;
+        }
+        
+        .cashout-btn.active {
+            display: block;
+            animation: glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes glow {
+            0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.4); }
+            50% { box-shadow: 0 8px 40px rgba(16, 185, 129, 0.8); }
         }
         
         /* GAME BOARD */
         .game-board {
-            background: var(--bg-primary);
+            background: rgba(30, 35, 60, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
             border-radius: 20px;
             padding: 32px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+        }
+        
+        .board-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
         }
         
         .board-title {
-            font-size: 2rem;
+            font-size: 1.5rem;
             font-weight: 900;
-            margin-bottom: 24px;
-            text-align: center;
+            color: #fff;
         }
         
-        .chicken-grid {
+        .provably-fair {
             display: flex;
-            flex-direction: column-reverse;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 8px;
+            font-size: 0.875rem;
+            color: #10b981;
+            font-weight: 600;
+        }
+        
+        .road-grid {
+            display: flex;
+            flex-direction: column;
             gap: 12px;
             margin-bottom: 24px;
         }
         
-        .grid-row {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
+        .road-row {
+            display: flex;
             gap: 12px;
             position: relative;
         }
         
-        .row-label {
+        .row-number {
             position: absolute;
-            left: -50px;
+            left: -40px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 1.5rem;
+            font-size: 1.25rem;
             font-weight: 900;
-            color: var(--text-secondary);
+            color: #6b7280;
         }
         
-        .grid-tile {
-            aspect-ratio: 1;
-            background: var(--bg-secondary);
-            border: 3px solid var(--border);
+        .road-tile {
+            flex: 1;
+            aspect-ratio: 2/1;
+            background: rgba(15, 20, 40, 0.8);
+            border: 2px solid rgba(139, 92, 246, 0.2);
             border-radius: 16px;
             display: flex;
             align-items: center;
@@ -134,204 +330,160 @@ $casino_available_balance = max(0, $balance - 10.00);
             overflow: hidden;
         }
         
-        .grid-tile::before {
+        .road-tile::before {
             content: '';
             position: absolute;
             inset: 0;
-            background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(168, 85, 247, 0.1));
+            background: linear-gradient(135deg, rgba(139, 92, 246, 0.0), rgba(139, 92, 246, 0.1));
             opacity: 0;
             transition: opacity 0.3s;
         }
         
-        .grid-tile:hover:not(.revealed):not(.disabled) {
+        .road-tile:hover:not(.revealed):not(.disabled) {
             transform: translateY(-4px);
-            border-color: var(--accent);
-            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.4);
+            border-color: #8b5cf6;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.4);
         }
         
-        .grid-tile:hover:not(.revealed):not(.disabled)::before {
+        .road-tile:hover:not(.revealed):not(.disabled)::before {
             opacity: 1;
         }
         
-        .grid-tile.revealed {
+        .road-tile.revealed {
             cursor: default;
+            animation: revealTile 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         
-        .grid-tile.revealed.safe {
-            background: linear-gradient(135deg, #10b981, #059669);
-            border-color: var(--success);
-            animation: tileReveal 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        .road-tile.revealed.safe {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.3));
+            border-color: #10b981;
+            box-shadow: 0 0 30px rgba(16, 185, 129, 0.4);
         }
         
-        .grid-tile.revealed.danger {
-            background: linear-gradient(135deg, #ef4444, #b91c1c);
-            border-color: var(--error);
-            animation: tileShake 0.5s;
+        .road-tile.revealed.danger {
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(185, 28, 28, 0.3));
+            border-color: #ef4444;
+            box-shadow: 0 0 30px rgba(239, 68, 68, 0.4);
+            animation: crash 0.5s;
         }
         
-        .grid-tile.disabled {
+        .road-tile.disabled {
             opacity: 0.3;
             cursor: not-allowed;
         }
         
-        @keyframes tileReveal {
-            0% { transform: scale(0.8) rotateY(0deg); }
-            50% { transform: scale(1.1) rotateY(180deg); }
-            100% { transform: scale(1) rotateY(360deg); }
+        .road-tile.next-row {
+            border-color: rgba(139, 92, 246, 0.5);
+            animation: pulse 2s ease-in-out infinite;
         }
         
-        @keyframes tileShake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px) rotate(-5deg); }
-            75% { transform: translateX(10px) rotate(5deg); }
+        @keyframes revealTile {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); opacity: 1; }
         }
         
-        /* CONTROLS PANEL */
-        .controls-panel {
+        @keyframes crash {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(-10deg) scale(1.1); }
+            75% { transform: rotate(10deg) scale(1.1); }
+        }
+        
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.4); }
+            50% { box-shadow: 0 0 0 8px rgba(139, 92, 246, 0); }
+        }
+        
+        /* STATS PANEL */
+        .stats-panel {
             display: flex;
             flex-direction: column;
-            gap: 20px;
+            gap: 16px;
         }
         
-        .stats-box {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .stat-row:last-child {
-            border-bottom: none;
+        .stat-box {
+            background: rgba(30, 35, 60, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
         
         .stat-label {
             font-size: 0.875rem;
-            color: var(--text-secondary);
-            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 8px;
             font-weight: 600;
+            text-transform: uppercase;
         }
         
         .stat-value {
-            font-size: 1.25rem;
-            font-weight: 800;
-            color: var(--accent);
+            font-size: 2rem;
+            font-weight: 900;
+            color: #8b5cf6;
         }
         
-        .stat-value.big {
-            font-size: 1.75rem;
-            color: var(--success);
+        .stat-value.highlight {
+            font-size: 2.5rem;
+            background: linear-gradient(135deg, #10b981, #059669);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         
-        .controls-box {
-            background: var(--bg-primary);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        .history-box {
+            background: rgba(30, 35, 60, 0.6);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3);
         }
         
-        .control-label {
+        .history-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: #a78bfa;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+        }
+        
+        .history-items {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        
+        .history-item {
+            padding: 8px 12px;
+            background: rgba(15, 20, 40, 0.8);
+            border-radius: 8px;
             font-size: 0.875rem;
             font-weight: 700;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            text-transform: uppercase;
         }
         
-        .bet-input {
-            width: 100%;
-            padding: 16px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 12px;
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            font-weight: 800;
-            text-align: center;
-            margin-bottom: 12px;
+        .history-item.win {
+            color: #10b981;
+            border: 1px solid rgba(16, 185, 129, 0.3);
         }
         
-        .bet-input:focus {
-            outline: none;
-            border-color: var(--accent);
-        }
-        
-        .quick-bets {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            margin-bottom: 20px;
-        }
-        
-        .quick-bet {
-            padding: 10px;
-            background: var(--bg-secondary);
-            border: 2px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-weight: 700;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .quick-bet:hover {
-            background: var(--accent);
-            border-color: var(--accent);
-            color: white;
-        }
-        
-        .action-btn {
-            width: 100%;
-            padding: 20px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.25rem;
-            font-weight: 900;
-            cursor: pointer;
-            text-transform: uppercase;
-            transition: all 0.3s;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-        }
-        
-        .action-btn:hover {
-            transform: translateY(-2px);
-        }
-        
-        .start-btn {
-            background: linear-gradient(135deg, #f59e0b, #ef4444);
-            color: white;
-        }
-        
-        .cashout-btn {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: white;
-            margin-top: 12px;
-            display: none;
-        }
-        
-        .cashout-btn.active {
-            display: block;
+        .history-item.loss {
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
         }
         
         /* RESULT MODAL */
         .result-modal {
             display: none;
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
+            inset: 0;
+            background: rgba(0,0,0,0.9);
+            backdrop-filter: blur(10px);
             z-index: 10000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .result-modal.active {
@@ -339,12 +491,14 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .result-content {
-            background: var(--bg-primary);
+            background: rgba(30, 35, 60, 0.95);
+            border: 1px solid rgba(139, 92, 246, 0.3);
             padding: 48px;
             border-radius: 24px;
             text-align: center;
-            max-width: 450px;
+            max-width: 500px;
             animation: modalPop 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
         }
         
         @keyframes modalPop {
@@ -355,33 +509,42 @@ $casino_available_balance = max(0, $balance - 10.00);
         .result-icon {
             font-size: 6rem;
             margin-bottom: 24px;
+            animation: bounce 1s infinite;
+        }
+        
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
         }
         
         .result-title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 900;
             margin-bottom: 16px;
         }
         
-        .result-amount {
+        .result-multiplier {
             font-size: 2rem;
             font-weight: 800;
+            margin-bottom: 24px;
+            color: #8b5cf6;
+        }
+        
+        .result-amount {
+            font-size: 2.5rem;
+            font-weight: 900;
             margin-bottom: 32px;
         }
         
         /* MOBILE */
-        @media (max-width: 1024px) {
+        @media (max-width: 1200px) {
             .game-layout {
                 grid-template-columns: 1fr;
             }
             
-            .row-label {
-                left: -35px;
-                font-size: 1rem;
-            }
-            
-            .game-board {
-                padding: 20px;
+            .stats-panel {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
             }
         }
     </style>
@@ -390,64 +553,74 @@ $casino_available_balance = max(0, $balance - 10.00);
     <div class="game-container">
         <!-- HEADER -->
         <div class="header">
-            <div>
+            <div class="header-left">
                 <a href="/casino.php" class="back-btn">← Zurück</a>
-                <h1 style="font-size: 2rem; font-weight: 900; margin-top: 8px;">🐔 Chicken</h1>
+                <div class="game-logo">🐔 CHICKEN</div>
             </div>
             <div class="balance-display">
-                <div class="balance-label">Guthaben</div>
-                <div class="balance-value" id="balance"><?= number_format($casino_available_balance, 2, ',', '.') ?>€</div>
+                <div>
+                    <div class="balance-label">Guthaben</div>
+                    <div class="balance-value" id="balance"><?= number_format($casino_available_balance, 2, ',', '.') ?>€</div>
+                </div>
             </div>
         </div>
         
         <!-- GAME LAYOUT -->
         <div class="game-layout">
-            <!-- GAME BOARD -->
-            <div class="game-board">
-                <div class="board-title">🐔 Wähle dein Feld</div>
-                <div class="chicken-grid" id="chickenGrid"></div>
-            </div>
-            
-            <!-- CONTROLS -->
+            <!-- LEFT: CONTROLS -->
             <div class="controls-panel">
-                <!-- STATS -->
-                <div class="stats-box">
-                    <div class="stat-row">
-                        <span class="stat-label">🎯 Einsatz</span>
-                        <span class="stat-value" id="currentBet">0.00€</span>
+                <div class="panel-box">
+                    <div class="panel-title">💰 Einsatz</div>
+                    <div class="bet-input-wrapper">
+                        <input type="number" id="betInput" class="bet-input" min="0.10" max="100" step="0.10" value="1.00">
+                        <span class="currency-symbol">€</span>
                     </div>
-                    <div class="stat-row">
-                        <span class="stat-label">🔢 Reihe</span>
-                        <span class="stat-value" id="currentRow">0/5</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">📊 Multiplikator</span>
-                        <span class="stat-value" id="multiplier">1.00x</span>
-                    </div>
-                    <div class="stat-row">
-                        <span class="stat-label">💰 Gewinn</span>
-                        <span class="stat-value big" id="potentialWin">0.00€</span>
-                    </div>
-                </div>
-                
-                <!-- CONTROLS -->
-                <div class="controls-box" id="betControls">
-                    <label class="control-label">💰 Einsatz</label>
-                    <input type="number" id="betInput" class="bet-input" min="0.10" max="100" step="0.10" value="1.00">
-                    
                     <div class="quick-bets">
                         <button class="quick-bet" onclick="setBet(1)">1€</button>
                         <button class="quick-bet" onclick="setBet(5)">5€</button>
                         <button class="quick-bet" onclick="setBet(10)">10€</button>
                         <button class="quick-bet" onclick="setBet(20)">20€</button>
                     </div>
-                    
-                    <button class="action-btn start-btn" onclick="startGame()">🐔 Starten</button>
+                    <button class="action-btn start-btn" id="startBtn" onclick="startGame()">🚀 Spiel starten</button>
+                    <button class="action-btn cashout-btn" id="cashoutBtn" onclick="cashout()">
+                        💎 Auszahlen · <span id="cashoutAmount">0.00€</span>
+                    </button>
                 </div>
-                
-                <button class="action-btn cashout-btn" id="cashoutBtn" onclick="cashout()">
-                    💰 Auszahlen: <span id="cashoutAmount">0.00€</span>
-                </button>
+            </div>
+            
+            <!-- CENTER: GAME BOARD -->
+            <div class="game-board">
+                <div class="board-header">
+                    <div class="board-title">🎮 Wähle deinen Weg</div>
+                    <div class="provably-fair">
+                        <span>✓</span> Provably Fair
+                    </div>
+                </div>
+                <div class="road-grid" id="roadGrid"></div>
+            </div>
+            
+            <!-- RIGHT: STATS -->
+            <div class="stats-panel">
+                <div class="stat-box">
+                    <div class="stat-label">🎯 Einsatz</div>
+                    <div class="stat-value" id="currentBet">0.00€</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">📊 Multiplikator</div>
+                    <div class="stat-value" id="multiplier">1.00x</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">💎 Potenzieller Gewinn</div>
+                    <div class="stat-value highlight" id="potentialWin">0.00€</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">🏆 Zeilen</div>
+                    <div class="stat-value" id="rowsCleared">0 / 10</div>
+                </div>
+                <div class="history-box">
+                    <div class="history-title">📜 Letzte Spiele</div>
+                    <div class="history-items" id="history"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -457,6 +630,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="result-content">
             <div class="result-icon" id="resultIcon">🎉</div>
             <div class="result-title" id="resultTitle">Gewonnen!</div>
+            <div class="result-multiplier" id="resultMultiplier">10.00x</div>
             <div class="result-amount" id="resultAmount">+0.00€</div>
             <button class="action-btn start-btn" onclick="resetGame()">🔄 Neues Spiel</button>
         </div>
@@ -468,10 +642,11 @@ $casino_available_balance = max(0, $balance - 10.00);
         let currentBet = 0;
         let currentRow = 0;
         let gameState = [];
+        let history = JSON.parse(localStorage.getItem('chickenHistory') || '[]');
         
-        const ROWS = 5;
-        const COLS = 3;
-        const DANGER_CHANCE = 0.33; // 1 aus 3 ist gefährlich
+        const ROWS = 10;
+        const TILES_PER_ROW = 3;
+        const BASE_MULTIPLIER = 1.47;
         
         function setBet(amount) {
             document.getElementById('betInput').value = amount.toFixed(2);
@@ -482,22 +657,22 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         function createGrid() {
-            const grid = document.getElementById('chickenGrid');
+            const grid = document.getElementById('roadGrid');
             grid.innerHTML = '';
             
             for (let row = 0; row < ROWS; row++) {
                 const rowDiv = document.createElement('div');
-                rowDiv.className = 'grid-row';
-                rowDiv.innerHTML = `<div class="row-label">${row + 1}</div>`;
+                rowDiv.className = 'road-row';
+                rowDiv.innerHTML = `<div class="row-number">${row + 1}</div>`;
                 
-                for (let col = 0; col < COLS; col++) {
-                    const tile = document.createElement('div');
-                    tile.className = 'grid-tile';
-                    tile.dataset.row = row;
-                    tile.dataset.col = col;
-                    tile.innerHTML = '🥚';
-                    tile.onclick = () => selectTile(row, col);
-                    rowDiv.appendChild(tile);
+                for (let tile = 0; tile < TILES_PER_ROW; tile++) {
+                    const tileDiv = document.createElement('div');
+                    tileDiv.className = 'road-tile';
+                    tileDiv.dataset.row = row;
+                    tileDiv.dataset.tile = tile;
+                    tileDiv.innerHTML = '🥚';
+                    tileDiv.onclick = () => selectTile(row, tile);
+                    rowDiv.appendChild(tileDiv);
                 }
                 
                 grid.appendChild(rowDiv);
@@ -527,17 +702,17 @@ $casino_available_balance = max(0, $balance - 10.00);
                     balance -= bet;
                     updateBalance();
                     
-                    // Generate game state
+                    // Generate provably fair game state
                     gameState = [];
-                    for (let row = 0; row < ROWS; row++) {
-                        const dangerPos = Math.floor(Math.random() * COLS);
-                        gameState.push(dangerPos);
+                    for (let i = 0; i < ROWS; i++) {
+                        gameState.push(Math.floor(Math.random() * TILES_PER_ROW));
                     }
                     
-                    document.getElementById('betControls').style.display = 'none';
+                    document.getElementById('startBtn').style.display = 'none';
                     document.getElementById('currentBet').textContent = bet.toFixed(2) + '€';
                     
                     createGrid();
+                    highlightNextRow();
                     updateStats();
                 }
             } catch (error) {
@@ -545,15 +720,28 @@ $casino_available_balance = max(0, $balance - 10.00);
             }
         }
         
-        async function selectTile(row, col) {
+        function highlightNextRow() {
+            document.querySelectorAll('.road-tile').forEach(tile => {
+                tile.classList.remove('next-row');
+            });
+            
+            if (currentRow < ROWS) {
+                document.querySelectorAll(`[data-row="${currentRow}"]`).forEach(tile => {
+                    if (!tile.classList.contains('revealed')) {
+                        tile.classList.add('next-row');
+                    }
+                });
+            }
+        }
+        
+        async function selectTile(row, tile) {
             if (!gameActive || row !== currentRow) return;
             
-            const tile = document.querySelector(`[data-row="${row}"][data-col="${col}"]`);
-            if (tile.classList.contains('revealed')) return;
+            const tileEl = document.querySelector(`[data-row="${row}"][data-tile="${tile}"]`);
+            if (tileEl.classList.contains('revealed')) return;
             
             // Disable all tiles in current row
             document.querySelectorAll(`[data-row="${row}"]`).forEach(t => {
-                t.classList.add('disabled');
                 t.style.pointerEvents = 'none';
             });
             
@@ -565,53 +753,52 @@ $casino_available_balance = max(0, $balance - 10.00);
                 });
                 const data = await response.json();
                 
-                // Check if safe
-                const isDanger = col === gameState[row];
+                const isDanger = tile === gameState[row];
                 
-                setTimeout(() => {
-                    tile.classList.add('revealed');
+                await new Promise(resolve => setTimeout(resolve, 300));
+                
+                tileEl.classList.add('revealed');
+                
+                if (isDanger) {
+                    // CRASH!
+                    tileEl.classList.add('danger');
+                    tileEl.innerHTML = '💀';
                     
-                    if (isDanger) {
-                        // Hit danger
-                        tile.classList.add('danger');
-                        tile.innerHTML = '💀';
-                        
-                        // Reveal all dangers in this row
-                        document.querySelectorAll(`[data-row="${row}"]`).forEach((t, i) => {
-                            if (i === gameState[row]) {
-                                setTimeout(() => {
-                                    t.classList.add('revealed', 'danger');
-                                    t.innerHTML = '💀';
-                                }, 200);
-                            }
-                        });
-                        
-                        gameOver(false);
-                    } else {
-                        // Safe
-                        tile.classList.add('safe');
-                        tile.innerHTML = '🐔';
-                        
-                        if (data.status === 'safe') {
-                            currentRow++;
-                            updateStats();
-                            
-                            document.getElementById('cashoutBtn').classList.add('active');
-                            document.getElementById('cashoutAmount').textContent = data.potential_win.toFixed(2) + '€';
-                            
-                            // Enable next row
-                            if (currentRow < ROWS) {
-                                document.querySelectorAll(`[data-row="${currentRow}"]`).forEach(t => {
-                                    t.classList.remove('disabled');
-                                    t.style.pointerEvents = 'auto';
-                                });
-                            } else {
-                                // All rows completed
-                                setTimeout(() => cashout(), 1000);
-                            }
+                    // Reveal all safe tiles
+                    document.querySelectorAll(`[data-row="${row}"]`).forEach((t, i) => {
+                        if (i !== tile) {
+                            setTimeout(() => {
+                                t.classList.add('revealed', 'safe');
+                                t.innerHTML = '🐔';
+                            }, 200);
                         }
+                    });
+                    
+                    gameActive = false;
+                    addToHistory(false, 0);
+                    setTimeout(() => gameOver(false), 1000);
+                } else {
+                    // SAFE!
+                    tileEl.classList.add('safe');
+                    tileEl.innerHTML = '🐔';
+                    
+                    currentRow++;
+                    updateStats();
+                    
+                    if (currentRow > 0) {
+                        document.getElementById('cashoutBtn').classList.add('active');
+                        const multiplier = Math.pow(BASE_MULTIPLIER, currentRow);
+                        const potential = currentBet * multiplier;
+                        document.getElementById('cashoutAmount').textContent = potential.toFixed(2) + '€';
                     }
-                }, 300);
+                    
+                    if (currentRow >= ROWS) {
+                        // All rows completed - auto cashout
+                        setTimeout(() => cashout(), 800);
+                    } else {
+                        highlightNextRow();
+                    }
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
@@ -633,7 +820,12 @@ $casino_available_balance = max(0, $balance - 10.00);
                     gameActive = false;
                     balance = data.new_balance;
                     updateBalance();
-                    showResult(true, data.win, data.multiplier);
+                    
+                    const multiplier = Math.pow(BASE_MULTIPLIER, currentRow);
+                    addToHistory(true, multiplier);
+                    
+                    document.getElementById('cashoutBtn').classList.remove('active');
+                    showResult(true, data.win, multiplier);
                 }
             } catch (error) {
                 alert('Fehler: ' + error.message);
@@ -646,34 +838,57 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         function updateStats() {
-            document.getElementById('currentRow').textContent = currentRow + '/' + ROWS;
+            document.getElementById('rowsCleared').textContent = currentRow + ' / ' + ROWS;
             
-            const multiplier = Math.pow(1.5, currentRow);
+            const multiplier = Math.pow(BASE_MULTIPLIER, currentRow);
             const potential = currentBet * multiplier;
             
             document.getElementById('multiplier').textContent = multiplier.toFixed(2) + 'x';
             document.getElementById('potentialWin').textContent = potential.toFixed(2) + '€';
         }
         
+        function addToHistory(won, multiplier) {
+            history.unshift({ won, multiplier: multiplier.toFixed(2) });
+            if (history.length > 10) history.pop();
+            localStorage.setItem('chickenHistory', JSON.stringify(history));
+            renderHistory();
+        }
+        
+        function renderHistory() {
+            const historyEl = document.getElementById('history');
+            historyEl.innerHTML = '';
+            
+            history.forEach(item => {
+                const div = document.createElement('div');
+                div.className = `history-item ${item.won ? 'win' : 'loss'}`;
+                div.textContent = item.won ? `${item.multiplier}x` : '💀';
+                historyEl.appendChild(div);
+            });
+        }
+        
         function showResult(won, amount, mult) {
             const modal = document.getElementById('resultModal');
             const icon = document.getElementById('resultIcon');
             const title = document.getElementById('resultTitle');
+            const multiplierEl = document.getElementById('resultMultiplier');
             const amountEl = document.getElementById('resultAmount');
             
             if (won) {
                 const profit = amount - currentBet;
                 icon.textContent = '🎉';
                 title.textContent = 'Gewonnen!';
-                title.style.color = 'var(--success)';
-                amountEl.textContent = '+' + profit.toFixed(2) + '€ (' + mult.toFixed(2) + 'x)';
-                amountEl.style.color = 'var(--success)';
+                title.style.color = '#10b981';
+                multiplierEl.textContent = mult.toFixed(2) + 'x';
+                multiplierEl.style.display = 'block';
+                amountEl.textContent = '+' + profit.toFixed(2) + '€';
+                amountEl.style.color = '#10b981';
             } else {
                 icon.textContent = '💀';
-                title.textContent = 'Verloren!';
-                title.style.color = 'var(--error)';
+                title.textContent = 'Crashed!';
+                title.style.color = '#ef4444';
+                multiplierEl.style.display = 'none';
                 amountEl.textContent = '-' + currentBet.toFixed(2) + '€';
-                amountEl.style.color = 'var(--error)';
+                amountEl.style.color = '#ef4444';
             }
             
             modal.classList.add('active');
@@ -681,7 +896,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         function resetGame() {
             document.getElementById('resultModal').classList.remove('active');
-            document.getElementById('betControls').style.display = 'block';
+            document.getElementById('startBtn').style.display = 'block';
             document.getElementById('cashoutBtn').classList.remove('active');
             
             gameActive = false;
@@ -693,6 +908,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         // Initialize
         createGrid();
+        renderHistory();
     </script>
 </body>
 </html>

@@ -189,6 +189,8 @@ if ($action === 'start' || $action === 'deal') {
         $stmt->fetch();
         $stmt->close();
         
+        $new_balance = floatval($new_balance);
+        
         // Save to casino history
         $multiplier = $payout > 0 ? ($payout / $bet) : 0;
         $stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, win_amount, multiplier, result) VALUES (?, 'blackjack', ?, ?, ?, ?)");
@@ -267,6 +269,8 @@ if ($action === 'hit') {
         $stmt->fetch();
         $stmt->close();
         
+        $new_balance = floatval($new_balance);
+        
         // Clear session
         unset($_SESSION['blackjack']);
         
@@ -280,7 +284,8 @@ if ($action === 'hit') {
             'game_over' => true,
             'dealer_visible' => false,
             'new_balance' => $new_balance,
-            'win' => 0
+            'win' => 0,
+            'profit' => -$bet
         ]);
         exit;
     }
@@ -426,6 +431,8 @@ if ($action === 'stand' || $action === 'double' || ($action === 'hit' && $player
     $stmt->bind_result($new_balance);
     $stmt->fetch();
     $stmt->close();
+    
+    $new_balance = floatval($new_balance);
     
     // Save to casino history
     $stmt = $conn->prepare("INSERT INTO casino_history (user_id, game_type, bet_amount, win_amount, multiplier, result) VALUES (?, 'blackjack', ?, ?, ?, ?)");

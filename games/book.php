@@ -189,7 +189,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 rgba(255,215,0,0.8) 90%, 
                 transparent);
             box-shadow: 0 0 10px rgba(255,215,0,0.8);
-            animation: paylinePulse 0.8s ease-in-out infinite;
+            /* animation removed - static display */
         }
         
         @keyframes paylinePulse {
@@ -569,33 +569,21 @@ $casino_available_balance = max(0, $balance - 10.00);
             const overlay = document.getElementById('paylineOverlay');
             overlay.innerHTML = '';
             
-            // Paylines definition (same as backend)
-            const paylines = [
-                [1, 1, 1, 1, 1], // Line 1: Middle row
-                [0, 0, 0, 0, 0], // Line 2: Top row
-                [2, 2, 2, 2, 2], // Line 3: Bottom row
-                [0, 1, 2, 1, 0], // Line 4: V-shape
-                [2, 1, 0, 1, 2], // Line 5: Inverted V
-                [1, 0, 0, 0, 1], // Line 6: W-shape top
-                [1, 2, 2, 2, 1], // Line 7: W-shape bottom
-                [0, 0, 1, 2, 2], // Line 8: Rising
-                [2, 2, 1, 0, 0]  // Line 9: Falling
-            ];
-            
             const reelsContainer = document.getElementById('bookReels');
             const containerRect = reelsContainer.getBoundingClientRect();
             const reelWidth = containerRect.width / 5;
             const symbolHeight = 90; // matches CSS
             
             winningLines.forEach((winLine, idx) => {
-                const linePattern = paylines[winLine.line];
-                const count = winLine.count;
+                const positions = winLine.positions; // [{reel: 0, row: 1}, {reel: 1, row: 1}, ...]
                 
-                // Highlight winning symbols
-                for (let i = 0; i < count; i++) {
-                    const reel = document.getElementById(`reel${i + 1}`);
+                // Highlight winning symbols using actual positions from backend
+                positions.forEach(pos => {
+                    const reel = document.getElementById(`reel${pos.reel + 1}`);
+                    if (!reel) return;
+                    
                     const symbols = reel.querySelectorAll('.book-symbol');
-                    const row = linePattern[i];
+                    const row = pos.row;
                     
                     // Get the visible symbol at this row position (last 3 symbols in strip)
                     if (symbols.length >= 3) {
@@ -604,9 +592,9 @@ $casino_available_balance = max(0, $balance - 10.00);
                             symbols[symbolIndex].classList.add('winning');
                         }
                     }
-                }
+                });
                 
-                // Draw the payline
+                // Draw the payline using actual positions
                 const svgNS = "http://www.w3.org/2000/svg";
                 const svg = document.createElementNS(svgNS, "svg");
                 svg.style.position = 'absolute';
@@ -618,10 +606,13 @@ $casino_available_balance = max(0, $balance - 10.00);
                 svg.style.zIndex = '5';
                 
                 const path = document.createElementNS(svgNS, "path");
-                let pathData = `M ${reelWidth * 0.5} ${(linePattern[0] + 0.5) * symbolHeight}`;
                 
-                for (let i = 1; i < 5; i++) {
-                    pathData += ` L ${reelWidth * (i + 0.5)} ${(linePattern[i] + 0.5) * symbolHeight}`;
+                // Start from first position
+                let pathData = `M ${reelWidth * (positions[0].reel + 0.5)} ${(positions[0].row + 0.5) * symbolHeight}`;
+                
+                // Connect to each winning position
+                for (let i = 1; i < positions.length; i++) {
+                    pathData += ` L ${reelWidth * (positions[i].reel + 0.5)} ${(positions[i].row + 0.5) * symbolHeight}`;
                 }
                 
                 path.setAttribute("d", pathData);
@@ -629,7 +620,6 @@ $casino_available_balance = max(0, $balance - 10.00);
                 path.setAttribute("stroke-width", "5");
                 path.setAttribute("fill", "none");
                 path.setAttribute("filter", "drop-shadow(0 0 10px rgba(255,215,0,0.8))");
-                path.style.animation = 'paylinePulse 0.8s ease-in-out infinite';
                 
                 svg.appendChild(path);
                 overlay.appendChild(svg);
