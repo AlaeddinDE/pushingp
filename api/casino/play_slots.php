@@ -33,9 +33,9 @@ if ($balance - $bet < 10) {
     exit;
 }
 
-// Generate slots result
-$symbols = ['🍒', '🍋', '⭐', '7️⃣', '💎'];
-$weights = [30, 30, 25, 10, 5];
+// Generate slots result - 4 REELS
+$symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', 'BAR'];
+$weights = [25, 25, 20, 18, 15, 12, 10, 8, 5, 2];
 
 function weightedRandom($symbols, $weights) {
     $total = array_sum($weights);
@@ -51,20 +51,48 @@ function weightedRandom($symbols, $weights) {
 $result = [
     weightedRandom($symbols, $weights),
     weightedRandom($symbols, $weights),
+    weightedRandom($symbols, $weights),
     weightedRandom($symbols, $weights)
 ];
 
-// Check win
+// Check win - ALL 4 MUST MATCH
 $win_amount = 0;
 $multiplier = 0;
 
-if ($result[0] === $result[1] && $result[1] === $result[2]) {
-    if ($result[0] === '💎') {
-        $multiplier = 100;
-    } elseif ($result[0] === '7️⃣') {
-        $multiplier = 50;
-    } else {
-        $multiplier = 10;
+if ($result[0] === $result[1] && $result[1] === $result[2] && $result[2] === $result[3]) {
+    switch ($result[0]) {
+        case '💎':
+            $multiplier = 500;
+            break;
+        case '7️⃣':
+            $multiplier = 200;
+            break;
+        case '🔔':
+            $multiplier = 100;
+            break;
+        case '⭐':
+            $multiplier = 50;
+            break;
+        case 'BAR':
+            $multiplier = 40;
+            break;
+        case '🍇':
+            $multiplier = 30;
+            break;
+        case '🍉':
+            $multiplier = 25;
+            break;
+        case '🍊':
+            $multiplier = 20;
+            break;
+        case '🍋':
+            $multiplier = 15;
+            break;
+        case '🍒':
+            $multiplier = 10;
+            break;
+        default:
+            $multiplier = 5;
     }
     $win_amount = $bet * $multiplier;
 }

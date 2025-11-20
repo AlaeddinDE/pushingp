@@ -202,13 +202,14 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-reels {
             display: flex;
-            gap: 20px;
+            gap: 15px;
             justify-content: center;
             margin: 30px 0;
             background: linear-gradient(180deg, rgba(0,0,0,0.3) 0%, rgba(0,0,0,0.6) 100%);
-            padding: 30px 20px;
+            padding: 30px 15px;
             border-radius: 20px;
             box-shadow: inset 0 10px 30px rgba(0,0,0,0.8);
+            flex-wrap: nowrap;
         }
         
         .slot-reel-frame {
@@ -248,30 +249,46 @@ $casino_available_balance = max(0, $balance - 10.00);
         }
         
         .slot-reel {
-            width: 140px;
-            height: 160px;
+            width: 120px;
+            height: 180px;
             background: 
                 radial-gradient(circle at center, rgba(139, 92, 246, 0.2), transparent 70%),
                 radial-gradient(circle at 30% 30%, rgba(236, 72, 153, 0.15), transparent 60%),
                 linear-gradient(145deg, #0a0015, #1a0033, #2d0052, #0a0015);
             border-radius: 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 5.5rem;
-            border: 4px solid rgba(139, 92, 246, 0.5);
             position: relative;
             overflow: hidden;
+            border: 4px solid rgba(139, 92, 246, 0.5);
             box-shadow: 
                 inset 0 0 60px rgba(0,0,0,1),
                 inset 0 0 30px rgba(139, 92, 246, 0.3),
                 inset 0 6px 20px rgba(139, 92, 246, 0.4),
                 0 0 50px rgba(139, 92, 246, 0.5),
                 0 0 100px rgba(236, 72, 153, 0.3);
-            transition: all 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
             animation: reelIdle 2.5s ease-in-out infinite;
             transform-style: preserve-3d;
             perspective: 1000px;
+        }
+        
+        .reel-strip {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: top 0.1s linear;
+        }
+        
+        .reel-symbol {
+            width: 100%;
+            height: 180px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 5rem;
+            flex-shrink: 0;
         }
         
         .slot-reel::after {
@@ -333,80 +350,31 @@ $casino_available_balance = max(0, $balance - 10.00);
             }
         }
         
-        .slot-reel.spinning {
+
+        
+        .slot-reel-frame.winning {
             animation: 
-                slotSpin 0.04s linear infinite, 
-                slotShake 0.1s ease-in-out infinite, 
-                slotGlow 0.12s ease-in-out infinite,
-                slotRotate 0.3s ease-in-out infinite;
-            filter: brightness(1.6) saturate(1.5) blur(2px) hue-rotate(0deg);
-            transform: scale(1.05) rotateY(5deg);
-        }
-        
-        .slot-reel.spinning::before {
-            animation: spinningLight 0.3s linear infinite;
-            background: linear-gradient(180deg, 
-                rgba(255,215,0,0.8), 
-                rgba(255,0,255,0.6), 
-                rgba(0,255,255,0.6),
-                rgba(255,215,0,0.8)
-            );
-            height: 100%;
-            filter: blur(5px);
-        }
-        
-        @keyframes spinningLight {
-            0% { opacity: 1; transform: translateY(-100%) scaleY(2); }
-            100% { opacity: 1; transform: translateY(100%) scaleY(2); }
-        }
-        
-        @keyframes slotRotate {
-            0% { transform: scale(1.05) rotateY(-5deg); }
-            50% { transform: scale(1.05) rotateY(5deg); }
-            100% { transform: scale(1.05) rotateY(-5deg); }
-        }
-        
-        .slot-reel.winning {
-            animation: 
-                slotWin 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite, 
-                rainbowGlow 0.8s linear infinite,
-                explosionPulse 0.6s ease-out infinite;
+                frameWin 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55) infinite, 
+                rainbowGlow 0.8s linear infinite;
             z-index: 100;
         }
         
-        .slot-reel.winning::before {
-            animation: winningExplosion 0.8s ease-out infinite;
-            background: radial-gradient(circle, 
-                rgba(255,215,0,1) 0%,
-                rgba(255,0,255,0.8) 30%,
-                rgba(0,255,255,0.8) 60%,
-                transparent 100%
-            );
-            width: 200%;
-            height: 200%;
-            left: -50%;
-            top: -50%;
-            filter: blur(8px);
-        }
-        
-        @keyframes explosionPulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes winningExplosion {
-            0% { 
-                transform: scale(0.5) rotate(0deg); 
-                opacity: 0; 
+        @keyframes frameWin {
+            0%, 100% { 
+                transform: scale(1) rotate(0deg);
+                box-shadow: 
+                    0 0 50px rgba(255,215,0,1),
+                    0 0 100px rgba(255,0,255,1),
+                    0 12px 32px rgba(0,0,0,0.9),
+                    inset 0 4px 12px rgba(255,255,255,0.7);
             }
             50% { 
-                transform: scale(1.5) rotate(180deg); 
-                opacity: 1; 
-            }
-            100% { 
-                transform: scale(2) rotate(360deg); 
-                opacity: 0; 
+                transform: scale(1.1) rotate(2deg);
+                box-shadow: 
+                    0 0 80px rgba(255,215,0,1),
+                    0 0 150px rgba(0,255,255,1),
+                    0 12px 32px rgba(0,0,0,0.9),
+                    inset 0 6px 16px rgba(255,255,255,0.9);
             }
         }
         
@@ -631,13 +599,24 @@ $casino_available_balance = max(0, $balance - 10.00);
             
             <div class="slots-reels">
                 <div class="slot-reel-frame">
-                    <div class="slot-reel" id="reel1">🍒</div>
+                    <div class="slot-reel" id="reel1">
+                        <div class="reel-strip"></div>
+                    </div>
                 </div>
                 <div class="slot-reel-frame">
-                    <div class="slot-reel" id="reel2">🍋</div>
+                    <div class="slot-reel" id="reel2">
+                        <div class="reel-strip"></div>
+                    </div>
                 </div>
                 <div class="slot-reel-frame">
-                    <div class="slot-reel" id="reel3">⭐</div>
+                    <div class="slot-reel" id="reel3">
+                        <div class="reel-strip"></div>
+                    </div>
+                </div>
+                <div class="slot-reel-frame">
+                    <div class="slot-reel" id="reel4">
+                        <div class="reel-strip"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -650,20 +629,96 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div id="resultBox"></div>
 
         <div style="margin-top: 24px; padding: 16px; background: var(--bg-secondary); border-radius: 12px; font-size: 0.875rem; color: var(--text-secondary);">
-            <strong>Auszahlungen:</strong><br>
-            💎💎💎 = 100x | 7️⃣7️⃣7️⃣ = 50x | ⭐⭐⭐ = 20x<br>
-            🍋🍋🍋 = 10x | 🍒🍒🍒 = 5x
+            <strong style="font-size: 1rem; color: var(--text-primary);">🎰 Auszahlungen (4 Symbole):</strong><br><br>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+                <div>💎💎💎💎 = <span style="color: #FFD700; font-weight: 800;">500x</span></div>
+                <div>7️⃣7️⃣7️⃣7️⃣ = <span style="color: #FF00FF; font-weight: 800;">200x</span></div>
+                <div>🔔🔔🔔🔔 = <span style="color: #00FFFF; font-weight: 800;">100x</span></div>
+                <div>⭐⭐⭐⭐ = <span style="color: #FFA500; font-weight: 800;">50x</span></div>
+                <div>BAR BAR BAR BAR = <span style="color: #FF0080; font-weight: 800;">40x</span></div>
+                <div>🍇🍇🍇🍇 = <span style="color: #9F7AEA; font-weight: 700;">30x</span></div>
+                <div>🍉🍉🍉🍉 = <span style="color: #10B981; font-weight: 700;">25x</span></div>
+                <div>🍊🍊🍊🍊 = <span style="color: #F97316; font-weight: 700;">20x</span></div>
+                <div>🍋🍋🍋🍋 = <span style="color: #EAB308; font-weight: 700;">15x</span></div>
+                <div>🍒🍒🍒🍒 = <span style="color: #EF4444; font-weight: 700;">10x</span></div>
+            </div>
         </div>
     </div>
 
     <script>
         let balance = <?= $casino_available_balance ?>;
         let spinning = false;
-        const symbols = ['��', '🍋', '⭐', '7️⃣', '💎'];
-        const payouts = { '💎💎💎': 100, '7️⃣7️⃣7️⃣': 50, '⭐⭐⭐': 20, '🍋🍋🍋': 10, '🍒🍒🍒': 5 };
+        
+        // Realistische Slot-Symbole
+        const symbols = ['🍒', '🍋', '🍊', '🍉', '🍇', '🔔', '⭐', '7️⃣', '💎', 'BAR'];
+        const payouts = { 
+            '💎💎💎💎': 500, 
+            '7️⃣7️⃣7️⃣7️⃣': 200, 
+            '🔔🔔🔔🔔': 100,
+            '⭐⭐⭐⭐': 50,
+            'BARBARBARBAR': 40,
+            '🍇🍇🍇🍇': 30,
+            '🍉🍉🍉🍉': 25,
+            '🍊🍊🍊🍊': 20,
+            '��🍋🍋🍋': 15,
+            '🍒🍒🍒🍒': 10
+        };
+        
+        // Initialize reels with symbols
+        function initializeReels() {
+            for (let i = 1; i <= 4; i++) {
+                const reel = document.querySelector(`#reel${i} .reel-strip`);
+                reel.innerHTML = '';
+                // Create long strip of random symbols for realistic rolling
+                for (let j = 0; j < 30; j++) {
+                    const symbol = document.createElement('div');
+                    symbol.className = 'reel-symbol';
+                    symbol.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                    reel.appendChild(symbol);
+                }
+            }
+        }
+        
+        initializeReels();
 
         function updateBalance() {
             document.getElementById('balance').textContent = balance.toFixed(2).replace('.', ',') + ' €';
+        }
+        
+        // Realistische Roll-Animation
+        function rollReel(reelElement, duration, finalSymbol) {
+            return new Promise((resolve) => {
+                const strip = reelElement.querySelector('.reel-strip');
+                const symbolHeight = 180;
+                let currentPos = 0;
+                const totalSymbols = 30;
+                const rollDistance = symbolHeight * totalSymbols;
+                
+                // Add winning symbol at end
+                const finalSymbolEl = document.createElement('div');
+                finalSymbolEl.className = 'reel-symbol';
+                finalSymbolEl.textContent = finalSymbol;
+                strip.appendChild(finalSymbolEl);
+                
+                const startTime = Date.now();
+                const interval = setInterval(() => {
+                    const elapsed = Date.now() - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    
+                    // Ease out effect
+                    const easeOut = 1 - Math.pow(1 - progress, 3);
+                    currentPos = easeOut * rollDistance;
+                    
+                    strip.style.top = `-${currentPos}px`;
+                    
+                    if (progress >= 1) {
+                        clearInterval(interval);
+                        // Position exactly on final symbol
+                        strip.style.top = `-${symbolHeight * totalSymbols}px`;
+                        resolve();
+                    }
+                }, 16);
+            });
         }
 
         async function spin() {
@@ -675,9 +730,6 @@ $casino_available_balance = max(0, $balance - 10.00);
             document.getElementById('spinBtn').disabled = true;
             document.getElementById('resultBox').innerHTML = '';
 
-            const reels = [document.getElementById('reel1'), document.getElementById('reel2'), document.getElementById('reel3')];
-            reels.forEach(r => { r.classList.add('spinning'); r.textContent = '❓'; });
-
             try {
                 const response = await fetch('/api/casino/play_slots.php', {
                     method: 'POST',
@@ -688,39 +740,46 @@ $casino_available_balance = max(0, $balance - 10.00);
 
                 if (data.status === 'success') {
                     balance = data.new_balance;
-                    setTimeout(() => {
-                        reels.forEach((r, i) => {
-                            r.classList.remove('spinning');
-                            r.textContent = data.result[i];
-                            
-                            // Add winning animation if it's a win
-                            if (data.win_amount > 0) {
-                                setTimeout(() => {
-                                    r.classList.add('winning');
-                                }, (i + 1) * 200);
-                            }
-                        });
-
-                        const resultBox = document.getElementById('resultBox');
-                        if (data.win_amount > 0) {
-                            resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
-                            
-                            // ULTRA KRASSE EFFEKTE
-                            createCoinRain(50);
-                            createExplosion(reels[1]);
-                            createLaserBeams(3);
-                            
-                            // Remove winning class after animation
-                            setTimeout(() => {
-                                reels.forEach(r => r.classList.remove('winning'));
-                            }, 3000);
-                        } else {
-                            resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
-                        }
-                        updateBalance();
-                        spinning = false;
-                        document.getElementById('spinBtn').disabled = false;
-                    }, 2000);
+                    
+                    // Reset reels
+                    initializeReels();
+                    
+                    // Make sure we have 4 results
+                    const results = data.result.length === 3 
+                        ? [...data.result, symbols[Math.floor(Math.random() * symbols.length)]]
+                        : data.result;
+                    
+                    // Start rolling all reels with staggered stop times
+                    const reels = [
+                        document.getElementById('reel1'),
+                        document.getElementById('reel2'),
+                        document.getElementById('reel3'),
+                        document.getElementById('reel4')
+                    ];
+                    
+                    // Roll each reel with different durations for realistic effect
+                    const rollPromises = reels.map((reel, i) => 
+                        rollReel(reel, 2000 + (i * 300), results[i])
+                    );
+                    
+                    await Promise.all(rollPromises);
+                    
+                    // Show results
+                    const resultBox = document.getElementById('resultBox');
+                    if (data.win_amount > 0) {
+                        resultBox.innerHTML = `<div class="result-box win">🎉 GEWINN! +${data.win_amount.toFixed(2)}€ (${data.multiplier}x)</div>`;
+                        
+                        // ULTRA KRASSE EFFEKTE
+                        createCoinRain(50);
+                        createExplosion(reels[2]);
+                        createLaserBeams(3);
+                    } else {
+                        resultBox.innerHTML = `<div class="result-box loss">Verloren: -${bet.toFixed(2)}€</div>`;
+                    }
+                    
+                    updateBalance();
+                    spinning = false;
+                    document.getElementById('spinBtn').disabled = false;
                 } else {
                     alert(data.error);
                     spinning = false;
