@@ -121,7 +121,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         .slots-crown {
             position: absolute;
-            top: -40px;
+            top: -50px;
             left: 50%;
             transform: translateX(-50%);
             background: linear-gradient(135deg, #FFD700, #FFA500, #FF00FF, #FFD700);
