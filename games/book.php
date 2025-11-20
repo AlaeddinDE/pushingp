@@ -136,45 +136,30 @@ $casino_available_balance = max(0, $balance - 10.00);
             border-bottom: 1px solid rgba(255,215,0,0.1);
         }
         
-        .p-symbol {
-            font-size: 4rem;
-            font-weight: 900;
-            background: linear-gradient(135deg, #FFD700, #FFA500, #FF8C00, #FFD700);
-            background-size: 200% 200%;
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+        .book-symbol:has(:first-child:last-child) {
             animation: p-glow 2s ease-in-out infinite;
-            filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)) 
-                    drop-shadow(0 0 20px rgba(255,165,0,0.6))
-                    drop-shadow(0 0 30px rgba(255,140,0,0.4));
-            position: relative;
-            display: inline-block;
         }
         
         @keyframes p-glow {
             0%, 100% {
-                background-position: 0% 50%;
-                filter: drop-shadow(0 0 10px rgba(255,215,0,0.8)) 
-                        drop-shadow(0 0 20px rgba(255,165,0,0.6))
-                        drop-shadow(0 0 30px rgba(255,140,0,0.4));
+                filter: drop-shadow(0 0 8px rgba(255,215,0,0.6)) 
+                        drop-shadow(0 0 15px rgba(255,165,0,0.4));
             }
             50% {
-                background-position: 100% 50%;
-                filter: drop-shadow(0 0 20px rgba(255,215,0,1)) 
-                        drop-shadow(0 0 30px rgba(255,165,0,0.8))
-                        drop-shadow(0 0 40px rgba(255,140,0,0.6));
+                filter: drop-shadow(0 0 15px rgba(255,215,0,0.9)) 
+                        drop-shadow(0 0 25px rgba(255,165,0,0.6));
             }
         }
         
-        .p-symbol.scatter-trigger {
+        .book-symbol.scatter-trigger {
             animation: p-scatter 0.8s ease-in-out;
         }
         
         @keyframes p-scatter {
             0%, 100% { transform: scale(1) rotate(0deg); }
-            25% { transform: scale(1.3) rotate(-10deg); }
-            50% { transform: scale(1.5) rotate(10deg); }
-            75% { transform: scale(1.3) rotate(-5deg); }
+            25% { transform: scale(1.2) rotate(-8deg); }
+            50% { transform: scale(1.3) rotate(8deg); }
+            75% { transform: scale(1.2) rotate(-4deg); }
         }
         
         .book-symbol.winning {
@@ -404,7 +389,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         <div class="payouts">
             <strong style="font-size: 0.85rem; color: #FFD700;">📖 Auszahlungen (3+ gleiche Symbole):</strong>
             <div class="payouts-grid">
-                <div><span class="p-symbol">P</span><span class="p-symbol">P</span><span class="p-symbol">P</span> <span style="color: #FFD700; font-weight: 800;">100x</span></div>
+                <div>🅿️🅿️🅿️ <span style="color: #FFD700; font-weight: 800;">100x</span></div>
                 <div>👑👑👑 <span style="color: #FFD700; font-weight: 800;">50x</span></div>
                 <div>🦅🦅🦅 <span style="color: #FFA500; font-weight: 800;">25x</span></div>
                 <div>⚱️⚱️⚱️ <span style="color: #FFA500; font-weight: 700;">15x</span></div>
@@ -415,8 +400,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 <div>🎯🎯🎯 <span style="color: #FFD700; font-weight: 700;">3x</span></div>
             </div>
             <div style="margin-top: 8px; font-size: 0.7rem; text-align: center;">
-                <span class="p-symbol">P</span> P Symbol = Scatter & Wild!<br>
-                <span class="p-symbol">P</span><span class="p-symbol">P</span><span class="p-symbol">P</span> = 10 Freispiele mit expanding Symbol!
+                🅿️ P Symbol = Scatter & Wild!<br>
+                🅿️🅿️🅿️ = 10 Freispiele mit expanding Symbol!
             </div>
         </div>
     </div>
@@ -434,7 +419,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         let currentBet = 0;
         
         // Book of Ra Symbole (Ägyptisch)
-        const symbols = ['<span class="p-symbol">P</span>', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
+        const symbols = ['🅿️', '👑', '🦅', '⚱️', '🔱', '💎', '🎴', '🃏', '🎯'];
         
         // Initialize reels
         function initializeReels() {
@@ -444,9 +429,8 @@ $casino_available_balance = max(0, $balance - 10.00);
                 for (let j = 0; j < 30; j++) {
                     const symbol = document.createElement('div');
                     symbol.className = 'book-symbol';
-                    symbol.innerHTML = randomSymbol;
                     const randomSymbol = symbols[Math.floor(Math.random() * symbols.length)];
-                    symbol.innerHTML = randomSymbol;
+                    symbol.textContent = randomSymbol;
                     reel.appendChild(symbol);
                 }
             }
@@ -469,8 +453,7 @@ $casino_available_balance = max(0, $balance - 10.00);
                 
                 const finalSymbolEl = document.createElement('div');
                 finalSymbolEl.className = 'book-symbol';
-                finalSymbolEl.innerHTML = finalSymbol;
-                finalSymbolEl.innerHTML = finalSymbol;
+                finalSymbolEl.textContent = finalSymbol;
                 strip.appendChild(finalSymbolEl);
                 
                 const startTime = Date.now();
@@ -531,7 +514,7 @@ $casino_available_balance = max(0, $balance - 10.00);
         
         function updateFreespinsDisplay() {
             document.getElementById('freespinsRemaining').textContent = freespinsRemaining;
-            document.getElementById('expandingSymbol').innerHTML = expandingSymbol;
+            document.getElementById('expandingSymbol').textContent = expandingSymbol;
             document.getElementById('freespinsTotalWin').textContent = freespinsTotalWin.toFixed(2);
         }
         
@@ -646,9 +629,11 @@ $casino_available_balance = max(0, $balance - 10.00);
                     // Check for freespin trigger (3+ P symbols)
                     if (!freespinsActive && data.freespins_triggered) {
                         playSound('p-trigger');
-                        // Add scatter animation to P symbols
-                        document.querySelectorAll('.p-symbol').forEach(p => {
-                            p.classList.add('scatter-trigger');
+                        // Add scatter animation to P symbols (🅿️)
+                        document.querySelectorAll('.book-symbol').forEach(sym => {
+                            if (sym.textContent === '🅿️') {
+                                sym.classList.add('scatter-trigger');
+                            }
                         });
                         showFreespinsOverlay(data.freespins_count, data.expanding_symbol);
                         spinning = false;
